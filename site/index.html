@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Expense Tracker MCP — Track expenses. Type it. Say it. Snap it.</title>
-<meta name="description" content="The MCP server that gives Claude, ChatGPT, and any AI assistant the ability to log, search, and summarize your spending — no bank linking, no new app to learn." />
+<title>Expense Tracker AI — Your Personal AI Finance Assistant</title>
+<meta name="description" content="Expense Tracker AI turns Claude, ChatGPT, and any AI assistant into your personal AI finance assistant — log, search, and summarize your spending by typing, talking, or snapping a photo. No bank linking, no new app to learn." />
 <link rel="icon" type="image/png" href="../assets/logo/icon-512.png" />
 <style>
   :root{
@@ -106,6 +106,8 @@
   .bhead .u{margin-left:12px;font-size:12px;color:var(--muted);font-family:var(--mono);}
   .videobox{aspect-ratio:16/9;position:relative;display:grid;place-items:center;
     background:radial-gradient(circle at 50% 40%,#1b1530,#0c0c14);cursor:pointer;}
+  .videobox .thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .videobox .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,6,10,.55),transparent 45%);}
   .videobox .grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;opacity:.25;mask-image:radial-gradient(circle at 50% 45%,#000,transparent 72%);}
   .playbtn{position:relative;width:76px;height:76px;border-radius:50%;background:linear-gradient(180deg,var(--violet2),var(--violet));
     display:grid;place-items:center;box-shadow:0 12px 40px -8px var(--glow);}
@@ -114,17 +116,6 @@
   .playwrap{position:relative;z-index:2;display:grid;place-items:center;}
   .videobox .ring{position:absolute;width:76px;height:76px;border-radius:50%;border:2px solid var(--violet);animation:pulse 2.4s ease-out infinite;}
   @keyframes pulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.2);opacity:0}}
-  /* faux-chat poster behind the play button */
-  .poster{position:absolute;inset:0;padding:34px 44px;display:flex;flex-direction:column;justify-content:center;gap:12px;
-    mask-image:linear-gradient(90deg,#000 42%,transparent 78%);opacity:.9;}
-  .poster .pu{align-self:flex-end;background:linear-gradient(180deg,var(--violet2),var(--violet));color:#fff;font-size:14px;padding:9px 14px;border-radius:14px 14px 4px 14px;}
-  .poster .pa{align-self:flex-start;background:var(--panel2);border:1px solid var(--line2);color:var(--ink2);font-size:14px;padding:9px 14px;border-radius:14px 14px 14px 4px;display:flex;align-items:center;gap:9px;}
-  .poster .pa .pdot{width:16px;height:16px;border-radius:50%;background:#22c55e;display:grid;place-items:center;color:#fff;font-size:10px;flex:0 0 16px;}
-  .poster .typing{gap:5px;}
-  .poster .typing i{width:6px;height:6px;border-radius:50%;background:var(--violet2);display:inline-block;animation:blink 1.2s infinite;}
-  .poster .typing i:nth-child(2){animation-delay:.2s;} .poster .typing i:nth-child(3){animation-delay:.4s;}
-  @keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
-
   /* ---------- trust bar ---------- */
   .trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg2);padding:26px 0;}
   .trust .row{display:flex;align-items:center;justify-content:center;gap:14px 30px;flex-wrap:wrap;color:var(--muted);font-size:14px;font-weight:500;}
@@ -308,8 +299,6 @@
     .hero .cta .btn{width:100%;justify-content:center;padding:15px;font-size:15.5px;}
     .modes{gap:9px;}
     .mode{font-size:13px;padding:8px 13px;}
-    /* clean demo: drop the chat poster, keep a crisp play button */
-    .videobox .poster{display:none;}
     .videobox{background:radial-gradient(circle at 50% 45%,#241a3d,#0c0c14);}
     .playbtn{width:64px;height:64px;}
     .videobox .ring{width:64px;height:64px;}
@@ -348,7 +337,7 @@
 <!-- NAV -->
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#top"><span class="mark"><img src="../assets/logo/icon-512.png" alt="Expense Tracker MCP logo"></span>Expense Tracker MCP</a>
+    <a class="brand" href="#top"><span class="mark"><img src="../assets/logo/icon-512.png" alt="Expense Tracker AI logo"></span>Expense Tracker <span style="color:var(--violet-ink)">AI</span></a>
     <nav>
       <a class="lnk" href="#how">How it works</a>
       <a class="lnk" href="#features">Features</a>
@@ -373,9 +362,9 @@
 <!-- HERO -->
 <section class="hero sec">
   <div class="wrap">
-    <span class="pill"><span class="dot"></span>Model Context Protocol server · v1.0</span>
-    <h1>Track expenses.<br>Type it. Say it. Snap it.</h1>
-    <p class="lead">The MCP server that lets Claude, ChatGPT, and any AI assistant log your spending from a typed prompt, a voice command, or a photo of a receipt or invoice — then search and summarize it all. No bank linking, no new app to learn.</p>
+    <span class="pill"><span class="dot"></span>Powered by AI · Model Context Protocol · v1.0</span>
+    <h1>Your personal AI<br>finance assistant.</h1>
+    <p class="lead">Expense Tracker AI lives inside Claude, ChatGPT, and any AI assistant you already use. It understands what you spent from a typed prompt, a voice command, or a photo of a receipt — then reasons over your spending to answer questions instantly. No bank linking, no new app to learn.</p>
     <div class="modes">
       <span class="mode"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>Type a prompt</span>
       <span class="mode"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg>Say it out loud</span>
@@ -390,15 +379,10 @@
 
     <div class="demo reveal">
       <div class="browserframe">
-        <div class="bhead"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">claude.ai — expense-tracker MCP</span></div>
+        <div class="bhead"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">ChatGPT · Mobile — Expense Tracker AI</span></div>
         <div class="videobox" id="video">
-          <div class="grid"></div>
-          <div class="poster">
-            <div class="pu">spent $18 on lunch 🍜</div>
-            <div class="pa"><span class="pdot">✓</span> Added <b style="color:var(--ink)">$18.00</b>&nbsp;· Food · today</div>
-            <div class="pu">how much this week?</div>
-            <div class="pa typing"><i></i><i></i><i></i></div>
-          </div>
+          <img class="thumb" src="../assets/video-thum.jpg" alt="A ChatGPT user viewing their monthly expense report from Expense Tracker AI on their phone" loading="lazy">
+          <div class="shade"></div>
           <div class="playwrap"><div class="ring"></div><div class="playbtn"></div></div>
           <div class="cap">▶ Watch the 30-second demo</div>
         </div>
@@ -427,27 +411,27 @@
 <section class="sec" id="how">
   <div class="wrap">
     <span class="eyebrow reveal">How it works</span>
-    <h2 class="reveal" style="margin-top:14px">Live in your AI chat in three steps</h2>
+    <h2 class="reveal" style="margin-top:14px">Your AI finance assistant, live in three steps</h2>
     <div class="steps">
       <div class="step reveal">
         <span class="num">STEP 01</span>
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div>
         <h3>Connect with one link</h3>
-        <p>Add the server to your AI client with a single connection link — no install, no config files, no infrastructure to run.</p>
+        <p>Add the AI assistant to your Claude or ChatGPT client with a single connection link — no install, no config files, no infrastructure to run.</p>
         <span class="line"></span>
       </div>
       <div class="step reveal">
         <span class="num">STEP 02</span>
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 10h8M8 14h5"/></svg></div>
         <h3>Type, speak, or snap</h3>
-        <p>Type “spent $12 on lunch,” say it as a voice command, or snap a receipt or invoice. The AI reads it and records the amount, category, and date for you.</p>
+        <p>Type “spent $12 on lunch,” say it as a voice command, or snap a receipt or invoice. Your AI assistant understands it and records the amount, category, and date for you.</p>
         <span class="line"></span>
       </div>
       <div class="step reveal">
         <span class="num">STEP 03</span>
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 4 3 5-7"/></svg></div>
         <h3>Ask for answers</h3>
-        <p>“How much on food this month?” Get instant summaries, search past spending, and track budgets — all inside your normal chat.</p>
+        <p>”How much on food this month?” Your AI assistant reasons over your history to give instant summaries, surface past spending, and track budgets — all inside your normal chat.</p>
       </div>
     </div>
   </div>
@@ -457,24 +441,24 @@
 <section class="sec" id="features" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);">
   <div class="wrap">
     <span class="eyebrow reveal">Features</span>
-    <h2 class="reveal" style="margin-top:14px">Everything you need to track spending in chat</h2>
+    <h2 class="reveal" style="margin-top:14px">Everything an AI finance assistant should do</h2>
     <div class="grid6">
       <div class="card reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <h3>Natural-language logging</h3>
-        <p>Just describe what you spent. No forms, no fields, no dropdowns — the AI structures it correctly every time.</p>
+        <p>Just describe what you spent. No forms, no fields, no dropdowns — the AI understands and structures it correctly every time.</p>
         <div class="viz"><span class="cbub">spent $12 on lunch</span><span class="arrow">→</span><span class="chip"><span class="ok">✓</span>$12 · Food</span></div>
       </div>
       <div class="card reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-        <h3>Receipt photo scanning</h3>
-        <p>Drop in a receipt image. The host model extracts the vendor, total, and date and logs it — no manual entry.</p>
+        <h3>AI receipt scanning</h3>
+        <p>Drop in a receipt image. The AI model reads the vendor, total, and date and logs it — no manual entry.</p>
         <div class="viz"><span class="rcpt"><span class="scan"></span><span></span><span></span><span></span><span></span></span><span class="arrow">→</span><span class="chip"><span class="ok">✓</span>$38.42 · Groceries</span></div>
       </div>
       <div class="card reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg></div>
-        <h3>Monthly & category summaries</h3>
-        <p>Spending grouped by category or month, with totals and trends — generated on demand, right in the conversation.</p>
+        <h3>AI-generated summaries</h3>
+        <p>Ask, and your AI assistant groups spending by category or month, spotting totals and trends — generated on demand, right in the conversation.</p>
         <div class="viz"><span class="bars"><i style="height:34px"></i><i style="height:24px"></i><i style="height:16px"></i><i style="height:10px"></i></span><span class="barlbl">Travel · Food · Bills · Misc</span></div>
       </div>
       <div class="card reveal">
@@ -491,8 +475,8 @@
       </div>
       <div class="card reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div>
-        <h3>Works with any MCP client</h3>
-        <p>One server, every assistant. Claude, ChatGPT, Gemini, Cursor, or anything that speaks the Model Context Protocol.</p>
+        <h3>Works with any AI assistant</h3>
+        <p>One brain, every assistant. Claude, ChatGPT, Gemini, Cursor, or anything that speaks the Model Context Protocol.</p>
         <div class="viz"><span class="logos"><span class="lchip"><svg viewBox="0 0 24 24" fill="#a78bfa"><path d="M12 2c.5 4.5 3.5 7.5 8 8-4.5.5-7.5 3.5-8 8-.5-4.5-3.5-7.5-8-8 4.5-.5 7.5-3.5 8-8z"/></svg>Claude</span><span class="lchip"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>ChatGPT</span><span class="lchip"><svg viewBox="0 0 24 24" fill="#a78bfa"><path d="M12 2c.5 4.5 3.5 7.5 8 8-4.5.5-7.5 3.5-8 8-.5-4.5-3.5-7.5-8-8 4.5-.5 7.5-3.5 8-8z"/></svg>Gemini</span></span></div>
       </div>
     </div>
@@ -503,7 +487,7 @@
 <section class="sec">
   <div class="wrap" style="text-align:center;">
     <span class="eyebrow reveal">See it in action</span>
-    <h2 class="reveal" style="margin-top:14px">A real exchange, start to finish</h2>
+    <h2 class="reveal" style="margin-top:14px">Your AI finance assistant, start to finish</h2>
     <div class="chat reveal">
       <div class="u"><div class="ubub">spent $45 on groceries</div></div>
       <div class="a"><div class="astar"><svg viewBox="0 0 24 24" fill="#a78bfa" stroke="none"><path d="M12 2c.5 4.5 3.5 7.5 8 8-4.5.5-7.5 3.5-8 8-.5-4.5-3.5-7.5-8-8 4.5-.5 7.5-3.5 8-8z"/></svg></div>
@@ -553,7 +537,7 @@
 <section class="sec" id="pricing">
   <div class="wrap" style="text-align:center;">
     <span class="eyebrow reveal">Pricing</span>
-    <h2 class="reveal" style="margin-top:14px">Start free. Upgrade when you need more.</h2>
+    <h2 class="reveal" style="margin-top:14px">Start free. Upgrade for a smarter AI assistant.</h2>
     <div class="prices">
       <div class="price reveal">
         <h3>Free</h3>
@@ -625,8 +609,8 @@
 <footer>
   <div class="wrap">
     <div>
-      <div class="brand"><span class="mark"><img src="../assets/logo/icon-512.png" alt="Expense Tracker MCP logo"></span>Expense Tracker MCP</div>
-      <div class="sub">Track expenses by typing — inside the AI assistant you already use.</div>
+      <div class="brand"><span class="mark"><img src="../assets/logo/icon-512.png" alt="Expense Tracker AI logo"></span>Expense Tracker AI</div>
+      <div class="sub">Your personal AI finance assistant — inside the AI you already use.</div>
     </div>
     <div class="cols">
       <div class="col"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#how">How it works</a></div>
@@ -634,7 +618,7 @@
       <div class="col"><h4>Company</h4><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="support.html">Support</a></div>
     </div>
   </div>
-  <div class="copyright">© 2026 Expense Tracker MCP · Built on the Model Context Protocol</div>
+  <div class="copyright">© 2026 Expense Tracker AI · Powered by AI, built on the Model Context Protocol</div>
 </footer>
 
 <script>
