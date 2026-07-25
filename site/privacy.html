@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacy Policy — Expense Tracker MCP</title>
+<meta name="description" content="How Expense Tracker MCP collects, uses, and protects your data." />
+<link rel="icon" type="image/png" href="../assets/logo/icon-512.png" />
+<style>
+  :root{
+    --bg:#0a0a0f; --bg2:#0f0f16; --panel:#14141d; --panel2:#181824;
+    --line:#23232f; --line2:#2c2c3a;
+    --ink:#f4f4f7; --ink2:#c3c3d0; --muted:#8a8a9c;
+    --violet:#8b5cf6; --violet2:#a78bfa; --violet-ink:#c4b5fd;
+    --glow:rgba(139,92,246,.5);
+    --maxw:820px;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;
+    -webkit-font-smoothing:antialiased;}
+  a{color:var(--violet2);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+
+  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(10,10,15,.72);border-bottom:1px solid var(--line);}
+  .nav .wrap{max-width:1120px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.02em;color:var(--ink);}
+  .mark{width:30px;height:30px;flex:0 0 30px;border-radius:9px;overflow:hidden;
+    box-shadow:0 4px 14px -4px var(--glow);display:grid;place-items:center;}
+  .mark img{width:30px;height:30px;display:block;}
+  .back{font-size:14px;color:var(--ink2);}
+
+  main{padding:64px 0 96px;}
+  h1{font-size:clamp(30px,4.2vw,42px);font-weight:800;letter-spacing:-.03em;margin-bottom:8px;}
+  .updated{color:var(--muted);font-size:14px;margin-bottom:40px;}
+  h2{font-size:20px;font-weight:700;margin:36px 0 12px;letter-spacing:-.01em;}
+  p,li{color:var(--ink2);font-size:15.5px;margin-bottom:14px;}
+  ul{padding-left:20px;margin-bottom:14px;}
+  li{margin-bottom:8px;}
+  strong{color:var(--ink);}
+
+  footer{border-top:1px solid var(--line);padding:32px 0;background:var(--bg2);}
+  footer .wrap{max-width:1120px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer .sub{color:var(--muted);font-size:13.5px;}
+  footer nav a{color:var(--ink2);font-size:14px;margin-left:20px;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark"><img src="../assets/logo/icon-512.png" alt="Expense Tracker MCP logo"></span>Expense Tracker MCP</a>
+    <a class="back" href="index.html">← Back to home</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Privacy Policy</h1>
+  <div class="updated">Last updated: July 25, 2026</div>
+
+  <p>Expense Tracker MCP ("we", "us") provides a Model Context Protocol (MCP) server that lets AI assistants log, search, and summarize spending on your behalf. This policy explains what data we collect and how we handle it.</p>
+
+  <h2>1. Data we collect</h2>
+  <ul>
+    <li><strong>Expense data</strong> you or your connected AI assistant submit — amounts, categories, dates, and notes.</li>
+    <li><strong>Account information</strong> such as your email address, used for authentication and support.</li>
+    <li><strong>Usage data</strong> such as request logs, timestamps, and error diagnostics needed to operate the service reliably.</li>
+  </ul>
+
+  <h2>2. How we use data</h2>
+  <ul>
+    <li>To store and retrieve your expenses, budgets, and summaries.</li>
+    <li>To operate, maintain, and improve the reliability of the service.</li>
+    <li>To respond to support requests.</li>
+  </ul>
+  <p>We do not sell your data, and we do not use your expense data to train third-party AI models.</p>
+
+  <h2>3. Data sharing</h2>
+  <p>We do not share your personal or financial data with third parties except: (a) infrastructure providers strictly necessary to run the service (e.g. hosting, database), under confidentiality obligations, or (b) when required by law.</p>
+
+  <h2>4. Data retention</h2>
+  <p>We retain your data for as long as your account is active. You may request deletion of your account and associated data at any time.</p>
+
+  <h2>5. Security</h2>
+  <p>We use industry-standard measures — encryption in transit, access controls, and least-privilege practices — to protect your data. No system is perfectly secure, and we encourage you to use strong, unique credentials.</p>
+
+  <h2>6. Your rights</h2>
+  <p>You may request access to, correction of, or deletion of your data by contacting us. Depending on your jurisdiction, additional rights may apply (e.g. GDPR, CCPA).</p>
+
+  <h2>7. Changes to this policy</h2>
+  <p>We may update this policy from time to time. Material changes will be reflected by updating the date above.</p>
+
+  <h2>8. Contact</h2>
+  <p>Questions about this policy? Reach us via our <a href="support.html">customer support page</a>.</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="sub">© 2026 Expense Tracker MCP · Built on the Model Context Protocol</div>
+    <nav>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="support.html">Support</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

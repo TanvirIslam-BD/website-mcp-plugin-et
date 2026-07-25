@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Customer Support — Expense Tracker MCP</title>
+<meta name="description" content="Get help with Expense Tracker MCP — setup, billing, and troubleshooting." />
+<link rel="icon" type="image/png" href="../assets/logo/icon-512.png" />
+<style>
+  :root{
+    --bg:#0a0a0f; --bg2:#0f0f16; --panel:#14141d; --panel2:#181824;
+    --line:#23232f; --line2:#2c2c3a;
+    --ink:#f4f4f7; --ink2:#c3c3d0; --muted:#8a8a9c;
+    --violet:#8b5cf6; --violet2:#a78bfa; --violet-ink:#c4b5fd;
+    --glow:rgba(139,92,246,.5);
+    --maxw:820px;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;
+    -webkit-font-smoothing:antialiased;}
+  a{color:var(--violet2);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+
+  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(10,10,15,.72);border-bottom:1px solid var(--line);}
+  .nav .wrap{max-width:1120px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.02em;color:var(--ink);}
+  .mark{width:30px;height:30px;flex:0 0 30px;border-radius:9px;overflow:hidden;
+    box-shadow:0 4px 14px -4px var(--glow);display:grid;place-items:center;}
+  .mark img{width:30px;height:30px;display:block;}
+  .back{font-size:14px;color:var(--ink2);}
+
+  main{padding:64px 0 96px;}
+  h1{font-size:clamp(30px,4.2vw,42px);font-weight:800;letter-spacing:-.03em;margin-bottom:8px;}
+  .updated{color:var(--muted);font-size:14px;margin-bottom:40px;}
+  h2{font-size:20px;font-weight:700;margin:36px 0 12px;letter-spacing:-.01em;}
+  p,li{color:var(--ink2);font-size:15.5px;margin-bottom:14px;}
+  ul{padding-left:20px;margin-bottom:14px;}
+  li{margin-bottom:8px;}
+  strong{color:var(--ink);}
+
+  .card{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:22px 24px;margin:24px 0;}
+  .card h3{font-size:16px;margin-bottom:6px;color:var(--ink);}
+  .contact-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px;}
+  .contact-row .card{flex:1 1 220px;margin:0;}
+
+  footer{border-top:1px solid var(--line);padding:32px 0;background:var(--bg2);}
+  footer .wrap{max-width:1120px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer .sub{color:var(--muted);font-size:13.5px;}
+  footer nav a{color:var(--ink2);font-size:14px;margin-left:20px;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark"><img src="../assets/logo/icon-512.png" alt="Expense Tracker MCP logo"></span>Expense Tracker MCP</a>
+    <a class="back" href="index.html">← Back to home</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Customer Support</h1>
+  <div class="updated">We're here to help.</div>
+
+  <p>Whether you're setting up the MCP server for the first time, running into an error, or have a billing question, here's how to reach us and get answers quickly.</p>
+
+  <div class="contact-row">
+    <div class="card">
+      <h3>Email support</h3>
+      <p style="margin-bottom:0;">support@expensetrackermcp.com<br>Typical response time: within 1 business day.</p>
+    </div>
+    <div class="card">
+      <h3>Documentation</h3>
+      <p style="margin-bottom:0;">Setup guides and API reference — see the <a href="index.html#faq">FAQ</a> or our <a href="#">GitHub</a> repo.</p>
+    </div>
+  </div>
+
+  <h2>Common topics</h2>
+  <ul>
+    <li><strong>Connecting to Claude or ChatGPT</strong> — see the "Add to Claude" / "Add to ChatGPT" buttons on the <a href="index.html">home page</a> for one-click setup.</li>
+    <li><strong>Billing and plans</strong> — manage or change your plan from your account settings, or email us to cancel/downgrade.</li>
+    <li><strong>Data export or deletion</strong> — email support to request an export or full account deletion; see our <a href="privacy.html">Privacy Policy</a> for details.</li>
+    <li><strong>Bug reports</strong> — include the tool call or command you ran, expected vs. actual behavior, and any error message.</li>
+  </ul>
+
+  <h2>Before you contact us</h2>
+  <p>Most setup issues are resolved by re-authorizing the MCP connection in your AI assistant's settings, or by checking that your assistant supports MCP tool calls. If that doesn't resolve it, reach out and we'll help directly.</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="sub">© 2026 Expense Tracker MCP · Built on the Model Context Protocol</div>
+    <nav>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="support.html">Support</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
