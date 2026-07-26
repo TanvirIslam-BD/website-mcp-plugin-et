@@ -6,9 +6,9 @@
     { "source": "/support", "destination": "/site/support.html" },
     { "source": "/assets/(.*)", "destination": "/site/assets/$1" }
   ],
-   "redirects": [
+  "redirects": [
     { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
     { "source": "/terms.html", "destination": "/terms", "permanent": true },
-    { "source": "/support.html", "destination": "/support", "permanent": true },
+    { "source": "/support.html", "destination": "/support", "permanent": true }
   ]
 }
