@@ -3,6 +3,7 @@
     { "source": "/", "destination": "/site/index.html" },
     { "source": "/privacy", "destination": "/site/privacy.html" },
     { "source": "/terms", "destination": "/site/terms.html" },
-    { "source": "/support", "destination": "/site/support.html" }
+    { "source": "/support", "destination": "/site/support.html" },
+    { "source": "/assets/(.*)", "destination": "/site/assets/$1" }
   ]
 }
