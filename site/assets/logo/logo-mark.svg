@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Expense Tracker AI">
+  <defs>
+    <linearGradient id="mkBg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#101828"/>
+      <stop offset="1" stop-color="#080b14"/>
+    </linearGradient>
+    <linearGradient id="mkOutline" x1="110" y1="100" x2="330" y2="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ee6c5"/>
+      <stop offset=".45" stop-color="#3a9df5"/>
+      <stop offset="1" stop-color="#7c5cff"/>
+    </linearGradient>
+    <linearGradient id="mkBars" x1="176" y1="300" x2="336" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f7cf6"/>
+      <stop offset="1" stop-color="#2ee6c5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="116" fill="url(#mkBg)"/>
+
+  <!-- chat bubble outline with tail -->
+  <path d="M156 92 H356 A60 60 0 0 1 416 152 V308 A60 60 0 0 1 356 368
+           H286 L182 434 L200 368 H156 A60 60 0 0 1 96 308 V152 A60 60 0 0 1 156 92 Z"
+        fill="none" stroke="url(#mkOutline)" stroke-width="26" stroke-linejoin="round"/>
+
+  <!-- bar chart -->
+  <g fill="url(#mkBars)">
+    <rect x="176" y="240" width="40" height="60" rx="11"/>
+    <rect x="236" y="196" width="40" height="104" rx="11"/>
+    <rect x="296" y="152" width="40" height="148" rx="11"/>
+  </g>
+</svg>

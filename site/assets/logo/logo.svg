@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Expense Tracker AI">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#111a2b"/>
+      <stop offset="1" stop-color="#070a12"/>
+    </radialGradient>
+    <linearGradient id="outline" x1="120" y1="130" x2="235" y2="445" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ee6c5"/>
+      <stop offset=".45" stop-color="#3a9df5"/>
+      <stop offset="1" stop-color="#7c5cff"/>
+    </linearGradient>
+    <linearGradient id="bars" x1="138" y1="274" x2="251" y2="167" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f7cf6"/>
+      <stop offset="1" stop-color="#2ee6c5"/>
+    </linearGradient>
+    <linearGradient id="aiRing" x1="290" y1="116" x2="392" y2="246" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ee6c5"/>
+      <stop offset="1" stop-color="#6d7cff"/>
+    </linearGradient>
+    <linearGradient id="wallet" x1="256" y1="286" x2="404" y2="398" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ee6c5"/>
+      <stop offset=".5" stop-color="#31a5ee"/>
+      <stop offset="1" stop-color="#5573f8"/>
+    </linearGradient>
+    <linearGradient id="walletBack" x1="256" y1="264" x2="400" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3ff0d2"/>
+      <stop offset="1" stop-color="#48b0f2"/>
+    </linearGradient>
+    <linearGradient id="clasp" x1="336" y1="310" x2="412" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3f8de8"/>
+      <stop offset="1" stop-color="#6072fb"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+
+  <!-- chat bubble outline, tail at bottom-left -->
+  <path d="M146 119 H238 A46 46 0 0 1 284 165 V370 A46 46 0 0 1 238 416
+           H234 L168 454 V416 H146 A46 46 0 0 1 100 370 V165 A46 46 0 0 1 146 119 Z"
+        fill="none" stroke="url(#outline)" stroke-width="13" stroke-linejoin="round"/>
+
+  <!-- bar chart -->
+  <g fill="url(#bars)">
+    <rect x="138" y="237" width="20" height="37" rx="5"/>
+    <rect x="169" y="214" width="20" height="60" rx="5"/>
+    <rect x="200" y="202" width="20" height="72" rx="5"/>
+    <rect x="231" y="167" width="20" height="107" rx="5"/>
+  </g>
+
+  <!-- list rows -->
+  <circle cx="147" cy="309" r="7" fill="#2ee6c5"/>
+  <rect x="165" y="304" width="74" height="11" rx="5.5" fill="#28344a"/>
+  <circle cx="147" cy="345" r="7" fill="#8b5cf6"/>
+  <rect x="165" y="340" width="74" height="11" rx="5.5" fill="#28344a"/>
+
+  <!-- AI speech bubble: tail first, circle drawn over it so they read as one shape -->
+  <path d="M286 208 L258 252 L320 242 Z" fill="#0d1220" stroke="url(#aiRing)"
+        stroke-width="13" stroke-linejoin="round"/>
+  <circle cx="342" cy="180" r="66" fill="#0d1220"/>
+  <circle cx="342" cy="180" r="66" fill="none" stroke="url(#aiRing)" stroke-width="13"/>
+  <text x="342" y="181" fill="#fff" font-family="Inter,'Segoe UI',Arial,Helvetica,sans-serif"
+        font-size="70" font-weight="800" letter-spacing="-1"
+        text-anchor="middle" dominant-baseline="central">AI</text>
+
+  <!-- sparkles -->
+  <path d="M410 71 Q413 96 438 99 Q413 102 410 127 Q407 102 382 99 Q407 96 410 71 Z" fill="#3ce0c8"/>
+  <path d="M441 126 Q443 141 458 143 Q443 145 441 160 Q439 145 424 143 Q439 141 441 126 Z" fill="#8b7cff"/>
+
+  <!-- wallet: back panel, body, clasp -->
+  <rect x="256" y="264" width="146" height="70" rx="22" fill="url(#walletBack)"/>
+  <rect x="253" y="282" width="153" height="114" rx="24" fill="url(#wallet)"/>
+  <path d="M277 282 H382" stroke="#ffffff" stroke-opacity=".22" stroke-width="5" stroke-linecap="round"/>
+  <rect x="336" y="310" width="78" height="48" rx="15" fill="url(#clasp)"/>
+  <circle cx="360" cy="334" r="9" fill="#151f38"/>
+</svg>
