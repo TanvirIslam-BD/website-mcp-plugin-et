@@ -2,18 +2,12 @@ const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
 const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
-const MCPIZE_DASHBOARD_BRIDGE_URL = "https://expense-tracker-mcp.mcpize.run/dashboard";
+const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 
 function redirectToMcpizeAuth() {
-  // A Vercel page cannot read MCPize's cookies or user header. Route through
-  // the MCP dashboard bridge, where MCPize supplies the authenticated user id
-  // and the server issues this browser a 15-minute signed dashboard session.
-  const returnTo = new URL("/dashboard", location.origin);
-  returnTo.searchParams.set("month", selectedMonth);
-  const bridge = new URL(MCPIZE_DASHBOARD_BRIDGE_URL);
-  bridge.searchParams.set("month", selectedMonth);
-  bridge.searchParams.set("return_to", returnTo.toString());
-  location.replace(bridge.toString());
+  // The Vercel API starts the MCPize OAuth + PKCE flow and the /authorize
+  // callback stores the resulting short-lived dashboard session securely.
+  location.replace(`${DASHBOARD_LOGIN_URL}?month=${encodeURIComponent(selectedMonth)}`);
 }
 
 function authRequiredError() {

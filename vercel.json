@@ -3,7 +3,7 @@
     { "source": "/", "destination": "/site/index.html" },
     { "source": "/dashboard", "destination": "/site/dashboard/index.html" },
     { "source": "/dashboard/(.*)", "destination": "/site/dashboard/$1" },
-    { "source": "/authorize", "destination": "/site/dashboard/authorize.html" },
+    { "source": "/authorize", "destination": "/api/dashboard-authorize" },
     { "source": "/privacy", "destination": "/site/privacy.html" },
     { "source": "/terms", "destination": "/site/terms.html" },
     { "source": "/support", "destination": "/site/support.html" },
