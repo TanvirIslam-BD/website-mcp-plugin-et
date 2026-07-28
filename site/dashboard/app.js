@@ -641,7 +641,7 @@ function openModal(title, subtitle, content, options = {}) {
   closeModal();
   document.body.insertAdjacentHTML("beforeend", `
     <div class="modal-backdrop" id="dashboard-modal" role="dialog" aria-modal="true">
-      <section class="modal ${options.wide ? "wide" : ""}">
+      <section class="modal ${options.wide ? "wide" : ""} ${options.className || ""}">
         <div class="modal-top">
           <div><h2>${esc(title)}</h2><p>${esc(subtitle || "")}</p></div>
           <button class="modal-close" data-close aria-label="Close">${icon("close")}</button>
@@ -686,7 +686,7 @@ function openAiChat(prefill = "") {
         <div><small>Private data only · AI may use expense, budget, and report tools.</small><button class="action-button primary" type="submit">Ask AI</button></div>
       </form>
     </div>
-  `, { wide: false });
+  `, { wide: false, className: "ai-modal" });
 }
 
 function localDashboardAnswer(message) {
