@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Continuing to Expense Tracker AI</title>
+  <script>
+    (() => {
+      const target = new URL("/dashboard", location.origin);
+      const params = new URLSearchParams(location.search);
+      for (const [key, value] of params) target.searchParams.set(key, value);
+      if (!target.searchParams.has("month")) target.searchParams.set("month", new Date().toISOString().slice(0, 7));
+      location.replace(target.toString());
+    })();
+  </script>
+</head>
+<body>
+  <p>Continuing to your private dashboard…</p>
+</body>
+</html>
