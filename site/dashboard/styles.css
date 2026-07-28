@@ -716,10 +716,12 @@ button {
 
 .chart-area-income {
   fill: url(#incomeFill);
+  stroke: none;
 }
 
 .chart-area-expense {
   fill: url(#expenseFill);
+  stroke: none;
 }
 
 .chart-line {
@@ -727,6 +729,7 @@ button {
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: points .18s ease;
 }
 
 .chart-line.income {
@@ -744,6 +747,23 @@ button {
 .chart-point {
   fill: #fff;
   stroke-width: 2;
+  filter: drop-shadow(0 4px 8px rgba(13, 26, 62, .16));
+  pointer-events: none;
+  transition: cx .12s ease, cy .12s ease;
+}
+
+.chart-cursor {
+  stroke: #95a5c3;
+  stroke-dasharray: 3 5;
+  stroke-width: 1;
+  opacity: .75;
+  pointer-events: none;
+}
+
+.chart-hitbox {
+  fill: transparent;
+  stroke: none;
+  cursor: crosshair;
 }
 
 .chart-tooltip {
@@ -757,6 +777,8 @@ button {
   background: #10182c;
   box-shadow: 0 16px 35px rgba(8, 16, 44, .28);
   font-size: 10px;
+  pointer-events: none;
+  transition: left .12s ease;
 }
 
 .chart-tooltip b {

@@ -268,7 +268,7 @@ function renderIncomeExpense(model) {
   const midIndex = Math.floor(model.incomeCum.length / 2);
   const midDay = `${String(midIndex + 1).padStart(2, "0")} ${monthLabel(model.month).split(" ")[0]} ${model.month.slice(0, 4)}`;
   return `
-    <article class="panel large-chart">
+    <article class="panel large-chart" data-income-expense-chart>
       <div class="panel-head">
         <h3>Income vs Expense</h3>
         <div class="chart-tools">
@@ -277,7 +277,11 @@ function renderIncomeExpense(model) {
             <span><i style="--tone:#ff4548"></i>Expenses</span>
             <span><i style="--tone:#2563ff"></i>Savings</span>
           </div>
-          <select class="period-select" aria-label="Chart period"><option>This Month</option><option>This Week</option><option>This Year</option></select>
+          <select class="period-select" aria-label="Chart period" data-chart-mode>
+            <option value="month">This Month</option>
+            <option value="daily">Daily</option>
+            <option value="week">Last 7 Days</option>
+          </select>
         </div>
       </div>
       <div class="income-expense-chart">
@@ -290,25 +294,29 @@ function renderIncomeExpense(model) {
           <line class="grid-line" x1="${padX}" y1="72" x2="${width - 8}" y2="72"/>
           <line class="grid-line" x1="${padX}" y1="109" x2="${width - 8}" y2="109"/>
           <line class="grid-line" x1="${padX}" y1="146" x2="${width - 8}" y2="146"/>
-          <text class="axis-label" x="0" y="38">${formatMoney(max, model.currency, { compact: true })}</text>
-          <text class="axis-label" x="0" y="75">${formatMoney(max * .66, model.currency, { compact: true })}</text>
-          <text class="axis-label" x="0" y="112">${formatMoney(max * .33, model.currency, { compact: true })}</text>
+          <text class="axis-label" data-axis-label="max" x="0" y="38">${formatMoney(max, model.currency, { compact: true })}</text>
+          <text class="axis-label" data-axis-label="mid" x="0" y="75">${formatMoney(max * .66, model.currency, { compact: true })}</text>
+          <text class="axis-label" data-axis-label="low" x="0" y="112">${formatMoney(max * .33, model.currency, { compact: true })}</text>
           <text class="axis-label" x="0" y="149">0</text>
-          <path class="chart-area-income" d="${areaPath(incomePoints, height, padY)}"/>
-          <path class="chart-area-expense" d="${areaPath(expensePoints, height, padY)}"/>
-          <polyline class="chart-line income" points="${incomePoints}"/>
-          <polyline class="chart-line expense" points="${expensePoints}"/>
-          <polyline class="chart-line saving" points="${savingPoints}"/>
-          <circle class="chart-point" cx="${padX + ((width - padX * 2) * midIndex) / Math.max(model.incomeCum.length - 1, 1)}" cy="${height - padY - ((height - padY * 2) * (model.expenseCum[midIndex] || 0)) / max}" r="4" stroke="#ff4548"/>
-          <text class="axis-label" x="${padX}" y="172">1 ${monthLabel(model.month).split(" ")[0]}</text>
-          <text class="axis-label" x="${width / 2 - 18}" y="172">15 ${monthLabel(model.month).split(" ")[0]}</text>
-          <text class="axis-label" x="${width - 78}" y="172">${daysInMonth(model.month)} ${monthLabel(model.month).split(" ")[0]}</text>
+          <path class="chart-area-income" data-chart-area="income" d="${areaPath(incomePoints, height, padY)}"/>
+          <path class="chart-area-expense" data-chart-area="expense" d="${areaPath(expensePoints, height, padY)}"/>
+          <polyline class="chart-line income" data-chart-line="income" points="${incomePoints}"/>
+          <polyline class="chart-line expense" data-chart-line="expense" points="${expensePoints}"/>
+          <polyline class="chart-line saving" data-chart-line="saving" points="${savingPoints}"/>
+          <line class="chart-cursor" data-chart-cursor x1="0" x2="0" y1="${padY}" y2="${height - padY}"/>
+          <circle class="chart-point income" data-chart-point="income" r="4" stroke="#18b96f"/>
+          <circle class="chart-point expense" data-chart-point="expense" r="4" stroke="#ff4548"/>
+          <circle class="chart-point saving" data-chart-point="saving" r="4" stroke="#2563ff"/>
+          <rect class="chart-hitbox" data-chart-hitbox x="${padX}" y="0" width="${width - padX * 2}" height="${height}" rx="4"/>
+          <text class="axis-label" data-x-label="start" x="${padX}" y="172">1 ${monthLabel(model.month).split(" ")[0]}</text>
+          <text class="axis-label" data-x-label="mid" x="${width / 2 - 18}" y="172">15 ${monthLabel(model.month).split(" ")[0]}</text>
+          <text class="axis-label" data-x-label="end" x="${width - 78}" y="172">${daysInMonth(model.month)} ${monthLabel(model.month).split(" ")[0]}</text>
         </svg>
-        <div class="chart-tooltip">
-          <b>${esc(midDay)}</b>
-          <span><label>Income</label><strong style="color:#32df8b">${formatMoney(model.incomeCum[midIndex] || 0, model.currency)}</strong></span>
-          <span><label>Expenses</label><strong style="color:#ff7073">${formatMoney(model.expenseCum[midIndex] || 0, model.currency)}</strong></span>
-          <span><label>Savings</label><strong style="color:#66a0ff">${formatMoney(model.savingsCum[midIndex] || 0, model.currency)}</strong></span>
+        <div class="chart-tooltip" data-chart-tooltip>
+          <b data-tip-date>${esc(midDay)}</b>
+          <span><label>Income</label><strong data-tip-income style="color:#32df8b">${formatMoney(model.incomeCum[midIndex] || 0, model.currency)}</strong></span>
+          <span><label>Expenses</label><strong data-tip-expense style="color:#ff7073">${formatMoney(model.expenseCum[midIndex] || 0, model.currency)}</strong></span>
+          <span><label>Savings</label><strong data-tip-saving style="color:#66a0ff">${formatMoney(model.savingsCum[midIndex] || 0, model.currency)}</strong></span>
         </div>
       </div>
     </article>
@@ -749,6 +757,117 @@ function submitPanelForm(form) {
   return submitEntry(form);
 }
 
+function chartDataset(model, mode = "month") {
+  const monthName = monthLabel(model.month).split(" ")[0];
+  const year = model.month.slice(0, 4);
+  let start = 0;
+  let income = model.incomeCum;
+  let expense = model.expenseCum;
+  let saving = model.savingsCum;
+  let labels = income.map((_, index) => `${index + 1} ${monthName} ${year}`);
+  if (mode === "daily") {
+    income = model.incomeDaily;
+    expense = model.expenseDaily;
+    saving = model.incomeDaily.map((value, index) => Math.max(0, value - (model.expenseDaily[index] || 0)));
+  }
+  if (mode === "week") {
+    const end = Math.min(todayDay(model.month), model.incomeDaily.length);
+    start = Math.max(0, end - 7);
+    income = model.incomeDaily.slice(start, end);
+    expense = model.expenseDaily.slice(start, end);
+    saving = income.map((value, index) => Math.max(0, value - (expense[index] || 0)));
+  }
+  labels = income.map((_, index) => `${start + index + 1} ${monthName} ${year}`);
+  return { income, expense, saving, labels, startDay: start + 1 };
+}
+
+function setChartText(root, selector, value) {
+  const node = root.querySelector(selector);
+  if (node) node.textContent = value;
+}
+
+function updateIncomeExpenseChart(mode = "month", selectedIndex) {
+  const model = window.dashboardModel;
+  const root = document.querySelector("[data-income-expense-chart]");
+  if (!model || !root) return;
+  const width = 600;
+  const height = 178;
+  const padX = 34;
+  const padY = 24;
+  const data = chartDataset(model, mode);
+  const max = Math.max(...data.income, ...data.expense, ...data.saving, 1);
+  const count = Math.max(data.income.length, data.expense.length, data.saving.length, 1);
+  const safeIndex = Math.max(0, Math.min(selectedIndex ?? Math.floor((count - 1) / 2), count - 1));
+  const incomePoints = linePoints(data.income, width, height, padX, padY, max);
+  const expensePoints = linePoints(data.expense, width, height, padX, padY, max);
+  const savingPoints = linePoints(data.saving, width, height, padX, padY, max);
+  const x = padX + ((width - padX * 2) * safeIndex) / Math.max(count - 1, 1);
+  const yFor = (value) => height - padY - ((height - padY * 2) * Number(value || 0)) / max;
+  const tooltip = root.querySelector("[data-chart-tooltip]");
+  const chart = root.querySelector(".income-expense-chart");
+
+  root.querySelector('[data-chart-line="income"]')?.setAttribute("points", incomePoints);
+  root.querySelector('[data-chart-line="expense"]')?.setAttribute("points", expensePoints);
+  root.querySelector('[data-chart-line="saving"]')?.setAttribute("points", savingPoints);
+  root.querySelector('[data-chart-area="income"]')?.setAttribute("d", areaPath(incomePoints, height, padY));
+  root.querySelector('[data-chart-area="expense"]')?.setAttribute("d", areaPath(expensePoints, height, padY));
+  const cursor = root.querySelector("[data-chart-cursor]");
+  if (cursor) {
+    cursor.setAttribute("x1", x);
+    cursor.setAttribute("x2", x);
+  }
+  const points = [
+    ["income", data.income[safeIndex]],
+    ["expense", data.expense[safeIndex]],
+    ["saving", data.saving[safeIndex]],
+  ];
+  for (const [name, value] of points) {
+    const point = root.querySelector(`[data-chart-point="${name}"]`);
+    if (!point) continue;
+    point.setAttribute("cx", x);
+    point.setAttribute("cy", yFor(value));
+  }
+  setChartText(root, '[data-axis-label="max"]', formatMoney(max, model.currency, { compact: true }));
+  setChartText(root, '[data-axis-label="mid"]', formatMoney(max * .66, model.currency, { compact: true }));
+  setChartText(root, '[data-axis-label="low"]', formatMoney(max * .33, model.currency, { compact: true }));
+  setChartText(root, '[data-x-label="start"]', data.labels[0] ? data.labels[0].replace(` ${model.month.slice(0, 4)}`, "") : "");
+  setChartText(root, '[data-x-label="mid"]', data.labels[Math.floor((count - 1) / 2)] ? data.labels[Math.floor((count - 1) / 2)].replace(` ${model.month.slice(0, 4)}`, "") : "");
+  setChartText(root, '[data-x-label="end"]', data.labels[count - 1] ? data.labels[count - 1].replace(` ${model.month.slice(0, 4)}`, "") : "");
+  setChartText(root, "[data-tip-date]", data.labels[safeIndex] || "");
+  setChartText(root, "[data-tip-income]", formatMoney(data.income[safeIndex] || 0, model.currency));
+  setChartText(root, "[data-tip-expense]", formatMoney(data.expense[safeIndex] || 0, model.currency));
+  setChartText(root, "[data-tip-saving]", formatMoney(data.saving[safeIndex] || 0, model.currency));
+
+  if (tooltip && chart) {
+    const percent = count > 1 ? safeIndex / (count - 1) : .5;
+    const chartWidth = chart.getBoundingClientRect().width || 1;
+    const tipWidth = tooltip.offsetWidth || 124;
+    const left = Math.max(8, Math.min(chartWidth - tipWidth - 8, padX / width * chartWidth + percent * ((width - padX * 2) / width * chartWidth) - tipWidth / 2));
+    tooltip.style.left = `${left}px`;
+  }
+}
+
+function bindIncomeExpenseChart() {
+  const root = document.querySelector("[data-income-expense-chart]");
+  const model = window.dashboardModel;
+  if (!root || !model) return;
+  const select = root.querySelector("[data-chart-mode]");
+  const hitbox = root.querySelector("[data-chart-hitbox]");
+  const mode = () => select?.value || "month";
+  const indexFromEvent = (event) => {
+    const box = hitbox.getBoundingClientRect();
+    const data = chartDataset(model, mode());
+    const count = Math.max(data.income.length, data.expense.length, data.saving.length, 1);
+    const ratio = Math.max(0, Math.min(1, (event.clientX - box.left) / Math.max(1, box.width)));
+    return Math.round(ratio * Math.max(count - 1, 0));
+  };
+  updateIncomeExpenseChart(mode());
+  hitbox?.addEventListener("pointermove", (event) => updateIncomeExpenseChart(mode(), indexFromEvent(event)));
+  hitbox?.addEventListener("pointerdown", (event) => updateIncomeExpenseChart(mode(), indexFromEvent(event)));
+  hitbox?.addEventListener("pointerleave", () => updateIncomeExpenseChart(mode()));
+  select?.addEventListener("change", () => updateIncomeExpenseChart(mode()));
+}
+
 function filterDashboard(query) {
   const needle = String(query || "").trim().toLowerCase();
   document.querySelectorAll(".transactions tbody tr[data-search]").forEach((row) => {
@@ -815,6 +934,7 @@ loadDashboard()
     window.dashboardModel = buildModel(data);
     renderDashboard(window.dashboardModel);
     bindEvents();
+    bindIncomeExpenseChart();
   })
   .catch((error) => {
     app.className = "error-card";
