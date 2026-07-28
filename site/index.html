@@ -549,7 +549,7 @@
   .sbtn svg{width:18px;height:18px;stroke:var(--ink2);fill:none;stroke-width:1.9;stroke-linecap:round;}
 
   /* ---------- live example: in-chat phone mock ---------- */
-  .live-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,368px);
+  .live-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,430px);
     gap:72px;align-items:center;text-align:left;}
   .live-copy .lead{max-width:440px;}
   .live-steps{list-style:none;display:flex;flex-direction:column;gap:22px;margin-top:34px;}
@@ -559,10 +559,16 @@
     background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.3);}
   .live-steps b{display:block;font-size:16.5px;margin-bottom:4px;}
   .live-steps p{color:var(--ink2);font-size:15px;line-height:1.55;}
-  .live{position:relative;margin:0;width:368px;max-width:100%;justify-self:end;}
+  .live{position:relative;margin:0;width:min(100%,430px);max-width:100%;justify-self:end;}
   .live::before{content:"";position:absolute;top:6%;left:50%;transform:translateX(-50%);
     width:150%;height:88%;z-index:0;pointer-events:none;
     background:radial-gradient(closest-side,rgba(20,184,166,.2),transparent 72%);filter:blur(18px);}
+  .live-promo{position:relative;z-index:1;display:block;overflow:hidden;border-radius:28px;
+    border:1px solid rgba(255,255,255,.12);background:#071027;
+    box-shadow:0 42px 110px -44px rgba(45,212,191,.75),0 36px 72px -34px rgba(0,0,0,.9);}
+  .live-promo img{display:block;width:100%;height:auto;}
+  .live-promo::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -28px 60px rgba(3,7,18,.18);}
   .lp{position:relative;z-index:1;background:#0b0e15;border-radius:44px;padding:9px;
     border:1.5px solid #263041;box-shadow:0 60px 110px -40px rgba(0,0,0,.95),0 0 70px -30px var(--glow);}
   .lp .scr{background:#0f1319;border-radius:36px;padding:12px 14px 14px;position:relative;
@@ -1554,100 +1560,11 @@
         </ol>
       </div>
 
-      <div class="live reveal">
-      <div class="lp">
-        <div class="scr">
-          <div class="notch"></div>
-          <div class="sbar">
-            <span>9:41</span>
-            <span class="rt">
-              <svg viewBox="0 0 24 16"><rect x="1" y="10" width="3" height="5" rx="1"/><rect x="6" y="7" width="3" height="8" rx="1"/><rect x="11" y="4" width="3" height="11" rx="1"/><rect x="16" y="1" width="3" height="14" rx="1"/></svg>
-              <svg viewBox="0 0 24 16"><path d="M12 14.4l-2.7-3.1a4.3 4.3 0 0 1 5.4 0z"/><path d="M12 7.9c-2.4 0-4.7 1-6.4 2.6L3.4 8.2a12.5 12.5 0 0 1 17.2 0l-2.2 2.3A9.2 9.2 0 0 0 12 7.9z"/></svg>
-              <svg viewBox="0 0 26 16"><rect x="1" y="3" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".5"/><rect x="3" y="5" width="16" height="6" rx="1.5"/><rect x="22.5" y="6.5" width="2" height="3" rx="1"/></svg>
-            </span>
-          </div>
-          <div class="top">
-            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h11M4 17h7"/></svg>
-            <b>ChatGPT &nbsp;&#8250;</b>
-            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
-          </div>
-
-          <div class="flow2">
-            <span class="u">spent $45 on groceries</span>
-            <div class="say">Logged it for you &#128071;</div>
-            <div class="exp">
-              <span class="chk">&#10003;</span>
-              <div>
-                <div class="k">Expense added</div>
-                <div class="amt">$45.00</div>
-                <div class="meta">Groceries &middot; Jul 25, 2026</div>
-              </div>
-              <span class="cart"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.55L21 8H6"/></svg></span>
-            </div>
-
-            <span class="u" style="margin-top:16px">how much this month?</span>
-            <div class="say">You&rsquo;ve spent <b>$1,261</b> in July. By category:</div>
-
-            <div class="cats">
-              <div class="crow">
-                <span class="ci" style="background:#6d3ff0"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/></svg></span>
-                <span>
-                  <span class="nm">Rent<b>$1,200</b></span>
-                  <span class="bt"><span class="bf" style="width:71%;background:#8b5cf6"></span></span>
-                </span>
-                <span class="pct">71%</span>
-              </div>
-              <div class="crow">
-                <span class="ci" style="background:#2563eb"><svg viewBox="0 0 24 24"><path d="M5 16v2M19 16v2"/><path d="M3 16v-4l2-5h14l2 5v4z"/><circle cx="7.5" cy="14" r="1"/><circle cx="16.5" cy="14" r="1"/></svg></span>
-                <span>
-                  <span class="nm">Transport<b>$40</b></span>
-                  <span class="bt"><span class="bf" style="width:16%;background:#3b82f6"></span></span>
-                </span>
-                <span class="pct">16%</span>
-              </div>
-              <div class="crow">
-                <span class="ci" style="background:#12805e"><svg viewBox="0 0 24 24"><path d="M7 3v8M10 3v8M8.5 11v10"/><path d="M16 3c-1.5 2-1.5 6 0 8v10"/></svg></span>
-                <span>
-                  <span class="nm">Food<b>$21</b></span>
-                  <span class="bt"><span class="bf" style="width:13%;background:#34d399"></span></span>
-                </span>
-                <span class="pct">13%</span>
-              </div>
-            </div>
-
-            <div class="tot">
-              <span class="wi"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16 11h4v4h-4a2 2 0 0 1 0-4z"/></svg></span>
-              <div>
-                <div class="k">Total spent in July</div>
-                <div class="v">$1,261</div>
-              </div>
-              <span class="up"><b>&uarr; 12%</b> vs last month</span>
-            </div>
-
-            <div class="tip">
-              <span class="em">&#128161;</span>
-              <div>
-                <b>Tip</b>
-                <p>You&rsquo;re keeping your food expenses low. Great job! &#127881;</p>
-              </div>
-            </div>
-
-            <div class="react">
-              <svg viewBox="0 0 24 24"><path d="M7 22V11l5-9a2.5 2.5 0 0 1 2.4 3.2L13.5 9H20a2 2 0 0 1 2 2.4l-1.6 8A2 2 0 0 1 18.4 21H7z"/><path d="M7 11H4v10h3"/></svg>
-              <svg viewBox="0 0 24 24" style="transform:rotate(180deg)"><path d="M7 22V11l5-9a2.5 2.5 0 0 1 2.4 3.2L13.5 9H20a2 2 0 0 1 2 2.4l-1.6 8A2 2 0 0 1 18.4 21H7z"/><path d="M7 11H4v10h3"/></svg>
-              <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>
-              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M12 12h.01"/></svg>
-            </div>
-
-            <div class="ask">
-              Ask anything&hellip;
-              <span class="mic"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg></span>
-              <span class="send"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
+      <figure class="live reveal" aria-label="Expense Tracker AI promotional preview">
+        <span class="live-promo">
+          <img src="assets/dashboard/expense-tracker-ai-promo.png" alt="Expense Tracker AI mobile report preview showing ChatGPT and Claude support">
+        </span>
+      </figure>
     </div>
   </div>
 </section>
