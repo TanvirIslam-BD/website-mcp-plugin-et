@@ -66,10 +66,33 @@ export default async function handler(req, res) {
       const body = decodeBody(req.body);
       const kind = body.kind;
       const amount = amountMinor(body.amount);
+      const target = amountMinor(body.target);
       const date = cleanText(body.date, 10);
       const currency = cleanText(body.currency, 3).toUpperCase();
       const category = cleanText(body.category, 60).toLowerCase();
       const description = cleanText(body.description, 240);
+      if (kind === "budget") {
+        if (!amount || !/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: "Enter a positive budget amount and 3-letter currency code." });
+        const now = new Date().toISOString();
+        await db.execute({
+          sql: "INSERT INTO budgets (id,user_id,category,amount_minor,currency,period,created_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(user_id,category) DO UPDATE SET amount_minor=excluded.amount_minor,currency=excluded.currency,period=excluded.period,created_at=excluded.created_at",
+          args: [randomUUID(), userId, null, amount, currency, "monthly", now],
+        });
+        return res.status(201).json({ ok: true });
+      }
+      if (kind === "goal") {
+        if (!target || !/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: "Enter a positive goal amount and 3-letter currency code." });
+        const now = new Date().toISOString();
+        const existing = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+        let finance = { incomes: [], recurring: [], budgetRules: [], categories: [], templates: [], alertThresholds: [50, 80, 100], expenseMetadata: {}, goals: [] };
+        if (existing.rows[0]?.data) {
+          try { finance = { ...finance, ...JSON.parse(String(existing.rows[0].data)) }; } catch { /* Use safe defaults. */ }
+        }
+        finance.goals = Array.isArray(finance.goals) ? finance.goals : [];
+        finance.goals[0] = { id: finance.goals[0]?.id || randomUUID(), name: cleanText(body.name, 80) || "Savings goal", targetMinor: target, currency, updatedAt: now };
+        await db.execute({ sql: "INSERT INTO finance_state (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at", args: [userId, JSON.stringify(finance), now] });
+        return res.status(201).json({ ok: true });
+      }
       if (!["expense", "income"].includes(kind) || !amount || !validDate(date) || !/^[A-Z]{3}$/.test(currency)) {
         return res.status(400).json({ error: "Enter a positive amount, valid date, and 3-letter currency code." });
       }
@@ -122,7 +145,7 @@ export default async function handler(req, res) {
     const recurring = (finance.recurring || []).filter((entry) => entry.active && entry.currency === currency);
     return res.status(200).json({
       month, currency, spentMinor, incomeMinor, budgetMinor: overallBudget?.amountMinor ?? null,
-      categories, expenses: scoped.slice(0, 12), daily, incomes, recurring,
+      categories, expenses: scoped.slice(0, 200), daily, incomes, recurring, goals: Array.isArray(finance.goals) ? finance.goals : [],
       expenseMetadata: finance.expenseMetadata || {}, labels: { spent: money(spentMinor, currency), income: money(incomeMinor, currency) },
     });
   } catch (error) {
