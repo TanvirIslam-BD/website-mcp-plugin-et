@@ -63,7 +63,10 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${tokenBody.access_token}`, Accept: "application/json" },
     });
     const sessionBody = await sessionResponse.json().catch(() => ({}));
-    if (!sessionResponse.ok || typeof sessionBody.dashboard_token !== "string") throw new Error("Could not create the private dashboard session.");
+    if (!sessionResponse.ok || typeof sessionBody.dashboard_token !== "string") {
+      const detail = typeof sessionBody.error === "string" ? ` ${sessionBody.error}` : "";
+      throw new Error(`Could not create the private dashboard session (MCPize returned ${sessionResponse.status}).${detail}`);
+    }
 
     res.setHeader("Set-Cookie", [clearStateCookie(), dashboardCookie(sessionBody.dashboard_token)]);
     res.setHeader("Cache-Control", "no-store");
