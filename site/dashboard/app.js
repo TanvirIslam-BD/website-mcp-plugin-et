@@ -2,6 +2,19 @@ const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
 const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
+const MCPIZE_AUTH_URL = "https://mcpize.com/auth";
+
+function redirectToMcpizeAuth() {
+  // Do not manufacture OAuth state, client, or PKCE values in the dashboard.
+  // MCPize creates those values when its authenticated connection is started.
+  location.replace(MCPIZE_AUTH_URL);
+}
+
+function authRequiredError() {
+  const error = new Error("Your dashboard session is missing or expired.");
+  error.code = "AUTH_REQUIRED";
+  return error;
+}
 
 const colors = ["#ff4548", "#2563ff", "#ffb21c", "#22b76b", "#7c3fff", "#289bd6", "#4757d9"];
 const tagColors = {
@@ -151,6 +164,7 @@ async function loadDashboard() {
   if (token) urlParams.set("dashboard_token", token);
   const response = await fetch(`/api/dashboard?${urlParams}`, { credentials: "same-origin" });
   const body = await response.json().catch(() => ({}));
+  if (response.status === 401 || response.status === 403) throw authRequiredError();
   if (!response.ok) throw new Error(body.error || "Unable to open dashboard.");
   if (token) history.replaceState({}, "", `${location.pathname}?month=${selectedMonth}${location.hash || ""}`);
   return body;
@@ -649,9 +663,14 @@ async function postDashboard(payload, form) {
       body: JSON.stringify(payload),
     });
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) throw authRequiredError();
     if (!response.ok) throw new Error(body.error || "Could not save changes.");
     location.reload();
   } catch (err) {
+    if (err.code === "AUTH_REQUIRED") {
+      redirectToMcpizeAuth();
+      return;
+    }
     if (error) error.textContent = err.message;
   }
 }
@@ -942,6 +961,10 @@ loadDashboard()
     bindIncomeExpenseChart();
   })
   .catch((error) => {
+    if (error.code === "AUTH_REQUIRED") {
+      redirectToMcpizeAuth();
+      return;
+    }
     app.className = "error-card";
     app.innerHTML = `<h1>Dashboard unavailable</h1><p>${esc(error.message)}</p><p>Open a fresh dashboard link from Expense Tracker MCP.</p>`;
   });
