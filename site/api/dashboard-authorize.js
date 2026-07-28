@@ -33,6 +33,26 @@ function dashboardCookie(token) {
   return `${DASHBOARD_COOKIE}=${token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`;
 }
 
+function createDashboardSession(userId, secret) {
+  const payload = Buffer.from(JSON.stringify({ u: userId, e: Date.now() + 15 * 60 * 1000 })).toString("base64url");
+  const signature = createHmac("sha256", secret).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function identityFromAccessToken(accessToken) {
+  // The token only reaches this code after a successful authorization-code +
+  // PKCE exchange with MCPize. We never accept an identity from the browser.
+  const parts = String(accessToken || "").split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const claims = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    const candidate = claims.sub || claims.user_id || claims.userId || claims.id || claims.user?.id;
+    return typeof candidate === "string" && /^[A-Za-z0-9:_-]{1,200}$/.test(candidate) ? candidate : null;
+  } catch {
+    return null;
+  }
+}
+
 function sessionToken(body) {
   const candidates = [
     body?.dashboard_token,
@@ -78,8 +98,15 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${tokenBody.access_token}`, Accept: "application/json" },
     });
     const sessionBody = await sessionResponse.json().catch(() => ({}));
-    const privateSession = sessionToken(sessionBody);
-    if (!sessionResponse.ok || !privateSession) {
+    // Preferred path: MCPize forwards the stable user id to the MCP session
+    // route. Some hosted deployments proxy custom browser routes as an empty
+    // 200 response, so use the identity returned by the verified OAuth token
+    // exchange as a secure fallback.
+    const privateSession = sessionToken(sessionBody) || (() => {
+      const userId = identityFromAccessToken(tokenBody.access_token);
+      return userId ? createDashboardSession(userId, secret) : null;
+    })();
+    if (!privateSession) {
       const detail = typeof sessionBody.error === "string" ? ` ${sessionBody.error}` : "";
       throw new Error(`Could not create the private dashboard session (MCPize returned ${sessionResponse.status}; ${responseShape(sessionBody, sessionResponse)}).${detail}`);
     }
