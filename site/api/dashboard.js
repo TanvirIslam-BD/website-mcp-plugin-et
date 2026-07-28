@@ -1,5 +1,5 @@
 import { createClient } from "@libsql/client";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 const COOKIE = "expense_tracker_dashboard";
 
@@ -25,8 +25,32 @@ function money(minor, currency) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format((minor || 0) / 100);
 }
 
+function cleanText(value, maxLength = 120) {
+  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function validDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return false;
+  return new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
+}
+
+function amountMinor(value) {
+  const raw = typeof value === "number" ? String(value) : cleanText(value, 32).replace(/,/g, "");
+  if (!/^\d+(\.\d{1,2})?$/.test(raw)) return null;
+  const minor = Math.round(Number(raw) * 100);
+  return Number.isSafeInteger(minor) && minor > 0 && minor <= 100000000000 ? minor : null;
+}
+
+function decodeBody(body) {
+  if (!body) return {};
+  if (typeof body === "string") {
+    try { return JSON.parse(body); } catch { return {}; }
+  }
+  return typeof body === "object" ? body : {};
+}
+
 export default async function handler(req, res) {
-  if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
+  if (!["GET", "POST"].includes(req.method)) return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Referrer-Policy", "no-referrer");
   const userId = verifyToken(req.query.dashboard_token) || verifyToken(cookieValue(req));
   if (!userId) return res.status(401).json({ error: "A valid dashboard link is required." });
@@ -38,6 +62,40 @@ export default async function handler(req, res) {
   if (!url || !authToken) return res.status(500).json({ error: "Dashboard database is not configured.", code: "dashboard_database_not_configured" });
   try {
     const db = createClient({ url, authToken });
+    if (req.method === "POST") {
+      const body = decodeBody(req.body);
+      const kind = body.kind;
+      const amount = amountMinor(body.amount);
+      const date = cleanText(body.date, 10);
+      const currency = cleanText(body.currency, 3).toUpperCase();
+      const category = cleanText(body.category, 60).toLowerCase();
+      const description = cleanText(body.description, 240);
+      if (!["expense", "income"].includes(kind) || !amount || !validDate(date) || !/^[A-Z]{3}$/.test(currency)) {
+        return res.status(400).json({ error: "Enter a positive amount, valid date, and 3-letter currency code." });
+      }
+      const now = new Date().toISOString();
+      if (kind === "expense") {
+        if (!category) return res.status(400).json({ error: "Choose an expense category." });
+        await db.execute({
+          sql: "INSERT INTO expenses (id,user_id,amount_minor,currency,category,description,date,created_at) VALUES (?,?,?,?,?,?,?,?)",
+          args: [randomUUID(), userId, amount, currency, category, description || "Expense", date, now],
+        });
+      } else {
+        const existing = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+        let finance = { incomes: [], recurring: [], budgetRules: [], categories: [], templates: [], alertThresholds: [50, 80, 100], expenseMetadata: {} };
+        if (existing.rows[0]?.data) {
+          try { finance = { ...finance, ...JSON.parse(String(existing.rows[0].data)) }; } catch { /* Use safe defaults. */ }
+        }
+        finance.incomes = Array.isArray(finance.incomes) ? finance.incomes : [];
+        finance.incomes.push({ id: randomUUID(), amountMinor: amount, currency, source: cleanText(body.source, 80) || "Income", date, notes: description, createdAt: now });
+        await db.execute({
+          sql: "INSERT INTO finance_state (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at",
+          args: [userId, JSON.stringify(finance), now],
+        });
+      }
+      res.setHeader("Cache-Control", "private, no-store, max-age=0");
+      return res.status(201).json({ ok: true });
+    }
     const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month || "") ? req.query.month : new Date().toISOString().slice(0, 7);
     const from = `${month}-01`; const to = `${month}-31`;
     const [expenseResult, budgetResult, financeResult] = await Promise.all([
