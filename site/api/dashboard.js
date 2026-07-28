@@ -34,9 +34,10 @@ export default async function handler(req, res) {
     res.setHeader("Set-Cookie", `${COOKIE}=${req.query.dashboard_token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`);
   }
   const url = process.env.TURSO_DATABASE_URL;
-  if (!url) return res.status(500).json({ error: "Dashboard database is not configured." });
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+  if (!url || !authToken) return res.status(500).json({ error: "Dashboard database is not configured.", code: "dashboard_database_not_configured" });
   try {
-    const db = createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
+    const db = createClient({ url, authToken });
     const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month || "") ? req.query.month : new Date().toISOString().slice(0, 7);
     const from = `${month}-01`; const to = `${month}-31`;
     const [expenseResult, budgetResult, financeResult] = await Promise.all([
@@ -59,6 +60,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ month, currency, spentMinor, incomeMinor, budgetMinor: overallBudget?.amountMinor ?? null, categories, expenses: scoped.slice(0, 12), labels: { spent: money(spentMinor, currency), income: money(incomeMinor, currency) } });
   } catch (error) {
     console.error("dashboard query failed", error);
-    return res.status(500).json({ error: "Dashboard is temporarily unavailable." });
+    return res.status(500).json({ error: "Dashboard is temporarily unavailable.", code: "dashboard_database_unavailable" });
   }
 }
