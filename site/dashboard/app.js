@@ -559,6 +559,11 @@ function renderDashboard(model) {
         ${renderTransactions(model)}
       </section>
     </section>
+    <aside class="marketing-rail" aria-label="Expense Tracker AI promotion">
+      <a class="promo-card" href="/" aria-label="Open Expense Tracker AI home">
+        <img src="/assets/dashboard/expense-tracker-ai-promo.png" alt="Expense Tracker AI marketing preview">
+      </a>
+    </aside>
     <button class="floating-add" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
   `;
 }

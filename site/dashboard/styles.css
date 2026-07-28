@@ -91,6 +91,33 @@ button {
   min-height: 100vh;
 }
 
+.marketing-rail {
+  display: none;
+}
+
+.promo-card {
+  display: block;
+  width: 100%;
+  max-width: 430px;
+  margin-left: auto;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 18px 45px rgba(20, 38, 83, .16);
+  background: #071336;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.promo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 55px rgba(20, 38, 83, .22);
+}
+
+.promo-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .sidebar {
   position: sticky;
   top: 0;
@@ -1384,6 +1411,23 @@ button {
   display: block;
   margin-top: 5px;
   font-size: 15px;
+}
+
+@media (min-width: 1680px) {
+  .dashboard-shell {
+    grid-template-columns: 228px minmax(0, 1276px) minmax(250px, 1fr);
+  }
+
+  .marketing-rail {
+    display: block;
+    min-width: 0;
+    padding: 24px 18px 36px 0;
+  }
+
+  .promo-card {
+    position: sticky;
+    top: 24px;
+  }
 }
 
 @media (max-width: 1350px) {
