@@ -155,14 +155,51 @@ function answerContent(message) {
 }
 
 async function callComet(model, messages, tools) {
-  const response = await fetch(`${COMET_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.COMET_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, messages, tools, tool_choice: "auto", temperature: 0.2, max_tokens: 900 }),
-  });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body?.error?.message || `CometAPI request failed (${response.status})`);
-  return body;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch(`${COMET_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.COMET_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model, messages, tools, tool_choice: "auto", temperature: 0.2, max_tokens: 900 }),
+      signal: controller.signal,
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error?.message || `CometAPI request failed (${response.status})`);
+    return body;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function fallbackMoney(amount, currency) {
+  const value = Number(amount || 0);
+  const prefix = currency === "BDT" ? "৳" : currency === "USD" ? "$" : `${currency} `;
+  return `${value < 0 ? "-" : ""}${prefix}${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+async function verifiedFallbackAnswer(db, userId, message) {
+  const requestedMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1] || currentMonth();
+  const report = await generateMonthlyReport(db, userId, { month: requestedMonth });
+  const top = report.categories[0];
+  const question = message.toLowerCase();
+  const categoryLines = report.categories.slice(0, 3).map((item) => `- ${item.category}: ${fallbackMoney(item.amount, report.currency)}`).join("\n") || "- No expenses recorded";
+  const budgetLine = report.budget === null
+    ? "No overall monthly budget has been set yet."
+    : `${fallbackMoney(report.spent, report.currency)} spent from a ${fallbackMoney(report.budget, report.currency)} budget (${Math.round((report.spent / Math.max(report.budget, 1)) * 100)}% used).`;
+  const reportRemaining = report.budget === null ? null : report.budget - report.spent;
+
+  if (/saving|reduce|cut|where can i/.test(question)) {
+    const target = top ? Math.round(top.amount * .1) : 0;
+    return `## Verified saving idea\n\n${top ? `Your largest category is **${top.category}** at **${fallbackMoney(top.amount, report.currency)}**. Reducing it by 10% could free about **${fallbackMoney(target, report.currency)}**.` : "Record a few expenses first and I can identify the best saving opportunity."}\n\n${budgetLine}`;
+  }
+  if (/budget|plan/.test(question)) {
+    return `## Budget check — ${report.month}\n\n${budgetLine}\n\n**Next step:** ${report.budget === null ? "set an overall monthly limit, then add category limits for your largest expenses." : reportRemaining < 0 ? "pause discretionary spending in the largest category until the next budget period." : "reserve the remaining balance for essentials and savings."}`;
+  }
+  if (/report|summary|month|spend|expense|how much|why|explain/.test(question)) {
+    return `## Monthly spending — ${report.month}\n\n- Total spent: **${fallbackMoney(report.spent, report.currency)}** across **${report.expenseCount}** expenses\n- Income recorded: **${fallbackMoney(report.income, report.currency)}**\n- Net cash flow: **${fallbackMoney(report.netCashFlow, report.currency)}**\n\n### Top categories\n${categoryLines}\n\n${budgetLine}`;
+  }
+  return `I can verify your expenses, budgets, and monthly reports. For ${report.month}, you have recorded **${fallbackMoney(report.spent, report.currency)}** in expenses. Ask me for a monthly report, a category breakdown, or savings ideas.`;
 }
 
 export default async function handler(req, res) {
@@ -223,6 +260,20 @@ export default async function handler(req, res) {
     return res.status(200).json(value);
   } catch (error) {
     console.error("[ai-chat] request failed", error);
-    return res.status(502).json({ error: "The AI assistant is temporarily unavailable. Please try again." });
+    try {
+      const fallbackDb = createClient({ url, authToken });
+      const answer = await verifiedFallbackAnswer(fallbackDb, userId, message);
+      return res.status(200).json({
+        answer,
+        model: "verified-dashboard-fallback",
+        usedTools: ["generate_monthly_report"],
+        usage: null,
+        cached: false,
+        fallback: true,
+      });
+    } catch (fallbackError) {
+      console.error("[ai-chat] fallback failed", fallbackError);
+      return res.status(502).json({ error: "The AI assistant is temporarily unavailable. Please try again." });
+    }
   }
 }

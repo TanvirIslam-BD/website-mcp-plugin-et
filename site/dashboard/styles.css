@@ -1669,7 +1669,8 @@ button {
     box-shadow: -14px 0 34px rgba(33, 59, 111, .04);
   }
 
-  .floating-ai {
+  .floating-ai,
+  .floating-add {
     display: none;
   }
 
