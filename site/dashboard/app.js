@@ -406,12 +406,12 @@ function renderInsights(model) {
     <article class="panel insights-panel">
       <div class="panel-head">
         <h3>AI Insights</h3>
-        <button class="panel-link" data-panel="analysis">View Full Analysis</button>
+        <button class="panel-link" data-open-ai-chat>Ask AI</button>
       </div>
       <div class="insight-list">
         ${items.map((item) => `<div class="insight-item"><i style="--tone:${item.tone};--tone-bg:${item.bg}">${icon(item.iconName)}</i><span><b>${esc(item.title)}</b><span>${esc(item.body)}</span></span></div>`).join("")}
       </div>
-      <button class="wide-button" data-panel="analysis">View Full Analysis</button>
+      <button class="wide-button" data-open-ai-chat>Open AI Advisor</button>
     </article>
   `;
 }
@@ -579,6 +579,7 @@ function renderDashboard(model) {
       </a>
     </aside>
     <button class="floating-add" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
+    <button class="floating-ai" data-open-ai-chat aria-label="Ask Expense Tracker AI">✦</button>
   `;
 }
 
@@ -608,6 +609,71 @@ function openModal(title, subtitle, content, options = {}) {
 
 function closeModal() {
   document.getElementById("dashboard-modal")?.remove();
+}
+
+function aiAnswerHtml(value) {
+  return esc(value || "I could not generate a response.")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/`(.+?)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br>");
+}
+
+function appendAiMessage(role, content, meta = "") {
+  const list = document.querySelector("[data-ai-messages]");
+  if (!list) return;
+  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Expense Tracker AI"}</div><div class="ai-message-body">${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
+  list.scrollTop = list.scrollHeight;
+}
+
+function openAiChat(prefill = "") {
+  openModal("Ask Expense Tracker AI", "Get verified answers from your private expense data.", `
+    <div class="ai-chat" data-ai-chat>
+      <div class="ai-chat-messages" data-ai-messages>
+        <div class="ai-message assistant"><div class="ai-message-label">Expense Tracker AI</div><div class="ai-message-body">Ask about your expenses, categories, budget, or monthly spending. I’ll use your recorded data before answering.</div></div>
+      </div>
+      <div class="ai-suggestions">
+        <button type="button" data-ai-suggestion="How much did I spend this month?">Monthly spending</button>
+        <button type="button" data-ai-suggestion="Why did my spending increase?">Why did spending change?</button>
+        <button type="button" data-ai-suggestion="Give me a monthly report for ${esc(selectedMonth)}">Monthly report</button>
+      </div>
+      <form class="ai-chat-form" data-ai-chat-form>
+        <textarea name="message" maxlength="2000" placeholder="Ask a financial question…" required>${esc(prefill)}</textarea>
+        <div><small>Private data only · AI may use expense, budget, and report tools.</small><button class="action-button primary" type="submit">Ask AI</button></div>
+      </form>
+    </div>
+  `, { wide: false });
+}
+
+async function submitAiQuestion(form) {
+  const textarea = form.querySelector("textarea[name=message]");
+  const button = form.querySelector("button[type=submit]");
+  const message = String(textarea?.value || "").trim();
+  if (!message) return;
+  appendAiMessage("user", message);
+  textarea.value = "";
+  textarea.disabled = true;
+  button.disabled = true;
+  button.textContent = "Thinking…";
+  try {
+    const response = await fetch("/api/ai-chat", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) throw authRequiredError();
+    if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");
+    const tools = body.usedTools?.length ? `Verified with ${body.usedTools.join(", ")}` : "General guidance";
+    appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`);
+  } catch (error) {
+    if (error.code === "AUTH_REQUIRED") {
+      closeModal();
+      redirectToMcpizeAuth();
+      return;
+    }
+    appendAiMessage("assistant", `I couldn’t complete that request. ${error.message || "Please try again."}`);
+  } finally {
+    textarea.disabled = false;
+    button.disabled = false;
+    button.textContent = "Ask AI";
+    textarea.focus();
+  }
 }
 
 function openEntry(kind) {
@@ -913,6 +979,20 @@ function bindEvents() {
       openEntry(entry.dataset.entry);
       return;
     }
+    const aiChat = event.target.closest("[data-open-ai-chat]");
+    if (aiChat) {
+      openAiChat();
+      return;
+    }
+    const suggestion = event.target.closest("[data-ai-suggestion]");
+    if (suggestion) {
+      const input = document.querySelector("[data-ai-chat-form] textarea[name=message]");
+      if (input) {
+        input.value = suggestion.dataset.aiSuggestion || "";
+        input.focus();
+      }
+      return;
+    }
     const panel = event.target.closest("[data-panel]");
     if (panel) {
       openPanel(panel.dataset.panel);
@@ -921,6 +1001,10 @@ function bindEvents() {
     const nav = event.target.closest("[data-nav]");
     if (nav) {
       document.querySelectorAll(".nav button").forEach((button) => button.classList.toggle("active", button === nav));
+      if (nav.dataset.nav === "analysis") {
+        openAiChat();
+        return;
+      }
       const target = document.getElementById(nav.dataset.nav);
       if (target) target.scrollIntoView({ block: "start" });
       else openPanel(nav.dataset.nav);
@@ -928,6 +1012,12 @@ function bindEvents() {
   });
 
   document.addEventListener("submit", (event) => {
+    const aiForm = event.target.closest("[data-ai-chat-form]");
+    if (aiForm) {
+      event.preventDefault();
+      submitAiQuestion(aiForm);
+      return;
+    }
     const form = event.target.closest("[data-form]");
     if (!form) return;
     event.preventDefault();
