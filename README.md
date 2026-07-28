@@ -10,9 +10,9 @@ Configure these production environment variables in Vercel:
 
 ```text
 COMET_API_KEY=your-secret-key
-DEFAULT_MODEL=deepseek/deepseek-chat
-ADVANCED_MODEL=deepseek/deepseek-v3-2
-PREMIUM_MODEL=moonshotai/kimi-k2-5
+DEFAULT_MODEL=deepseek-chat
+ADVANCED_MODEL=deepseek-v3.2
+PREMIUM_MODEL=kimi-k2.5
 ```
 
 The assistant uses CometAPI's OpenAI-compatible endpoint at

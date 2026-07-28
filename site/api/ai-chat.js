@@ -3,9 +3,11 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const DASHBOARD_COOKIE = "expense_tracker_dashboard";
 const COMET_BASE_URL = "https://api.cometapi.com/v1";
-const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "deepseek/deepseek-chat";
-const ADVANCED_MODEL = process.env.ADVANCED_MODEL || "deepseek/deepseek-v3-2";
-const PREMIUM_MODEL = process.env.PREMIUM_MODEL || "moonshotai/kimi-k2-5";
+// CometAPI's available model identifiers are provider-normalized. Keep these
+// defaults aligned with its /v1/models catalogue, while env vars can override.
+const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "deepseek-chat";
+const ADVANCED_MODEL = process.env.ADVANCED_MODEL || "deepseek-v3.2";
+const PREMIUM_MODEL = process.env.PREMIUM_MODEL || "kimi-k2.5";
 const RATE_WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 18;
 const CACHE_TTL_MS = 5 * 60_000;
