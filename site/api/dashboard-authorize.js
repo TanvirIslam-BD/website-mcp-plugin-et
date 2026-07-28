@@ -33,6 +33,21 @@ function dashboardCookie(token) {
   return `${DASHBOARD_COOKIE}=${token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`;
 }
 
+function sessionToken(body) {
+  const candidates = [
+    body?.dashboard_token,
+    body?.data?.dashboard_token,
+    body?.result?.dashboard_token,
+  ];
+  return candidates.find((value) => typeof value === "string" && value.length > 20) || null;
+}
+
+function responseShape(body, response) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return response.headers.get("content-type") || "non-JSON";
+  const keys = Object.keys(body).slice(0, 8);
+  return keys.length ? `JSON fields: ${keys.join(", ")}` : "empty JSON response";
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
   const secret = process.env.DASHBOARD_SESSION_SECRET;
@@ -63,12 +78,13 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${tokenBody.access_token}`, Accept: "application/json" },
     });
     const sessionBody = await sessionResponse.json().catch(() => ({}));
-    if (!sessionResponse.ok || typeof sessionBody.dashboard_token !== "string") {
+    const privateSession = sessionToken(sessionBody);
+    if (!sessionResponse.ok || !privateSession) {
       const detail = typeof sessionBody.error === "string" ? ` ${sessionBody.error}` : "";
-      throw new Error(`Could not create the private dashboard session (MCPize returned ${sessionResponse.status}).${detail}`);
+      throw new Error(`Could not create the private dashboard session (MCPize returned ${sessionResponse.status}; ${responseShape(sessionBody, sessionResponse)}).${detail}`);
     }
 
-    res.setHeader("Set-Cookie", [clearStateCookie(), dashboardCookie(sessionBody.dashboard_token)]);
+    res.setHeader("Set-Cookie", [clearStateCookie(), dashboardCookie(privateSession)]);
     res.setHeader("Cache-Control", "no-store");
     return res.redirect(302, `${DASHBOARD_ORIGIN}/dashboard?month=${encodeURIComponent(pending.month)}`);
   } catch (error) {
