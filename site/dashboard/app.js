@@ -555,6 +555,55 @@ function renderHeader(model) {
   `;
 }
 
+function renderAiAssistantRail(model) {
+  const topCategory = model.categories?.[0];
+  const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
+  const overBudget = model.remainingMinor !== null && model.remainingMinor < 0;
+  const suggestedSavingMinor = Math.max(0, Math.round((topCategory?.amountMinor || model.spentMinor || 0) * .1));
+  const firstInsight = topCategory
+    ? `<b>Your ${esc(topCategory.name)} spend is ${topShare}% of this month.</b><span>That’s ${formatMoney(topCategory.amountMinor, model.currency)}, your highest category.</span>`
+    : `<b>Start by recording an expense.</b><span>I’ll use your private data to find patterns and savings opportunities.</span>`;
+  const budgetInsight = model.budgetMinor
+    ? overBudget
+      ? `<b>Budget exceeded by ${Math.max(0, model.budgetUsed - 100)}%.</b><span>You’ve spent ${formatMoney(Math.abs(model.remainingMinor), model.currency)} over your total budget of ${formatMoney(model.budgetMinor, model.currency)}.</span>`
+      : `<b>Your budget is on track.</b><span>You still have ${formatMoney(model.remainingMinor, model.currency)} available this month.</span>`
+    : `<b>Create a monthly budget.</b><span>Set a limit and I’ll track your progress and alerts automatically.</span>`;
+  const savingInsight = suggestedSavingMinor
+    ? `<b>Try moving ${formatMoney(suggestedSavingMinor, model.currency)} to savings next week.</b><span>A small scheduled transfer can help build your emergency buffer.</span>`
+    : `<b>Build your first savings habit.</b><span>Once you record income, I can suggest a realistic savings target.</span>`;
+
+  return `
+    <aside class="assistant-rail" aria-label="AI Finance Assistant">
+      <div class="assistant-rail-header">
+        <span class="assistant-title"><i>✦</i> AI Finance Assistant <b>BETA</b></span>
+        <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
+      </div>
+      <div class="assistant-rail-chat ai-chat" data-ai-chat>
+        <div class="assistant-welcome">
+          <img src="/assets/logo/icon-512.png" alt="Expense Tracker AI">
+          <div><b>Hi! I’m your AI Finance Assistant.</b><span>I can help you understand your finances and make smarter decisions.</span><small>Just now</small></div>
+        </div>
+        <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
+          <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>Now</small></div>
+          <div class="ai-message assistant ai-rail-insight"><div class="ai-message-label">Spending insight</div><div class="ai-message-body">${firstInsight}</div></div>
+          <div class="ai-message assistant ai-rail-insight"><div class="ai-message-label">Budget check</div><div class="ai-message-body">${budgetInsight}</div></div>
+          <div class="ai-message assistant ai-rail-insight"><div class="ai-message-label">Savings idea</div><div class="ai-message-body">${savingInsight}</div></div>
+        </div>
+        <div class="ai-suggestions assistant-rail-suggestions" aria-label="AI quick actions">
+          <button type="button" data-ai-suggestion="Explain my spending this month.">▣ Explain Spending</button>
+          <button type="button" data-ai-suggestion="Where can I reduce spending this month?">◉ Find Savings</button>
+          <button type="button" data-ai-suggestion="Help me plan next month's budget.">▦ Plan Budget</button>
+          <button type="button" data-ai-suggestion="Review my recurring bills and subscriptions.">▤ Review Bills</button>
+        </div>
+        <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
+          <textarea name="message" maxlength="2000" placeholder="Ask about your money…" aria-label="Ask AI Finance Assistant" required></textarea>
+          <div><small>ⓘ AI responses are for informational purposes only.</small><button class="assistant-send" type="submit" aria-label="Send question">➜</button></div>
+        </form>
+      </div>
+    </aside>
+  `;
+}
+
 function renderDashboard(model) {
   app.className = "dashboard-shell";
   app.innerHTML = `
@@ -573,11 +622,7 @@ function renderDashboard(model) {
         ${renderTransactions(model)}
       </section>
     </section>
-    <aside class="marketing-rail" aria-label="Expense Tracker AI promotion">
-      <a class="promo-card" href="/" aria-label="Open Expense Tracker AI home">
-        <img src="/assets/dashboard/expense-tracker-ai-promo.png" alt="Expense Tracker AI marketing preview">
-      </a>
-    </aside>
+    ${renderAiAssistantRail(model)}
     <button class="floating-add" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
     <button class="floating-ai" data-open-ai-chat aria-label="Ask Expense Tracker AI">✦</button>
   `;
@@ -618,8 +663,8 @@ function aiAnswerHtml(value) {
     .replace(/\n/g, "<br>");
 }
 
-function appendAiMessage(role, content, meta = "") {
-  const list = document.querySelector("[data-ai-messages]");
+function appendAiMessage(role, content, meta = "", chatRoot = document) {
+  const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return;
   list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Expense Tracker AI"}</div><div class="ai-message-body">${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
   list.scrollTop = list.scrollHeight;
@@ -647,9 +692,11 @@ function openAiChat(prefill = "") {
 async function submitAiQuestion(form) {
   const textarea = form.querySelector("textarea[name=message]");
   const button = form.querySelector("button[type=submit]");
+  const chatRoot = form.closest("[data-ai-chat]") || document;
+  window.activeAiChatRoot = chatRoot;
   const message = String(textarea?.value || "").trim();
   if (!message) return;
-  appendAiMessage("user", message);
+  appendAiMessage("user", message, "", chatRoot);
   textarea.value = "";
   textarea.disabled = true;
   button.disabled = true;
@@ -669,6 +716,7 @@ async function submitAiQuestion(form) {
     }
     appendAiMessage("assistant", `I couldn’t complete that request. ${error.message || "Please try again."}`);
   } finally {
+    if (window.activeAiChatRoot === chatRoot) window.activeAiChatRoot = null;
     textarea.disabled = false;
     button.disabled = false;
     button.textContent = "Ask AI";
@@ -984,9 +1032,16 @@ function bindEvents() {
       openAiChat();
       return;
     }
+    const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");
+    if (aiRailToggle) {
+      const rail = document.querySelector(".assistant-rail");
+      rail?.classList.toggle("collapsed");
+      aiRailToggle.setAttribute("aria-label", rail?.classList.contains("collapsed") ? "Expand AI Finance Assistant" : "Minimize AI Finance Assistant");
+      return;
+    }
     const suggestion = event.target.closest("[data-ai-suggestion]");
     if (suggestion) {
-      const input = document.querySelector("[data-ai-chat-form] textarea[name=message]");
+      const input = suggestion.closest("[data-ai-chat]")?.querySelector("textarea[name=message]") || document.querySelector("[data-ai-chat-form] textarea[name=message]");
       if (input) {
         input.value = suggestion.dataset.aiSuggestion || "";
         input.focus();
@@ -1002,7 +1057,11 @@ function bindEvents() {
     if (nav) {
       document.querySelectorAll(".nav button").forEach((button) => button.classList.toggle("active", button === nav));
       if (nav.dataset.nav === "analysis") {
-        openAiChat();
+        const rail = document.querySelector(".assistant-rail");
+        if (rail && getComputedStyle(rail).display !== "none") {
+          rail.classList.remove("collapsed");
+          rail.querySelector("textarea[name=message]")?.focus();
+        } else openAiChat();
         return;
       }
       const target = document.getElementById(nav.dataset.nav);
