@@ -57,7 +57,16 @@ export default async function handler(req, res) {
     const categories = Object.entries(scoped.reduce((map, expense) => ({ ...map, [expense.category]: (map[expense.category] || 0) + expense.amountMinor }), {}))
       .map(([name, amountMinor]) => ({ name, amountMinor })).sort((a, b) => b.amountMinor - a.amountMinor);
     res.setHeader("Cache-Control", "private, no-store, max-age=0");
-    return res.status(200).json({ month, currency, spentMinor, incomeMinor, budgetMinor: overallBudget?.amountMinor ?? null, categories, expenses: scoped.slice(0, 12), labels: { spent: money(spentMinor, currency), income: money(incomeMinor, currency) } });
+    const daily = Object.entries(scoped.reduce((days, expense) => {
+      days[expense.date] = (days[expense.date] || 0) + expense.amountMinor;
+      return days;
+    }, {})).map(([date, amountMinor]) => ({ date, amountMinor })).sort((a, b) => a.date.localeCompare(b.date));
+    const recurring = (finance.recurring || []).filter((entry) => entry.active && entry.currency === currency);
+    return res.status(200).json({
+      month, currency, spentMinor, incomeMinor, budgetMinor: overallBudget?.amountMinor ?? null,
+      categories, expenses: scoped.slice(0, 12), daily, incomes, recurring,
+      expenseMetadata: finance.expenseMetadata || {}, labels: { spent: money(spentMinor, currency), income: money(incomeMinor, currency) },
+    });
   } catch (error) {
     console.error("dashboard query failed", error);
     return res.status(500).json({ error: "Dashboard is temporarily unavailable.", code: "dashboard_database_unavailable" });
