@@ -1,0 +1,8 @@
+{
+  "name": "expense-tracker-ai-website",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@libsql/client": "^0.14.0"
+  }
+}
