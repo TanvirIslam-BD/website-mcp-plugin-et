@@ -689,6 +689,32 @@ function openAiChat(prefill = "") {
   `, { wide: false });
 }
 
+function localDashboardAnswer(message) {
+  const model = window.dashboardModel;
+  if (!model) return "I couldn’t load your private dashboard data yet. Please refresh the dashboard and try again.";
+  const question = String(message || "").toLowerCase();
+  const top = model.categories?.[0];
+  const topShare = top && model.spentMinor ? Math.round((Number(top.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
+  const reportMonth = monthLabel(model.month);
+  const budgetStatus = model.budgetMinor
+    ? model.remainingMinor < 0
+      ? `You are **${formatMoney(Math.abs(model.remainingMinor), model.currency)} over** your ${formatMoney(model.budgetMinor, model.currency)} budget.`
+      : `You have **${formatMoney(model.remainingMinor, model.currency)} remaining** from your ${formatMoney(model.budgetMinor, model.currency)} budget.`
+    : "You have not set an overall monthly budget yet.";
+
+  if (/saving|reduce|cut|where can i/.test(question)) {
+    const opportunity = Math.round(Number(top?.amountMinor || 0) * .1);
+    return top
+      ? `## Verified saving idea\n\nYour largest category is **${top.name}** at **${formatMoney(top.amountMinor, model.currency)}** (${topShare}% of spending). Reducing it by 10% could save about **${formatMoney(opportunity, model.currency)}**.\n\n${budgetStatus}`
+      : "Record a few expenses first and I’ll identify the strongest saving opportunity.";
+  }
+  if (/budget|plan/.test(question)) {
+    return `## Budget check — ${reportMonth}\n\n${budgetStatus}\n\n**Next step:** ${model.remainingMinor !== null && model.remainingMinor < 0 ? "pause discretionary spending in your largest category until the next budget period." : "set aside part of your remaining amount for savings and essentials."}`;
+  }
+  const categories = (model.categories || []).slice(0, 3).map((item) => `- ${item.name}: **${formatMoney(item.amountMinor, model.currency)}**`).join("\n") || "- No expenses recorded";
+  return `## Monthly spending — ${reportMonth}\n\n- Total spent: **${formatMoney(model.spentMinor, model.currency)}**\n- Income recorded: **${formatMoney(model.incomeMinor, model.currency)}**\n- Net cash flow: **${formatMoney(model.savedMinor, model.currency)}**\n\n### Top categories\n${categories}\n\n${budgetStatus}`;
+}
+
 async function submitAiQuestion(form) {
   const textarea = form.querySelector("textarea[name=message]");
   const button = form.querySelector("button[type=submit]");
@@ -714,7 +740,7 @@ async function submitAiQuestion(form) {
       redirectToMcpizeAuth();
       return;
     }
-    appendAiMessage("assistant", `I couldn’t complete that request. ${error.message || "Please try again."}`);
+    appendAiMessage("assistant", localDashboardAnswer(message), "Verified dashboard data · offline response", chatRoot);
   } finally {
     if (window.activeAiChatRoot === chatRoot) window.activeAiChatRoot = null;
     textarea.disabled = false;
