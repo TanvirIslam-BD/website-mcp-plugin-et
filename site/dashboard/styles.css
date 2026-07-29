@@ -1710,21 +1710,6 @@ button {
   font-size: 12px;
 }
 
-.floating-add {
-  position: fixed;
-  right: 34px;
-  bottom: 30px;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 0;
-  border-radius: 18px;
-  color: #fff;
-  background: linear-gradient(145deg, #3475ff, #244de4);
-  box-shadow: 0 18px 42px rgba(37, 99, 255, .38);
-}
-
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1990,8 +1975,7 @@ button {
     box-shadow: -14px 0 34px rgba(33, 59, 111, .04);
   }
 
-  .floating-ai,
-  .floating-add {
+  .floating-ai {
     display: none;
   }
 
@@ -2490,10 +2474,6 @@ button {
 
   .tx-title {
     grid-template-columns: 30px minmax(0, 1fr);
-  }
-
-  .floating-add {
-    display: none;
   }
 
   .floating-ai {
@@ -3788,6 +3768,45 @@ textarea {
   height: 17px;
 }
 
+.chart-y-axis,
+.chart-x-axis {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  color: #68758b;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.01em;
+}
+
+.chart-y-axis span,
+.chart-x-axis span {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.chart-y-axis span {
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.chart-y-axis span:nth-child(1) { top: 18.4%; }
+.chart-y-axis span:nth-child(2) { top: 37.9%; }
+.chart-y-axis span:nth-child(3) { top: 57.4%; }
+.chart-y-axis span:nth-child(4) { top: 76.8%; }
+
+.chart-x-axis span {
+  bottom: 4px;
+  color: #4f5d73;
+  font-weight: 550;
+}
+
+.chart-x-axis span:nth-child(1) { left: 6.5%; }
+.chart-x-axis span:nth-child(2) { left: 50%; transform: translateX(-50%); }
+.chart-x-axis span:nth-child(3) { right: 1%; }
+
 .profile-card b {
   font-weight: 650;
   letter-spacing: -.01em;
@@ -3813,5 +3832,10 @@ textarea:focus-visible {
 
   .panel h3 {
     font-size: 14px;
+  }
+
+  .chart-y-axis,
+  .chart-x-axis {
+    font-size: 9px;
   }
 }

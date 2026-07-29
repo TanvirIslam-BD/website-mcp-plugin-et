@@ -302,10 +302,6 @@ function renderIncomeExpense(model) {
           <line class="grid-line" x1="${padX}" y1="72" x2="${width - 8}" y2="72"/>
           <line class="grid-line" x1="${padX}" y1="109" x2="${width - 8}" y2="109"/>
           <line class="grid-line" x1="${padX}" y1="146" x2="${width - 8}" y2="146"/>
-          <text class="axis-label" data-axis-label="max" x="0" y="38">${formatMoney(max, model.currency, { compact: true })}</text>
-          <text class="axis-label" data-axis-label="mid" x="0" y="75">${formatMoney(max * .66, model.currency, { compact: true })}</text>
-          <text class="axis-label" data-axis-label="low" x="0" y="112">${formatMoney(max * .33, model.currency, { compact: true })}</text>
-          <text class="axis-label" x="0" y="149">0</text>
           <path class="chart-area-income" data-chart-area="income" d="${areaPath(incomePoints, height, padY)}"/>
           <path class="chart-area-expense" data-chart-area="expense" d="${areaPath(expensePoints, height, padY)}"/>
           <polyline class="chart-line income" data-chart-line="income" points="${incomePoints}"/>
@@ -316,10 +312,18 @@ function renderIncomeExpense(model) {
           <circle class="chart-point expense" data-chart-point="expense" r="4" stroke="#ff4548"/>
           <circle class="chart-point saving" data-chart-point="saving" r="4" stroke="#2563ff"/>
           <rect class="chart-hitbox" data-chart-hitbox x="${padX}" y="0" width="${width - padX * 2}" height="${height}" rx="4"/>
-          <text class="axis-label" data-x-label="start" x="${padX}" y="172">1 ${monthLabel(model.month).split(" ")[0]}</text>
-          <text class="axis-label" data-x-label="mid" x="${width / 2 - 18}" y="172">15 ${monthLabel(model.month).split(" ")[0]}</text>
-          <text class="axis-label" data-x-label="end" x="${width - 78}" y="172">${daysInMonth(model.month)} ${monthLabel(model.month).split(" ")[0]}</text>
         </svg>
+        <div class="chart-y-axis" aria-hidden="true">
+          <span data-axis-label="max">${formatMoney(max, model.currency, { compact: true })}</span>
+          <span data-axis-label="mid">${formatMoney(max * .66, model.currency, { compact: true })}</span>
+          <span data-axis-label="low">${formatMoney(max * .33, model.currency, { compact: true })}</span>
+          <span>0</span>
+        </div>
+        <div class="chart-x-axis" aria-hidden="true">
+          <span data-x-label="start">1 ${monthLabel(model.month).split(" ")[0]}</span>
+          <span data-x-label="mid">15 ${monthLabel(model.month).split(" ")[0]}</span>
+          <span data-x-label="end">${daysInMonth(model.month)} ${monthLabel(model.month).split(" ")[0]}</span>
+        </div>
         <div class="chart-tooltip" data-chart-tooltip>
           <b data-tip-date>${esc(midDay)}</b>
           <span><label>Income</label><strong data-tip-income style="color:#32df8b">${formatMoney(model.incomeCum[midIndex] || 0, model.currency)}</strong></span>
@@ -581,7 +585,6 @@ function renderDashboard(model) {
       </section>
     </section>
     ${renderAiAssistantRail(model)}
-    <button class="floating-add" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
     <button class="floating-ai" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
   `;
 }
