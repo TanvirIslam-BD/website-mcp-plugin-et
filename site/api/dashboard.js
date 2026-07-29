@@ -120,6 +120,16 @@ function inMonth(entry, month) {
   return String(entry?.date || "").slice(0, 7) === month;
 }
 
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function csvDocument(rows) {
+  const headers = ["type", "date", "description", "category", "amount", "currency", "merchant", "payment_method", "tags"];
+  return [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+}
+
 export default async function handler(req, res) {
   if (!["GET", "POST"].includes(req.method)) return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Referrer-Policy", "no-referrer");
@@ -138,6 +148,25 @@ export default async function handler(req, res) {
 
   try {
     const db = createClient({ url, authToken });
+    if (req.method === "GET" && req.query.export === "csv") {
+      const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month || "") ? req.query.month : new Date().toISOString().slice(0, 7);
+      const range = monthRange(month);
+      const all = req.query.scope === "all";
+      const expenseResult = await db.execute({
+        sql: `SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ?${all ? "" : " AND date >= ? AND date <= ?"} ORDER BY date DESC`,
+        args: all ? [userId] : [userId, range.from, range.to],
+      });
+      const finance = await readFinance(db, userId);
+      const incomes = (finance.incomes || []).filter((income) => all || inMonth(income, month));
+      const expenseRows = expenseResult.rows.map((row) => {
+        const meta = finance.expenseMetadata?.[row.id] || {};
+        return ["expense", row.date, row.description, row.category, (Number(row.amount_minor || 0) / 100).toFixed(2), row.currency, meta.merchant || "", meta.paymentMethod || "", (meta.tags || []).join("|")];
+      });
+      const incomeRows = incomes.map((income) => ["income", income.date, income.notes || income.source || "Income", income.source || "income", (Number(income.amountMinor || 0) / 100).toFixed(2), income.currency, "", "", ""]);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="expense-tracker-${all ? "all-data" : month}.csv"`);
+      return res.status(200).send(`\uFEFF${csvDocument([...expenseRows, ...incomeRows])}`);
+    }
     if (req.method === "POST") {
       const body = decodeBody(req.body);
       const kind = body.kind;
@@ -147,6 +176,32 @@ export default async function handler(req, res) {
       const currency = cleanText(body.currency, 3).toUpperCase();
       const category = cleanText(body.category, 60).toLowerCase();
       const description = cleanText(body.description, 240);
+
+      if (kind === "clear_all") {
+        await db.batch([
+          { sql: "DELETE FROM expenses WHERE user_id = ?", args: [userId] },
+          { sql: "DELETE FROM budgets WHERE user_id = ?", args: [userId] },
+          { sql: "DELETE FROM finance_state WHERE user_id = ?", args: [userId] },
+        ], "write");
+        return res.status(200).json({ ok: true });
+      }
+
+      if (kind === "clear_month") {
+        const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(body.month || "") ? body.month : null;
+        if (!month) return res.status(400).json({ error: "Choose a valid month." });
+        const range = monthRange(month);
+        const ids = await db.execute({ sql: "SELECT id FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, range.from, range.to] });
+        const finance = await readFinance(db, userId);
+        finance.incomes = (finance.incomes || []).filter((income) => !inMonth(income, month));
+        const removed = new Set(ids.rows.map((row) => String(row.id)));
+        finance.expenseMetadata = Object.fromEntries(Object.entries(finance.expenseMetadata || {}).filter(([id]) => !removed.has(id)));
+        const now = new Date().toISOString();
+        await db.batch([
+          { sql: "DELETE FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, range.from, range.to] },
+          { sql: "INSERT INTO finance_state (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at", args: [userId, JSON.stringify(finance), now] },
+        ], "write");
+        return res.status(200).json({ ok: true });
+      }
 
       if (kind === "budget") {
         if (!amount || !/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: "Enter a positive budget amount and 3-letter currency code." });

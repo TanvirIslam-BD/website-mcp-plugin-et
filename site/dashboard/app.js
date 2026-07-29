@@ -62,6 +62,8 @@ function icon(name) {
     lock: "<rect x='5' y='10' width='14' height='11' rx='2'/><path d='M8 10V7a4 4 0 0 1 8 0v3'/>",
     attachment: "<path d='m20.5 11.5-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 1 1-2.8-2.8l8.9-8.9'/>",
     send: "<path d='m4 4 17 8-17 8 3-8z'/><path d='M7 12h14'/>",
+    database: "<ellipse cx='12' cy='5' rx='8' ry='3'/><path d='M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5'/><path d='M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6'/>",
+    logout: "<path d='M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5'/><path d='m15 8 4 4-4 4M19 12H8'/>",
     flame: "<path d='M12 22c4 0 7-3 7-7 0-3-2-5-4-7 .2 2-.7 3.2-2 4-1.3-3-1-6-1-10-4 3-7 7-7 12 0 5 3 8 7 8z'/>",
     chevron: "<path d='m9 18 6-6-6-6'/>",
     eye: "<path d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z'/><circle cx='12' cy='12' r='3'/>",
@@ -494,6 +496,7 @@ function renderSidebar(model) {
     ["dashboard", "Dashboard", "dashboard"],
     ["transactions", "Transactions", "transactions"],
     ["advisor", "AI Advisor", "analysis"],
+    ["database", "Manage Data", "data-management"],
     ["settings", "Settings", "settings"],
   ];
   return `
@@ -505,7 +508,7 @@ function renderSidebar(model) {
       <section class="profile-card">
         <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
         <div><b>${displayName}</b><span>Signed dashboard</span></div>
-        ${icon("chevron")}
+        <button class="profile-logout" type="button" data-logout aria-label="Log out" title="Log out">${icon("logout")}</button>
       </section>
     </aside>
   `;
@@ -1039,6 +1042,27 @@ function openPanel(kind) {
       </div>
       <p>This dashboard only loads data through the signed MCP dashboard session. The browser never chooses a user id.</p>
     `);
+    return;
+  }
+  if (kind === "data-management") {
+    const month = esc(model.month);
+    openModal("Manage Your Data", "Export or permanently remove only your signed-in dashboard data.", `
+      <div class="data-management-grid">
+        <section class="data-action-card">
+          <i>${icon("database")}</i><div><h3>Export data</h3><p>Download a portable CSV copy of your transactions and income.</p></div>
+          <div class="data-action-buttons"><a class="action-button" href="/api/dashboard?export=csv&scope=month&month=${month}">Export this month</a><a class="action-button" href="/api/dashboard?export=csv&scope=all&month=${month}">Export all data</a></div>
+        </section>
+        <section class="data-action-card danger-soft">
+          <i>${icon("transactions")}</i><div><h3>Clear this month</h3><p>Deletes expenses and income from ${esc(monthLabel(model.month))}. Budgets, goals, and recurring settings stay intact.</p></div>
+          <button class="action-button danger" type="button" data-clear-data="month">Clear this month</button>
+        </section>
+        <section class="data-action-card danger-soft">
+          <i>${icon("logout")}</i><div><h3>Clear all financial data</h3><p>Permanently deletes every expense, income, budget, goal, recurring item, and saved category for this account.</p></div>
+          <button class="action-button danger" type="button" data-clear-data="all">Clear all data</button>
+        </section>
+      </div>
+      <p class="form-error" data-error></p>
+    `, { wide: true });
   }
 }
 
@@ -1220,6 +1244,19 @@ function bindEvents() {
     }
     if (event.target.closest("[data-empty-copilot-start]")) {
       document.querySelector(".empty-copilot-compose textarea")?.focus();
+      return;
+    }
+    if (event.target.closest("[data-logout]")) {
+      location.assign("/api/dashboard-logout");
+      return;
+    }
+    const clearData = event.target.closest("[data-clear-data]");
+    if (clearData) {
+      const all = clearData.dataset.clearData === "all";
+      const warning = all
+        ? "Permanently delete ALL financial data for this account? This cannot be undone."
+        : `Permanently delete expenses and income for ${monthLabel(window.dashboardModel.month)}? This cannot be undone.`;
+      if (window.confirm(warning)) postDashboard({ kind: all ? "clear_all" : "clear_month", month: window.dashboardModel.month }, clearData.closest(".modal"));
       return;
     }
     const panel = event.target.closest("[data-panel]");
