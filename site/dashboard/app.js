@@ -502,8 +502,11 @@ function renderSidebar(model) {
   return `
     <aside class="sidebar">
       <div class="brand"><img src="/assets/logo/icon-512.png" alt=""><strong>Expense<span>Tracker AI</span></strong></div>
+      <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
+      <button class="sidebar-search" type="button" data-sidebar-search aria-label="Search dashboard">${icon("search")}<span>Search dashboard</span><kbd>⌘ K</kbd></button>
+      <span class="nav-label">Workspace</span>
       <nav class="nav" aria-label="Dashboard navigation">
-        ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
+        ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}" data-tooltip="${label}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
       <section class="profile-card">
         <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
@@ -1247,6 +1250,18 @@ function bindEvents() {
       aiRailToggle.setAttribute("aria-label", rail?.classList.contains("collapsed") ? "Expand AI Finance Assistant" : "Minimize AI Finance Assistant");
       return;
     }
+    const sidebarToggle = event.target.closest("[data-sidebar-toggle]");
+    if (sidebarToggle) {
+      const collapsed = app.classList.toggle("sidebar-collapsed");
+      sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+      sidebarToggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+      try { localStorage.setItem("expenseTrackerSidebar", collapsed ? "collapsed" : "expanded"); } catch {}
+      return;
+    }
+    if (event.target.closest("[data-sidebar-search]")) {
+      document.querySelector("[data-search]")?.focus();
+      return;
+    }
     const suggestion = event.target.closest("[data-ai-suggestion]");
     if (suggestion) {
       const input = suggestion.closest("[data-ai-chat]")?.querySelector("textarea[name=message]") || document.querySelector("[data-ai-chat-form] textarea[name=message]");
@@ -1338,6 +1353,9 @@ loadDashboard()
     window.dashboardModel = buildModel(data);
     if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
     else renderEmptyDashboard(window.dashboardModel);
+    try {
+      if (localStorage.getItem("expenseTrackerSidebar") === "collapsed") app.classList.add("sidebar-collapsed");
+    } catch {}
     bindEvents();
     bindIncomeExpenseChart();
   })
