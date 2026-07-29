@@ -1032,6 +1032,10 @@ button {
   box-shadow: 0 11px 24px rgba(0, 0, 0, .35);
 }
 
+.brand .brand-logo-light {
+  display: none;
+}
+
 .brand strong {
   display: block;
   color: #fff;
@@ -5380,6 +5384,17 @@ textarea:focus-visible {
     border: 1px solid #dce5f3;
     border-radius: 13px;
     box-shadow: 0 8px 20px rgba(41, 74, 141, .12);
+  }
+
+  .sidebar .brand .brand-logo-dark {
+    display: none;
+  }
+
+  .sidebar .brand .brand-logo-light {
+    display: block;
+    padding: 2px;
+    object-fit: cover;
+    background: #fff;
   }
 
   .sidebar .brand strong {

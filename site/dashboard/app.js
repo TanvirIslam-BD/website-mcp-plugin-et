@@ -501,7 +501,11 @@ function renderSidebar(model) {
   ];
   return `
     <aside class="sidebar">
-      <div class="brand"><img src="/assets/logo/icon-512.png" alt=""><strong>Expense<span>Tracker AI</span></strong></div>
+      <div class="brand">
+        <img class="brand-logo brand-logo-dark" src="/assets/logo/icon-512.png" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/light-icon.png" alt="">
+        <strong>Expense<span>Tracker AI</span></strong>
+      </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
       <button class="sidebar-search" type="button" data-sidebar-search aria-label="Search dashboard">${icon("search")}<span>Search dashboard</span><kbd>⌘ K</kbd></button>
       <span class="nav-label">Workspace</span>
