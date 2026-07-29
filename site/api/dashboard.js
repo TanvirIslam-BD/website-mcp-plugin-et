@@ -1,5 +1,6 @@
 import { createClient } from "@libsql/client";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { readMcpizeProfile } from "./_mcpize-profile.js";
 
 const COOKIE = "expense_tracker_dashboard";
 
@@ -258,8 +259,15 @@ export default async function handler(req, res) {
     }, {})).map(([date, amountMinor]) => ({ date, amountMinor })).sort((a, b) => a.date.localeCompare(b.date));
     const recurring = (finance.recurring || []).filter((entry) => entry.active && entry.currency === currency);
 
+    const mcpizeProfile = session.displayName && session.profilePhotoUrl
+      ? { displayName: "", profilePhotoUrl: "" }
+      : await readMcpizeProfile(userId);
+
     return res.status(200).json({
-      user: { displayName: session.displayName || "User", profilePhotoUrl: session.profilePhotoUrl || "" },
+      user: {
+        displayName: session.displayName || mcpizeProfile.displayName || "User",
+        profilePhotoUrl: session.profilePhotoUrl || mcpizeProfile.profilePhotoUrl || "",
+      },
       month,
       previousMonth: previous,
       daysInMonth: current.days,

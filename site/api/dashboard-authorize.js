@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { cleanDisplayName, cleanProfilePhoto, readMcpizeProfile } from "./_mcpize-profile.js";
 
 const STATE_COOKIE = "expense_tracker_oauth";
 const DASHBOARD_COOKIE = "expense_tracker_dashboard";
@@ -31,21 +32,6 @@ function clearStateCookie() {
 
 function dashboardCookie(token) {
   return `${DASHBOARD_COOKIE}=${token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`;
-}
-
-function cleanDisplayName(value) {
-  if (typeof value !== "string") return "";
-  return value.trim().replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 80);
-}
-
-function cleanProfilePhoto(value) {
-  if (typeof value !== "string" || value.length > 500) return "";
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" ? url.toString() : "";
-  } catch {
-    return "";
-  }
 }
 
 function createDashboardSession(userId, secret, displayName = "", profilePhotoUrl = "") {
@@ -146,6 +132,7 @@ export default async function handler(req, res) {
     // 200 response, so use the identity returned by the verified OAuth token
     // exchange as a secure fallback.
     const identity = identityFromAccessToken(tokenBody.access_token);
+    const mcpizeProfile = identity ? await readMcpizeProfile(identity.userId) : { displayName: "", profilePhotoUrl: "" };
     const responseDisplayName = cleanDisplayName(
       sessionBody?.user?.name ||
       sessionBody?.display_name ||
@@ -165,7 +152,12 @@ export default async function handler(req, res) {
       tokenBody?.avatar_url,
     );
     const privateSession = identity
-      ? createDashboardSession(identity.userId, secret, identity.displayName || responseDisplayName, identity.profilePhotoUrl || responseProfilePhoto)
+      ? createDashboardSession(
+        identity.userId,
+        secret,
+        mcpizeProfile.displayName || identity.displayName || responseDisplayName,
+        mcpizeProfile.profilePhotoUrl || identity.profilePhotoUrl || responseProfilePhoto,
+      )
       : sessionToken(sessionBody);
     if (!privateSession) {
       const detail = typeof sessionBody.error === "string" ? ` ${sessionBody.error}` : "";
