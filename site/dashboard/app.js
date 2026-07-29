@@ -670,6 +670,34 @@ function appendAiMessage(role, content, meta = "", chatRoot = document) {
   list.scrollTop = list.scrollHeight;
 }
 
+function appendAiLoading(chatRoot = document) {
+  const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
+  if (!list) return null;
+  const id = `ai-loading-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  list.insertAdjacentHTML("beforeend", `
+    <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
+      <div class="ai-message-label">Expense Tracker AI</div>
+      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Reviewing your dashboard data...</span></div>
+    </div>
+  `);
+  list.scrollTop = list.scrollHeight;
+  return list.querySelector(`#${id}`);
+}
+
+function setAiSubmitLoading(button, isLoading) {
+  if (!button) return;
+  if (!button.dataset.idleHtml) button.dataset.idleHtml = button.innerHTML;
+  button.disabled = isLoading;
+  button.classList.toggle("is-loading", isLoading);
+  if (isLoading) {
+    button.innerHTML = button.classList.contains("assistant-send")
+      ? `<span class="button-spinner" aria-hidden="true"></span><span class="sr-only">Sending</span>`
+      : `<span class="button-spinner" aria-hidden="true"></span><span>Thinking...</span>`;
+  } else {
+    button.innerHTML = button.dataset.idleHtml;
+  }
+}
+
 function openAiChat(prefill = "") {
   openModal("Ask Expense Tracker AI", "Get verified answers from your private expense data.", `
     <div class="ai-chat" data-ai-chat>
@@ -723,29 +751,30 @@ async function submitAiQuestion(form) {
   const message = String(textarea?.value || "").trim();
   if (!message) return;
   appendAiMessage("user", message, "", chatRoot);
+  const loadingMessage = appendAiLoading(chatRoot);
   textarea.value = "";
   textarea.disabled = true;
-  button.disabled = true;
-  button.textContent = "Thinking…";
+  setAiSubmitLoading(button, true);
   try {
     const response = await fetch("/api/ai-chat", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
     const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) throw authRequiredError();
     if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");
     const tools = body.usedTools?.length ? `Verified with ${body.usedTools.join(", ")}` : "General guidance";
-    appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`);
+    loadingMessage?.remove();
+    appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot);
   } catch (error) {
     if (error.code === "AUTH_REQUIRED") {
       closeModal();
       redirectToMcpizeAuth();
       return;
     }
+    loadingMessage?.remove();
     appendAiMessage("assistant", localDashboardAnswer(message), "Verified dashboard data · offline response", chatRoot);
   } finally {
     if (window.activeAiChatRoot === chatRoot) window.activeAiChatRoot = null;
     textarea.disabled = false;
-    button.disabled = false;
-    button.textContent = "Ask AI";
+    setAiSubmitLoading(button, false);
     textarea.focus();
   }
 }
