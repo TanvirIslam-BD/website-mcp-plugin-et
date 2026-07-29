@@ -3658,3 +3658,160 @@ body {
     justify-items: center;
   }
 }
+
+/* Final type and icon polish: a single readable scale across the dashboard. */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.dashboard-shell svg,
+.modal svg {
+  stroke-width: 1.8;
+}
+
+.headline h1,
+.panel h3,
+.assistant-title,
+.brand strong {
+  letter-spacing: -.025em;
+}
+
+.headline h1 {
+  font-size: clamp(22px, 1.7vw, 27px);
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.headline p {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.nav button {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+}
+
+.nav button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.metric-card label,
+.metric-card.balance label {
+  color: #59657a;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .005em;
+}
+
+.metric-card h2,
+.metric-card.balance h2 {
+  font-size: clamp(22px, 1.6vw, 26px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.1;
+}
+
+.metric-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.panel h3 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.month-input,
+.input-shell input,
+.action-button,
+.period-select {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.category-line,
+.health-stat,
+.insight-item b,
+.tx-title b,
+.payment,
+.amount {
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.category-line b,
+.transactions th,
+.tag {
+  font-weight: 600;
+}
+
+.transactions th {
+  color: #69758a;
+  font-size: 9px;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.assistant-title {
+  font-weight: 700;
+}
+
+.assistant-alert > div > b {
+  font-weight: 700;
+  letter-spacing: -.015em;
+}
+
+.assistant-alert-actions button,
+.panel-footer-link {
+  font-weight: 650;
+}
+
+.assistant-send {
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.assistant-send svg {
+  width: 17px;
+  height: 17px;
+}
+
+.profile-card b {
+  font-weight: 650;
+  letter-spacing: -.01em;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(37, 99, 255, .22);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .headline h1 {
+    font-size: 21px;
+  }
+
+  .metric-card h2,
+  .metric-card.balance h2 {
+    font-size: 23px;
+  }
+
+  .panel h3 {
+    font-size: 14px;
+  }
+}
