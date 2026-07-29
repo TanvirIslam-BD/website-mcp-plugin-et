@@ -5690,6 +5690,201 @@ textarea:focus-visible {
   }
 }
 
+/* Persistent light / dark appearance control */
+.theme-switch {
+  position: absolute;
+  right: 14px;
+  bottom: 84px;
+  left: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #dfe5ee;
+  border-radius: 999px;
+  background: #f2f5f9;
+  box-shadow: inset 0 1px 2px rgba(20, 39, 77, .04);
+}
+
+.theme-switch button {
+  display: flex;
+  min-width: 0;
+  height: 33px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 7px;
+  color: #71809a;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.theme-switch button svg { width: 16px; height: 16px; }
+.theme-switch button.active { color: #12203a; background: #fff; box-shadow: 0 3px 10px rgba(25, 45, 80, .1); }
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f2f6ff;
+  --text: #e8eefb;
+  --muted: #9caac2;
+  --soft: #172238;
+  --line: #293850;
+  --panel: #111c2d;
+  --shadow: 0 14px 34px rgba(0, 0, 0, .25);
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .dashboard-shell {
+  color: var(--text);
+  background: #091321;
+}
+
+:root[data-theme="dark"] .main,
+:root[data-theme="dark"] .empty-dashboard-main { background: #091321; }
+
+:root[data-theme="dark"] .metric-card,
+:root[data-theme="dark"] .metric-card.balance,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .assistant-rail,
+:root[data-theme="dark"] .assistant-rail .ai-message.assistant,
+:root[data-theme="dark"] .assistant-alert,
+:root[data-theme="dark"] .copilot-compose,
+:root[data-theme="dark"] .empty-setup,
+:root[data-theme="dark"] .empty-client-card,
+:root[data-theme="dark"] .empty-how,
+:root[data-theme="dark"] .empty-client-strip,
+:root[data-theme="dark"] .empty-preview,
+:root[data-theme="dark"] .empty-benefits article,
+:root[data-theme="dark"] .modal-card,
+:root[data-theme="dark"] .data-card,
+:root[data-theme="dark"] .settings-card {
+  color: var(--text);
+  border-color: #293850;
+  background: #111c2d;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, .14);
+}
+
+:root[data-theme="dark"] .headline h1,
+:root[data-theme="dark"] .panel h3,
+:root[data-theme="dark"] .metric-card h2,
+:root[data-theme="dark"] .metric-card.balance h2,
+:root[data-theme="dark"] .budget-ring b,
+:root[data-theme="dark"] .score-ring b,
+:root[data-theme="dark"] .assistant-title,
+:root[data-theme="dark"] .assistant-alert > div > b,
+:root[data-theme="dark"] .copilot-summary .ai-message-body > b,
+:root[data-theme="dark"] .empty-client-card h3,
+:root[data-theme="dark"] .empty-setup h2,
+:root[data-theme="dark"] .modal-card h2,
+:root[data-theme="dark"] .insight-item,
+:root[data-theme="dark"] .budget-total { color: #f4f7ff; }
+
+:root[data-theme="dark"] .headline p,
+:root[data-theme="dark"] .metric-card label,
+:root[data-theme="dark"] .metric-card.balance label,
+:root[data-theme="dark"] .legend,
+:root[data-theme="dark"] .health-stat,
+:root[data-theme="dark"] .assistant-alert > div > span,
+:root[data-theme="dark"] .copilot-summary .ai-message-body,
+:root[data-theme="dark"] .copilot-summary ul,
+:root[data-theme="dark"] .empty-client-card p,
+:root[data-theme="dark"] .empty-setup p { color: #9eabc0; }
+
+:root[data-theme="dark"] .input-shell,
+:root[data-theme="dark"] .month-input,
+:root[data-theme="dark"] .notice-button,
+:root[data-theme="dark"] .period-select,
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] .assistant-alert-actions button,
+:root[data-theme="dark"] .empty-model-picker button,
+:root[data-theme="dark"] .empty-questions button,
+:root[data-theme="dark"] .client-connect:not(.primary) {
+  color: #dce5f5;
+  border-color: #314158;
+  background: #162337;
+}
+
+:root[data-theme="dark"] .input-shell input,
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder { color: #8391a8; }
+
+:root[data-theme="dark"] .category-line,
+:root[data-theme="dark"] .category-line b,
+:root[data-theme="dark"] .transactions td,
+:root[data-theme="dark"] .transactions th,
+:root[data-theme="dark"] .tx-title b { color: #cbd5e6; }
+
+:root[data-theme="dark"] .transactions td,
+:root[data-theme="dark"] .transactions th,
+:root[data-theme="dark"] .health-stat,
+:root[data-theme="dark"] .panel-footer-link { border-color: #293850; }
+
+:root[data-theme="dark"] .category-track,
+:root[data-theme="dark"] .copilot-progress { background: #253248; }
+
+:root[data-theme="dark"] .insight-item { border-color: #293850; background: #152237; }
+:root[data-theme="dark"] .assistant-day::before,
+:root[data-theme="dark"] .assistant-day::after { background: #314158; }
+:root[data-theme="dark"] .assistant-rail .ai-message.user { color: #dbe4ff; border-color: #4352a5; background: #25316a; }
+:root[data-theme="dark"] .comet-badge { border-color: #35435a; background: #f7f9fc; }
+:root[data-theme="dark"] .assistant-online { color: #a7b4c9; }
+
+:root[data-theme="dark"] .sidebar {
+  color: #d8e3f4;
+  border-right-color: #1e3048;
+  background: radial-gradient(circle at 25% 15%, rgba(45, 102, 229, .16), transparent 32%), #071528;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, .2);
+}
+
+:root[data-theme="dark"] .sidebar .brand strong { color: #f4f8ff; }
+:root[data-theme="dark"] .sidebar .brand span { color: #73a1ff; }
+:root[data-theme="dark"] .sidebar .brand .brand-logo-light { display: none; }
+:root[data-theme="dark"] .sidebar .brand .brand-logo-dark { display: block; }
+:root[data-theme="dark"] .sidebar-search,
+:root[data-theme="dark"] .sidebar-toggle { color: #aab7cb; border-color: #2c3c54; background: #122036; }
+:root[data-theme="dark"] .sidebar .nav button { color: #afbdd1; }
+:root[data-theme="dark"] .sidebar .nav button:hover,
+:root[data-theme="dark"] .sidebar .nav button.active { color: #fff; }
+:root[data-theme="dark"] .profile-card { color: #e5ecf8; border-color: #2a3c55; background: #111f34; }
+
+:root[data-theme="dark"] .theme-switch { border-color: #2d3d54; background: #0c192b; }
+:root[data-theme="dark"] .theme-switch button { color: #8796ad; }
+:root[data-theme="dark"] .theme-switch button.active { color: #f2f6ff; background: #233149; box-shadow: 0 3px 12px rgba(0,0,0,.24); }
+
+:root[data-theme="dark"] .boot-screen {
+  background: radial-gradient(circle at 50% 42%, rgba(73, 97, 255, .16), transparent 29rem), linear-gradient(145deg, #091321, #0b1728 58%, #0d1b30);
+}
+:root[data-theme="dark"] .boot-panel { color: var(--text); border-color: #293850; background: rgba(17,28,45,.95); }
+:root[data-theme="dark"] .boot-brand,
+:root[data-theme="dark"] .boot-copy h1 { color: #f4f7ff; }
+:root[data-theme="dark"] .boot-progress { background: #253248; }
+
+@media (max-width: 900px) and (min-width: 721px) {
+  .theme-switch { grid-template-columns: 1fr; gap: 5px; padding: 5px; }
+  .theme-switch button { padding: 0; }
+  .theme-switch button span { display: none; }
+}
+
+@media (max-width: 720px) {
+  .theme-switch {
+    top: 12px;
+    right: 12px;
+    bottom: auto;
+    left: auto;
+    width: 94px;
+    z-index: 2;
+  }
+  .theme-switch button { width: 40px; height: 30px; padding: 0; }
+  .theme-switch button span { display: none; }
+  :root[data-theme="dark"] body { background: #091321; }
+}
+
 @media (min-width: 1440px) {
   .dashboard-shell:has(.assistant-rail) {
     grid-template-columns: 224px minmax(0, 1fr) 336px;

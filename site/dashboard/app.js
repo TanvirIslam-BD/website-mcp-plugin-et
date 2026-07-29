@@ -4,6 +4,15 @@ const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 
+function syncThemeSwitch() {
+  const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+    const active = button.dataset.themeChoice === current;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
 function redirectToMcpizeAuth() {
   // The Vercel API starts the MCPize OAuth + PKCE flow and the /authorize
   // callback stores the resulting short-lived dashboard session securely.
@@ -67,6 +76,8 @@ function icon(name) {
     flame: "<path d='M12 22c4 0 7-3 7-7 0-3-2-5-4-7 .2 2-.7 3.2-2 4-1.3-3-1-6-1-10-4 3-7 7-7 12 0 5 3 8 7 8z'/>",
     chevron: "<path d='m9 18 6-6-6-6'/>",
     eye: "<path d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z'/><circle cx='12' cy='12' r='3'/>",
+    sun: "<circle cx='12' cy='12' r='4'/><path d='M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'/>",
+    moon: "<path d='M20 15.2A8.2 8.2 0 0 1 8.8 4a8.5 8.5 0 1 0 11.2 11.2z'/>",
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.dashboard}</svg>`;
 }
@@ -512,6 +523,10 @@ function renderSidebar(model) {
       <nav class="nav" aria-label="Dashboard navigation">
         ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}" data-tooltip="${label}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
+      <div class="theme-switch" role="group" aria-label="Dashboard appearance">
+        <button type="button" data-theme-choice="light" aria-label="Use light theme">${icon("sun")}<span>Light</span></button>
+        <button type="button" data-theme-choice="dark" aria-label="Use dark theme">${icon("moon")}<span>Dark</span></button>
+      </div>
       <section class="profile-card">
         <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
         <div><b>${displayName}</b><span>Signed dashboard</span></div>
@@ -1262,6 +1277,14 @@ function bindEvents() {
       try { localStorage.setItem("expenseTrackerSidebar", collapsed ? "collapsed" : "expanded"); } catch {}
       return;
     }
+    const themeChoice = event.target.closest("[data-theme-choice]");
+    if (themeChoice) {
+      const theme = themeChoice.dataset.themeChoice === "dark" ? "dark" : "light";
+      document.documentElement.dataset.theme = theme;
+      try { localStorage.setItem("expenseTrackerTheme", theme); } catch {}
+      syncThemeSwitch();
+      return;
+    }
     if (event.target.closest("[data-sidebar-search]")) {
       document.querySelector("[data-search]")?.focus();
       return;
@@ -1357,6 +1380,7 @@ loadDashboard()
     window.dashboardModel = buildModel(data);
     if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
     else renderEmptyDashboard(window.dashboardModel);
+    syncThemeSwitch();
     try {
       if (localStorage.getItem("expenseTrackerSidebar") === "collapsed") app.classList.add("sidebar-collapsed");
     } catch {}
