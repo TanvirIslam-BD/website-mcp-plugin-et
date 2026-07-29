@@ -588,20 +588,26 @@ function renderEmptyAssistantRail() {
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
       </div>
-      <div class="empty-copilot-body">
+      <div class="empty-copilot-body" data-ai-chat>
         <img src="/assets/finance-copilot.png" alt="Finance Copilot">
-        <h2>Ready when you are</h2>
-        <p>Start recording expenses in ChatGPT or Claude to ask questions about your spending.</p>
-        <a class="empty-primary-link" href="/#how">Connect an AI</a>
-        <div class="empty-divider"><span>Example questions</span></div>
-        <div class="empty-questions">
-          <span>${icon("lock")}Summarize this month</span>
-          <span>${icon("lock")}Where can I save?</span>
-          <span>${icon("lock")}Build a budget</span>
+        <h2>Choose your Copilot</h2>
+        <p>Chat inside this dashboard without connecting your personal ChatGPT or Claude account.</p>
+        <div class="empty-model-picker" role="group" aria-label="Choose Copilot style">
+          <button class="active" type="button" data-copilot-model="GPT"><span class="chatgpt-mark">◎</span>GPT</button>
+          <button type="button" data-copilot-model="Claude"><span class="claude-mark">✳</span>Claude</button>
         </div>
+        <button class="empty-primary-link" type="button" data-empty-copilot-start>Start Finance Copilot</button>
+        <small class="empty-model-note">Model access provided by CometAPI</small>
+        <div class="empty-divider"><span>Try asking</span></div>
+        <div class="empty-questions">
+          <button type="button" data-ai-suggestion="How do I add an expense?">${icon("advisor")}How do I add an expense?</button>
+          <button type="button" data-ai-suggestion="Help me create my first budget.">${icon("advisor")}Create my first budget</button>
+          <button type="button" data-ai-suggestion="What financial data can the AI access?">${icon("advisor")}What data can AI access?</button>
+        </div>
+        <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       </div>
       <div class="empty-copilot-compose">
-        <div>${icon("lock")}<span>Connect an AI to start chatting</span><button disabled aria-label="Chat unavailable">${icon("send")}</button></div>
+        <form data-ai-chat-form><span class="compose-clip">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Finance Copilot..." aria-label="Ask Finance Copilot" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></form>
         <small>${icon("lock")} Private · Uses only data you approve</small>
       </div>
     </aside>
@@ -634,10 +640,10 @@ function renderEmptyDashboard(model) {
       ${renderEmptyHeader(model)}
       <section class="empty-hero">
         <div class="empty-hero-copy">
-          <h2>Know where your <span>money</span> is going</h2>
-          <p>Turn everyday expense conversations into clear reports, budgets, and saving insights.</p>
-          <div class="empty-hero-actions"><a href="/#how">Connect an AI ${icon("chevron")}</a><button data-entry="expense">Enter manually</button></div>
-          <small>${icon("lock")}Private by design&nbsp; · &nbsp;You choose what to share</small>
+          <h2>Use Expense Tracker <span>wherever</span> you chat</h2>
+          <p>Install secure expense tools in ChatGPT or Claude.<br>Share only the details you choose and keep your dashboard up to date.</p>
+          <div class="empty-hero-actions"><a href="/#how">View integrations ${icon("chevron")}</a><a class="empty-secondary-link" href="/#how">How it works</a></div>
+          <small>${icon("lock")}Private by design&nbsp; · &nbsp;Nothing is imported automatically</small>
         </div>
         <div class="empty-hero-visual" aria-hidden="true">
           <div class="source-card"><i class="chatgpt-mark">◎</i><span></span><span></span></div>
@@ -647,22 +653,23 @@ function renderEmptyDashboard(model) {
         </div>
       </section>
       <section class="empty-connect panel">
-        <div class="empty-section-heading"><h3>Connect your AI workspace</h3><p>Choose where you already track or discuss expenses.</p></div>
+        <div class="empty-section-heading"><h3>Use Expense Tracker with your AI</h3><p>Add our tools where you already have conversations.</p></div>
         <div class="empty-client-grid">
           <article class="empty-client-card">
-            <div class="client-logo chatgpt-mark">◎</div><div><h3>ChatGPT <em>Recommended</em></h3><p>Turn expense chats into structured transactions and monthly reports.</p></div>
-            <a class="client-connect primary" href="/#how">Connect ChatGPT ${icon("chevron")}</a><small>${icon("transactions")}Takes about 1 minute</small>
+            <div class="client-logo chatgpt-mark">◎</div><div><h3>ChatGPT <em>Recommended</em></h3><p>Install the Expense Tracker plugin and save expenses when you choose to invoke it.</p></div>
+            <a class="client-connect primary" href="/#how">Use with ChatGPT ${icon("chevron")}</a><small>${icon("lock")}Install plugin · OAuth protected</small>
           </article>
           <article class="empty-client-card">
-            <div class="client-logo claude-mark">✳</div><div><h3>Claude</h3><p>Bring expense notes into one organized financial view.</p></div>
-            <a class="client-connect" href="/#how">Connect Claude ${icon("chevron")}</a><small>${icon("transactions")}Takes about 1 minute</small>
+            <div class="client-logo claude-mark">✳</div><div><h3>Claude</h3><p>Connect our remote MCP tools and send selected expense details to your dashboard.</p></div>
+            <a class="client-connect" href="/#how">Use with Claude ${icon("chevron")}</a><small>${icon("lock")}Connect via MCP · OAuth protected</small>
           </article>
         </div>
+        <a class="empty-import-link" href="/#how">${icon("attachment")}<span><b>Import a conversation export instead</b><small>Manual upload · Nothing syncs automatically</small></span></a>
       </section>
-      <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Connect<small>Link your workspace</small></strong></span><i></i><span><b>2</b><strong>Choose what to share<small>Stay in control</small></strong></span><i></i><span><b>3</b><strong>Ask for insights<small>Get reports instantly</small></strong></span></div></section>
+      <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Install or connect<small>Add Expense Tracker tools</small></strong></span><i></i><span><b>2</b><strong>Approve access<small>Choose permitted actions</small></strong></span><i></i><span><b>3</b><strong>Save as you chat<small>Invoke the tool when needed</small></strong></span></div></section>
       <section class="empty-benefits">
-        <article>${icon("analytics")}<span><b>Smart reports</b><small>Monthly summaries</small></span></article>
-        <article>${icon("bills")}<span><b>Receipt capture</b><small>Track expenses</small></span></article>
+        <article>${icon("transactions")}<span><b>Conversation tools</b><small>Add expenses intentionally</small></span></article>
+        <article>${icon("attachment")}<span><b>Manual import</b><small>Upload an export</small></span></article>
         <article>${icon("goals")}<span><b>Save more</b><small>Practical AI tips</small></span></article>
         <article>${icon("lock")}<span><b>Private & secure</b><small>Your data, your control</small></span></article>
       </section>
@@ -1203,6 +1210,16 @@ function bindEvents() {
         input.value = suggestion.dataset.aiSuggestion || "";
         input.focus();
       }
+      return;
+    }
+    const copilotModel = event.target.closest("[data-copilot-model]");
+    if (copilotModel) {
+      document.querySelectorAll("[data-copilot-model]").forEach((button) => button.classList.toggle("active", button === copilotModel));
+      document.querySelector(".empty-copilot-compose textarea")?.setAttribute("placeholder", `Ask ${copilotModel.dataset.copilotModel} Finance Copilot...`);
+      return;
+    }
+    if (event.target.closest("[data-empty-copilot-start]")) {
+      document.querySelector(".empty-copilot-compose textarea")?.focus();
       return;
     }
     const panel = event.target.closest("[data-panel]");
