@@ -1,5 +1,6 @@
 import { createClient } from "@libsql/client";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
 
 const DASHBOARD_COOKIE = "expense_tracker_dashboard";
 const COMET_BASE_URL = "https://api.cometapi.com/v1";
@@ -281,16 +282,21 @@ export default async function handler(req, res) {
   const claimedUserId = safeText(req.body?.userId, 200);
   if (claimedUserId && claimedUserId !== userId) return res.status(403).json({ error: "The requested user does not match this dashboard session." });
   const modelChoice = selectModel(message);
-  const cacheKey = `${userId}:${dashboardMonth}:${modelChoice.model}:${message.toLowerCase()}`;
-  const cached = responseCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) return res.status(200).json({ ...cached.value, cached: true });
-
   const url = process.env.TURSO_DATABASE_URL;
   const authToken = process.env.TURSO_AUTH_TOKEN;
   if (!url || !authToken) return res.status(503).json({ error: "Expense data is not configured." });
 
   try {
     const db = createClient({ url, authToken });
+    await ensureMonitoringTables(db);
+    const control = await userControl(db, userId);
+    if (control.status === "suspended") return res.status(403).json({ error: "This account has been suspended.", code: "account_suspended" });
+    const cacheKey = `${userId}:${dashboardMonth}:${modelChoice.model}:${message.toLowerCase()}`;
+    const cached = responseCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      await recordActivity(db, { userId, source: "dashboard_ai", eventType: "ai_answer_cached", detail: { model: cached.value.model, month: dashboardMonth } });
+      return res.status(200).json({ ...cached.value, cached: true });
+    }
     const preloaded = await preloadFinancialContext(db, userId, message, dashboardMonth, modelChoice.tier);
     const messages = [
       { role: "system", content: systemPrompt(currentDate, dashboardMonth, Boolean(preloaded)) },
@@ -329,6 +335,7 @@ export default async function handler(req, res) {
     responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
     if (responseCache.size > 500) responseCache.delete(responseCache.keys().next().value);
     console.info("[ai-chat]", JSON.stringify({ userId, model: activeModel, tools: value.usedTools, usage: value.usage }));
+    await recordActivity(db, { userId, source: "dashboard_ai", eventType: "ai_question_answered", detail: { model: activeModel, tools: value.usedTools, month: dashboardMonth } });
     return res.status(200).json(value);
   } catch (error) {
     console.error("[ai-chat] request failed", error);

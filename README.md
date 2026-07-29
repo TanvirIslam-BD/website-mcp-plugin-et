@@ -44,3 +44,29 @@ downgrades to the default model.
 
 The route includes an in-memory per-user rate limit, five-minute answer cache,
 bounded tool loops, prompt sanitization, and server-side usage logging.
+
+## Owner monitoring console
+
+The private owner console is available at `/owner/login` and its monitoring
+page is `/owner/monitor`. It uses a separate signed, HTTP-only session and does
+not accept a customer dashboard or MCPize login as owner authorization.
+
+Configure these production-only Vercel variables:
+
+```text
+OWNER_EMAIL=owner@example.com
+OWNER_PASSWORD_HASH=scrypt$base64url-salt$base64url-hash
+OWNER_SESSION_SECRET=a-different-random-secret-of-at-least-32-characters
+```
+
+Generate a compatible password hash locally (replace the final argument with
+your chosen password):
+
+```powershell
+node -e "const {randomBytes,scryptSync}=require('crypto');const p=process.argv[1],s=randomBytes(16);console.log('scrypt$'+s.toString('base64url')+'$'+scryptSync(p,s,64).toString('base64url'))" "your-password"
+```
+
+The console shows aggregate operational counts and metadata-only activity. It
+does not display transaction descriptions or financial amounts. Suspending an
+account is audited and enforced by both the Vercel dashboard/AI API and the MCP
+data boundary.

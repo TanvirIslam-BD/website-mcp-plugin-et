@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { readMcpizeProfile } from "./_mcpize-profile.js";
+import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
 
 const COOKIE = "expense_tracker_dashboard";
 
@@ -148,6 +149,11 @@ export default async function handler(req, res) {
 
   try {
     const db = createClient({ url, authToken });
+    await ensureMonitoringTables(db);
+    const control = await userControl(db, userId);
+    if (control.status === "suspended") {
+      return res.status(403).json({ error: "This account has been suspended. Contact support if you believe this is a mistake.", code: "account_suspended" });
+    }
     if (req.method === "GET" && req.query.export === "csv") {
       const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month || "") ? req.query.month : new Date().toISOString().slice(0, 7);
       const range = monthRange(month);
@@ -165,6 +171,7 @@ export default async function handler(req, res) {
       const incomeRows = incomes.map((income) => ["income", income.date, income.notes || income.source || "Income", income.source || "income", (Number(income.amountMinor || 0) / 100).toFixed(2), income.currency, "", "", ""]);
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", `attachment; filename="expense-tracker-${all ? "all-data" : month}.csv"`);
+      await recordActivity(db, { userId, source: "dashboard", eventType: "data_exported", detail: { scope: all ? "all" : "month", month } });
       return res.status(200).send(`\uFEFF${csvDocument([...expenseRows, ...incomeRows])}`);
     }
     if (req.method === "POST") {
@@ -176,6 +183,7 @@ export default async function handler(req, res) {
       const currency = cleanText(body.currency, 3).toUpperCase();
       const category = cleanText(body.category, 60).toLowerCase();
       const description = cleanText(body.description, 240);
+      await recordActivity(db, { userId, source: "dashboard", eventType: `${cleanText(kind, 40) || "unknown"}_requested`, detail: { month: cleanText(body.month, 7) } });
 
       if (kind === "clear_all") {
         await db.batch([
@@ -317,6 +325,15 @@ export default async function handler(req, res) {
     const mcpizeProfile = session.displayName && session.profilePhotoUrl
       ? { displayName: "", profilePhotoUrl: "" }
       : await readMcpizeProfile(userId);
+
+    await recordActivity(db, {
+      userId,
+      source: "dashboard",
+      eventType: "dashboard_viewed",
+      detail: { month },
+      displayName: session.displayName || mcpizeProfile.displayName || "",
+      profilePhotoUrl: session.profilePhotoUrl || mcpizeProfile.profilePhotoUrl || "",
+    });
 
     return res.status(200).json({
       user: {
