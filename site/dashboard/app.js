@@ -558,6 +558,18 @@ function renderHeader(model) {
   `;
 }
 
+function renderAssistantIntegrationCta() {
+  return `
+    <section class="assistant-integration-cta" aria-label="Connect Expense Tracker to an AI assistant">
+      <div><strong>Connect Expense Tracker with ChatGPT or Claude</strong><span>Scan receipts, voice log, AI insights &amp; more.</span></div>
+      <nav aria-label="AI integrations">
+        <a href="/#how"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</a>
+        <a href="/#how"><img src="/assets/brands/claude.png" alt="">Claude</a>
+      </nav>
+    </section>
+  `;
+}
+
 function renderAiAssistantRail(model) {
   const topCategory = model.categories?.[0];
   const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
@@ -596,6 +608,7 @@ function renderAiAssistantRail(model) {
           <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
           <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${esc(monthLabel(model.month).split(" ")[0])}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
         </div>
+        ${renderAssistantIntegrationCta()}
         <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
           <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask about your money..." aria-label="Ask AI Finance Assistant" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
           <small>▣ Private · Uses only connected financial data</small>
@@ -853,6 +866,7 @@ function openAiChat(prefill = "") {
         <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
         <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${reportMonth}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model?.budgetUsed || 0)}%"></i><strong>${model?.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} of ${model?.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model?.remainingMinor === null || !model ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
       </div>
+      ${renderAssistantIntegrationCta()}
       <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
         <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask about your money..." aria-label="Ask AI Finance Assistant" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
         <small>▣ Private · Uses only connected financial data</small>
