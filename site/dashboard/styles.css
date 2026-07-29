@@ -2770,14 +2770,18 @@ button {
   font-weight: 650;
 }
 
-.empty-client-strip b {
-  display: grid;
-  width: 23px;
-  height: 23px;
-  margin-right: -12px;
-  place-items: center;
-  border-radius: 6px;
-  font-size: 14px;
+.empty-client-strip .brand-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.empty-client-strip .brand-item img {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
 }
 
 .empty-client-strip i {
@@ -2971,6 +2975,8 @@ button {
 .source-card span:last-child { width: 54%; }
 .chatgpt-mark { color: #fff; background: #13b98b !important; }
 .claude-mark { color: #ee7042; background: #fff7f2 !important; }
+.brand-logo-card img { width: 28px; height: 28px; object-fit: contain; }
+.brand-logo-card.chatgpt-mark img { filter: invert(1); }
 .flow-dots { position: absolute; top: 60px; left: 61%; color: #b9c8ff; font-size: 24px; }
 
 .report-card {
