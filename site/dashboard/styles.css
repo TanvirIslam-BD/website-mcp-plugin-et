@@ -2987,22 +2987,28 @@ body {
 }
 
 .comet-badge {
-  color: #2345ee;
-  border: 0;
-  border-radius: 4px;
-  background: #eeefff;
+  gap: 5px;
+  padding: 3px 7px;
+  color: #667188;
+  border: 1px solid #dfe4eb;
+  border-radius: 5px;
+  background: #fff;
   box-shadow: none;
 }
 
-.comet-badge strong {
-  color: #2345ee;
+.comet-badge > span {
+  color: #68748a;
+  font-size: 8px;
+  font-weight: 650;
+  white-space: nowrap;
 }
 
-.comet-badge-mark {
-  width: 15px;
-  height: 15px;
-  color: #fff;
-  background: #23a9f4;
+.comet-badge img {
+  display: block;
+  width: 84px;
+  height: 18px;
+  object-fit: cover;
+  object-position: center;
 }
 
 .assistant-online {
