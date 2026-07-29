@@ -5726,6 +5726,34 @@ textarea:focus-visible {
 .theme-switch button svg { width: 16px; height: 16px; }
 .theme-switch button.active { color: #12203a; background: #fff; box-shadow: 0 3px 10px rgba(25, 45, 80, .1); }
 
+.sidebar-promo {
+  position: absolute;
+  right: 14px;
+  bottom: 142px;
+  left: 14px;
+  display: block;
+  overflow: hidden;
+  border: 1px solid #dce4f0;
+  border-radius: 13px;
+  background: #071336;
+  box-shadow: 0 12px 28px rgba(25, 47, 91, .13);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.sidebar-promo:hover {
+  border-color: #aebffc;
+  box-shadow: 0 16px 34px rgba(31, 67, 159, .2);
+  transform: translateY(-2px);
+}
+
+.sidebar-promo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
 :root[data-theme="dark"] {
   color-scheme: dark;
   --ink: #f2f6ff;
@@ -5948,6 +5976,7 @@ textarea:focus-visible {
 :root[data-theme="dark"] .theme-switch { border-color: #2d3d54; background: #0c192b; }
 :root[data-theme="dark"] .theme-switch button { color: #8796ad; }
 :root[data-theme="dark"] .theme-switch button.active { color: #f2f6ff; background: #233149; box-shadow: 0 3px 12px rgba(0,0,0,.24); }
+:root[data-theme="dark"] .sidebar-promo { border-color: #30425b; box-shadow: 0 14px 32px rgba(0,0,0,.3); }
 
 :root[data-theme="dark"] .boot-screen {
   background: radial-gradient(circle at 50% 42%, rgba(73, 97, 255, .16), transparent 29rem), linear-gradient(145deg, #091321, #0b1728 58%, #0d1b30);
@@ -5979,6 +6008,11 @@ textarea:focus-visible {
     padding: 0;
   }
   .sidebar-collapsed .theme-switch button span { display: none; }
+  .sidebar-collapsed .sidebar-promo { display: none; }
+}
+
+@media (max-width: 900px), (max-height: 820px) {
+  .sidebar-promo { display: none; }
 }
 
 @media (max-width: 720px) {
@@ -5992,6 +6026,7 @@ textarea:focus-visible {
   }
   .theme-switch button { width: 40px; height: 30px; padding: 0; }
   .theme-switch button span { display: none; }
+  .sidebar-promo { display: none; }
   :root[data-theme="dark"] body { background: #091321; }
 }
 

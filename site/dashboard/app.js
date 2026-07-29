@@ -523,6 +523,7 @@ function renderSidebar(model) {
       <nav class="nav" aria-label="Dashboard navigation">
         ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}" data-tooltip="${label}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
+      ${model.hasFinancialData ? `<a class="sidebar-promo" href="/#how" aria-label="Discover Expense Tracker AI features"><img src="/assets/sidebar-promo.webp" alt="Expense Tracker AI — know where your money is going"></a>` : ""}
       <div class="theme-switch" role="group" aria-label="Dashboard appearance">
         <button type="button" data-theme-choice="light" aria-label="Use light theme">${icon("sun")}<span>Light</span></button>
         <button type="button" data-theme-choice="dark" aria-label="Use dark theme">${icon("moon")}<span>Dark</span></button>
