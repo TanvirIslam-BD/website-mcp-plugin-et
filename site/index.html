@@ -55,6 +55,12 @@
   .btn-ghost{background:var(--panel);border-color:var(--line2);color:var(--ink);}
   .btn-ghost:hover{border-color:var(--violet);color:#fff;background:var(--panel2);}
   .blogo{width:17px;height:17px;flex:0 0 17px;}
+  .client-ico{width:20px;height:20px;flex:0 0 20px;}
+  .btn-chatgpt{background:linear-gradient(100deg,#10a37f,#22c55e);color:#fff;
+    box-shadow:0 8px 24px -8px rgba(16,163,127,.55),inset 0 1px 0 rgba(255,255,255,.24);}
+  .btn-chatgpt:hover{transform:translateY(-2px);box-shadow:0 14px 34px -10px rgba(16,163,127,.62),inset 0 1px 0 rgba(255,255,255,.3);}
+  .btn-claude{border-color:rgba(217,119,87,.42);background:rgba(217,119,87,.08);color:#fff;}
+  .btn-claude:hover{border-color:#e0a07f;background:rgba(217,119,87,.14);transform:translateY(-2px);}
 
   /* ---------- nav ---------- */
   header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
@@ -1071,7 +1077,6 @@
       <a class="lnk" href="#pricing">Pricing</a>
       <a class="lnk" href="#faq">FAQ</a>
       <a class="btn btn-dashboard desk" href="/dashboard">Dashboard Login</a>
-      <a class="btn btn-primary desk" href="#pricing">Get Started Free <span aria-hidden="true">→</span></a>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </nav>
   </div>
@@ -1082,7 +1087,6 @@
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
     <a href="/dashboard" style="color:var(--ink);font-weight:600;">Dashboard Login</a>
-    <a href="#pricing" style="color:var(--violet2);font-weight:600;">＋ Get Started Free</a>
   </div>
 </header>
 
@@ -1097,8 +1101,14 @@
         <h1>Track Expenses.<br><span class="g">Get AI Insights.</span><br>Save More.</h1>
         <p class="lead">The AI copilot for your money. Track, analyze and optimize your expenses &mdash; all in one place.</p>
         <div class="cta">
-          <a class="btn btn-primary" href="#pricing">Get Started Free <span aria-hidden="true">&rarr;</span></a>
-          <a class="btn btn-outline" href="#showcase">See Demo <span class="pl">&#9654;</span></a>
+          <a class="btn btn-chatgpt" href="#how">
+            <svg class="client-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17"/></svg>
+            Open in ChatGPT
+          </a>
+          <a class="btn btn-claude" href="#how">
+            <svg class="client-ico" viewBox="0 0 24 24" fill="#d97757"><path d="M12 2l1.6 5.2L19 5.6l-2.6 4.7L21 12l-4.6 1.7L19 18.4l-5.4-1.6L12 22l-1.6-5.2L5 18.4l2.6-4.7L3 12l4.6-1.7L5 5.6l5.4 1.6z"/></svg>
+            Open in Claude
+          </a>
         </div>
         <div class="hfeats">
           <span class="hfeat"><svg viewBox="0 0 24 24" stroke="#34d399"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Scan Receipts</span>
