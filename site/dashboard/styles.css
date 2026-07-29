@@ -3021,9 +3021,43 @@ button {
 .empty-client-card h3 em { margin-left: 8px; padding: 4px 8px; border-radius: 99px; color: #078448; background: #e7f9ef; font-size: 9px; font-style: normal; font-weight: 600; }
 .empty-client-card p { margin: 0; color: #627089; font-size: 11px; line-height: 1.5; }
 .client-connect { grid-column: 2; display: flex; align-items: center; justify-content: center; min-height: 38px; border: 1px solid #bfc9db; border-radius: 6px; color: #101827; font-size: 11px; font-weight: 650; text-decoration: none; }
-.empty-onboarding-left .client-connect { min-height: 40px; }
+.empty-onboarding-left .client-connect {
+  position: relative;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 42px;
+  box-sizing: border-box;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1;
+  text-align: center;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
 .client-connect.primary { color: #fff; border-color: #3456f5; background: linear-gradient(135deg, #326dff, #4b3ff4); }
 .client-connect svg { width: 14px; height: 14px; margin-left: auto; margin-right: 10px; }
+.empty-onboarding-left .client-connect svg {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  transform: translateY(-50%);
+}
+.empty-onboarding-left .client-connect:not(.primary):hover {
+  border-color: #8394b6;
+  background: #f8faff;
+  box-shadow: 0 4px 12px rgba(34, 55, 101, .08);
+}
+.empty-onboarding-left .client-connect.primary:hover {
+  box-shadow: 0 7px 16px rgba(55, 75, 237, .22);
+  transform: translateY(-1px);
+}
+.empty-onboarding-left .client-connect:focus-visible {
+  outline: 3px solid rgba(63, 88, 255, .2);
+  outline-offset: 2px;
+}
 .empty-client-card > small { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 0 -14px; padding: 10px 14px; color: #69758c; border-top: 1px solid #e4e8ef; font-size: 10px; }
 .empty-client-card > small svg { width: 14px; height: 14px; }
 
