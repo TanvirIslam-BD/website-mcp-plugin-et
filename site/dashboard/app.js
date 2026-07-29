@@ -531,7 +531,7 @@ function renderAiAssistantRail(model) {
     <aside class="assistant-rail" aria-label="AI Finance Assistant">
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><i>✦</i> Finance Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot.png" alt=""></span> Finance Copilot</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -578,7 +578,7 @@ function renderDashboard(model) {
     </section>
     ${renderAiAssistantRail(model)}
     <button class="floating-add" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
-    <button class="floating-ai" data-open-ai-chat aria-label="Ask Expense Tracker AI">✦</button>
+    <button class="floating-ai" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
   `;
 }
 
@@ -653,7 +653,7 @@ function setAiSubmitLoading(button, isLoading) {
 }
 
 function openAiChat(prefill = "") {
-  openModal("Ask Expense Tracker AI", "Get verified answers from your private expense data.", `
+  openModal("Finance Copilot", "Get verified answers from your private expense data.", `
     <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
       <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
     </a>
