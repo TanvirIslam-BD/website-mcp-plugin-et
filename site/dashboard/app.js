@@ -593,19 +593,14 @@ function renderEmptyAssistantRail() {
       </div>
       <div class="empty-copilot-body" data-ai-chat>
         <img src="/assets/finance-copilot.png" alt="Finance Copilot">
-        <h2>Choose your Copilot</h2>
-        <p>Chat inside this dashboard without connecting your personal ChatGPT or Claude account.</p>
-        <div class="empty-model-picker" role="group" aria-label="Choose Copilot style">
-          <button class="active" type="button" data-copilot-model="GPT"><span class="chatgpt-mark">◎</span>GPT</button>
-          <button type="button" data-copilot-model="Claude"><span class="claude-mark">✳</span>Claude</button>
-        </div>
-        <button class="empty-primary-link" type="button" data-empty-copilot-start>Start Finance Copilot</button>
-        <small class="empty-model-note">Model access provided by CometAPI</small>
-        <div class="empty-divider"><span>Try asking</span></div>
+        <h2>Hi, I’m your Finance Copilot</h2>
+        <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
+        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-divider"><span>Suggested questions</span></div>
         <div class="empty-questions">
-          <button type="button" data-ai-suggestion="How do I add an expense?">${icon("advisor")}How do I add an expense?</button>
-          <button type="button" data-ai-suggestion="Help me create my first budget.">${icon("advisor")}Create my first budget</button>
-          <button type="button" data-ai-suggestion="What financial data can the AI access?">${icon("advisor")}What data can AI access?</button>
+          <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
+          <button type="button" data-panel="budget-editor">${icon("budget")}Create a starter budget</button>
+          <button type="button" data-ai-suggestion="How does Expense Tracker protect my privacy?">${icon("lock")}How does privacy work?</button>
         </div>
         <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       </div>
@@ -641,41 +636,37 @@ function renderEmptyDashboard(model) {
     ${renderSidebar(model)}
     <main class="main empty-dashboard-main">
       ${renderEmptyHeader(model)}
-      <section class="empty-hero">
-        <div class="empty-hero-copy">
-          <h2>Use Expense Tracker <span>wherever</span> you chat</h2>
-          <p>Install secure expense tools in ChatGPT or Claude.<br>Share only the details you choose and keep your dashboard up to date.</p>
-          <div class="empty-hero-actions"><a href="/#how">View integrations ${icon("chevron")}</a><a class="empty-secondary-link" href="/#how">How it works</a></div>
-          <small>${icon("lock")}Private by design&nbsp; · &nbsp;Nothing is imported automatically</small>
+      <div class="empty-onboarding-grid">
+        <div class="empty-onboarding-left">
+          <section class="empty-hero">
+            <div class="empty-hero-copy">
+              <h2>Use Expense Tracker <span>wherever</span> you chat</h2>
+              <p>Install secure expense tools in ChatGPT or Claude.<br>Share only the details you choose and keep your dashboard up to date.</p>
+              <div class="empty-hero-actions"><a href="/#how">View integrations ${icon("chevron")}</a><a class="empty-secondary-link" href="/#how">How it works</a></div>
+              <small>${icon("lock")}Private by design&nbsp; · &nbsp;Nothing is imported automatically</small>
+            </div>
+          </section>
+          <section class="empty-connect panel">
+            <div class="empty-section-heading"><h3>Use Expense Tracker with your AI</h3><p>Add our tools where you already have conversations.</p></div>
+            <div class="empty-client-grid">
+              <article class="empty-client-card"><div class="client-logo chatgpt-mark">◎</div><div><h3>ChatGPT <em>Recommended</em></h3><p>Install the Expense Tracker plugin and save expenses when you choose to invoke it.</p></div><a class="client-connect primary" href="/#how">Use with ChatGPT ${icon("chevron")}</a><small>${icon("lock")}Install plugin · OAuth protected</small></article>
+              <article class="empty-client-card"><div class="client-logo claude-mark">✳</div><div><h3>Claude</h3><p>Connect our remote MCP tools and send selected expense details to your dashboard.</p></div><a class="client-connect" href="/#how">Use with Claude ${icon("chevron")}</a><small>${icon("lock")}Connect via MCP · OAuth protected</small></article>
+            </div>
+          </section>
+          <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Install or connect<small>Add Expense Tracker tools</small></strong></span><i></i><span><b>2</b><strong>Approve access<small>Choose permitted actions</small></strong></span><i></i><span><b>3</b><strong>Save as you chat<small>Invoke the tool when needed</small></strong></span></div></section>
+          <section class="empty-benefits empty-benefits-compact">
+            <article>${icon("transactions")}<span><b>Conversation tools</b><small>Add expenses intentionally</small></span></article>
+            <article>${icon("goals")}<span><b>Save more</b><small>Practical AI tips</small></span></article>
+            <article>${icon("lock")}<span><b>Private & secure</b><small>Your data, your control</small></span></article>
+          </section>
         </div>
-        <div class="empty-hero-visual" aria-hidden="true">
-          <div class="source-card"><i class="chatgpt-mark">◎</i><span></span><span></span></div>
-          <div class="source-card"><i class="claude-mark">✳</i><span></span><span></span></div>
-          <div class="flow-dots">···›</div>
-          <div class="report-card"><i></i><b></b><span></span><span></span><span></span></div>
-        </div>
-      </section>
-      <section class="empty-connect panel">
-        <div class="empty-section-heading"><h3>Use Expense Tracker with your AI</h3><p>Add our tools where you already have conversations.</p></div>
-        <div class="empty-client-grid">
-          <article class="empty-client-card">
-            <div class="client-logo chatgpt-mark">◎</div><div><h3>ChatGPT <em>Recommended</em></h3><p>Install the Expense Tracker plugin and save expenses when you choose to invoke it.</p></div>
-            <a class="client-connect primary" href="/#how">Use with ChatGPT ${icon("chevron")}</a><small>${icon("lock")}Install plugin · OAuth protected</small>
-          </article>
-          <article class="empty-client-card">
-            <div class="client-logo claude-mark">✳</div><div><h3>Claude</h3><p>Connect our remote MCP tools and send selected expense details to your dashboard.</p></div>
-            <a class="client-connect" href="/#how">Use with Claude ${icon("chevron")}</a><small>${icon("lock")}Connect via MCP · OAuth protected</small>
-          </article>
-        </div>
-        <a class="empty-import-link" href="/#how">${icon("attachment")}<span><b>Import a conversation export instead</b><small>Manual upload · Nothing syncs automatically</small></span></a>
-      </section>
-      <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Install or connect<small>Add Expense Tracker tools</small></strong></span><i></i><span><b>2</b><strong>Approve access<small>Choose permitted actions</small></strong></span><i></i><span><b>3</b><strong>Save as you chat<small>Invoke the tool when needed</small></strong></span></div></section>
-      <section class="empty-benefits">
-        <article>${icon("transactions")}<span><b>Conversation tools</b><small>Add expenses intentionally</small></span></article>
-        <article>${icon("attachment")}<span><b>Manual import</b><small>Upload an export</small></span></article>
-        <article>${icon("goals")}<span><b>Save more</b><small>Practical AI tips</small></span></article>
-        <article>${icon("lock")}<span><b>Private & secure</b><small>Your data, your control</small></span></article>
-      </section>
+        <aside class="empty-preview panel">
+          <div class="panel-head"><h3>See it in action</h3><a href="/assets/dashboard/expense-tracker-ai-promo.png" target="_blank" aria-label="Open preview">${icon("chevron")}</a></div>
+          <img src="/assets/dashboard/expense-tracker-ai-promo.png" alt="Expense Tracker AI dashboard and chat experience preview">
+          <a href="/#demo">Preview the ChatGPT experience</a>
+        </aside>
+      </div>
+      <section class="empty-client-strip"><span>Works with your favorite AI clients and MCP tools</span><div><b class="chatgpt-mark">◎</b>ChatGPT<i></i><b class="claude-mark">✳</b>Claude<i></i><b>✦</b>Gemini<i></i><b>↗</b>Grok<i></i><b>◆</b>Cursor<i></i><b>◇</b>Any MCP Client</div></section>
     </main>
     ${renderEmptyAssistantRail()}
   `;
