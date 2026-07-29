@@ -72,6 +72,8 @@
   .nav nav a.lnk.active{color:var(--ink);}
   .nav nav a.lnk.active::after{content:"";position:absolute;left:0;right:0;bottom:-31px;height:2px;background:var(--violet2);border-radius:2px;}
   .nav .btn{padding:13px 24px;font-size:15px;}
+  .btn-dashboard{border-color:rgba(45,212,191,.28);color:var(--ink);background:rgba(255,255,255,.035);}
+  .btn-dashboard:hover{border-color:var(--violet2);background:rgba(20,184,166,.10);transform:translateY(-2px);}
   header.nav.scrolled{background:rgba(10,10,15,.9);box-shadow:0 8px 30px -18px rgba(0,0,0,.8);}
   .menu-btn{display:none;width:40px;height:40px;border:1px solid var(--line2);border-radius:10px;background:var(--panel);
     flex-direction:column;gap:4px;align-items:center;justify-content:center;cursor:pointer;}
@@ -90,6 +92,10 @@
     .nav .btn.desk{display:none;}
   }
   @media(min-width:821px){ .menu-btn,.mobile-menu{display:none !important;} }
+  @media(max-width:1060px){
+    .nav nav{gap:18px;}
+    .nav .btn{padding:11px 16px;font-size:14px;}
+  }
 
   /* ---------- hero ---------- */
   .hero{padding:52px 0 40px;position:relative;text-align:left;}
@@ -1064,6 +1070,7 @@
       <a class="lnk" href="#showcase">Demo</a>
       <a class="lnk" href="#pricing">Pricing</a>
       <a class="lnk" href="#faq">FAQ</a>
+      <a class="btn btn-dashboard desk" href="/dashboard">Dashboard Login</a>
       <a class="btn btn-primary desk" href="#pricing">Get Started Free <span aria-hidden="true">→</span></a>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </nav>
@@ -1074,7 +1081,8 @@
     <a href="#showcase">Demo</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
-    <a href="#" style="color:var(--violet2);font-weight:600;">＋ Get Started Free</a>
+    <a href="/dashboard" style="color:var(--ink);font-weight:600;">Dashboard Login</a>
+    <a href="#pricing" style="color:var(--violet2);font-weight:600;">＋ Get Started Free</a>
   </div>
 </header>
 
@@ -1902,7 +1910,7 @@
 <div class="mcta">
   <div class="inner">
     <a class="btn btn-primary" href="#pricing">Get Started Free <span aria-hidden="true">&rarr;</span></a>
-    <a class="btn btn-outline" href="#showcase">See Demo</a>
+    <a class="btn btn-outline" href="/dashboard">Dashboard Login</a>
   </div>
 </div>
 
