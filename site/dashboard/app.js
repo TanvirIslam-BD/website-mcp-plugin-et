@@ -575,7 +575,12 @@ function renderAiAssistantRail(model) {
   return `
     <aside class="assistant-rail" aria-label="AI Finance Assistant">
       <div class="assistant-rail-header">
-        <span class="assistant-title"><i>✦</i> AI Finance Assistant <b>BETA</b></span>
+        <div class="assistant-heading">
+          <span class="assistant-title"><i>✦</i> AI Finance Assistant <b>BETA</b></span>
+          <a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+            <span class="comet-badge-mark" aria-hidden="true">✦</span> Powered by <strong>CometAPI</strong>
+          </a>
+        </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
       </div>
       <div class="assistant-rail-chat ai-chat" data-ai-chat>
@@ -700,6 +705,9 @@ function setAiSubmitLoading(button, isLoading) {
 
 function openAiChat(prefill = "") {
   openModal("Ask Expense Tracker AI", "Get verified answers from your private expense data.", `
+    <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+      <span class="comet-badge-mark" aria-hidden="true">✦</span> Powered by <strong>CometAPI</strong>
+    </a>
     <div class="ai-chat" data-ai-chat>
       <div class="ai-chat-messages" data-ai-messages>
         <div class="ai-message assistant"><div class="ai-message-label">Expense Tracker AI</div><div class="ai-message-body">Ask about your expenses, categories, budget, or monthly spending. I’ll use your recorded data before answering.</div></div>
