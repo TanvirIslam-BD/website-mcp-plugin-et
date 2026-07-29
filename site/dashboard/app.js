@@ -758,8 +758,42 @@ function setAiSubmitLoading(button, isLoading) {
   }
 }
 
+function openEmptyAiChat(prefill = "") {
+  openModal("Finance Copilot", "Build your first financial picture with guided, private help.", `
+    <div class="copilot-modal-status empty-copilot-status">
+      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+        <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
+      </a>
+      <span class="assistant-online"><i></i>Online</span>
+    </div>
+    <div class="empty-mobile-copilot" data-ai-chat>
+      <div class="empty-mobile-copilot-intro">
+        <img src="/assets/finance-copilot.png" alt="Finance Copilot">
+        <h2>Hi, I’m your Finance Copilot</h2>
+        <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
+        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot.png" alt=""></span>What would you like to do first?</div>
+      </div>
+      <div class="empty-divider"><span>Suggested questions</span></div>
+      <div class="empty-questions">
+        <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
+        <button type="button" data-panel="budget-editor">${icon("budget")}Create a starter budget</button>
+        <button type="button" data-ai-suggestion="How does Expense Tracker protect my privacy?">${icon("lock")}How does privacy work?</button>
+      </div>
+      <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
+      <form class="empty-mobile-copilot-compose" data-ai-chat-form>
+        <div><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Finance Copilot..." aria-label="Ask Finance Copilot" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
+        <small>${icon("lock")} Private · Uses only data you approve</small>
+      </form>
+    </div>
+  `, { wide: false, className: "ai-modal empty-ai-modal" });
+}
+
 function openAiChat(prefill = "") {
   const model = window.dashboardModel;
+  if (!model?.hasFinancialData) {
+    openEmptyAiChat(prefill);
+    return;
+  }
   const topCategory = model?.categories?.[0];
   const topShare = topCategory && model?.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
   const overBudget = model?.remainingMinor !== null && Number(model?.remainingMinor || 0) < 0;
