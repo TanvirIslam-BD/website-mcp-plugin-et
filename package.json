@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@libsql/client": "^0.14.0"
+    "@libsql/client": "^0.14.0",
+    "@libsql/linux-x64-gnu": "0.4.7"
   }
 }
