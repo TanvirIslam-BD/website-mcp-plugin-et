@@ -2323,10 +2323,10 @@ button {
   }
 
   .modal.ai-modal {
-    height: min(720px, 86dvh);
-    max-height: 86dvh;
+    height: auto;
+    max-height: calc(100dvh - 12px);
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
     gap: 0;
     padding: 17px 14px 15px;
   }
@@ -2348,13 +2348,14 @@ button {
 
   .ai-modal .ai-chat {
     min-height: 0;
-    grid-template-rows: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto auto;
     gap: 10px;
   }
 
   .ai-modal .ai-chat-messages {
     min-height: 0;
-    max-height: none;
+    max-height: min(34dvh, 320px);
+    align-content: start;
     padding: 3px 2px 3px 0;
   }
 
