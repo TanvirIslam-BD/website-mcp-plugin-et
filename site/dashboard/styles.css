@@ -5832,8 +5832,56 @@ textarea:focus-visible {
 :root[data-theme="dark"] .assistant-day::before,
 :root[data-theme="dark"] .assistant-day::after { background: #314158; }
 :root[data-theme="dark"] .assistant-rail .ai-message.user { color: #dbe4ff; border-color: #4352a5; background: #25316a; }
-:root[data-theme="dark"] .comet-badge { border-color: #35435a; background: #f7f9fc; }
+:root[data-theme="dark"] .comet-badge {
+  border-color: #304159;
+  background: #101d31;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025);
+}
+:root[data-theme="dark"] .comet-badge > span { color: #aab7ca; }
+:root[data-theme="dark"] .comet-badge img {
+  filter: invert(1) grayscale(1) brightness(2.2);
+  mix-blend-mode: screen;
+}
 :root[data-theme="dark"] .assistant-online { color: #a7b4c9; }
+:root[data-theme="dark"] .copilot-logo,
+:root[data-theme="dark"] .floating-ai {
+  border-color: #31435d;
+  background: #16253b;
+}
+:root[data-theme="dark"] .copilot-logo img,
+:root[data-theme="dark"] .floating-ai img {
+  filter: brightness(1.35) saturate(1.15);
+  mix-blend-mode: multiply;
+}
+:root[data-theme="dark"] .empty-copilot-body > img,
+:root[data-theme="dark"] .empty-mobile-copilot-intro > img {
+  padding: 5px;
+  border: 1px solid #31435d;
+  background: #16253b;
+  box-shadow: 0 12px 35px rgba(0,0,0,.24);
+  filter: brightness(1.35) saturate(1.15);
+  mix-blend-mode: multiply;
+}
+:root[data-theme="dark"] .empty-copilot-greeting {
+  color: #b9c5d8;
+  border-color: #34455e;
+  background: #111e31;
+}
+:root[data-theme="dark"] .empty-copilot-greeting > span {
+  border: 1px solid #405674;
+  background: #1a2c46;
+}
+:root[data-theme="dark"] .empty-copilot-greeting img {
+  filter: brightness(1.35) saturate(1.15);
+  mix-blend-mode: multiply;
+}
+:root[data-theme="dark"] .empty-copilot-compose form {
+  color: #91a0b7;
+  border-color: #34455e;
+  background: #101d30;
+}
+:root[data-theme="dark"] .empty-client-strip > div { color: #d8e2f2; }
+:root[data-theme="dark"] .empty-client-strip i { background: #35445a; }
 
 :root[data-theme="dark"] .sidebar {
   color: #d8e3f4;
@@ -5869,6 +5917,24 @@ textarea:focus-visible {
   .theme-switch { grid-template-columns: 1fr; gap: 5px; padding: 5px; }
   .theme-switch button { padding: 0; }
   .theme-switch button span { display: none; }
+}
+
+@media (min-width: 721px) {
+  .sidebar-collapsed .theme-switch {
+    right: 10px;
+    bottom: 78px;
+    left: 10px;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 5px;
+    border-radius: 18px;
+  }
+  .sidebar-collapsed .theme-switch button {
+    width: 100%;
+    height: 31px;
+    padding: 0;
+  }
+  .sidebar-collapsed .theme-switch button span { display: none; }
 }
 
 @media (max-width: 720px) {
