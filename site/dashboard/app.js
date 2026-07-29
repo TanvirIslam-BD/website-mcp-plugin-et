@@ -475,12 +475,6 @@ function renderSidebar(model) {
   const nav = [
     ["dashboard", "Dashboard", "dashboard"],
     ["transactions", "Transactions", "transactions"],
-    ["analytics", "Analytics", "analytics"],
-    ["budget", "Budget", "budget"],
-    ["accounts", "Accounts", "accounts"],
-    ["categories", "Categories", "categories"],
-    ["bills", "Bills", "bills"],
-    ["goals", "Goals", "goals"],
     ["advisor", "AI Advisor", "analysis"],
     ["settings", "Settings", "settings"],
   ];
