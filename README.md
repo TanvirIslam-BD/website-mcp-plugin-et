@@ -10,7 +10,8 @@ Configure these production environment variables in Vercel:
 
 ```text
 COMET_API_KEY=your-secret-key
-DEFAULT_MODEL=deepseek-chat
+FAST_MODEL=gemini-2.5-flash-lite
+DEFAULT_MODEL=gemini-2.5-flash
 ADVANCED_MODEL=deepseek-v3.2
 PREMIUM_MODEL=kimi-k2.5
 ```
@@ -24,20 +25,22 @@ never bundled into the dashboard JavaScript.
 `POST /api/ai-chat`
 
 ```json
-{ "message": "How much did I spend on restaurants this month?" }
+{ "message": "How much did I spend on restaurants this month?", "month": "2026-07" }
 ```
 
 The route derives the user from the signed `expense_tracker_dashboard` cookie,
 then lets the model call only these private data tools:
 
 - `get_expenses`
+- `get_latest_expense`
 - `get_budget_status`
 - `generate_monthly_report`
 
-Simple requests use the default DeepSeek model. Comparison, anomaly, and
-savings questions use the advanced model; longer financial-plan requests use
-the premium model. If an advanced/premium model fails, the request downgrades
-to the default model.
+Short verified lookups use Flash-Lite, normal reports use Flash, comparison,
+anomaly, and savings questions use the advanced model, and longer financial
+plans use the premium model. Routine requests preload verified database data
+to avoid a second model round trip. If a specialized model fails, the request
+downgrades to the default model.
 
 The route includes an in-memory per-user rate limit, five-minute answer cache,
 bounded tool loops, prompt sanitization, and server-side usage logging.

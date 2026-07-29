@@ -756,7 +756,12 @@ async function submitAiQuestion(form) {
   textarea.disabled = true;
   setAiSubmitLoading(button, true);
   try {
-    const response = await fetch("/api/ai-chat", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
+    const response = await fetch("/api/ai-chat", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, month: selectedMonth }),
+    });
     const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) throw authRequiredError();
     if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");

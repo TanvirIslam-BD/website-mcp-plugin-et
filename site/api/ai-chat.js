@@ -5,7 +5,8 @@ const DASHBOARD_COOKIE = "expense_tracker_dashboard";
 const COMET_BASE_URL = "https://api.cometapi.com/v1";
 // CometAPI's available model identifiers are provider-normalized. Keep these
 // defaults aligned with its /v1/models catalogue, while env vars can override.
-const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "deepseek-chat";
+const FAST_MODEL = process.env.FAST_MODEL || "gemini-2.5-flash-lite";
+const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "gemini-2.5-flash";
 const ADVANCED_MODEL = process.env.ADVANCED_MODEL || "deepseek-v3.2";
 const PREMIUM_MODEL = process.env.PREMIUM_MODEL || "kimi-k2.5";
 const RATE_WINDOW_MS = 60_000;
@@ -55,6 +56,10 @@ function currentMonth() {
   return new Date().toISOString().slice(0, 7);
 }
 
+function validMonth(value) {
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(value || "");
+}
+
 function monthRange(month) {
   const [year, monthNumber] = month.split("-").map(Number);
   const days = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
@@ -69,7 +74,8 @@ function selectModel(message) {
   const text = message.toLowerCase();
   if (/\b(6[ -]?month|six[ -]?month|financial plan|all spending behavior|comprehensive plan|long.term plan)\b/.test(text)) return { model: PREMIUM_MODEL, tier: "premium" };
   if (/\b(why|abnormal|unusual|anomal|increase|decrease|trend|compare|strategy|strategies|forecast|reduce)\b/.test(text)) return { model: ADVANCED_MODEL, tier: "advanced" };
-  return { model: DEFAULT_MODEL, tier: "standard" };
+  if (/\b(report|summary|explain|recommend|advice|plan)\b/.test(text)) return { model: DEFAULT_MODEL, tier: "standard" };
+  return { model: FAST_MODEL, tier: "fast" };
 }
 
 function checkRateLimit(userId) {
@@ -85,15 +91,36 @@ function checkRateLimit(userId) {
 
 function toolDefinitions() {
   return [
-    { type: "function", function: { name: "get_expenses", description: "Retrieve the authenticated user's expenses for a date range and optional category. Use this for transaction totals, categories, merchants, and comparisons.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" }, category: { type: "string" } }, required: ["startDate", "endDate"], additionalProperties: false } } },
-    { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
+    { type: "function", function: { name: "get_latest_expense", description: "Retrieve the authenticated user's single most recent expense across all dates. Always use this for latest expense, last expense, or most recent transaction questions.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
+    { type: "function", function: { name: "get_expenses", description: "Retrieve the authenticated user's expenses for a date range and optional category. If the user gives no date, use the dashboard month supplied in the system context.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" }, category: { type: "string" } }, additionalProperties: false } } },
+    { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits for the dashboard month.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
     { type: "function", function: { name: "generate_monthly_report", description: "Generate a verified report for one calendar month. Use when the user asks for a monthly summary, report, or category breakdown.", parameters: { type: "object", properties: { month: { type: "string", description: "YYYY-MM" } }, required: ["month"], additionalProperties: false } } },
   ];
 }
 
-async function getExpenses(db, userId, input) {
-  const startDate = validDate(input.startDate) ? input.startDate : monthRange(currentMonth()).startDate;
-  const endDate = validDate(input.endDate) ? input.endDate : monthRange(currentMonth()).endDate;
+async function getLatestExpense(db, userId) {
+  const result = await db.execute({
+    sql: "SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT 1",
+    args: [userId],
+  });
+  const row = result.rows[0];
+  if (!row) return { expense: null };
+  return {
+    expense: {
+      id: row.id,
+      date: row.date,
+      category: row.category,
+      description: row.description,
+      amount: Number(row.amount_minor || 0) / 100,
+      currency: row.currency,
+    },
+  };
+}
+
+async function getExpenses(db, userId, input, dashboardMonth) {
+  const fallbackRange = monthRange(dashboardMonth);
+  const startDate = validDate(input.startDate) ? input.startDate : fallbackRange.startDate;
+  const endDate = validDate(input.endDate) ? input.endDate : fallbackRange.endDate;
   if (startDate > endDate) return { error: "startDate must be before endDate" };
   const category = safeText(input.category, 60).toLowerCase();
   const where = category ? " AND lower(category) = ?" : "";
@@ -104,8 +131,8 @@ async function getExpenses(db, userId, input) {
   return { startDate, endDate, category: category || null, count: expenses.length, total, currency: expenses[0]?.currency || "USD", expenses };
 }
 
-async function getBudgetStatus(db, userId) {
-  const { startDate, endDate } = monthRange(currentMonth());
+async function getBudgetStatus(db, userId, dashboardMonth) {
+  const { startDate, endDate } = monthRange(dashboardMonth);
   const [budgetResult, expenseResult] = await Promise.all([
     db.execute({ sql: "SELECT category,amount_minor,currency,period FROM budgets WHERE user_id = ? ORDER BY created_at DESC", args: [userId] }),
     db.execute({ sql: "SELECT amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, startDate, endDate] }),
@@ -114,11 +141,11 @@ async function getBudgetStatus(db, userId) {
   const currency = budgets.find((budget) => budget.category === null)?.currency || expenseResult.rows[0]?.currency || "USD";
   const spent = expenseResult.rows.filter((row) => row.currency === currency).reduce((sum, row) => sum + Number(row.amount_minor || 0), 0) / 100;
   const overall = budgets.find((budget) => budget.category === null && budget.currency === currency);
-  return { month: currentMonth(), currency, spent, budget: overall?.amount ?? null, remaining: overall ? overall.amount - spent : null, usedPercent: overall?.amount ? Math.round((spent / overall.amount) * 100) : null, categoryLimits: budgets.filter((budget) => budget.category !== null) };
+  return { month: dashboardMonth, currency, spent, budget: overall?.amount ?? null, remaining: overall ? overall.amount - spent : null, usedPercent: overall?.amount ? Math.round((spent / overall.amount) * 100) : null, categoryLimits: budgets.filter((budget) => budget.category !== null) };
 }
 
-async function generateMonthlyReport(db, userId, input) {
-  const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(input.month || "") ? input.month : currentMonth();
+async function generateMonthlyReport(db, userId, input, dashboardMonth = currentMonth()) {
+  const month = validMonth(input.month) ? input.month : dashboardMonth;
   const { startDate, endDate } = monthRange(month);
   const [expenseResult, financeResult, budgetResult] = await Promise.all([
     db.execute({ sql: "SELECT date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date DESC", args: [userId, startDate, endDate] }),
@@ -136,16 +163,17 @@ async function generateMonthlyReport(db, userId, input) {
   return { month, currency, expenseCount: scoped.length, spent, income, netCashFlow: income - spent, budget: budget ? Number(budget.amount_minor || 0) / 100 : null, categories, largestExpenses: scoped.slice().sort((a, b) => b.amount - a.amount).slice(0, 8) };
 }
 
-async function runTool(db, userId, name, rawInput) {
+async function runTool(db, userId, name, rawInput, dashboardMonth) {
   const input = rawInput && typeof rawInput === "object" ? rawInput : {};
-  if (name === "get_expenses") return getExpenses(db, userId, input);
-  if (name === "get_budget_status") return getBudgetStatus(db, userId);
-  if (name === "generate_monthly_report") return generateMonthlyReport(db, userId, input);
+  if (name === "get_latest_expense") return getLatestExpense(db, userId);
+  if (name === "get_expenses") return getExpenses(db, userId, input, dashboardMonth);
+  if (name === "get_budget_status") return getBudgetStatus(db, userId, dashboardMonth);
+  if (name === "generate_monthly_report") return generateMonthlyReport(db, userId, input, dashboardMonth);
   return { error: `Unknown tool: ${name}` };
 }
 
-function systemPrompt() {
-  return "You are Expense Tracker AI, a concise personal-finance assistant. Never invent, assume, or estimate transactions. For any financial fact, total, budget, category, or report, call the available tools first. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The tools already enforce the signed user's private data scope; never ask for or expose another user id.";
+function systemPrompt(currentDate, dashboardMonth, hasVerifiedContext = false) {
+  return `You are Expense Tracker AI, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", query the most recent transaction across all dates. Never invent, assume, or estimate transactions. ${hasVerifiedContext ? "The server has already supplied verified private financial data below; answer only from that data and do not request another tool call." : "For any financial fact, total, budget, category, or report, call the available tools first."} Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
 }
 
 function answerContent(message) {
@@ -161,7 +189,13 @@ async function callComet(model, messages, tools) {
     const response = await fetch(`${COMET_BASE_URL}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.COMET_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model, messages, tools, tool_choice: "auto", temperature: 0.2, max_tokens: 900 }),
+      body: JSON.stringify({
+        model,
+        messages,
+        ...(Array.isArray(tools) && tools.length ? { tools, tool_choice: "auto" } : {}),
+        temperature: 0.2,
+        max_tokens: 900,
+      }),
       signal: controller.signal,
     });
     const body = await response.json().catch(() => ({}));
@@ -178,9 +212,15 @@ function fallbackMoney(amount, currency) {
   return `${value < 0 ? "-" : ""}${prefix}${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-async function verifiedFallbackAnswer(db, userId, message) {
-  const requestedMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1] || currentMonth();
-  const report = await generateMonthlyReport(db, userId, { month: requestedMonth });
+async function verifiedFallbackAnswer(db, userId, message, dashboardMonth) {
+  const requestedMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1] || dashboardMonth;
+  if (/\b(last|latest|most recent)\b.*\b(expense|transaction|purchase)\b|\b(expense|transaction|purchase)\b.*\b(last|latest|most recent)\b/i.test(message)) {
+    const latest = (await getLatestExpense(db, userId)).expense;
+    return latest
+      ? `## Latest expense\n\n- **${latest.description || latest.category}**\n- Amount: **${fallbackMoney(latest.amount, latest.currency)}**\n- Category: **${latest.category}**\n- Date: **${latest.date}**`
+      : "You do not have any recorded expenses yet.";
+  }
+  const report = await generateMonthlyReport(db, userId, { month: requestedMonth }, dashboardMonth);
   const top = report.categories[0];
   const question = message.toLowerCase();
   const categoryLines = report.categories.slice(0, 3).map((item) => `- ${item.category}: ${fallbackMoney(item.amount, report.currency)}`).join("\n") || "- No expenses recorded";
@@ -202,6 +242,29 @@ async function verifiedFallbackAnswer(db, userId, message) {
   return `I can verify your expenses, budgets, and monthly reports. For ${report.month}, you have recorded **${fallbackMoney(report.spent, report.currency)}** in expenses. Ask me for a monthly report, a category breakdown, or savings ideas.`;
 }
 
+function isLatestExpenseIntent(message) {
+  return /\b(last|latest|most recent)\b.*\b(expense|transaction|purchase)\b|\b(expense|transaction|purchase)\b.*\b(last|latest|most recent)\b/i.test(message);
+}
+
+function needsFinancialData(message) {
+  return /\b(expense|spend|spent|transaction|purchase|income|budget|saving|category|merchant|report|summary|cash flow|balance|bill|subscription|forecast)\b/i.test(message);
+}
+
+async function preloadFinancialContext(db, userId, message, dashboardMonth, tier) {
+  if (!needsFinancialData(message) || ["advanced", "premium"].includes(tier)) return null;
+  if (isLatestExpenseIntent(message)) {
+    return { name: "get_latest_expense", result: await getLatestExpense(db, userId) };
+  }
+  if (/\bbudget\b/i.test(message) && !/\breport|summary\b/i.test(message)) {
+    return { name: "get_budget_status", result: await getBudgetStatus(db, userId, dashboardMonth) };
+  }
+  const explicitMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1];
+  return {
+    name: "generate_monthly_report",
+    result: await generateMonthlyReport(db, userId, { month: explicitMonth || dashboardMonth }, dashboardMonth),
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Cache-Control", "private, no-store, max-age=0");
@@ -213,10 +276,12 @@ export default async function handler(req, res) {
 
   const message = safeText(req.body?.message, 2000);
   if (!message) return res.status(400).json({ error: "Enter a question for the assistant." });
+  const dashboardMonth = validMonth(req.body?.month) ? req.body.month : currentMonth();
+  const currentDate = new Date().toISOString().slice(0, 10);
   const claimedUserId = safeText(req.body?.userId, 200);
   if (claimedUserId && claimedUserId !== userId) return res.status(403).json({ error: "The requested user does not match this dashboard session." });
   const modelChoice = selectModel(message);
-  const cacheKey = `${userId}:${modelChoice.model}:${message.toLowerCase()}`;
+  const cacheKey = `${userId}:${dashboardMonth}:${modelChoice.model}:${message.toLowerCase()}`;
   const cached = responseCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return res.status(200).json({ ...cached.value, cached: true });
 
@@ -226,13 +291,19 @@ export default async function handler(req, res) {
 
   try {
     const db = createClient({ url, authToken });
-    const messages = [{ role: "system", content: systemPrompt() }, ...safeHistory(req.body?.history), { role: "user", content: message }];
-    const usedTools = [];
+    const preloaded = await preloadFinancialContext(db, userId, message, dashboardMonth, modelChoice.tier);
+    const messages = [
+      { role: "system", content: systemPrompt(currentDate, dashboardMonth, Boolean(preloaded)) },
+      ...(preloaded ? [{ role: "system", content: `Verified tool result (${preloaded.name}): ${JSON.stringify(preloaded.result)}` }] : []),
+      ...safeHistory(req.body?.history),
+      { role: "user", content: message },
+    ];
+    const usedTools = preloaded ? [preloaded.name] : [];
     let activeModel = modelChoice.model;
     let completion;
     for (let pass = 0; pass < 4; pass += 1) {
       try {
-        completion = await callComet(activeModel, messages, toolDefinitions());
+        completion = await callComet(activeModel, messages, preloaded ? [] : toolDefinitions());
       } catch (error) {
         if (activeModel !== DEFAULT_MODEL) {
           activeModel = DEFAULT_MODEL;
@@ -247,11 +318,12 @@ export default async function handler(req, res) {
         let input = {};
         try { input = JSON.parse(call.function?.arguments || "{}"); } catch { input = {}; }
         const name = safeText(call.function?.name, 64);
-        const result = await runTool(db, userId, name, input);
+        const result = await runTool(db, userId, name, input, dashboardMonth);
         usedTools.push(name);
         messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
       }
     }
+    if (needsFinancialData(message) && !usedTools.length) throw new Error("The model returned an unverified financial answer.");
     const answer = answerContent(completion?.choices?.[0]?.message);
     const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, cached: false };
     responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
@@ -262,7 +334,7 @@ export default async function handler(req, res) {
     console.error("[ai-chat] request failed", error);
     try {
       const fallbackDb = createClient({ url, authToken });
-      const answer = await verifiedFallbackAnswer(fallbackDb, userId, message);
+      const answer = await verifiedFallbackAnswer(fallbackDb, userId, message, dashboardMonth);
       return res.status(200).json({
         answer,
         model: "verified-dashboard-fallback",
