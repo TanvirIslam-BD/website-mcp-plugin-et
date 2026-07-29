@@ -5828,6 +5828,23 @@ textarea:focus-visible {
 :root[data-theme="dark"] .category-track,
 :root[data-theme="dark"] .copilot-progress { background: #253248; }
 
+:root[data-theme="dark"] .score-ring {
+  background: conic-gradient(var(--green) var(--score), #28374b 0);
+}
+:root[data-theme="dark"] .budget-ring {
+  background: conic-gradient(#f31920 var(--budget), #3a2934 0);
+}
+:root[data-theme="dark"] .score-ring .inner,
+:root[data-theme="dark"] .budget-ring .inner,
+:root[data-theme="dark"] .donut .inner {
+  color: #f2f6ff;
+  background: #162337;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+}
+:root[data-theme="dark"] .score-ring span,
+:root[data-theme="dark"] .budget-ring span,
+:root[data-theme="dark"] .donut span { color: #cbd5e5; }
+
 :root[data-theme="dark"] .insight-item { border-color: #293850; background: #152237; }
 :root[data-theme="dark"] .assistant-day::before,
 :root[data-theme="dark"] .assistant-day::after { background: #314158; }
@@ -5900,6 +5917,33 @@ textarea:focus-visible {
 :root[data-theme="dark"] .sidebar .nav button:hover,
 :root[data-theme="dark"] .sidebar .nav button.active { color: #fff; }
 :root[data-theme="dark"] .profile-card { color: #e5ecf8; border-color: #2a3c55; background: #111f34; }
+:root[data-theme="dark"] .sidebar .profile-logout {
+  color: #b7c5d9;
+  border-color: #33465f;
+  background: #17263b;
+}
+:root[data-theme="dark"] .sidebar .profile-logout:hover {
+  color: #fff;
+  border-color: rgba(255,112,112,.55);
+  background: rgba(255,69,72,.18);
+}
+
+:root[data-theme="dark"] .action-button:not(.primary):not(.danger) {
+  color: #62dda4;
+  border-color: #285542;
+  background: #112a25;
+  box-shadow: none;
+}
+:root[data-theme="dark"] .action-button:not(.primary):not(.danger):hover {
+  color: #83ecc0;
+  border-color: #34775a;
+  background: #15372f;
+}
+:root[data-theme="dark"] .assistant-alert-icon {
+  color: #8297ff;
+  border: 1px solid #344a78;
+  background: #1b2b4c;
+}
 
 :root[data-theme="dark"] .theme-switch { border-color: #2d3d54; background: #0c192b; }
 :root[data-theme="dark"] .theme-switch button { color: #8796ad; }
