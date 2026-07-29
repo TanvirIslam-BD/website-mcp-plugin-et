@@ -55,7 +55,6 @@ button {
   stroke-linejoin: round;
 }
 
-.boot-card,
 .error-card {
   width: min(460px, calc(100% - 32px));
   margin: 15vh auto;
@@ -66,23 +65,218 @@ button {
   box-shadow: var(--shadow);
 }
 
-.boot-card img {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+.boot-screen {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100dvh;
+  place-content: center;
+  gap: 18px;
+  overflow: hidden;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(68, 113, 255, .11), transparent 29rem),
+    linear-gradient(145deg, #f9fbff 0%, #f2f6fc 58%, #edf4ff 100%);
 }
 
-.boot-card h1,
+.boot-screen::before,
+.boot-screen::after {
+  position: absolute;
+  z-index: -1;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  content: "";
+  filter: blur(2px);
+  opacity: .48;
+}
+
+.boot-screen::before {
+  top: -190px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(83, 72, 255, .2), transparent 68%);
+}
+
+.boot-screen::after {
+  bottom: -210px;
+  left: -90px;
+  background: radial-gradient(circle, rgba(21, 189, 151, .18), transparent 68%);
+}
+
+.boot-panel {
+  width: min(430px, calc(100vw - 32px));
+  padding: 28px;
+  border: 1px solid rgba(207, 218, 236, .92);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 24px 70px rgba(27, 52, 102, .12), 0 2px 8px rgba(27, 52, 102, .04);
+  backdrop-filter: blur(16px);
+}
+
+.boot-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #101a35;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.boot-logo {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #07152f;
+  box-shadow: 0 8px 22px rgba(19, 65, 151, .2);
+  animation: bootLogoPulse 1.8s ease-in-out infinite;
+}
+
+.boot-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.boot-copy {
+  margin-top: 28px;
+}
+
+.boot-eyebrow {
+  color: #275cf2;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.boot-copy h1,
 .error-card h1 {
-  margin: 18px 0 8px;
-  font-size: 24px;
+  margin: 8px 0 8px;
+  color: #07132d;
+  font-size: clamp(23px, 5vw, 28px);
+  letter-spacing: -.035em;
 }
 
-.boot-card p,
+.boot-copy p,
 .error-card p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.boot-progress {
+  height: 6px;
+  margin-top: 26px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e8eef8;
+}
+
+.boot-progress span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #18b96f, #2475ff, #5d4cf5);
+  animation: bootProgress 1.45s ease-in-out infinite;
+}
+
+.boot-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  color: #77849d;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.boot-status span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #168a5a;
+}
+
+.boot-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #18b96f;
+  box-shadow: 0 0 0 4px rgba(24, 185, 111, .1);
+}
+
+.boot-privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  color: #71809a;
+  font-size: 10px;
+  text-align: center;
+}
+
+.boot-privacy svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+@keyframes bootProgress {
+  0% { transform: translateX(-110%); }
+  55%, 100% { transform: translateX(245%); }
+}
+
+@keyframes bootLogoPulse {
+  0%, 100% { transform: translateY(0); box-shadow: 0 8px 22px rgba(19, 65, 151, .2); }
+  50% { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(19, 65, 151, .28); }
+}
+
+@media (max-width: 480px) {
+  .boot-screen {
+    place-content: center;
+    padding: 16px;
+  }
+
+  .boot-panel {
+    padding: 23px 20px;
+    border-radius: 16px;
+  }
+
+  .boot-copy {
+    margin-top: 24px;
+  }
+
+  .boot-copy h1 {
+    font-size: 23px;
+  }
+
+  .boot-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-logo,
+  .boot-progress span {
+    animation: none;
+  }
+
+  .boot-progress span {
+    width: 68%;
+  }
 }
 
 .dashboard-shell {
@@ -203,6 +397,17 @@ button {
 
 .comet-badge-modal {
   margin: -8px 0 14px;
+}
+
+.copilot-modal-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -8px 0 14px;
+}
+
+.copilot-modal-status .comet-badge-modal {
+  margin: 0;
 }
 
 .assistant-collapse {
@@ -2323,10 +2528,10 @@ button {
   }
 
   .modal.ai-modal {
-    height: auto;
+    height: min(720px, calc(100dvh - 12px));
     max-height: calc(100dvh - 12px);
     display: grid;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr);
     gap: 0;
     padding: 17px 14px 15px;
   }
@@ -2348,15 +2553,35 @@ button {
 
   .ai-modal .ai-chat {
     min-height: 0;
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     gap: 10px;
   }
 
   .ai-modal .ai-chat-messages {
     min-height: 0;
-    max-height: min(34dvh, 320px);
+    max-height: none;
     align-content: start;
     padding: 3px 2px 3px 0;
+  }
+
+  .ai-modal .assistant-alert {
+    grid-template-columns: 42px minmax(0, 1fr);
+    padding: 12px 10px 10px;
+  }
+
+  .ai-modal .assistant-alert-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .ai-modal .assistant-alert-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ai-modal .assistant-alert-actions button {
+    padding-inline: 5px;
+    white-space: nowrap;
   }
 
   .ai-modal .ai-message {

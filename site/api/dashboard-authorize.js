@@ -33,8 +33,28 @@ function dashboardCookie(token) {
   return `${DASHBOARD_COOKIE}=${token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`;
 }
 
-function createDashboardSession(userId, secret) {
-  const payload = Buffer.from(JSON.stringify({ u: userId, e: Date.now() + 15 * 60 * 1000 })).toString("base64url");
+function cleanDisplayName(value) {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 80);
+}
+
+function cleanProfilePhoto(value) {
+  if (typeof value !== "string" || value.length > 500) return "";
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+function createDashboardSession(userId, secret, displayName = "", profilePhotoUrl = "") {
+  const payload = Buffer.from(JSON.stringify({
+    u: userId,
+    e: Date.now() + 15 * 60 * 1000,
+    ...(displayName ? { n: displayName } : {}),
+    ...(profilePhotoUrl ? { p: profilePhotoUrl } : {}),
+  })).toString("base64url");
   const signature = createHmac("sha256", secret).update(payload).digest("base64url");
   return `${payload}.${signature}`;
 }
@@ -47,7 +67,30 @@ function identityFromAccessToken(accessToken) {
   try {
     const claims = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
     const candidate = claims.sub || claims.user_id || claims.userId || claims.id || claims.user?.id;
-    return typeof candidate === "string" && /^[A-Za-z0-9:_-]{1,200}$/.test(candidate) ? candidate : null;
+    if (typeof candidate !== "string" || !/^[A-Za-z0-9:_-]{1,200}$/.test(candidate)) return null;
+    const email = cleanDisplayName(claims.email || claims.user?.email);
+    const emailName = email.includes("@")
+      ? email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase())
+      : "";
+    const displayName = cleanDisplayName(
+      claims.name ||
+      claims.full_name ||
+      claims.display_name ||
+      claims.preferred_username ||
+      claims.username ||
+      claims.user?.name ||
+      claims.user_metadata?.full_name ||
+      emailName,
+    );
+    const profilePhotoUrl = cleanProfilePhoto(
+      claims.picture ||
+      claims.avatar_url ||
+      claims.user?.picture ||
+      claims.user?.avatar_url ||
+      claims.user?.image ||
+      claims.user_metadata?.avatar_url,
+    );
+    return { userId: candidate, displayName, profilePhotoUrl };
   } catch {
     return null;
   }
@@ -102,10 +145,28 @@ export default async function handler(req, res) {
     // route. Some hosted deployments proxy custom browser routes as an empty
     // 200 response, so use the identity returned by the verified OAuth token
     // exchange as a secure fallback.
-    const privateSession = sessionToken(sessionBody) || (() => {
-      const userId = identityFromAccessToken(tokenBody.access_token);
-      return userId ? createDashboardSession(userId, secret) : null;
-    })();
+    const identity = identityFromAccessToken(tokenBody.access_token);
+    const responseDisplayName = cleanDisplayName(
+      sessionBody?.user?.name ||
+      sessionBody?.display_name ||
+      tokenBody?.user?.name ||
+      tokenBody?.display_name,
+    );
+    const responseProfilePhoto = cleanProfilePhoto(
+      sessionBody?.user?.picture ||
+      sessionBody?.user?.avatar_url ||
+      sessionBody?.user?.image ||
+      sessionBody?.picture ||
+      sessionBody?.avatar_url ||
+      tokenBody?.user?.picture ||
+      tokenBody?.user?.avatar_url ||
+      tokenBody?.user?.image ||
+      tokenBody?.picture ||
+      tokenBody?.avatar_url,
+    );
+    const privateSession = identity
+      ? createDashboardSession(identity.userId, secret, identity.displayName || responseDisplayName, identity.profilePhotoUrl || responseProfilePhoto)
+      : sessionToken(sessionBody);
     if (!privateSession) {
       const detail = typeof sessionBody.error === "string" ? ` ${sessionBody.error}` : "";
       throw new Error(`Could not create the private dashboard session (MCPize returned ${sessionResponse.status}; ${responseShape(sessionBody, sessionResponse)}).${detail}`);

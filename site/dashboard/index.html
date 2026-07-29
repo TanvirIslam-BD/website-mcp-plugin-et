@@ -10,10 +10,27 @@
   <script defer src="/dashboard/app.js"></script>
 </head>
 <body>
-  <main id="app" class="boot-card">
-    <img src="/assets/logo/icon-512.png" alt="">
-    <h1>Opening your dashboard</h1>
-    <p>Loading your private monthly finance workspace.</p>
+  <main id="app" class="boot-screen" aria-live="polite" aria-busy="true">
+    <section class="boot-panel">
+      <div class="boot-brand">
+        <span class="boot-logo"><img src="/assets/logo/icon-512.png" alt=""></span>
+        <span>Expense Tracker AI</span>
+      </div>
+      <div class="boot-copy">
+        <span class="boot-eyebrow">Private financial workspace</span>
+        <h1>Preparing your dashboard</h1>
+        <p>Securely loading your latest balances, budget, and spending insights.</p>
+      </div>
+      <div class="boot-progress" role="progressbar" aria-label="Loading dashboard"><span></span></div>
+      <div class="boot-status">
+        <span><i></i>Secure connection</span>
+        <span>Syncing your data</span>
+      </div>
+    </section>
+    <p class="boot-privacy">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+      Only your authenticated session can access this dashboard
+    </p>
   </main>
 </body>
 </html>

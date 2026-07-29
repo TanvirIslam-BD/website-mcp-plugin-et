@@ -472,6 +472,8 @@ function renderTransactions(model) {
 }
 
 function renderSidebar(model) {
+  const displayName = esc(model.user?.displayName || "User");
+  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/icon-512.png");
   const nav = [
     ["dashboard", "Dashboard", "dashboard"],
     ["transactions", "Transactions", "transactions"],
@@ -485,8 +487,8 @@ function renderSidebar(model) {
         ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
       <section class="profile-card">
-        <img src="/assets/logo/icon-512.png" alt="">
-        <div><b>Private User</b><span>Signed dashboard</span></div>
+        <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
+        <div><b>${displayName}</b><span>Signed dashboard</span></div>
         ${icon("chevron")}
       </section>
     </aside>
@@ -494,10 +496,11 @@ function renderSidebar(model) {
 }
 
 function renderHeader(model) {
+  const displayName = esc(model.user?.displayName || "User");
   return `
     <header class="topbar">
       <div class="headline">
-        <h1>Good morning, Private User</h1>
+        <h1>Good morning, ${displayName}</h1>
         <p>Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.</p>
       </div>
       <div class="toolbar">
@@ -653,22 +656,46 @@ function setAiSubmitLoading(button, isLoading) {
 }
 
 function openAiChat(prefill = "") {
+  const model = window.dashboardModel;
+  const topCategory = model?.categories?.[0];
+  const topShare = topCategory && model?.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
+  const overBudget = model?.remainingMinor !== null && Number(model?.remainingMinor || 0) < 0;
+  const budgetDifference = Math.abs(Number(model?.remainingMinor || 0));
+  const budgetHeadline = model?.budgetMinor
+    ? overBudget
+      ? `You’re <strong>${formatMoney(budgetDifference, model.currency, { compact: true })}</strong> over budget`
+      : `<strong>${formatMoney(model.remainingMinor, model.currency, { compact: true })}</strong> remains in your budget`
+    : "Set a budget to unlock alerts";
+  const budgetContext = topCategory
+    ? `${esc(topCategory.name)} drove most of this month’s spending.`
+    : "Record expenses to unlock category insights.";
+  const reportMonth = model ? esc(monthLabel(model.month).split(" ")[0]) : esc(monthLabel(selectedMonth).split(" ")[0]);
+
   openModal("Finance Copilot", "Get verified answers from your private expense data.", `
-    <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
-      <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
-    </a>
+    <div class="copilot-modal-status">
+      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+        <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
+      </a>
+      <span class="assistant-online"><i></i>Online</span>
+    </div>
     <div class="ai-chat" data-ai-chat>
-      <div class="ai-chat-messages" data-ai-messages>
-        <div class="ai-message assistant"><div class="ai-message-label">Expense Tracker AI</div><div class="ai-message-body">Ask about your expenses, categories, budget, or monthly spending. I’ll use your recorded data before answering.</div></div>
+      <div class="assistant-alert">
+        <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
+        <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
+        <div class="assistant-alert-actions">
+          <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
+          <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
+          <button type="button" data-ai-suggestion="Help me plan next month's budget.">${icon("bills")}Plan budget</button>
+        </div>
       </div>
-      <div class="ai-suggestions">
-        <button type="button" data-ai-suggestion="How much did I spend this month?">Monthly spending</button>
-        <button type="button" data-ai-suggestion="Why did my spending increase?">Why did spending change?</button>
-        <button type="button" data-ai-suggestion="Give me a monthly report for ${esc(selectedMonth)}">Monthly report</button>
+      <div class="assistant-day"><span>Today</span></div>
+      <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
+        <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
+        <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${reportMonth}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model?.budgetUsed || 0)}%"></i><strong>${model?.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} of ${model?.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model?.remainingMinor === null || !model ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
       </div>
-      <form class="ai-chat-form" data-ai-chat-form>
-        <textarea name="message" maxlength="2000" placeholder="Ask a financial question…" required>${esc(prefill)}</textarea>
-        <div><small>Private data only · AI may use expense, budget, and report tools.</small><button class="action-button primary" type="submit">Ask AI</button></div>
+      <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
+        <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask about your money..." aria-label="Ask AI Finance Assistant" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">➜</button></div>
+        <small>▣ Private · Uses only connected financial data</small>
       </form>
     </div>
   `, { wide: false, className: "ai-modal" });
@@ -1031,6 +1058,12 @@ function filterDashboard(query) {
 }
 
 function bindEvents() {
+  const profilePhoto = document.querySelector("[data-profile-photo]");
+  profilePhoto?.addEventListener("error", () => {
+    profilePhoto.removeAttribute("data-profile-photo");
+    profilePhoto.src = "/assets/logo/icon-512.png";
+  }, { once: true });
+
   document.addEventListener("click", (event) => {
     const close = event.target.closest("[data-close]");
     if (close) {

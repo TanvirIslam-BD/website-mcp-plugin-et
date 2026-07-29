@@ -14,7 +14,18 @@ function verifyToken(token) {
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
     const value = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return typeof value.u === "string" && value.u && Number.isFinite(value.e) && value.e > Date.now() ? value.u : null;
+    if (typeof value.u !== "string" || !value.u || !Number.isFinite(value.e) || value.e <= Date.now()) return null;
+    const displayName = typeof value.n === "string" ? value.n.trim().replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 80) : "";
+    let profilePhotoUrl = "";
+    if (typeof value.p === "string" && value.p.length <= 500) {
+      try {
+        const url = new URL(value.p);
+        if (url.protocol === "https:") profilePhotoUrl = url.toString();
+      } catch {
+        profilePhotoUrl = "";
+      }
+    }
+    return { userId: value.u, displayName, profilePhotoUrl };
   } catch {
     return null;
   }
@@ -113,8 +124,9 @@ export default async function handler(req, res) {
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Cache-Control", "private, no-store, max-age=0");
 
-  const userId = verifyToken(req.query.dashboard_token) || verifyToken(cookieValue(req));
-  if (!userId) return res.status(401).json({ error: "A valid dashboard link is required." });
+  const session = verifyToken(req.query.dashboard_token) || verifyToken(cookieValue(req));
+  if (!session) return res.status(401).json({ error: "A valid dashboard link is required." });
+  const userId = session.userId;
   if (req.query.dashboard_token) {
     res.setHeader("Set-Cookie", `${COOKIE}=${req.query.dashboard_token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`);
   }
@@ -247,6 +259,7 @@ export default async function handler(req, res) {
     const recurring = (finance.recurring || []).filter((entry) => entry.active && entry.currency === currency);
 
     return res.status(200).json({
+      user: { displayName: session.displayName || "User", profilePhotoUrl: session.profilePhotoUrl || "" },
       month,
       previousMonth: previous,
       daysInMonth: current.days,
