@@ -59,6 +59,8 @@ function icon(name) {
     plus: "<path d='M12 5v14M5 12h14'/>",
     close: "<path d='M6 6l12 12M18 6 6 18'/>",
     card: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='M3 10h18'/>",
+    lock: "<rect x='5' y='10' width='14' height='11' rx='2'/><path d='M8 10V7a4 4 0 0 1 8 0v3'/>",
+    attachment: "<path d='m20.5 11.5-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 1 1-2.8-2.8l8.9-8.9'/>",
     flame: "<path d='M12 22c4 0 7-3 7-7 0-3-2-5-4-7 .2 2-.7 3.2-2 4-1.3-3-1-6-1-10-4 3-7 7-7 12 0 5 3 8 7 8z'/>",
     chevron: "<path d='m9 18 6-6-6-6'/>",
     eye: "<path d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z'/><circle cx='12' cy='12' r='3'/>",
@@ -206,42 +208,34 @@ function buildModel(data) {
 }
 
 function renderMetricCards(model) {
-  const balanceTrend = percentChange(model.savedMinor, Number(model.previousIncomeMinor || 0) - Number(model.previousSpentMinor || 0));
-  const incomeTrend = percentChange(model.incomeMinor, model.previousIncomeMinor);
-  const expenseTrend = percentChange(model.spentMinor, model.previousSpentMinor, true);
-  const savingTrend = model.incomeMinor ? model.savingsRate : 0;
   const balanceSpark = model.savingsCum.length ? model.savingsCum : [1, 2, 1, 3, 4, 3, 5];
   const incomeSpark = model.incomeDaily.length ? model.incomeDaily : [1, 2, 3, 2, 4, 3, 5];
   const expenseSpark = model.expenseDaily.length ? model.expenseDaily : [1, 3, 4, 3, 2, 5, 4];
   return `
     <section class="summary-grid" aria-label="Monthly summary">
-      <article class="metric-card balance">
-        <span class="metric-icon">${icon("wallet")}</span>
-        <label>Total Balance</label>
-        <h2>${formatMoney(model.savedMinor, model.currency)}</h2>
-        ${trendBadge(balanceTrend, "vs last month")}
-        ${spark(balanceSpark)}
+      <article class="metric-card balance ${model.savedMinor < 0 ? "is-negative" : ""}">
+        <span class="metric-icon">${icon(model.savedMinor < 0 ? "down" : "up")}</span>
+        <label>Balance</label>
+        <h2>${formatMoney(model.savedMinor, model.currency, { compact: true })}</h2>
+        ${spark(balanceSpark, model.savedMinor < 0 ? "#ff2d2f" : "#18b96f")}
       </article>
       <article class="metric-card income">
-        <span class="metric-icon">${icon("down")}</span>
-        <label>Total Income</label>
-        <h2>${formatMoney(model.incomeMinor, model.currency)}</h2>
-        ${trendBadge(incomeTrend, "vs last month")}
+        <span class="metric-icon">${icon("up")}</span>
+        <label>Income</label>
+        <h2>${formatMoney(model.incomeMinor, model.currency, { compact: true })}</h2>
         ${spark(incomeSpark, "#18b96f")}
       </article>
       <article class="metric-card expense">
         <span class="metric-icon">${icon("up")}</span>
-        <label>Total Expenses</label>
-        <h2>${formatMoney(model.spentMinor, model.currency)}</h2>
-        ${trendBadge(expenseTrend, "vs last month", expenseTrend < 0 ? "bad" : "good")}
+        <label>Spent</label>
+        <h2>${formatMoney(model.spentMinor, model.currency, { compact: true })}</h2>
         ${spark(expenseSpark, "#ff4548")}
       </article>
-      <article class="metric-card saving">
-        <span class="metric-icon">${icon("piggy")}</span>
-        <label>Total Savings</label>
-        <h2>${formatMoney(model.savedMinor, model.currency)}</h2>
-        ${trendBadge(savingTrend, "savings rate", "purple")}
-        ${spark(balanceSpark, "#7c3fff")}
+      <article class="metric-card saving ${model.savedMinor < 0 ? "is-negative" : ""}">
+        <span class="metric-icon">${icon(model.savedMinor < 0 ? "down" : "up")}</span>
+        <label>Saved</label>
+        <h2>${formatMoney(model.savedMinor, model.currency, { compact: true })}</h2>
+        ${spark(balanceSpark, model.savedMinor < 0 ? "#ff4548" : "#2563ff")}
       </article>
     </section>
   `;
@@ -252,20 +246,19 @@ function renderHealth(model) {
   return `
     <article class="panel financial-health" id="analytics">
       <div class="panel-head">
-        <h3>Financial Health Score</h3>
-        <span class="tiny-icon">${icon("eye")}</span>
+        <h3>Financial health</h3>
       </div>
       <div class="health-body">
         <div class="score-ring" style="--score:${model.health}%">
-          <div class="inner"><b>${model.health}</b><span>${model.health >= 80 ? "Excellent" : model.health >= 60 ? "Good" : "Needs care"}</span></div>
+          <div class="inner"><b>${model.health}</b><span>/ 100</span></div>
         </div>
         <div class="health-stats">
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#18b96f;--tone-bg:#e8faef">${icon("down")}</i>Savings Rate</span><b>${model.savingsRate}%</b></div>
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#ff4548;--tone-bg:#fff0f0">${icon("budget")}</i>Budget Used</span><b>${model.budgetMinor ? `${model.budgetUsed}%` : "Not set"}</b></div>
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#2563ff;--tone-bg:#edf3ff">${icon("wallet")}</i>Emergency Fund</span><b>${recurringMonths} Months</b></div>
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#ffb21c;--tone-bg:#fff7e6">${icon("card")}</i>Debt Level</span><b class="good">Low</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:#ff4548;--tone-bg:#fff0f0">${icon("budget")}</i>Budget</span><b class="negative">${model.budgetMinor ? `${model.budgetUsed}%` : "Not set"}</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:#18b96f;--tone-bg:#e8faef">${icon("card")}</i>Debt</span><b class="good">Low</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:#06133a;--tone-bg:#f1f4f8">${icon("wallet")}</i>Emergency fund</span><b>${recurringMonths} months</b></div>
         </div>
       </div>
+      <button class="panel-footer-link" data-panel="analytics">View details</button>
     </article>
   `;
 }
@@ -284,7 +277,7 @@ function renderIncomeExpense(model) {
   return `
     <article class="panel large-chart" data-income-expense-chart>
       <div class="panel-head">
-        <h3>Income vs Expense</h3>
+        <h3>Cash flow</h3>
         <div class="chart-tools">
           <div class="legend">
             <span><i style="--tone:#18b96f"></i>Income</span>
@@ -344,51 +337,31 @@ function renderBudget(model) {
   return `
     <article class="panel budget-panel" id="budget">
       <div class="panel-head">
-        <h3>Budget Overview</h3>
+        <h3>Budget</h3>
       </div>
       <div class="budget-ring" style="--budget:${ring}%">
-        <div class="inner"><b>${model.budgetMinor ? `${used}%` : "--"}</b><span>${model.budgetMinor ? `of ${formatMoney(model.budgetMinor, model.currency, { compact: true })}` : "No budget"}</span></div>
+        <div class="inner"><b>${model.budgetMinor ? `${used}%` : "--"}</b><span>${model.budgetMinor ? "used" : "No budget"}</span></div>
       </div>
-      <div class="budget-values">
-        <span><small>Spent</small><b class="${isOver ? "negative" : ""}">${formatMoney(model.spentMinor, model.currency, { compact: true })}</b></span>
-        <span><small>Budget</small><b>${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "--"}</b></span>
-        <span><small>Remaining</small><b class="${isOver ? "negative" : ""}">${model.remainingMinor === null ? "--" : formatMoney(model.remainingMinor, model.currency, { compact: true })}</b></span>
-      </div>
-      <div class="budget-footer">
-        <div class="alert-pill">${icon(isOver ? "up" : "down")} ${model.budgetMinor ? (isOver ? `Budget exceeded by ${Math.max(0, used - 100)}%` : `${formatMoney(model.remainingMinor, model.currency)} remaining`) : "Set a monthly budget"}</div>
-        <button class="wide-button" data-panel="budget-editor">View Budget</button>
-      </div>
+      <p class="budget-total"><b>${formatMoney(model.spentMinor, model.currency, { compact: true })}</b> of <b>${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "--"}</b></p>
+      <p class="budget-over ${isOver ? "negative" : "positive"}">${model.remainingMinor === null ? "Set a monthly budget" : isOver ? `${formatMoney(Math.abs(model.remainingMinor), model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} remaining`}</p>
     </article>
   `;
 }
 
 function renderCategories(model) {
   const total = Math.max(model.spentMinor || 0, 1);
-  let start = 0;
-  const segments = (model.categories || []).slice(0, 6).map((category, index) => {
-    const pct = (category.amountMinor / total) * 100;
-    const end = start + pct;
-    const segment = `${colors[index % colors.length]} ${start.toFixed(2)}% ${end.toFixed(2)}%`;
-    start = end;
-    return segment;
-  });
-  if (start < 100) segments.push(`#e5ebf3 ${start.toFixed(2)}% 100%`);
-  const rows = (model.categories || []).slice(0, 6).map((category, index) => {
-    const pct = Math.round((category.amountMinor / total) * 100);
-    return `<div class="category-line"><label><i class="dot" style="--tone:${colors[index % colors.length]}"></i>${esc(category.name)}</label><b>${pct}%</b><span>${formatMoney(category.amountMinor, model.currency, { compact: true })}</span></div>`;
+  const largest = Math.max(...(model.categories || []).map((category) => Number(category.amountMinor || 0)), 1);
+  const rows = (model.categories || []).slice(0, 5).map((category, index) => {
+    const width = Math.max(4, Math.round((category.amountMinor / largest) * 100));
+    return `<div class="category-line"><label>${esc(category.name)}</label><span class="category-track"><i style="--tone:${colors[index % colors.length]};--value:${width}%"></i></span><b>${formatMoney(category.amountMinor, model.currency, { compact: true })}</b></div>`;
   }).join("") || `<div class="empty-state">No category data yet.</div>`;
   return `
     <article class="panel spending-panel" id="categories">
       <div class="panel-head">
-        <h3>Spending by Category</h3>
+        <h3>Spending breakdown</h3>
       </div>
-      <div class="category-body">
-        <div class="donut" style="--donut:conic-gradient(${segments.join(",")})">
-          <div class="inner"><b>${formatMoney(model.spentMinor, model.currency, { compact: true })}</b><span>Total</span></div>
-        </div>
-        <div class="category-legend">${rows}</div>
-      </div>
-      <button class="wide-button" data-panel="categories">View All Categories</button>
+      <div class="category-legend">${rows}</div>
+      <button class="panel-footer-link" data-panel="categories">View all categories</button>
     </article>
   `;
 }
@@ -405,13 +378,12 @@ function renderInsights(model) {
   return `
     <article class="panel insights-panel">
       <div class="panel-head">
-        <h3>AI Insights</h3>
-        <button class="panel-link" data-open-ai-chat>Ask AI</button>
+        <h3>Smart insights</h3>
       </div>
       <div class="insight-list">
-        ${items.map((item) => `<div class="insight-item"><i style="--tone:${item.tone};--tone-bg:${item.bg}">${icon(item.iconName)}</i><span><b>${esc(item.title)}</b><span>${esc(item.body)}</span></span></div>`).join("")}
+        ${items.map((item) => `<button class="insight-item" data-open-ai-chat data-ai-prefill="${esc(item.title)}"><i style="--tone:${item.tone};--tone-bg:${item.bg}">${icon(item.iconName)}</i><span><b>${esc(item.title)}</b></span>${icon("chevron")}</button>`).join("")}
       </div>
-      <button class="wide-button" data-open-ai-chat>Open AI Advisor</button>
+      <button class="panel-footer-link" data-open-ai-chat>Ask AI Advisor</button>
     </article>
   `;
 }
@@ -468,7 +440,7 @@ function renderBillsAndSubscriptions(model) {
 }
 
 function renderTransactions(model) {
-  const expenses = (model.expenses || []).slice(0, 8);
+  const expenses = (model.expenses || []).slice(0, 6);
   const rows = expenses.map((expense, index) => {
     const metadata = model.expenseMetadata?.[expense.id] || {};
     const [tone, bg] = toneFor(expense.category, index);
@@ -477,9 +449,9 @@ function renderTransactions(model) {
     return `
       <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${payment}`.toLowerCase())}">
         <td>${esc(expense.date)}</td>
-        <td><div class="tx-title"><i class="tx-avatar" style="--tone:${tone};--tone-bg:${bg}">${esc(String(merchant).charAt(0).toUpperCase())}</i><span><b>${esc(merchant)}</b><span>${esc(expense.description || expense.category)}</span></span></div></td>
+        <td><div class="tx-title"><span><b>${esc(merchant)}</b></span></div></td>
         <td><span class="tag" style="--tone:${tone};--tone-bg:${bg}">${esc(expense.category)}</span></td>
-        <td><span class="payment"><i>${esc(payment.slice(0, 4).toUpperCase())}</i>${esc(payment)}</span></td>
+        <td><span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span></td>
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
       </tr>`;
   }).join("") || `<tr><td colspan="5"><div class="empty-state">No transactions recorded for this month.</div></td></tr>`;
@@ -491,7 +463,7 @@ function renderTransactions(model) {
       </div>
       <div class="transactions-wrap">
         <table class="transactions">
-          <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Payment Method</th><th class="amount">Amount</th></tr></thead>
+          <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Method</th><th class="amount">Amount</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -500,7 +472,6 @@ function renderTransactions(model) {
 }
 
 function renderSidebar(model) {
-  const streak = model.savingsRate > 0 ? Math.max(1, Math.min(30, Math.round(model.savingsRate / 2))) : 0;
   const nav = [
     ["dashboard", "Dashboard", "dashboard"],
     ["transactions", "Transactions", "transactions"],
@@ -519,12 +490,6 @@ function renderSidebar(model) {
       <nav class="nav" aria-label="Dashboard navigation">
         ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
-      <section class="streak-card">
-        <div class="streak-label"><i class="flame">${icon("flame")}</i>Saving Streak</div>
-        <b>${streak} Days</b>
-        <p>${streak ? "Keep it up. Your net position is improving." : "Record income to start your streak."}</p>
-        <div class="streak-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      </section>
       <section class="profile-card">
         <img src="/assets/logo/icon-512.png" alt="">
         <div><b>Private User</b><span>Signed dashboard</span></div>
@@ -535,16 +500,15 @@ function renderSidebar(model) {
 }
 
 function renderHeader(model) {
-  const savedMore = percentChange(model.savedMinor, Number(model.previousIncomeMinor || 0) - Number(model.previousSpentMinor || 0));
   return `
     <header class="topbar">
       <div class="headline">
-        <h1>Good Morning, Private User!</h1>
-        <p>${savedMore >= 0 ? `You saved <strong>${Math.abs(savedMore).toFixed(0)}%</strong> more than last month. Keep it up!` : `Your private financial overview for ${esc(monthLabel(model.month))}.`}</p>
+        <h1>Good morning, Private User</h1>
+        <p>Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.</p>
       </div>
       <div class="toolbar">
         <input class="month-input" type="month" aria-label="Select month" value="${esc(model.month)}" data-month-picker>
-        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search anything..." data-search><span class="kbd">Ctrl K</span></label>
+        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
         <button class="notice-button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${buildNotifications(model).length}</b></button>
         <div class="toolbar-actions">
           <button class="action-button" data-entry="income">${icon("plus")}Add Income</button>
@@ -559,50 +523,43 @@ function renderAiAssistantRail(model) {
   const topCategory = model.categories?.[0];
   const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
   const overBudget = model.remainingMinor !== null && model.remainingMinor < 0;
-  const suggestedSavingMinor = Math.max(0, Math.round((topCategory?.amountMinor || model.spentMinor || 0) * .1));
-  const firstInsight = topCategory
-    ? `<b>Your ${esc(topCategory.name)} spend is ${topShare}% of this month.</b><span>That’s ${formatMoney(topCategory.amountMinor, model.currency)}, your highest category.</span>`
-    : `<b>Start by recording an expense.</b><span>I’ll use your private data to find patterns and savings opportunities.</span>`;
-  const budgetInsight = model.budgetMinor
+  const budgetDifference = Math.abs(Number(model.remainingMinor || 0));
+  const budgetHeadline = model.budgetMinor
     ? overBudget
-      ? `<b>Budget exceeded by ${Math.max(0, model.budgetUsed - 100)}%.</b><span>You’ve spent ${formatMoney(Math.abs(model.remainingMinor), model.currency)} over your total budget of ${formatMoney(model.budgetMinor, model.currency)}.</span>`
-      : `<b>Your budget is on track.</b><span>You still have ${formatMoney(model.remainingMinor, model.currency)} available this month.</span>`
-    : `<b>Create a monthly budget.</b><span>Set a limit and I’ll track your progress and alerts automatically.</span>`;
-  const savingInsight = suggestedSavingMinor
-    ? `<b>Try moving ${formatMoney(suggestedSavingMinor, model.currency)} to savings next week.</b><span>A small scheduled transfer can help build your emergency buffer.</span>`
-    : `<b>Build your first savings habit.</b><span>Once you record income, I can suggest a realistic savings target.</span>`;
+      ? `You’re <strong>${formatMoney(budgetDifference, model.currency, { compact: true })}</strong> over budget`
+      : `<strong>${formatMoney(model.remainingMinor, model.currency, { compact: true })}</strong> remains in your budget`
+    : "Set a budget to unlock alerts";
+  const budgetContext = topCategory
+    ? `${esc(topCategory.name)} drove most of this month’s spending.`
+    : "Record expenses to unlock category insights.";
 
   return `
     <aside class="assistant-rail" aria-label="AI Finance Assistant">
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><i>✦</i> AI Finance Assistant <b>BETA</b></span>
-          <a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
-            <span class="comet-badge-mark" aria-hidden="true">✦</span> Powered by <strong>CometAPI</strong>
-          </a>
+          <span class="assistant-title"><i>✦</i> Finance Copilot</span>
+          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span class="comet-badge-mark" aria-hidden="true">↗</span> Powered by <strong>CometAPI</strong></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
       </div>
       <div class="assistant-rail-chat ai-chat" data-ai-chat>
-        <div class="assistant-welcome">
-          <img src="/assets/logo/icon-512.png" alt="Expense Tracker AI">
-          <div><b>Hi! I’m your AI Finance Assistant.</b><span>I can help you understand your finances and make smarter decisions.</span><small>Just now</small></div>
+        <div class="assistant-alert">
+          <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
+          <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
+          <div class="assistant-alert-actions">
+            <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
+            <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
+            <button type="button" data-ai-suggestion="Help me plan next month's budget.">${icon("bills")}Plan budget</button>
+          </div>
         </div>
+        <div class="assistant-day"><span>Today</span></div>
         <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
-          <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>Now</small></div>
-          <div class="ai-message assistant ai-rail-insight"><div class="ai-message-label">Spending insight</div><div class="ai-message-body">${firstInsight}</div></div>
-          <div class="ai-message assistant ai-rail-insight"><div class="ai-message-label">Budget check</div><div class="ai-message-body">${budgetInsight}</div></div>
-          <div class="ai-message assistant ai-rail-insight"><div class="ai-message-label">Savings idea</div><div class="ai-message-body">${savingInsight}</div></div>
-        </div>
-        <div class="ai-suggestions assistant-rail-suggestions" aria-label="AI quick actions">
-          <button type="button" data-ai-suggestion="Explain my spending this month.">▣ Explain Spending</button>
-          <button type="button" data-ai-suggestion="Where can I reduce spending this month?">◉ Find Savings</button>
-          <button type="button" data-ai-suggestion="Help me plan next month's budget.">▦ Plan Budget</button>
-          <button type="button" data-ai-suggestion="Review my recurring bills and subscriptions.">▤ Review Bills</button>
+          <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
+          <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${esc(monthLabel(model.month).split(" ")[0])}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
         </div>
         <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
-          <textarea name="message" maxlength="2000" placeholder="Ask about your money…" aria-label="Ask AI Finance Assistant" required></textarea>
-          <div><small>ⓘ AI responses are for informational purposes only.</small><button class="assistant-send" type="submit" aria-label="Send question">➜</button></div>
+          <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask about your money..." aria-label="Ask AI Finance Assistant" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">➜</button></div>
+          <small>▣ Private · Uses only connected financial data</small>
         </form>
       </div>
     </aside>
@@ -617,13 +574,11 @@ function renderDashboard(model) {
       ${renderHeader(model)}
       ${renderMetricCards(model)}
       <section class="content-grid">
-        ${renderHealth(model)}
         ${renderIncomeExpense(model)}
         ${renderBudget(model)}
         ${renderCategories(model)}
+        ${renderHealth(model)}
         ${renderInsights(model)}
-        ${renderGoals(model)}
-        ${renderBillsAndSubscriptions(model)}
         ${renderTransactions(model)}
       </section>
     </section>
@@ -1097,7 +1052,7 @@ function bindEvents() {
     }
     const aiChat = event.target.closest("[data-open-ai-chat]");
     if (aiChat) {
-      openAiChat();
+      openAiChat(aiChat.dataset.aiPrefill || "");
       return;
     }
     const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");
