@@ -654,11 +654,7 @@ function renderEmptyDashboard(model) {
             </div>
           </section>
           <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Install or connect<small>Add Expense Tracker tools</small></strong></span><i></i><span><b>2</b><strong>Approve access<small>Choose permitted actions</small></strong></span><i></i><span><b>3</b><strong>Save as you chat<small>Invoke the tool when needed</small></strong></span></div></section>
-          <section class="empty-benefits empty-benefits-compact">
-            <article>${icon("transactions")}<span><b>Conversation tools</b><small>Add expenses intentionally</small></span></article>
-            <article>${icon("goals")}<span><b>Save more</b><small>Practical AI tips</small></span></article>
-            <article>${icon("lock")}<span><b>Private & secure</b><small>Your data, your control</small></span></article>
-          </section>
+          <section class="empty-client-strip"><span>Works with your favorite AI clients and MCP tools</span><div><b class="chatgpt-mark">◎</b>ChatGPT<i></i><b class="claude-mark">✳</b>Claude<i></i><b>✦</b>Gemini<i></i><b>↗</b>Grok<i></i><b>◆</b>Cursor<i></i><b>◇</b>Any MCP Client</div></section>
         </div>
         <aside class="empty-preview panel">
           <div class="panel-head"><h3>See it in action</h3><a href="/assets/dashboard/expense-tracker-ai-promo.png" target="_blank" aria-label="Open preview">${icon("chevron")}</a></div>
@@ -666,7 +662,6 @@ function renderEmptyDashboard(model) {
           <a href="/#demo">Preview the ChatGPT experience</a>
         </aside>
       </div>
-      <section class="empty-client-strip"><span>Works with your favorite AI clients and MCP tools</span><div><b class="chatgpt-mark">◎</b>ChatGPT<i></i><b class="claude-mark">✳</b>Claude<i></i><b>✦</b>Gemini<i></i><b>↗</b>Grok<i></i><b>◆</b>Cursor<i></i><b>◇</b>Any MCP Client</div></section>
     </main>
     ${renderEmptyAssistantRail()}
   `;
