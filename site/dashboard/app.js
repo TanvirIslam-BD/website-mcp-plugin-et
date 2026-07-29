@@ -189,6 +189,16 @@ function buildModel(data) {
   const forecastMinor = Math.round((Number(data.spentMinor || 0) / elapsed) * daysInMonth(month));
   const savingsRate = data.incomeMinor ? Math.round((savedMinor / data.incomeMinor) * 100) : 0;
   const health = Math.max(38, Math.min(97, Math.round(70 + Math.min(18, Math.max(-18, savingsRate / 2)) - Math.max(0, budgetUsed - 100) / 3)));
+  const hasFinancialData = Boolean(
+    Number(data.spentMinor || 0) ||
+    Number(data.incomeMinor || 0) ||
+    budgetMinor !== null ||
+    (data.expenses || []).length ||
+    (data.incomes || []).length ||
+    (data.categories || []).length ||
+    (data.recurring || []).length ||
+    (data.goals || []).length
+  );
   return {
     ...data,
     currency,
@@ -205,6 +215,7 @@ function buildModel(data) {
     forecastMinor,
     savingsRate,
     health,
+    hasFinancialData,
   };
 }
 
@@ -565,6 +576,98 @@ function renderAiAssistantRail(model) {
         </form>
       </div>
     </aside>
+  `;
+}
+
+function renderEmptyAssistantRail() {
+  return `
+    <aside class="assistant-rail empty-assistant-rail" aria-label="Finance Copilot onboarding">
+      <div class="assistant-rail-header">
+        <div class="assistant-heading">
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot.png" alt=""></span> Finance Copilot</span>
+          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
+        </div>
+      </div>
+      <div class="empty-copilot-body">
+        <img src="/assets/finance-copilot.png" alt="Finance Copilot">
+        <h2>Ready when you are</h2>
+        <p>Start recording expenses in ChatGPT or Claude to ask questions about your spending.</p>
+        <a class="empty-primary-link" href="/#how">Connect an AI</a>
+        <div class="empty-divider"><span>Example questions</span></div>
+        <div class="empty-questions">
+          <span>${icon("lock")}Summarize this month</span>
+          <span>${icon("lock")}Where can I save?</span>
+          <span>${icon("lock")}Build a budget</span>
+        </div>
+      </div>
+      <div class="empty-copilot-compose">
+        <div>${icon("lock")}<span>Connect an AI to start chatting</span><button disabled aria-label="Chat unavailable">${icon("send")}</button></div>
+        <small>${icon("lock")} Private · Uses only data you approve</small>
+      </div>
+    </aside>
+  `;
+}
+
+function renderEmptyHeader(model) {
+  const displayName = esc(model.user?.displayName || "User");
+  const firstName = displayName.split(/\s+/)[0];
+  return `
+    <header class="topbar empty-topbar">
+      <div class="headline">
+        <h1>Welcome, ${firstName}</h1>
+        <p>Let’s build your first financial picture.</p>
+      </div>
+      <div class="toolbar">
+        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
+        <button class="notice-button" aria-label="Notifications">${icon("bell")}<b>0</b></button>
+        <button class="empty-manual-action" data-entry="expense">Enter expenses manually</button>
+      </div>
+    </header>
+  `;
+}
+
+function renderEmptyDashboard(model) {
+  app.className = "dashboard-shell empty-dashboard";
+  app.innerHTML = `
+    ${renderSidebar(model)}
+    <main class="main empty-dashboard-main">
+      ${renderEmptyHeader(model)}
+      <section class="empty-hero">
+        <div class="empty-hero-copy">
+          <h2>Know where your <span>money</span> is going</h2>
+          <p>Turn everyday expense conversations into clear reports, budgets, and saving insights.</p>
+          <div class="empty-hero-actions"><a href="/#how">Connect an AI ${icon("chevron")}</a><button data-entry="expense">Enter manually</button></div>
+          <small>${icon("lock")}Private by design&nbsp; · &nbsp;You choose what to share</small>
+        </div>
+        <div class="empty-hero-visual" aria-hidden="true">
+          <div class="source-card"><i class="chatgpt-mark">◎</i><span></span><span></span></div>
+          <div class="source-card"><i class="claude-mark">✳</i><span></span><span></span></div>
+          <div class="flow-dots">···›</div>
+          <div class="report-card"><i></i><b></b><span></span><span></span><span></span></div>
+        </div>
+      </section>
+      <section class="empty-connect panel">
+        <div class="empty-section-heading"><h3>Connect your AI workspace</h3><p>Choose where you already track or discuss expenses.</p></div>
+        <div class="empty-client-grid">
+          <article class="empty-client-card">
+            <div class="client-logo chatgpt-mark">◎</div><div><h3>ChatGPT <em>Recommended</em></h3><p>Turn expense chats into structured transactions and monthly reports.</p></div>
+            <a class="client-connect primary" href="/#how">Connect ChatGPT ${icon("chevron")}</a><small>${icon("transactions")}Takes about 1 minute</small>
+          </article>
+          <article class="empty-client-card">
+            <div class="client-logo claude-mark">✳</div><div><h3>Claude</h3><p>Bring expense notes into one organized financial view.</p></div>
+            <a class="client-connect" href="/#how">Connect Claude ${icon("chevron")}</a><small>${icon("transactions")}Takes about 1 minute</small>
+          </article>
+        </div>
+      </section>
+      <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Connect<small>Link your workspace</small></strong></span><i></i><span><b>2</b><strong>Choose what to share<small>Stay in control</small></strong></span><i></i><span><b>3</b><strong>Ask for insights<small>Get reports instantly</small></strong></span></div></section>
+      <section class="empty-benefits">
+        <article>${icon("analytics")}<span><b>Smart reports</b><small>Monthly summaries</small></span></article>
+        <article>${icon("bills")}<span><b>Receipt capture</b><small>Track expenses</small></span></article>
+        <article>${icon("goals")}<span><b>Save more</b><small>Practical AI tips</small></span></article>
+        <article>${icon("lock")}<span><b>Private & secure</b><small>Your data, your control</small></span></article>
+      </section>
+    </main>
+    ${renderEmptyAssistantRail()}
   `;
 }
 
@@ -1159,7 +1262,8 @@ function bindEvents() {
 loadDashboard()
   .then((data) => {
     window.dashboardModel = buildModel(data);
-    renderDashboard(window.dashboardModel);
+    if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
+    else renderEmptyDashboard(window.dashboardModel);
     bindEvents();
     bindIncomeExpenseChart();
   })
