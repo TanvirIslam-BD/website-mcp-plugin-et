@@ -6419,3 +6419,630 @@ textarea:focus-visible {
 :root[data-theme="dark"] .score-ring .inner {
   box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
 }
+
+/* ─── Dark Theme Deep Polish ─── */
+
+/* Surface hierarchy: use layered backgrounds for depth */
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .dashboard-shell {
+  background: #060e1a;
+}
+
+:root[data-theme="dark"] .main,
+:root[data-theme="dark"] .empty-dashboard-main {
+  background: #060e1a;
+}
+
+/* Metric cards: glassy elevated surface with colored glow */
+:root[data-theme="dark"] .metric-card,
+:root[data-theme="dark"] .metric-card.balance {
+  border-color: #1e2e44;
+  background: linear-gradient(145deg, #0f1b2c, #111f33);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .02) inset,
+    0 2px 8px rgba(0, 0, 0, .18),
+    0 8px 24px rgba(0, 0, 0, .12);
+}
+
+:root[data-theme="dark"] .metric-card:hover {
+  border-color: #2a3d56;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .03) inset,
+    0 4px 12px rgba(0, 0, 0, .22),
+    0 12px 32px rgba(0, 0, 0, .16);
+}
+
+:root[data-theme="dark"] .metric-card.income {
+  border-top-color: rgba(24, 185, 111, .5);
+}
+
+:root[data-theme="dark"] .metric-card.expense {
+  border-top-color: rgba(255, 69, 72, .5);
+}
+
+:root[data-theme="dark"] .metric-card.saving:not(.is-negative) {
+  border-top-color: rgba(37, 99, 255, .5);
+}
+
+:root[data-theme="dark"] .metric-card.saving.is-negative {
+  border-top-color: rgba(255, 69, 72, .5);
+}
+
+:root[data-theme="dark"] .metric-card.balance {
+  border-top-color: rgba(124, 108, 255, .5);
+}
+
+/* Metric labels: better contrast */
+:root[data-theme="dark"] .metric-card label,
+:root[data-theme="dark"] .metric-card.balance label {
+  color: #8fa0be;
+}
+
+/* Metric values: brighter white */
+:root[data-theme="dark"] .metric-card h2,
+:root[data-theme="dark"] .metric-card.balance h2 {
+  color: #f8fbff;
+}
+
+:root[data-theme="dark"] .metric-card.expense h2,
+:root[data-theme="dark"] .metric-card.is-negative h2 {
+  color: #ff6b6e;
+}
+
+/* Metric icons: vivid against dark */
+:root[data-theme="dark"] .metric-icon,
+:root[data-theme="dark"] .metric-card.balance .metric-icon {
+  color: #ff6b6e;
+  background: rgba(255, 69, 72, .12);
+  box-shadow: 0 0 0 3px rgba(255, 69, 72, .06);
+}
+
+:root[data-theme="dark"] .metric-card.income .metric-icon {
+  color: #4ce8a2;
+  background: rgba(24, 185, 111, .12);
+  box-shadow: 0 0 0 3px rgba(24, 185, 111, .06);
+}
+
+:root[data-theme="dark"] .metric-card.saving:not(.is-negative) .metric-icon {
+  color: #6fa4ff;
+  background: rgba(37, 99, 255, .12);
+  box-shadow: 0 0 0 3px rgba(37, 99, 255, .06);
+}
+
+/* Sparklines: brighter in dark mode */
+:root[data-theme="dark"] .sparkline polyline {
+  opacity: .85;
+}
+
+:root[data-theme="dark"] .sparkline path.area {
+  opacity: .12;
+}
+
+/* Panels: elevated glass effect */
+:root[data-theme="dark"] .panel {
+  border-color: #1e2e44;
+  background: linear-gradient(160deg, #0d1928, #101e30);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .02) inset,
+    0 2px 8px rgba(0, 0, 0, .14),
+    0 6px 20px rgba(0, 0, 0, .1);
+}
+
+:root[data-theme="dark"] .panel:hover {
+  border-color: #273a52;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .025) inset,
+    0 4px 12px rgba(0, 0, 0, .18),
+    0 10px 28px rgba(0, 0, 0, .14);
+}
+
+/* Panel headings: crisp white */
+:root[data-theme="dark"] .panel h3 {
+  color: #f0f5ff;
+}
+
+/* Cash flow chart: subtle gradient background */
+:root[data-theme="dark"] .large-chart {
+  background: linear-gradient(180deg, #0d1928, #0b1724);
+}
+
+/* Chart lines: glow effect in dark */
+:root[data-theme="dark"] .chart-line.income {
+  filter: drop-shadow(0 0 4px rgba(24, 185, 111, .3));
+}
+
+:root[data-theme="dark"] .chart-line.expense {
+  filter: drop-shadow(0 0 4px rgba(255, 69, 72, .3));
+}
+
+:root[data-theme="dark"] .chart-line.saving {
+  filter: drop-shadow(0 0 4px rgba(37, 99, 255, .3));
+}
+
+:root[data-theme="dark"] .chart-point {
+  fill: #0f1b2c;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .3));
+}
+
+/* Grid lines: barely visible for clean look */
+:root[data-theme="dark"] .grid-line {
+  stroke: #1a2840;
+  stroke-dasharray: 3 5;
+}
+
+/* Axis labels */
+:root[data-theme="dark"] .axis-label {
+  fill: #6b7f9c;
+}
+
+:root[data-theme="dark"] .chart-y-axis,
+:root[data-theme="dark"] .chart-x-axis {
+  color: #6b7f9c;
+}
+
+/* Legend: better visibility */
+:root[data-theme="dark"] .legend {
+  color: #9aacca;
+}
+
+:root[data-theme="dark"] .period-select {
+  color: #d0daf0;
+  border-color: #253548;
+  background: #0c1826;
+}
+
+/* Budget ring: softer red glow */
+:root[data-theme="dark"] .budget-ring {
+  background: conic-gradient(#e8333a var(--budget), #1a2840 0);
+  box-shadow: 0 0 20px rgba(232, 51, 58, .08);
+}
+
+:root[data-theme="dark"] .budget-ring .inner {
+  background: #0d1928;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, .2),
+    inset 0 0 0 1px rgba(255, 255, 255, .03);
+}
+
+:root[data-theme="dark"] .budget-ring b {
+  color: #f8fbff;
+}
+
+:root[data-theme="dark"] .budget-ring span {
+  color: #8fa0be;
+}
+
+:root[data-theme="dark"] .budget-total {
+  color: #e4ecf8;
+}
+
+:root[data-theme="dark"] .budget-over.negative {
+  color: #ff6b6e;
+}
+
+/* Score ring: vivid green glow */
+:root[data-theme="dark"] .score-ring {
+  background: conic-gradient(#22d983 var(--score), #1a2840 0);
+  box-shadow: 0 0 18px rgba(34, 217, 131, .06);
+}
+
+:root[data-theme="dark"] .score-ring .inner {
+  background: #0d1928;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, .2),
+    inset 0 0 0 1px rgba(255, 255, 255, .03);
+}
+
+:root[data-theme="dark"] .score-ring b {
+  color: #f8fbff;
+}
+
+:root[data-theme="dark"] .score-ring span {
+  color: #8fa0be;
+}
+
+/* Health stats: refined separator */
+:root[data-theme="dark"] .health-stat {
+  border-bottom-color: #1a2840;
+  color: #8fa0be;
+}
+
+:root[data-theme="dark"] .health-stat b {
+  color: #dde6f4;
+}
+
+:root[data-theme="dark"] .health-stat b.good {
+  color: #4ce8a2;
+}
+
+:root[data-theme="dark"] .health-stat b.negative {
+  color: #ff6b6e;
+}
+
+/* Spending breakdown: vibrant category bars */
+:root[data-theme="dark"] .category-line {
+  color: #c4d1e6;
+}
+
+:root[data-theme="dark"] .category-line b {
+  color: #a3b4ce;
+}
+
+:root[data-theme="dark"] .category-track {
+  background: #162236;
+}
+
+:root[data-theme="dark"] .category-track i {
+  box-shadow: 0 0 6px rgba(0, 0, 0, .15);
+}
+
+/* Panel footer link */
+:root[data-theme="dark"] .panel-footer-link {
+  color: #6fa4ff;
+  border-top-color: #1a2840;
+}
+
+:root[data-theme="dark"] .panel-footer-link:hover {
+  color: #8fb8ff;
+}
+
+/* Insight items: elevated cards with glow */
+:root[data-theme="dark"] .insight-item {
+  border-color: #1e2e44;
+  background: linear-gradient(145deg, #0f1b2c, #111f33);
+}
+
+:root[data-theme="dark"] .insight-item:hover {
+  border-color: #2a3d56;
+  background: #142337;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .12);
+}
+
+:root[data-theme="dark"] .insight-item b {
+  color: #e4ecf8;
+}
+
+:root[data-theme="dark"] .insight-item span {
+  color: #8fa0be;
+}
+
+/* Transactions: cleaner rows with hover */
+:root[data-theme="dark"] .transactions-panel {
+  border-color: #1e2e44;
+  background: linear-gradient(160deg, #0d1928, #101e30);
+}
+
+:root[data-theme="dark"] .transactions th {
+  color: #7b90ad;
+  border-bottom-color: #1e2e44;
+}
+
+:root[data-theme="dark"] .transactions td {
+  color: #c4d1e6;
+  border-bottom-color: #152232;
+}
+
+:root[data-theme="dark"] .transactions tr:hover td {
+  background: rgba(37, 99, 255, .04);
+}
+
+:root[data-theme="dark"] .tx-title b {
+  color: #dde6f4;
+}
+
+:root[data-theme="dark"] .tx-title span {
+  color: #7b90ad;
+}
+
+:root[data-theme="dark"] .amount {
+  color: #ff6b6e;
+}
+
+:root[data-theme="dark"] .amount.positive {
+  color: #4ce8a2;
+}
+
+:root[data-theme="dark"] .payment {
+  color: #a3b4ce;
+}
+
+:root[data-theme="dark"] .payment svg {
+  color: #6fa4ff;
+}
+
+/* Tags: vivid against dark */
+:root[data-theme="dark"] .tag {
+  border: 1px solid rgba(255, 255, 255, .06);
+}
+
+/* Headline: more presence */
+:root[data-theme="dark"] .headline h1 {
+  color: #f8fbff;
+}
+
+:root[data-theme="dark"] .headline p {
+  color: #7b90ad;
+}
+
+/* Toolbar inputs: seamless with the surface */
+:root[data-theme="dark"] .input-shell,
+:root[data-theme="dark"] .month-input,
+:root[data-theme="dark"] .notice-button {
+  border-color: #1e2e44;
+  background: #0b1724;
+}
+
+:root[data-theme="dark"] .input-shell:focus-within {
+  border-color: #3563d4;
+  box-shadow: 0 0 0 3px rgba(37, 99, 255, .08);
+}
+
+:root[data-theme="dark"] .notice-button:hover {
+  background: #142337;
+  border-color: #2a3d56;
+}
+
+/* Action buttons: vibrant in dark */
+:root[data-theme="dark"] .action-button.primary {
+  background: linear-gradient(135deg, #2d63f5, #4a42f0);
+  box-shadow: 0 4px 14px rgba(45, 99, 245, .25);
+}
+
+:root[data-theme="dark"] .action-button.primary:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(45, 99, 245, .35);
+}
+
+/* Sidebar: deeper with ambient glow */
+:root[data-theme="dark"] .sidebar {
+  background:
+    radial-gradient(circle at 30% 12%, rgba(37, 99, 255, .08), transparent 40%),
+    linear-gradient(180deg, #06111f, #040d18);
+  border-right-color: #14243a;
+  box-shadow: 8px 0 32px rgba(0, 0, 0, .3);
+}
+
+:root[data-theme="dark"] .sidebar .nav button {
+  color: #8fa0be;
+}
+
+:root[data-theme="dark"] .sidebar .nav button:hover {
+  color: #dce6f4;
+  background: rgba(37, 99, 255, .08);
+  border-color: rgba(37, 99, 255, .15);
+}
+
+:root[data-theme="dark"] .sidebar .nav button.active {
+  color: #fff;
+  background: linear-gradient(135deg, #2458e8, #4a3ef0);
+  border-color: rgba(37, 99, 255, .4);
+  box-shadow: 0 6px 18px rgba(37, 99, 255, .2);
+}
+
+:root[data-theme="dark"] .sidebar-search {
+  color: #7b90ad;
+  border-color: #1a2a3f;
+  background: #080f1c;
+}
+
+:root[data-theme="dark"] .sidebar-search:hover {
+  color: #a3b4ce;
+  border-color: #253a52;
+  background: #0b1624;
+}
+
+/* Profile card: polished dark */
+:root[data-theme="dark"] .sidebar .profile-card {
+  border-color: #1a2a3f;
+  background: #0a1522;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .2);
+}
+
+:root[data-theme="dark"] .sidebar .profile-card b {
+  color: #e4ecf8;
+}
+
+:root[data-theme="dark"] .sidebar .profile-card span {
+  color: #6b7f9c;
+}
+
+/* Theme switch: blends into sidebar */
+:root[data-theme="dark"] .theme-switch {
+  border-color: #1a2a3f;
+  background: #080f1c;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+:root[data-theme="dark"] .theme-switch button {
+  color: #6b7f9c;
+}
+
+:root[data-theme="dark"] .theme-switch button.active {
+  color: #f0f5ff;
+  background: #1a2a3f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+}
+
+/* Sidebar promo: subtle glow on dark */
+:root[data-theme="dark"] .sidebar-promo {
+  border-color: #1a2a3f;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+}
+
+:root[data-theme="dark"] .sidebar-promo:hover {
+  border-color: #3a5080;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .4);
+}
+
+/* Finance Copilot rail: polished dark */
+:root[data-theme="dark"] .assistant-rail {
+  border-left-color: #14243a;
+  background: #080f1c;
+}
+
+:root[data-theme="dark"] .assistant-rail-header {
+  border-bottom-color: #14243a;
+}
+
+:root[data-theme="dark"] .assistant-title {
+  color: #f0f5ff;
+}
+
+:root[data-theme="dark"] .assistant-alert {
+  border-color: #253a6a;
+  background: linear-gradient(145deg, #0c1826, #101e32);
+}
+
+:root[data-theme="dark"] .assistant-alert-icon {
+  color: #7b9bff;
+  background: rgba(37, 99, 255, .1);
+  border: 1px solid rgba(37, 99, 255, .2);
+}
+
+:root[data-theme="dark"] .assistant-alert-actions button {
+  color: #7b9bff;
+  border-color: #253a5e;
+  background: #0b1724;
+}
+
+:root[data-theme="dark"] .assistant-alert-actions button:hover {
+  background: #142337;
+  border-color: #3a5580;
+}
+
+/* AI messages in copilot */
+:root[data-theme="dark"] .assistant-rail .ai-message.user {
+  color: #c8d8ff;
+  border-color: #2d4580;
+  background: linear-gradient(135deg, #162748, #1a2d52);
+}
+
+:root[data-theme="dark"] .assistant-rail .ai-message.assistant {
+  border-color: #1e2e44;
+  background: #0d1928;
+}
+
+:root[data-theme="dark"] .copilot-summary .ai-message-body {
+  color: #b8c8e0;
+}
+
+:root[data-theme="dark"] .copilot-summary ul {
+  color: #8fa0be;
+}
+
+:root[data-theme="dark"] .copilot-progress {
+  background: #162236;
+}
+
+:root[data-theme="dark"] .copilot-budget-row {
+  color: #7b90ad;
+}
+
+/* Integration CTA: polished glass card */
+:root[data-theme="dark"] .assistant-integration-cta {
+  border-color: #1e2e44;
+  background: linear-gradient(145deg, #0c1826, #101e32);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
+}
+
+:root[data-theme="dark"] .assistant-integration-cta a {
+  border-color: #1e2e44;
+  background: #0b1724;
+  color: #dde6f4;
+}
+
+:root[data-theme="dark"] .assistant-integration-cta a:hover {
+  border-color: #3a5580;
+  background: #142337;
+}
+
+/* Compose area */
+:root[data-theme="dark"] .copilot-compose {
+  border-color: #1e2e44;
+  background: #0b1724;
+}
+
+:root[data-theme="dark"] .assistant-rail-form textarea {
+  color: #e4ecf8;
+  background: transparent;
+}
+
+:root[data-theme="dark"] .assistant-send {
+  background: linear-gradient(135deg, #2458e8, #4a3ef0);
+  box-shadow: 0 4px 12px rgba(37, 99, 255, .25);
+}
+
+/* Donut chart (spending breakdown) */
+:root[data-theme="dark"] .donut .inner {
+  background: #0d1928;
+}
+
+/* Day separator */
+:root[data-theme="dark"] .assistant-day {
+  color: #5a6f8c;
+}
+
+/* Wide buttons */
+:root[data-theme="dark"] .wide-button {
+  color: #6fa4ff;
+  background: rgba(37, 99, 255, .08);
+}
+
+:root[data-theme="dark"] .wide-button:hover {
+  background: rgba(37, 99, 255, .12);
+}
+
+/* Alert pill */
+:root[data-theme="dark"] .alert-pill {
+  color: #ff6b6e;
+  background: rgba(255, 69, 72, .1);
+}
+
+/* Modal in dark */
+:root[data-theme="dark"] .modal {
+  border-color: #1e2e44;
+  background: #0c1826;
+  box-shadow: 0 28px 85px rgba(0, 0, 0, .5);
+}
+
+:root[data-theme="dark"] .modal h2 {
+  color: #f0f5ff;
+}
+
+:root[data-theme="dark"] .modal p {
+  color: #8fa0be;
+}
+
+:root[data-theme="dark"] .modal-close {
+  color: #dde6f4;
+  background: #162236;
+}
+
+:root[data-theme="dark"] .modal-close:hover {
+  background: #1e2e44;
+}
+
+/* Form fields in dark */
+:root[data-theme="dark"] .field input,
+:root[data-theme="dark"] .field select {
+  color: #e4ecf8;
+  border-color: #1e2e44;
+  background: #0b1724;
+}
+
+:root[data-theme="dark"] .field input:focus,
+:root[data-theme="dark"] .field select:focus {
+  border-color: #3563d4;
+  box-shadow: 0 0 0 3px rgba(37, 99, 255, .1);
+}
+
+:root[data-theme="dark"] .field label {
+  color: #7b90ad;
+}
+
+/* Focus outlines for dark */
+:root[data-theme="dark"] button:focus-visible,
+:root[data-theme="dark"] input:focus-visible,
+:root[data-theme="dark"] select:focus-visible,
+:root[data-theme="dark"] textarea:focus-visible {
+  outline-color: rgba(99, 148, 255, .3);
+}
