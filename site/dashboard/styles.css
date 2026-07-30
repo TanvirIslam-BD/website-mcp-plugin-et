@@ -6143,3 +6143,279 @@ textarea:focus-visible {
     display: block;
   }
 }
+
+/* ─── Visual Polish Pass ─── */
+
+/* Metric cards: subtle top accent border + refined shadow depth */
+.metric-card,
+.metric-card.balance {
+  border-top: 2.5px solid transparent;
+  background-clip: padding-box;
+  box-shadow:
+    0 1px 2px rgba(23, 43, 77, .04),
+    0 4px 16px rgba(23, 43, 77, .045);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+
+.metric-card:hover {
+  box-shadow:
+    0 2px 4px rgba(23, 43, 77, .05),
+    0 8px 24px rgba(23, 43, 77, .07);
+  transform: translateY(-1px);
+}
+
+.metric-card.income {
+  border-top-color: #18b96f;
+}
+
+.metric-card.expense {
+  border-top-color: #ff4548;
+}
+
+.metric-card.saving:not(.is-negative) {
+  border-top-color: #2563ff;
+}
+
+.metric-card.saving.is-negative {
+  border-top-color: #ff4548;
+}
+
+.metric-card.balance {
+  border-top-color: #7c6cff;
+}
+
+/* Metric icon: softer shape with subtle ring */
+.metric-icon,
+.metric-card.balance .metric-icon {
+  box-shadow: 0 0 0 3px rgba(37, 99, 255, .06);
+}
+
+.metric-card.income .metric-icon {
+  box-shadow: 0 0 0 3px rgba(24, 185, 111, .08);
+}
+
+.metric-card.expense .metric-icon {
+  box-shadow: 0 0 0 3px rgba(255, 69, 72, .08);
+}
+
+/* Panels: consistent elevated feel */
+.panel {
+  box-shadow:
+    0 1px 2px rgba(23, 43, 77, .03),
+    0 4px 14px rgba(23, 43, 77, .04);
+  transition: box-shadow .2s ease;
+}
+
+.panel:hover {
+  box-shadow:
+    0 2px 4px rgba(23, 43, 77, .04),
+    0 6px 20px rgba(23, 43, 77, .06);
+}
+
+/* Chart area: refined grid lines and slight inner glow */
+.large-chart {
+  background: linear-gradient(180deg, #fff 0%, #fcfdff 100%);
+}
+
+.grid-line {
+  stroke: #ebeef5;
+  stroke-dasharray: 3 4;
+}
+
+.chart-line {
+  stroke-width: 2.6;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .06));
+}
+
+.chart-point {
+  stroke-width: 2.5;
+  filter: drop-shadow(0 3px 6px rgba(13, 26, 62, .12));
+}
+
+/* Budget ring: gradient arc and smoother ring */
+.budget-ring {
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .02);
+}
+
+.budget-ring .inner {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+}
+
+/* Score ring polish */
+.score-ring {
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .02);
+}
+
+.score-ring .inner {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+}
+
+/* Transactions table: better row definition */
+.transactions td {
+  border-bottom-color: #f0f3f7;
+}
+
+.transactions tr:hover td {
+  background: #f8fafd;
+}
+
+.transactions th {
+  color: #5a6a84;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
+/* Transaction amount: bolder for readability */
+.amount {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+/* Category bars: rounded ends with subtle glow */
+.category-track {
+  background: #f0f3f8;
+}
+
+.category-track i {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+}
+
+/* Insight cards: lift on hover */
+.insight-item {
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.insight-item:hover {
+  border-color: #cdd4e4;
+  background: #f9fbff;
+  box-shadow: 0 2px 8px rgba(23, 43, 77, .04);
+}
+
+/* Typography: improved contrast on key elements */
+.headline p {
+  color: #4b5d7a;
+}
+
+.metric-card label,
+.metric-card.balance label {
+  color: #566479;
+}
+
+.panel h3 {
+  color: #0a1223;
+}
+
+.legend {
+  font-weight: 650;
+}
+
+.legend i {
+  height: 2.5px;
+  border-radius: 2px;
+}
+
+/* Sparklines: smoother stroke */
+.sparkline polyline {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sparkline path.area {
+  opacity: .08;
+}
+
+/* Action buttons: micro-interaction */
+.action-button {
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+.action-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 255, .12);
+}
+
+.action-button.primary:hover:not(:disabled) {
+  box-shadow: 0 6px 18px rgba(37, 99, 255, .22);
+}
+
+/* Period select and toolbar inputs: focus ring polish */
+.period-select:focus-visible,
+.month-input:focus-visible {
+  border-color: #2563ff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 255, .1);
+}
+
+/* Panel footer link: subtle arrow hint */
+.panel-footer-link {
+  transition: color .15s ease;
+}
+
+.panel-footer-link:hover {
+  color: #1a32c4;
+}
+
+/* Dark mode overrides for new polish */
+:root[data-theme="dark"] .metric-card,
+:root[data-theme="dark"] .metric-card.balance {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, .12),
+    0 4px 16px rgba(0, 0, 0, .1);
+}
+
+:root[data-theme="dark"] .metric-card:hover {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, .14),
+    0 8px 24px rgba(0, 0, 0, .14);
+}
+
+:root[data-theme="dark"] .panel {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, .1),
+    0 4px 14px rgba(0, 0, 0, .08);
+}
+
+:root[data-theme="dark"] .panel:hover {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, .12),
+    0 6px 20px rgba(0, 0, 0, .12);
+}
+
+:root[data-theme="dark"] .large-chart {
+  background: #111c2d;
+}
+
+:root[data-theme="dark"] .grid-line {
+  stroke: #253248;
+}
+
+:root[data-theme="dark"] .transactions td {
+  border-bottom-color: #1e2d42;
+}
+
+:root[data-theme="dark"] .transactions tr:hover td {
+  background: #162538;
+}
+
+:root[data-theme="dark"] .category-track {
+  background: #1e2d42;
+}
+
+:root[data-theme="dark"] .insight-item:hover {
+  border-color: #3a4c66;
+  background: #182840;
+}
+
+:root[data-theme="dark"] .metric-icon,
+:root[data-theme="dark"] .metric-card.balance .metric-icon {
+  box-shadow: 0 0 0 3px rgba(255, 69, 72, .06);
+}
+
+:root[data-theme="dark"] .metric-card.income .metric-icon {
+  box-shadow: 0 0 0 3px rgba(24, 185, 111, .06);
+}
+
+:root[data-theme="dark"] .budget-ring .inner,
+:root[data-theme="dark"] .score-ring .inner {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
