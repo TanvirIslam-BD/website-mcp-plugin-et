@@ -651,7 +651,7 @@ function renderMobileCopilotComposer() {
     <section class="mobile-finance-composer" aria-label="Finance Copilot quick actions">
       <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
       <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
-      <button class="mobile-composer-action" type="button" data-open-ai-chat data-ai-prefill="Help me log an expense by voice." aria-label="Log an expense by voice">${icon("microphone")}</button>
+      <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Finance Copilot">${icon("send")}</button>
       <button class="mobile-composer-action" type="button" data-entry="expense" aria-label="Scan a receipt">${icon("camera")}</button>
     </section>
   `;
@@ -1050,6 +1050,19 @@ function openAiChat(prefill = "") {
       </form>
     </div>
   `, { wide: false, className: "ai-modal" });
+}
+
+function openMobileCopilotAndSend(message) {
+  const text = String(message || "").trim();
+  if (!text) {
+    openAiChat();
+    return;
+  }
+  openAiChat(text);
+  requestAnimationFrame(() => {
+    const form = document.querySelector(".ai-modal [data-ai-chat-form]");
+    if (form) submitAiQuestion(form);
+  });
 }
 
 function localDashboardAnswer(message) {
@@ -1550,6 +1563,11 @@ function bindEvents() {
       openAiChat(aiChat.dataset.aiPrefill || "");
       return;
     }
+    const mobileCopilotSend = event.target.closest("[data-mobile-copilot-send]");
+    if (mobileCopilotSend) {
+      openMobileCopilotAndSend(document.querySelector("[data-mobile-copilot-input]")?.value);
+      return;
+    }
     const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");
     if (aiRailToggle) {
       const rail = document.querySelector(".assistant-rail");
@@ -1659,7 +1677,7 @@ function bindEvents() {
   document.addEventListener("keydown", (event) => {
     if (event.target.matches("[data-mobile-copilot-input]") && event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      openAiChat(event.target.value.trim());
+      openMobileCopilotAndSend(event.target.value.trim());
       return;
     }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {

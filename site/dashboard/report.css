@@ -1088,7 +1088,7 @@ body.is-resizing-copilot * {
   /* Mobile status, menu, greeting, and quick actions. */
   .mobile-dashboard-header {
     display: block;
-    padding: max(6px, env(safe-area-inset-top)) 4px 2px;
+    padding: 4px 4px 2px;
     color: var(--mobile-ink);
   }
 
@@ -1098,6 +1098,12 @@ body.is-resizing-copilot * {
   .mobile-signal {
     display: flex;
     align-items: center;
+  }
+
+  /* The dashboard is rendered edge-to-edge in the app shell; the simulated
+     phone status strip only consumes valuable report space on mobile. */
+  .mobile-statusbar {
+    display: none;
   }
 
   .mobile-statusbar {
