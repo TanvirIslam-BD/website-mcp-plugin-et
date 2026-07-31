@@ -848,14 +848,15 @@ body.is-resizing-copilot * {
 @media (max-width: 720px) {
   .ai-modal .ai-chat {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto auto !important;
+    grid-template-rows: auto auto auto !important;
     min-height: 0;
+    align-content: start;
   }
 
   .ai-modal .ai-chat-scroll {
     display: grid;
     grid-template-rows: auto auto auto;
-    min-height: 0;
+    max-height: min(48dvh, 500px);
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -1130,6 +1131,12 @@ body.is-resizing-copilot * {
     opacity: 0;
     pointer-events: none;
     transition: opacity .2s ease;
+  }
+
+  /* A dialog owns the viewport; persistent controls must never cover it. */
+  body.dashboard-modal-open .mobile-finance-composer,
+  body.dashboard-modal-open .mobile-bottom-nav {
+    display: none !important;
   }
 
   .mobile-menu-open .mobile-menu-backdrop {
