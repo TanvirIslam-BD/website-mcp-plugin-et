@@ -674,6 +674,7 @@ function renderMobileBottomNav() {
 function renderAssistantIntegrationCta() {
   return `
     <section class="assistant-integration-cta" aria-label="Connect Money Copilot AI to an AI assistant">
+      <button class="assistant-integration-dismiss" type="button" data-dismiss-integration aria-label="Hide integration promotion">${icon("close")}</button>
       <div><strong>Connect Money Copilot AI with ChatGPT or Claude</strong><span>Scan receipts, voice log, AI insights &amp; more.</span></div>
       <nav aria-label="AI integrations">
         <a href="/#how"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</a>
@@ -1031,6 +1032,7 @@ function openAiChat(prefill = "") {
       <span class="assistant-online"><i></i>Online</span>
     </div>
     <div class="ai-chat" data-ai-chat>
+      <div class="ai-chat-scroll">
       <div class="assistant-alert">
         <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
         <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
@@ -1044,6 +1046,7 @@ function openAiChat(prefill = "") {
       <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
         <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
         <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${reportMonth}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model?.budgetUsed || 0)}%"></i><strong>${model?.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} of ${model?.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model?.remainingMinor === null || !model ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
+      </div>
       </div>
       ${renderAssistantIntegrationCta()}
       <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
@@ -1582,6 +1585,11 @@ function bindEvents() {
     const mobileCopilotSend = event.target.closest("[data-mobile-copilot-send]");
     if (mobileCopilotSend) {
       openMobileCopilotAndSend(document.querySelector("[data-mobile-copilot-input]")?.value);
+      return;
+    }
+    const dismissIntegration = event.target.closest("[data-dismiss-integration]");
+    if (dismissIntegration) {
+      dismissIntegration.closest(".assistant-integration-cta")?.classList.add("is-dismissed");
       return;
     }
     const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");

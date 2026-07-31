@@ -6118,6 +6118,13 @@ textarea:focus-visible {
   }
 
   .ai-modal .ai-chat { grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
+  .ai-modal .ai-chat { grid-template-rows: minmax(0, 1fr) auto auto; }
+  .ai-modal .ai-chat-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 2px;
+  }
   .ai-modal .assistant-integration-cta strong { font-size: 12px; }
   .ai-modal .assistant-integration-cta span { font-size: 10px; }
   .ai-modal .assistant-integration-cta a { min-height: 42px; font-size: 11px; }
@@ -7092,6 +7099,14 @@ textarea:focus-visible {
   background: linear-gradient(165deg, #f8faff 0%, #f1f5fd 100%);
 }
 
+.ai-chat-scroll {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  overflow-y: auto;
+}
+
 .ai-metric-row {
   display: flex;
   gap: 10px;
@@ -7898,10 +7913,41 @@ textarea:focus-visible {
 
 /* Integration CTA: polished card */
 .assistant-integration-cta {
+  position: relative;
   border-radius: 12px;
   border-color: #dfe5f2;
   background: linear-gradient(145deg, #fcfdff, #f6f9ff);
   box-shadow: 0 2px 8px rgba(33, 58, 126, .04);
+}
+
+.assistant-integration-cta.is-dismissed {
+  display: none;
+}
+
+.assistant-integration-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: #74829b;
+  background: transparent;
+  cursor: pointer;
+}
+
+.assistant-integration-dismiss:hover {
+  color: #1d2e4d;
+  background: #edf2fb;
+}
+
+.assistant-integration-dismiss svg {
+  width: 14px;
+  height: 14px;
 }
 
 .assistant-integration-cta strong {
