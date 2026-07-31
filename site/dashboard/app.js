@@ -943,7 +943,10 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   if (!list) return;
   const visualHtml = role === "assistant" ? renderVisualData(visualData) : "";
   list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Money Copilot AI"}</div><div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
-  list.scrollTop = list.scrollHeight;
+  const message = list.lastElementChild;
+  if (role === "assistant" && message) {
+    list.scrollTo({ top: Math.max(0, message.offsetTop - 8), behavior: "smooth" });
+  }
 }
 
 function appendAiLoading(chatRoot = document) {
