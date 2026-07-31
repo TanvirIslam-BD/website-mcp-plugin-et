@@ -2930,6 +2930,12 @@ button {
     border-radius: 16px 16px 0 0;
   }
 
+  .modal.notifications-modal {
+    max-height: calc(88vh - 72px);
+    margin-bottom: calc(72px + env(safe-area-inset-bottom));
+    border-radius: 16px;
+  }
+
   .modal-actions {
     display: grid;
     grid-template-columns: 1fr;
@@ -4146,15 +4152,21 @@ body {
 
 .copilot-logo {
   display: grid;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #dbe7f6;
+  border: 0;
   border-radius: 10px;
   background: #f7fbff;
   box-shadow: 0 4px 12px rgba(20, 91, 170, .12);
+}
+
+.brand img,
+.copilot-logo,
+.copilot-logo img {
+  border: 0 !important;
 }
 
 .copilot-logo img {
