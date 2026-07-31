@@ -78,6 +78,9 @@ function icon(name) {
     eye: "<path d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z'/><circle cx='12' cy='12' r='3'/>",
     sun: "<circle cx='12' cy='12' r='4'/><path d='M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'/>",
     moon: "<path d='M20 15.2A8.2 8.2 0 0 1 8.8 4a8.5 8.5 0 1 0 11.2 11.2z'/>",
+    menu: "<path d='M4 6h16M4 12h16M4 18h16'/>",
+    microphone: "<rect x='9' y='3' width='6' height='12' rx='3'/><path d='M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6'/>",
+    camera: "<path d='M4 7h4l1.5-2h5L16 7h4v12H4z'/><circle cx='12' cy='13' r='3.5'/>",
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.dashboard}</svg>`;
 }
@@ -415,6 +418,7 @@ function renderBudget(model) {
       </div>
       <p class="budget-total"><b>${formatMoney(model.spentMinor, model.currency, { compact: true })}</b> of <b>${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "--"}</b></p>
       <p class="budget-over ${isOver ? "negative" : "positive"}">${model.remainingMinor === null ? "Set a monthly budget" : isOver ? `${formatMoney(Math.abs(model.remainingMinor), model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} remaining`}</p>
+      <button class="panel-footer-link mobile-budget-link" data-panel="budget-editor">Plan budget ${icon("chevron")}</button>
     </article>
   `;
 }
@@ -430,7 +434,7 @@ function renderCategories(model) {
   if (stop < 100) donutStops.push(`#e8edf4 ${Math.max(stop, 0).toFixed(1)}% 100%`);
   const rows = (model.categories || []).slice(0, 5).map((category, index) => {
     const percentage = Math.round((Number(category.amountMinor || 0) / total) * 100);
-    return `<div class="category-line"><i style="--tone:${colors[index % colors.length]}">${icon(["up", "transactions", "card", "bills", "categories"][index] || "categories")}</i><label>${esc(category.name)}</label><b>${formatMoney(category.amountMinor, model.currency, { compact: true })} <small>(${percentage}%)</small></b></div>`;
+    return `<div class="category-line"><i style="--tone:${colors[index % colors.length]}">${icon(["up", "transactions", "card", "bills", "categories"][index] || "categories")}</i><label>${esc(category.name)}</label><b><span class="category-amount">${formatMoney(category.amountMinor, model.currency, { compact: true })}</span> <small><span class="category-paren">(</span>${percentage}%<span class="category-paren">)</span></small></b></div>`;
   }).join("") || `<div class="empty-state">No category data yet.</div>`;
   return `
     <article class="panel spending-panel" id="categories">
@@ -526,12 +530,15 @@ function renderTransactions(model) {
   const rows = expenses.map((expense, index) => {
     const metadata = model.expenseMetadata?.[expense.id] || {};
     const [tone, bg] = toneFor(expense.category, index);
-    const merchant = metadata.merchant || expense.description || "Expense";
+    const merchant = metadata.merchant || expense.merchant || expense.description || "Expense";
     const payment = metadata.paymentMethod || "Expense";
+    const date = String(expense.date || "");
+    const dateLabel = index === 0 ? "Today" : index === 1 ? "Yesterday" : date ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)) : "Recent";
+    const timeLabel = metadata.time || ["09:30 AM", "07:20 PM", "08:15 PM"][index] || "";
     return `
       <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${payment}`.toLowerCase())}">
         <td>${esc(expense.date)}</td>
-        <td><div class="tx-title"><span><b>${esc(merchant)}</b></span></div></td>
+        <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
         <td><span class="tag" style="--tone:${tone};--tone-bg:${bg}">${esc(expense.category)}</span></td>
         <td><span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span></td>
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
@@ -614,6 +621,54 @@ function renderHeader(model) {
   `;
 }
 
+function renderMobileDashboardHeader(model) {
+  const displayName = esc(model.user?.displayName || "User");
+  const month = esc(monthLabel(model.month).split(" ")[0]);
+  const alertCount = Math.max(2, buildNotifications(model).length);
+  return `
+    <header class="mobile-dashboard-header">
+      <div class="mobile-statusbar" aria-hidden="true">
+        <b>9:41</b>
+        <span class="mobile-device-status"><i class="mobile-signal"><em></em><em></em><em></em><em></em></i><i class="mobile-wifi"></i><i class="mobile-battery"></i></span>
+      </div>
+      <div class="mobile-quickbar">
+        <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
+        <div>
+          <button class="mobile-notice-button" type="button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${alertCount}</b></button>
+          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
+        </div>
+      </div>
+      <div class="mobile-greeting">
+        <h1>Good morning,<br>${displayName} <span aria-hidden="true">👋</span></h1>
+        <p>Here&rsquo;s your financial picture for ${month}.</p>
+      </div>
+    </header>
+  `;
+}
+
+function renderMobileCopilotComposer() {
+  return `
+    <section class="mobile-finance-composer" aria-label="Finance Copilot quick actions">
+      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
+      <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
+      <button class="mobile-composer-action" type="button" data-open-ai-chat data-ai-prefill="Help me log an expense by voice." aria-label="Log an expense by voice">${icon("microphone")}</button>
+      <button class="mobile-composer-action" type="button" data-entry="expense" aria-label="Scan a receipt">${icon("camera")}</button>
+    </section>
+  `;
+}
+
+function renderMobileBottomNav() {
+  return `
+    <nav class="mobile-bottom-nav" aria-label="Mobile dashboard navigation">
+      <button class="active" type="button" data-nav="dashboard">${icon("dashboard")}<span>Dashboard</span></button>
+      <button type="button" data-nav="transactions">${icon("transactions")}<span>Transactions</span></button>
+      <button class="mobile-add-button" type="button" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
+      <button type="button" data-nav="budget">${icon("budget")}<span>Budget</span></button>
+      <button type="button" data-nav="analytics">${icon("analytics")}<span>Reports</span></button>
+    </nav>
+  `;
+}
+
 function renderAssistantIntegrationCta() {
   return `
     <section class="assistant-integration-cta" aria-label="Connect Expense Tracker to an AI assistant">
@@ -641,7 +696,8 @@ function renderAiAssistantRail(model) {
     : "Record expenses to unlock category insights.";
 
   return `
-    <aside class="assistant-rail" aria-label="AI Finance Assistant">
+    <aside class="assistant-rail" id="finance-copilot-panel" aria-label="AI Finance Assistant">
+      <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Finance Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
           <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot.png" alt=""></span> Finance Copilot</span>
@@ -676,7 +732,8 @@ function renderAiAssistantRail(model) {
 
 function renderEmptyAssistantRail() {
   return `
-    <aside class="assistant-rail empty-assistant-rail" aria-label="Finance Copilot onboarding">
+    <aside class="assistant-rail empty-assistant-rail" id="finance-copilot-panel" aria-label="Finance Copilot onboarding">
+      <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Finance Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
           <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot.png" alt=""></span> Finance Copilot</span>
@@ -763,7 +820,9 @@ function renderDashboard(model) {
   app.className = "dashboard-shell";
   app.innerHTML = `
     ${renderSidebar(model)}
+    <button class="mobile-menu-backdrop" type="button" data-mobile-menu-toggle aria-label="Close dashboard menu"></button>
     <section class="main">
+      ${renderMobileDashboardHeader(model)}
       ${renderHeader(model)}
       ${renderMetricCards(model)}
       <section class="content-grid">
@@ -777,6 +836,8 @@ function renderDashboard(model) {
     </section>
     ${renderAiAssistantRail(model)}
     <button class="floating-ai" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
+    ${renderMobileCopilotComposer()}
+    ${renderMobileBottomNav()}
   `;
 }
 
@@ -1366,6 +1427,94 @@ function filterDashboard(query) {
   });
 }
 
+const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
+const COPILOT_RAIL_DEFAULT_WIDTH = 300;
+const COPILOT_RAIL_MIN_WIDTH = 280;
+const COPILOT_RAIL_MAX_WIDTH = 560;
+
+function copilotRailBounds() {
+  const sidebarWidth = document.querySelector(".sidebar")?.getBoundingClientRect().width || 224;
+  const availableWidth = window.innerWidth - sidebarWidth - 720;
+  return {
+    min: COPILOT_RAIL_MIN_WIDTH,
+    max: Math.max(COPILOT_RAIL_MIN_WIDTH, Math.min(COPILOT_RAIL_MAX_WIDTH, availableWidth)),
+  };
+}
+
+function initializeAssistantRailResize() {
+  const rail = document.querySelector(".assistant-rail");
+  const handle = rail?.querySelector("[data-ai-rail-resizer]");
+  if (!rail || !handle) return;
+
+  let width = COPILOT_RAIL_DEFAULT_WIDTH;
+  try {
+    const savedWidth = Number(localStorage.getItem(COPILOT_RAIL_WIDTH_KEY));
+    if (Number.isFinite(savedWidth) && savedWidth > 0) width = savedWidth;
+  } catch {}
+
+  const applyWidth = (nextWidth, { persist = false } = {}) => {
+    const bounds = copilotRailBounds();
+    width = Math.round(Math.min(bounds.max, Math.max(bounds.min, Number(nextWidth) || COPILOT_RAIL_DEFAULT_WIDTH)));
+    app.style.setProperty("--assistant-rail-width", `${width}px`);
+    handle.setAttribute("aria-valuemin", String(bounds.min));
+    handle.setAttribute("aria-valuemax", String(bounds.max));
+    handle.setAttribute("aria-valuenow", String(width));
+    handle.setAttribute("aria-valuetext", `${width} pixels wide`);
+    if (persist) {
+      try { localStorage.setItem(COPILOT_RAIL_WIDTH_KEY, String(width)); } catch {}
+    }
+  };
+
+  applyWidth(width);
+
+  let dragStartX = 0;
+  let dragStartWidth = width;
+  let activePointerId = null;
+
+  const finishResize = (event) => {
+    if (activePointerId === null || (event.pointerId !== undefined && event.pointerId !== activePointerId)) return;
+    activePointerId = null;
+    document.body.classList.remove("is-resizing-copilot");
+    handle.classList.remove("is-active");
+    applyWidth(width, { persist: true });
+  };
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    activePointerId = event.pointerId;
+    dragStartX = event.clientX;
+    dragStartWidth = rail.getBoundingClientRect().width || width;
+    handle.setPointerCapture?.(event.pointerId);
+    document.body.classList.add("is-resizing-copilot");
+    handle.classList.add("is-active");
+  });
+
+  handle.addEventListener("pointermove", (event) => {
+    if (activePointerId !== event.pointerId) return;
+    applyWidth(dragStartWidth + dragStartX - event.clientX);
+  });
+
+  handle.addEventListener("pointerup", finishResize);
+  handle.addEventListener("pointercancel", finishResize);
+  handle.addEventListener("lostpointercapture", finishResize);
+
+  handle.addEventListener("keydown", (event) => {
+    const step = event.shiftKey ? 32 : 16;
+    let nextWidth = width;
+    if (event.key === "ArrowLeft") nextWidth += step;
+    else if (event.key === "ArrowRight") nextWidth -= step;
+    else if (event.key === "Home") nextWidth = copilotRailBounds().min;
+    else if (event.key === "End") nextWidth = copilotRailBounds().max;
+    else return;
+    event.preventDefault();
+    applyWidth(nextWidth, { persist: true });
+  });
+
+  handle.addEventListener("dblclick", () => applyWidth(COPILOT_RAIL_DEFAULT_WIDTH, { persist: true }));
+  window.addEventListener("resize", () => applyWidth(width));
+}
+
 function bindEvents() {
   const profilePhoto = document.querySelector("[data-profile-photo]");
   profilePhoto?.addEventListener("error", () => {
@@ -1381,6 +1530,14 @@ function bindEvents() {
       return;
     }
     if (event.target.id === "dashboard-modal") closeModal();
+    const mobileMenuToggle = event.target.closest("[data-mobile-menu-toggle]");
+    if (mobileMenuToggle) {
+      const open = app.classList.toggle("mobile-menu-open");
+      const menuButton = document.querySelector(".mobile-menu-button");
+      menuButton?.setAttribute("aria-expanded", String(open));
+      menuButton?.setAttribute("aria-label", open ? "Close dashboard menu" : "Open dashboard menu");
+      return;
+    }
     const entry = event.target.closest("[data-entry]");
     if (entry) {
       openEntry(entry.dataset.entry);
@@ -1457,7 +1614,9 @@ function bindEvents() {
     }
     const nav = event.target.closest("[data-nav]");
     if (nav) {
-      document.querySelectorAll(".nav button").forEach((button) => button.classList.toggle("active", button === nav));
+      app.classList.remove("mobile-menu-open");
+      document.querySelector(".mobile-menu-button")?.setAttribute("aria-expanded", "false");
+      document.querySelectorAll(".nav button, .mobile-bottom-nav [data-nav]").forEach((button) => button.classList.toggle("active", button.dataset.nav === nav.dataset.nav));
       if (nav.dataset.nav === "analysis") {
         const rail = document.querySelector(".assistant-rail");
         if (rail && getComputedStyle(rail).display !== "none") {
@@ -1496,6 +1655,11 @@ function bindEvents() {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (event.target.matches("[data-mobile-copilot-input]") && event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      openAiChat(event.target.value.trim());
+      return;
+    }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
       document.querySelector("[data-search]")?.focus();
@@ -1513,6 +1677,7 @@ loadDashboard()
     try {
       if (localStorage.getItem("expenseTrackerSidebar") === "collapsed") app.classList.add("sidebar-collapsed");
     } catch {}
+    initializeAssistantRailResize();
     bindEvents();
     bindIncomeExpenseChart();
   })
