@@ -34,12 +34,15 @@ function dashboardCookie(token) {
   return `${DASHBOARD_COOKIE}=${token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`;
 }
 
-function createDashboardSession(userId, secret, displayName = "", profilePhotoUrl = "") {
+function createDashboardSession(userId, secret, displayName = "", profilePhotoUrl = "", mcpAccessToken = "") {
   const payload = Buffer.from(JSON.stringify({
     u: userId,
     e: Date.now() + 15 * 60 * 1000,
     ...(displayName ? { n: displayName } : {}),
     ...(profilePhotoUrl ? { p: profilePhotoUrl } : {}),
+    // Kept only in the signed, HttpOnly dashboard session cookie so server-side
+    // Copilot requests can invoke the authenticated MCPize tool catalog.
+    ...(mcpAccessToken ? { mt: mcpAccessToken } : {}),
   })).toString("base64url");
   const signature = createHmac("sha256", secret).update(payload).digest("base64url");
   return `${payload}.${signature}`;
@@ -157,6 +160,7 @@ export default async function handler(req, res) {
         secret,
         mcpizeProfile.displayName || identity.displayName || responseDisplayName,
         mcpizeProfile.profilePhotoUrl || identity.profilePhotoUrl || responseProfilePhoto,
+        tokenBody.access_token,
       )
       : sessionToken(sessionBody);
     if (!privateSession) {

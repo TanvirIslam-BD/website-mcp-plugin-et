@@ -1,5 +1,5 @@
 import { createClient } from "@libsql/client";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
 
 const DASHBOARD_COOKIE = "expense_tracker_dashboard";
@@ -13,8 +13,10 @@ const PREMIUM_MODEL = process.env.PREMIUM_MODEL || "kimi-k2.5";
 const RATE_WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 18;
 const CACHE_TTL_MS = 5 * 60_000;
+const MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
 const rateLimits = new Map();
 const responseCache = new Map();
+const mcpCatalogCache = new Map();
 
 function verifyDashboardToken(token) {
   const secret = process.env.DASHBOARD_SESSION_SECRET;
@@ -27,7 +29,8 @@ function verifyDashboardToken(token) {
   if (receivedBuffer.length !== expectedBuffer.length || !timingSafeEqual(receivedBuffer, expectedBuffer)) return null;
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return typeof session.u === "string" && session.u && Number(session.e) > Date.now() ? session.u : null;
+    if (typeof session.u !== "string" || !session.u || Number(session.e) <= Date.now()) return null;
+    return { userId: session.u, mcpAccessToken: typeof session.mt === "string" ? session.mt : "" };
   } catch {
     return null;
   }
@@ -97,6 +100,48 @@ function toolDefinitions() {
     { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits for the dashboard month.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
     { type: "function", function: { name: "generate_monthly_report", description: "Generate a verified report for one calendar month. Use when the user asks for a monthly summary, report, or category breakdown.", parameters: { type: "object", properties: { month: { type: "string", description: "YYYY-MM" } }, required: ["month"], additionalProperties: false } } },
   ];
+}
+
+async function callMcp(accessToken, method, params = {}) {
+  const response = await fetch(MCP_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({ jsonrpc: "2.0", id: randomUUID(), method, params }),
+  });
+  const raw = await response.text();
+  let body = {};
+  try { body = JSON.parse(raw); } catch {
+    const data = raw.split("\n").find((line) => line.startsWith("data:"))?.slice(5).trim();
+    try { body = data ? JSON.parse(data) : {}; } catch { body = {}; }
+  }
+  if (!response.ok || body?.error) throw new Error(body?.error?.message || `MCPize ${method} failed (${response.status}).`);
+  return body?.result ?? body;
+}
+
+async function mcpToolDefinitions(accessToken) {
+  const key = createHmac("sha256", "mcp-tool-catalog").update(accessToken).digest("hex");
+  const cached = mcpCatalogCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
+  const result = await callMcp(accessToken, "tools/list");
+  const value = (result?.tools || []).map((tool) => ({
+    type: "function",
+    function: {
+      name: safeText(tool.name, 64),
+      description: safeText(tool.description || tool.title || `Run ${tool.name}`, 1200),
+      parameters: tool.inputSchema && typeof tool.inputSchema === "object" ? tool.inputSchema : { type: "object", properties: {} },
+    },
+  })).filter((tool) => tool.function.name);
+  mcpCatalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, value });
+  return value;
+}
+
+async function runMcpTool(accessToken, name, input) {
+  const result = await callMcp(accessToken, "tools/call", { name, arguments: input });
+  return result?.structuredContent || result?.content || result;
 }
 
 async function getLatestExpense(db, userId) {
@@ -174,7 +219,7 @@ async function runTool(db, userId, name, rawInput, dashboardMonth) {
 }
 
 function systemPrompt(currentDate, dashboardMonth, hasVerifiedContext = false) {
-  return `You are Expense Tracker AI, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", query the most recent transaction across all dates. Never invent, assume, or estimate transactions. ${hasVerifiedContext ? "The server has already supplied verified private financial data below; answer only from that data and do not request another tool call." : "For any financial fact, total, budget, category, or report, call the available tools first."} Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
+  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", query the most recent transaction across all dates. Never invent, assume, or estimate transactions. ${hasVerifiedContext ? "The server has already supplied verified private financial data below; answer only from that data and do not request another tool call." : "Use the available MCP tools for financial facts and requested actions."} You have access to the signed-in user's full MCPize finance tool catalog, including expense, income, budget, recurring expense, category, alert, import, export, and report tools. When the user clearly asks to make a change, execute the matching tool and report exactly what changed. Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
 }
 
 function answerContent(message) {
@@ -322,8 +367,9 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Cache-Control", "private, no-store, max-age=0");
   res.setHeader("Referrer-Policy", "no-referrer");
-  const userId = verifyDashboardToken(cookieValue(req, DASHBOARD_COOKIE));
-  if (!userId) return res.status(401).json({ error: "A valid dashboard session is required." });
+  const session = verifyDashboardToken(cookieValue(req, DASHBOARD_COOKIE));
+  if (!session) return res.status(401).json({ error: "A valid dashboard session is required." });
+  const { userId, mcpAccessToken } = session;
   if (!process.env.COMET_API_KEY) return res.status(503).json({ error: "AI assistant is not configured yet." });
   if (!checkRateLimit(userId)) return res.status(429).json({ error: "Too many AI requests. Please try again in a minute." });
 
@@ -344,12 +390,13 @@ export default async function handler(req, res) {
     const control = await userControl(db, userId);
     if (control.status === "suspended") return res.status(403).json({ error: "This account has been suspended.", code: "account_suspended" });
     const cacheKey = `${userId}:${dashboardMonth}:${modelChoice.model}:${message.toLowerCase()}`;
-    const cached = responseCache.get(cacheKey);
+    const cached = mcpAccessToken ? null : responseCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       await recordActivity(db, { userId, source: "dashboard_ai", eventType: "ai_answer_cached", detail: { model: cached.value.model, month: dashboardMonth } });
       return res.status(200).json({ ...cached.value, cached: true });
     }
-    const preloaded = await preloadFinancialContext(db, userId, message, dashboardMonth, modelChoice.tier);
+    const preloaded = mcpAccessToken ? null : await preloadFinancialContext(db, userId, message, dashboardMonth, modelChoice.tier);
+    const availableTools = mcpAccessToken ? await mcpToolDefinitions(mcpAccessToken) : toolDefinitions();
     const messages = [
       { role: "system", content: systemPrompt(currentDate, dashboardMonth, Boolean(preloaded)) },
       ...(preloaded ? [{ role: "system", content: `Verified tool result (${preloaded.name}): ${JSON.stringify(preloaded.result)}` }] : []),
@@ -363,11 +410,11 @@ export default async function handler(req, res) {
     let completion;
     for (let pass = 0; pass < 4; pass += 1) {
       try {
-        completion = await callComet(activeModel, messages, preloaded ? [] : toolDefinitions());
+        completion = await callComet(activeModel, messages, preloaded ? [] : availableTools);
       } catch (error) {
         if (activeModel !== DEFAULT_MODEL) {
           activeModel = DEFAULT_MODEL;
-          completion = await callComet(activeModel, messages, toolDefinitions());
+          completion = await callComet(activeModel, messages, availableTools);
         } else throw error;
       }
       const assistant = completion?.choices?.[0]?.message;
@@ -378,7 +425,9 @@ export default async function handler(req, res) {
         let input = {};
         try { input = JSON.parse(call.function?.arguments || "{}"); } catch { input = {}; }
         const name = safeText(call.function?.name, 64);
-        const result = await runTool(db, userId, name, input, dashboardMonth);
+        const result = mcpAccessToken
+          ? await runMcpTool(mcpAccessToken, name, input)
+          : await runTool(db, userId, name, input, dashboardMonth);
         usedTools.push(name);
         lastToolName = name;
         lastToolResult = result;
@@ -389,8 +438,10 @@ export default async function handler(req, res) {
     const answer = answerContent(completion?.choices?.[0]?.message);
     const visualData = buildVisualData(lastToolName, lastToolResult, null) || undefined;
     const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, visualData, cached: false };
-    responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
-    if (responseCache.size > 500) responseCache.delete(responseCache.keys().next().value);
+    if (!mcpAccessToken) {
+      responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
+      if (responseCache.size > 500) responseCache.delete(responseCache.keys().next().value);
+    }
     console.info("[ai-chat]", JSON.stringify({ userId, model: activeModel, tools: value.usedTools, usage: value.usage }));
     await recordActivity(db, { userId, source: "dashboard_ai", eventType: "ai_question_answered", detail: { model: activeModel, tools: value.usedTools, month: dashboardMonth } });
     return res.status(200).json(value);
