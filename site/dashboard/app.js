@@ -1229,13 +1229,13 @@ function openPanel(kind) {
       <form data-form="email-report" class="email-report-form">
         <div class="field"><label for="report-email">Email address</label><input id="report-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
         <div class="email-report-preview"><b>${esc(month)} summary</b><span>${esc(budgetLine)}</span><span>${esc(model.remainingMinor === null ? "Add a budget to track remaining funds." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`)}</span></div>
-        <p class="form-error" data-error></p><div class="modal-actions"><button type="submit" class="action-button primary">${icon("mail")} Open email draft</button></div>
+        <p class="form-error" data-error></p><div class="modal-actions"><button type="submit" class="action-button primary">${icon("mail")} Send report by email</button></div>
       </form>
     `, { wide: false });
     return;
   }
   if (kind === "notifications") {
-    openModal("Notifications", "Budget alerts and workspace reminders.", panelRows(buildNotifications(model), (item) => `<div class="plain-row"><span><b>${esc(item.title)}</b><small>${esc(item.body)}</small></span>${icon("bell")}</div>`));
+    openModal("Notifications", "Budget alerts and workspace reminders.", panelRows(buildNotifications(model), (item) => `<div class="plain-row"><span><b>${esc(item.title)}</b><small>${esc(item.body)}</small></span>${icon("bell")}</div>`), { className: "notifications-modal" });
     return;
   }
   if (kind === "categories") {
@@ -1703,8 +1703,9 @@ function bindEvents() {
       const subject = `${monthLabel(model.month)} Money Copilot report`;
       const budget = model.budgetMinor ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)` : "No monthly budget is set";
       const status = model.remainingMinor === null ? "No budget remaining status available." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget.` : `${formatMoney(model.remainingMinor, model.currency)} remaining.`;
-      const body = `Money Copilot report for ${monthLabel(model.month)}%0D%0A%0D%0A${budget}%0D%0A${status}%0D%0ATotal income: ${formatMoney(model.incomeMinor, model.currency)}%0D%0ANet cash flow: ${formatMoney(model.savedMinor, model.currency)}`;
-      location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${body}`;
+      const bodyText = `Money Copilot report for ${monthLabel(model.month)}\n\n${budget}\n${status}\nTotal income: ${formatMoney(model.incomeMinor, model.currency)}\nNet cash flow: ${formatMoney(model.savedMinor, model.currency)}`;
+      const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+      window.location.assign(mailto);
       closeModal();
       return;
     }
