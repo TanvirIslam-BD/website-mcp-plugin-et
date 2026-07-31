@@ -1789,6 +1789,11 @@ body.is-resizing-copilot * {
     backdrop-filter: blur(18px);
   }
 
+  body.finance-copilot-open .mobile-finance-composer,
+  body.finance-copilot-open .mobile-bottom-nav {
+    display: none !important;
+  }
+
   .mobile-finance-composer {
     bottom: calc(74px + env(safe-area-inset-bottom));
     grid-template-columns: 45px minmax(0, 1fr) 40px 40px;

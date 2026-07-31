@@ -863,10 +863,12 @@ function openModal(title, subtitle, content, options = {}) {
       </section>
     </div>
   `);
+  document.body.classList.toggle("finance-copilot-open", String(options.className || "").split(/\s+/).includes("ai-modal"));
 }
 
 function closeModal() {
   document.getElementById("dashboard-modal")?.remove();
+  document.body.classList.remove("finance-copilot-open");
 }
 
 function fmtVisualAmount(value, currency) {
