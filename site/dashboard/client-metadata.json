@@ -1,5 +1,5 @@
 {
-  "client_name": "Expense Tracker AI Dashboard",
+  "client_name": "Money Copilot AI Dashboard",
   "client_uri": "https://expense-chat-ai-sandy.vercel.app/",
   "redirect_uris": ["https://expense-chat-ai-sandy.vercel.app/authorize"],
   "grant_types": ["authorization_code", "refresh_token"],

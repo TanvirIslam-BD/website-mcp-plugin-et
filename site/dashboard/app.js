@@ -576,9 +576,9 @@ function renderSidebar(model) {
   return `
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo brand-logo-dark" src="/assets/logo/icon-512.png" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/light-icon.png" alt="">
-        <strong>Expense<span>Tracker AI</span></strong>
+        <img class="brand-logo brand-logo-dark" src="/assets/logo/logo-mark.svg" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/logo-mark.svg" alt="">
+        <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
       <button class="sidebar-search" type="button" data-sidebar-search aria-label="Search dashboard">${icon("search")}<span>Search dashboard</span><kbd>⌘ K</kbd></button>
@@ -586,7 +586,7 @@ function renderSidebar(model) {
       <nav class="nav" aria-label="Dashboard navigation">
         ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}" data-tooltip="${label}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
-      ${model.hasFinancialData ? `<a class="sidebar-promo" href="/#how" aria-label="Discover Expense Tracker AI features"><img src="/assets/sidebar-promo.webp" alt="Expense Tracker AI — know where your money is going"></a>` : ""}
+      ${model.hasFinancialData ? `<a class="sidebar-promo" href="/#how" aria-label="Discover Money Copilot AI features"><img src="/assets/sidebar-promo.webp" alt="Money Copilot AI — know where your money is going"></a>` : ""}
       <div class="theme-switch" role="group" aria-label="Dashboard appearance">
         <button type="button" data-theme-choice="light" aria-label="Use light theme">${icon("sun")}<span>Light</span></button>
         <button type="button" data-theme-choice="dark" aria-label="Use dark theme">${icon("moon")}<span>Dark</span></button>
@@ -671,8 +671,8 @@ function renderMobileBottomNav() {
 
 function renderAssistantIntegrationCta() {
   return `
-    <section class="assistant-integration-cta" aria-label="Connect Expense Tracker to an AI assistant">
-      <div><strong>Connect Expense Tracker with ChatGPT or Claude</strong><span>Scan receipts, voice log, AI insights &amp; more.</span></div>
+    <section class="assistant-integration-cta" aria-label="Connect Money Copilot AI to an AI assistant">
+      <div><strong>Connect Money Copilot AI with ChatGPT or Claude</strong><span>Scan receipts, voice log, AI insights &amp; more.</span></div>
       <nav aria-label="AI integrations">
         <a href="/#how"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</a>
         <a href="/#how"><img src="/assets/brands/claude.png" alt="">Claude</a>
@@ -749,7 +749,7 @@ function renderEmptyAssistantRail() {
         <div class="empty-questions">
           <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
           <button type="button" data-panel="budget-editor">${icon("budget")}Create a starter budget</button>
-          <button type="button" data-ai-suggestion="How does Expense Tracker protect my privacy?">${icon("lock")}How does privacy work?</button>
+          <button type="button" data-ai-suggestion="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
         </div>
         <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       </div>
@@ -789,25 +789,25 @@ function renderEmptyDashboard(model) {
         <div class="empty-onboarding-left">
           <section class="empty-hero">
             <div class="empty-hero-copy">
-              <h2>Use Expense Tracker <span>wherever</span> you chat</h2>
+              <h2>Use Money Copilot AI <span>wherever</span> you chat</h2>
               <p>Install secure expense tools in ChatGPT or Claude.<br>Share only the details you choose and keep your dashboard up to date.</p>
               <div class="empty-hero-actions"><a href="/#how">View integrations ${icon("chevron")}</a><a class="empty-secondary-link" href="/#how">How it works</a></div>
               <small>${icon("lock")}Private by design&nbsp; · &nbsp;Nothing is imported automatically</small>
             </div>
           </section>
           <section class="empty-connect panel">
-            <div class="empty-section-heading"><h3>Use Expense Tracker with your AI</h3><p>Add our tools where you already have conversations.</p></div>
+            <div class="empty-section-heading"><h3>Use Money Copilot AI with your AI</h3><p>Add our tools where you already have conversations.</p></div>
             <div class="empty-client-grid">
-              <article class="empty-client-card"><div class="client-logo brand-logo-card chatgpt-mark"><img src="/assets/brands/chatgpt.png" alt=""></div><div><h3>ChatGPT <em>Recommended</em></h3><p>Install the Expense Tracker plugin and save expenses when you choose to invoke it.</p></div><a class="client-connect primary" href="/#how">Use with ChatGPT ${icon("chevron")}</a><small>${icon("lock")}Install plugin · OAuth protected</small></article>
+              <article class="empty-client-card"><div class="client-logo brand-logo-card chatgpt-mark"><img src="/assets/brands/chatgpt.png" alt=""></div><div><h3>ChatGPT <em>Recommended</em></h3><p>Install the Money Copilot AI plugin and save expenses when you choose to invoke it.</p></div><a class="client-connect primary" href="/#how">Use with ChatGPT ${icon("chevron")}</a><small>${icon("lock")}Install plugin · OAuth protected</small></article>
               <article class="empty-client-card"><div class="client-logo brand-logo-card claude-mark"><img src="/assets/brands/claude.png" alt=""></div><div><h3>Claude</h3><p>Connect our remote MCP tools and send selected expense details to your dashboard.</p></div><a class="client-connect" href="/#how">Use with Claude ${icon("chevron")}</a><small>${icon("lock")}Connect via MCP · OAuth protected</small></article>
             </div>
           </section>
-          <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Install or connect<small>Add Expense Tracker tools</small></strong></span><i></i><span><b>2</b><strong>Approve access<small>Choose permitted actions</small></strong></span><i></i><span><b>3</b><strong>Save as you chat<small>Invoke the tool when needed</small></strong></span></div></section>
+          <section class="empty-how panel"><h3>How it works</h3><div><span><b>1</b><strong>Install or connect<small>Add Money Copilot AI tools</small></strong></span><i></i><span><b>2</b><strong>Approve access<small>Choose permitted actions</small></strong></span><i></i><span><b>3</b><strong>Save as you chat<small>Invoke the tool when needed</small></strong></span></div></section>
           <section class="empty-client-strip"><span>Works with your favorite AI clients and MCP tools</span><div><span class="brand-item"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</span><i></i><span class="brand-item"><img src="/assets/brands/claude.png" alt="">Claude</span><i></i><span class="brand-item"><img src="/assets/brands/gemini.png" alt="">Gemini</span><i></i><span class="brand-item"><img src="/assets/brands/grok.png" alt="">Grok</span><i></i><span class="brand-item"><img src="/assets/brands/cursor.png" alt="">Cursor</span><i></i><span class="brand-item"><img src="/assets/brands/mcp.png" alt="">Any MCP Client</span></div></section>
         </div>
         <aside class="empty-preview panel">
           <div class="panel-head"><h3>See it in action</h3><a href="/assets/dashboard/expense-tracker-ai-promo.png" target="_blank" aria-label="Open preview">${icon("chevron")}</a></div>
-          <img src="/assets/dashboard/expense-tracker-ai-promo.png" alt="Expense Tracker AI dashboard and chat experience preview">
+          <img src="/assets/dashboard/expense-tracker-ai-promo.png" alt="Money Copilot AI dashboard and chat experience preview">
           <a href="/#demo">Preview the ChatGPT experience</a>
         </aside>
       </div>
@@ -939,7 +939,7 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return;
   const visualHtml = role === "assistant" ? renderVisualData(visualData) : "";
-  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Expense Tracker AI"}</div><div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
+  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Money Copilot AI"}</div><div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
   list.scrollTop = list.scrollHeight;
 }
 
@@ -949,7 +949,7 @@ function appendAiLoading(chatRoot = document) {
   const id = `ai-loading-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
-      <div class="ai-message-label">Expense Tracker AI</div>
+      <div class="ai-message-label">Money Copilot AI</div>
       <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Reviewing your dashboard data...</span></div>
     </div>
   `);
@@ -990,7 +990,7 @@ function openEmptyAiChat(prefill = "") {
       <div class="empty-questions">
         <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
         <button type="button" data-panel="budget-editor">${icon("budget")}Create a starter budget</button>
-        <button type="button" data-ai-suggestion="How does Expense Tracker protect my privacy?">${icon("lock")}How does privacy work?</button>
+        <button type="button" data-ai-suggestion="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
       </div>
       <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       <form class="empty-mobile-copilot-compose" data-ai-chat-form>
@@ -1689,5 +1689,5 @@ loadDashboard()
       return;
     }
     app.className = "error-card";
-    app.innerHTML = `<h1>Dashboard unavailable</h1><p>${esc(error.message)}</p><p>Open a fresh dashboard link from Expense Tracker MCP.</p>`;
+    app.innerHTML = `<h1>Dashboard unavailable</h1><p>${esc(error.message)}</p><p>Open a fresh dashboard link from Money Copilot MCP.</p>`;
   });
