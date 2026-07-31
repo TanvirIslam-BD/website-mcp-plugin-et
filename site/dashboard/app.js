@@ -4,6 +4,14 @@ const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 
+function timeGreeting(date = new Date()) {
+  const hour = date.getHours();
+  if (hour < 5) return "Good night";
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 function syncThemeSwitch() {
   const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
   document.querySelectorAll("[data-theme-choice]").forEach((button) => {
@@ -578,8 +586,8 @@ function renderSidebar(model) {
   return `
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-logo-dark.png" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-logo-light.png" alt="">
+        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-mark-dark.png" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-mark-light.png" alt="">
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
@@ -607,7 +615,7 @@ function renderHeader(model) {
   return `
     <header class="topbar">
       <div class="headline">
-        <h1>Good morning, ${displayName} <span class="headline-wave" aria-hidden="true">👋</span></h1>
+        <h1>${timeGreeting()}, ${displayName} <span class="headline-wave" aria-hidden="true">👋</span></h1>
         <p>Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.</p>
       </div>
       <div class="toolbar">
@@ -641,7 +649,7 @@ function renderMobileDashboardHeader(model) {
         </div>
       </div>
       <div class="mobile-greeting">
-        <h1>Good morning,<br>${displayName} <span aria-hidden="true">👋</span></h1>
+        <h1>${timeGreeting()},<br>${displayName} <span aria-hidden="true">👋</span></h1>
         <p>Here&rsquo;s your financial picture for ${month}.</p>
       </div>
     </header>

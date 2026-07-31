@@ -846,6 +846,20 @@ body.is-resizing-copilot * {
 }
 
 @media (max-width: 720px) {
+  .ai-modal .ai-chat {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto !important;
+    min-height: 0;
+  }
+
+  .ai-modal .ai-chat-scroll {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .main {
     padding: 28px 14px 96px;
   }
