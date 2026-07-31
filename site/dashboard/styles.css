@@ -1028,6 +1028,8 @@ button {
 .brand img {
   width: 42px;
   height: 42px;
+  object-fit: cover;
+  object-position: left center;
   border-radius: 12px;
   box-shadow: 0 11px 24px rgba(0, 0, 0, .35);
 }
@@ -6123,6 +6125,9 @@ textarea:focus-visible {
 
   /* Keep the Copilot chrome compact so the answer remains the focus on phones. */
   .ai-modal {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
     padding: 12px;
   }
   .ai-modal .modal-top {
@@ -8012,6 +8017,24 @@ textarea:focus-visible {
 :root[data-theme="dark"] .assistant-alert {
   border-color: #253a6a;
   background: linear-gradient(145deg, #0d1928, #101e34);
+}
+
+/* Match the Money Copilot wordmark used on the public homepage. */
+.brand strong {
+  color: #0b1738;
+  letter-spacing: -.03em;
+}
+
+.brand strong span {
+  color: #078bdc;
+  background: linear-gradient(90deg, #10b981, #078bdc 72%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:root[data-theme="dark"] .brand strong {
+  color: #f7faff;
 }
 
 :root[data-theme="dark"] .assistant-alert-actions button {

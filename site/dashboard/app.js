@@ -70,6 +70,7 @@ function icon(name) {
     card: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='M3 10h18'/>",
     lock: "<rect x='5' y='10' width='14' height='11' rx='2'/><path d='M8 10V7a4 4 0 0 1 8 0v3'/>",
     attachment: "<path d='m20.5 11.5-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 1 1-2.8-2.8l8.9-8.9'/>",
+    mail: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='m3 7 9 6 9-6'/>",
     send: "<path d='m4 4 17 8-17 8 3-8z'/><path d='M7 12h14'/>",
     database: "<ellipse cx='12' cy='5' rx='8' ry='3'/><path d='M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5'/><path d='M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6'/>",
     logout: "<path d='M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5'/><path d='m15 8 4 4-4 4M19 12H8'/>",
@@ -571,13 +572,14 @@ function renderSidebar(model) {
     ["categories", "Categories", "categories"],
     ["budget", "Budget", "budget"],
     ["analytics", "Reports", "analytics"],
+    ["mail", "Email Report", "email-report"],
     ["settings", "Settings", "settings"],
   ];
   return `
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo brand-logo-dark" src="/assets/logo/logo-mark.svg" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/logo-mark.svg" alt="">
+        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-logo-dark.png" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-logo-light.png" alt="">
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
@@ -635,7 +637,7 @@ function renderMobileDashboardHeader(model) {
         <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
         <div>
           <button class="mobile-notice-button" type="button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${alertCount}</b></button>
-          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
+          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
         </div>
       </div>
       <div class="mobile-greeting">
@@ -648,10 +650,10 @@ function renderMobileDashboardHeader(model) {
 
 function renderMobileCopilotComposer() {
   return `
-    <section class="mobile-finance-composer" aria-label="Finance Copilot quick actions">
-      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
+    <section class="mobile-finance-composer" aria-label="Money Copilot quick actions">
+      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
       <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
-      <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Finance Copilot">${icon("send")}</button>
+      <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Money Copilot">${icon("send")}</button>
       <button class="mobile-composer-action" type="button" data-entry="expense" aria-label="Scan a receipt">${icon("camera")}</button>
     </section>
   `;
@@ -697,10 +699,10 @@ function renderAiAssistantRail(model) {
 
   return `
     <aside class="assistant-rail" id="finance-copilot-panel" aria-label="AI Finance Assistant">
-      <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Finance Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
+      <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot.png" alt=""></span> Finance Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -732,19 +734,19 @@ function renderAiAssistantRail(model) {
 
 function renderEmptyAssistantRail() {
   return `
-    <aside class="assistant-rail empty-assistant-rail" id="finance-copilot-panel" aria-label="Finance Copilot onboarding">
-      <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Finance Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
+    <aside class="assistant-rail empty-assistant-rail" id="finance-copilot-panel" aria-label="Money Copilot onboarding">
+      <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot.png" alt=""></span> Finance Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
       </div>
       <div class="empty-copilot-body" data-ai-chat>
-        <img src="/assets/finance-copilot.png" alt="Finance Copilot">
-        <h2>Hi, I’m your Finance Copilot</h2>
+        <img src="/assets/finance-copilot-robot.png" alt="Money Copilot">
+        <h2>Hi, I’m your Money Copilot</h2>
         <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
-        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot-robot.png" alt=""></span>What would you like to do first?</div>
         <div class="empty-divider"><span>Suggested questions</span></div>
         <div class="empty-questions">
           <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
@@ -754,7 +756,7 @@ function renderEmptyAssistantRail() {
         <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       </div>
       <div class="empty-copilot-compose">
-        <form data-ai-chat-form><span class="compose-clip">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Finance Copilot..." aria-label="Ask Finance Copilot" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></form>
+        <form data-ai-chat-form><span class="compose-clip">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Money Copilot..." aria-label="Ask Money Copilot" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></form>
         <small>${icon("lock")} Private · Uses only data you approve</small>
       </div>
     </aside>
@@ -835,7 +837,7 @@ function renderDashboard(model) {
       </section>
     </section>
     ${renderAiAssistantRail(model)}
-    <button class="floating-ai" data-open-ai-chat aria-label="Open Finance Copilot"><img src="/assets/finance-copilot.png" alt=""></button>
+    <button class="floating-ai" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
     ${renderMobileCopilotComposer()}
     ${renderMobileBottomNav()}
   `;
@@ -972,7 +974,7 @@ function setAiSubmitLoading(button, isLoading) {
 }
 
 function openEmptyAiChat(prefill = "") {
-  openModal("Finance Copilot", "Build your first financial picture with guided, private help.", `
+  openModal("Money Copilot", "Build your first financial picture with guided, private help.", `
     <div class="copilot-modal-status empty-copilot-status">
       <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
         <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
@@ -981,10 +983,10 @@ function openEmptyAiChat(prefill = "") {
     </div>
     <div class="empty-mobile-copilot" data-ai-chat>
       <div class="empty-mobile-copilot-intro">
-        <img src="/assets/finance-copilot.png" alt="Finance Copilot">
-        <h2>Hi, I’m your Finance Copilot</h2>
+        <img src="/assets/finance-copilot-robot.png" alt="Money Copilot">
+        <h2>Hi, I’m your Money Copilot</h2>
         <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
-        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot-robot.png" alt=""></span>What would you like to do first?</div>
       </div>
       <div class="empty-divider"><span>Suggested questions</span></div>
       <div class="empty-questions">
@@ -994,7 +996,7 @@ function openEmptyAiChat(prefill = "") {
       </div>
       <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       <form class="empty-mobile-copilot-compose" data-ai-chat-form>
-        <div><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Finance Copilot..." aria-label="Ask Finance Copilot" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
+        <div><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Money Copilot..." aria-label="Ask Money Copilot" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
         <small>${icon("lock")} Private · Uses only data you approve</small>
       </form>
     </div>
@@ -1021,7 +1023,7 @@ function openAiChat(prefill = "") {
     : "Record expenses to unlock category insights.";
   const reportMonth = model ? esc(monthLabel(model.month).split(" ")[0]) : esc(monthLabel(selectedMonth).split(" ")[0]);
 
-  openModal("Finance Copilot", "Get verified answers from your private expense data.", `
+  openModal("Money Copilot", "Get verified answers from your private expense data.", `
     <div class="copilot-modal-status">
       <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
         <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
@@ -1204,6 +1206,20 @@ function panelRows(items, render) {
 function openPanel(kind) {
   const model = window.dashboardModel;
   if (!model) return;
+  if (kind === "email-report") {
+    const month = monthLabel(model.month);
+    const budgetLine = model.budgetMinor
+      ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)`
+      : "No monthly budget is set";
+    openModal("Email your report", "Send a private spending and budget summary to your inbox.", `
+      <form data-form="email-report" class="email-report-form">
+        <div class="field"><label for="report-email">Email address</label><input id="report-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+        <div class="email-report-preview"><b>${esc(month)} summary</b><span>${esc(budgetLine)}</span><span>${esc(model.remainingMinor === null ? "Add a budget to track remaining funds." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`)}</span></div>
+        <p class="form-error" data-error></p><div class="modal-actions"><button type="submit" class="action-button primary">${icon("mail")} Open email draft</button></div>
+      </form>
+    `, { wide: false });
+    return;
+  }
   if (kind === "notifications") {
     openModal("Notifications", "Budget alerts and workspace reminders.", panelRows(buildNotifications(model), (item) => `<div class="plain-row"><span><b>${esc(item.title)}</b><small>${esc(item.body)}</small></span>${icon("bell")}</div>`));
     return;
@@ -1607,7 +1623,7 @@ function bindEvents() {
     const copilotModel = event.target.closest("[data-copilot-model]");
     if (copilotModel) {
       document.querySelectorAll("[data-copilot-model]").forEach((button) => button.classList.toggle("active", button === copilotModel));
-      document.querySelector(".empty-copilot-compose textarea")?.setAttribute("placeholder", `Ask ${copilotModel.dataset.copilotModel} Finance Copilot...`);
+      document.querySelector(".empty-copilot-compose textarea")?.setAttribute("placeholder", `Ask ${copilotModel.dataset.copilotModel} Money Copilot...`);
       return;
     }
     if (event.target.closest("[data-empty-copilot-start]")) {
@@ -1661,6 +1677,18 @@ function bindEvents() {
     const form = event.target.closest("[data-form]");
     if (!form) return;
     event.preventDefault();
+    if (form.dataset.form === "email-report") {
+      const email = form.elements.email?.value.trim();
+      if (!email) return;
+      const model = window.dashboardModel;
+      const subject = `${monthLabel(model.month)} Money Copilot report`;
+      const budget = model.budgetMinor ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)` : "No monthly budget is set";
+      const status = model.remainingMinor === null ? "No budget remaining status available." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget.` : `${formatMoney(model.remainingMinor, model.currency)} remaining.`;
+      const body = `Money Copilot report for ${monthLabel(model.month)}%0D%0A%0D%0A${budget}%0D%0A${status}%0D%0ATotal income: ${formatMoney(model.incomeMinor, model.currency)}%0D%0ANet cash flow: ${formatMoney(model.savedMinor, model.currency)}`;
+      location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${body}`;
+      closeModal();
+      return;
+    }
     submitPanelForm(form);
   });
 
