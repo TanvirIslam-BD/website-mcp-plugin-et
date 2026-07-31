@@ -1028,6 +1028,8 @@ button {
 .brand img {
   width: 42px;
   height: 42px;
+  object-fit: cover;
+  object-position: left center;
   border-radius: 12px;
   box-shadow: 0 11px 24px rgba(0, 0, 0, .35);
 }
@@ -6116,6 +6118,13 @@ textarea:focus-visible {
   }
 
   .ai-modal .ai-chat { grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
+  .ai-modal .ai-chat { grid-template-rows: minmax(0, 1fr) auto auto; }
+  .ai-modal .ai-chat-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 2px;
+  }
   .ai-modal .assistant-integration-cta strong { font-size: 12px; }
   .ai-modal .assistant-integration-cta span { font-size: 10px; }
   .ai-modal .assistant-integration-cta a { min-height: 42px; font-size: 11px; }
@@ -6123,6 +6132,9 @@ textarea:focus-visible {
 
   /* Keep the Copilot chrome compact so the answer remains the focus on phones. */
   .ai-modal {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
     padding: 12px;
   }
   .ai-modal .modal-top {
@@ -7087,6 +7099,14 @@ textarea:focus-visible {
   background: linear-gradient(165deg, #f8faff 0%, #f1f5fd 100%);
 }
 
+.ai-chat-scroll {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  overflow-y: auto;
+}
+
 .ai-metric-row {
   display: flex;
   gap: 10px;
@@ -7893,10 +7913,41 @@ textarea:focus-visible {
 
 /* Integration CTA: polished card */
 .assistant-integration-cta {
+  position: relative;
   border-radius: 12px;
   border-color: #dfe5f2;
   background: linear-gradient(145deg, #fcfdff, #f6f9ff);
   box-shadow: 0 2px 8px rgba(33, 58, 126, .04);
+}
+
+.assistant-integration-cta.is-dismissed {
+  display: none;
+}
+
+.assistant-integration-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: #74829b;
+  background: transparent;
+  cursor: pointer;
+}
+
+.assistant-integration-dismiss:hover {
+  color: #1d2e4d;
+  background: #edf2fb;
+}
+
+.assistant-integration-dismiss svg {
+  width: 14px;
+  height: 14px;
 }
 
 .assistant-integration-cta strong {
@@ -8012,6 +8063,24 @@ textarea:focus-visible {
 :root[data-theme="dark"] .assistant-alert {
   border-color: #253a6a;
   background: linear-gradient(145deg, #0d1928, #101e34);
+}
+
+/* Match the Money Copilot wordmark used on the public homepage. */
+.brand strong {
+  color: #0b1738;
+  letter-spacing: -.03em;
+}
+
+.brand strong span {
+  color: #078bdc;
+  background: linear-gradient(90deg, #10b981, #078bdc 72%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:root[data-theme="dark"] .brand strong {
+  color: #f7faff;
 }
 
 :root[data-theme="dark"] .assistant-alert-actions button {

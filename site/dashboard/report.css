@@ -1052,6 +1052,24 @@ body.is-resizing-copilot * {
     justify-content: flex-start;
     gap: 12px;
     padding: 0 14px;
+    color: #15213a;
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .dashboard-shell .sidebar .nav button svg {
+    color: #29456f;
+    stroke: currentColor;
+  }
+
+  .dashboard-shell .sidebar .nav button.active {
+    color: #fff;
+    background: linear-gradient(135deg, #3158f6, #5540e8);
+    border-color: transparent;
+  }
+
+  .dashboard-shell .sidebar .nav button.active svg {
+    color: #fff;
   }
 
   .dashboard-shell .sidebar .theme-switch {
