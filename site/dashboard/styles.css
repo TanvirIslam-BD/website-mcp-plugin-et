@@ -140,6 +140,11 @@ button {
   object-fit: cover;
 }
 
+.boot-logo-dark { display: none; }
+
+:root[data-theme="dark"] .boot-logo-light { display: none; }
+:root[data-theme="dark"] .boot-logo-dark { display: block; }
+
 .boot-copy {
   margin-top: 28px;
 }
