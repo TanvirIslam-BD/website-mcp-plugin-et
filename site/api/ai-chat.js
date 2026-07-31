@@ -243,6 +243,58 @@ async function verifiedFallbackAnswer(db, userId, message, dashboardMonth) {
   return `I can verify your expenses, budgets, and monthly reports. For ${report.month}, you have recorded **${fallbackMoney(report.spent, report.currency)}** in expenses. Ask me for a monthly report, a category breakdown, or savings ideas.`;
 }
 
+function buildVisualData(toolName, toolResult, currency) {
+  if (!toolResult || toolResult.error) return null;
+  const fmt = (v) => Number(v || 0).toFixed(2);
+  if (toolName === "get_budget_status") {
+    const r = toolResult;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
+      { label: "Budget", value: r.budget !== null ? fmt(r.budget) : null, currency: cur, color: "#2563ff" },
+      { label: "Remaining", value: r.remaining !== null ? fmt(r.remaining) : null, currency: cur, color: r.remaining < 0 ? "#ff4548" : "#18b96f" },
+    ].filter((m) => m.value !== null);
+    const progress = r.budget ? { value: r.spent, max: r.budget, percent: r.usedPercent || 0, label: "Budget Used" } : null;
+    const categories = (r.categoryLimits || []).slice(0, 6).map((c) => ({ name: c.category, limit: c.amount, currency: c.currency }));
+    return { type: "budget_status", metrics, progress, categories: categories.length ? categories : null };
+  }
+  if (toolName === "generate_monthly_report") {
+    const r = toolResult;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Total Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
+      { label: "Income", value: fmt(r.income), currency: cur, color: "#18b96f" },
+      { label: "Net Cash Flow", value: fmt(r.netCashFlow), currency: cur, color: r.netCashFlow >= 0 ? "#18b96f" : "#ff4548" },
+    ];
+    if (r.budget !== null) metrics.push({ label: "Budget", value: fmt(r.budget), currency: cur, color: "#2563ff" });
+    const total = r.categories.reduce((s, c) => s + c.amount, 0) || 1;
+    const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+    const pieChart = r.categories.slice(0, 7).map((c, i) => ({
+      label: c.category, value: c.amount, percent: Math.round((c.amount / total) * 100), color: pieColors[i % pieColors.length],
+    }));
+    return { type: "monthly_report", metrics, pieChart: pieChart.length ? pieChart : null };
+  }
+  if (toolName === "get_expenses") {
+    const r = toolResult;
+    if (!r.count) return null;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Transactions", value: String(r.count), color: "#2563ff" },
+      { label: "Total", value: fmt(r.total), currency: cur, color: "#ff4548" },
+    ];
+    const byCategory = {};
+    (r.expenses || []).forEach((e) => { byCategory[e.category] = (byCategory[e.category] || 0) + e.amount; });
+    const cats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const maxCat = cats[0]?.[1] || 1;
+    const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899"];
+    const pieChart = cats.map(([name, amount], i) => ({
+      label: name, value: amount, percent: Math.round((amount / (r.total || 1)) * 100), color: pieColors[i % pieColors.length],
+    }));
+    return { type: "expense_list", metrics, pieChart: pieChart.length > 1 ? pieChart : null };
+  }
+  return null;
+}
+
 function isLatestExpenseIntent(message) {
   return /\b(last|latest|most recent)\b.*\b(expense|transaction|purchase)\b|\b(expense|transaction|purchase)\b.*\b(last|latest|most recent)\b/i.test(message);
 }
@@ -305,6 +357,8 @@ export default async function handler(req, res) {
       { role: "user", content: message },
     ];
     const usedTools = preloaded ? [preloaded.name] : [];
+    let lastToolName = preloaded?.name || null;
+    let lastToolResult = preloaded?.result || null;
     let activeModel = modelChoice.model;
     let completion;
     for (let pass = 0; pass < 4; pass += 1) {
@@ -326,12 +380,15 @@ export default async function handler(req, res) {
         const name = safeText(call.function?.name, 64);
         const result = await runTool(db, userId, name, input, dashboardMonth);
         usedTools.push(name);
+        lastToolName = name;
+        lastToolResult = result;
         messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
       }
     }
     if (needsFinancialData(message) && !usedTools.length) throw new Error("The model returned an unverified financial answer.");
     const answer = answerContent(completion?.choices?.[0]?.message);
-    const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, cached: false };
+    const visualData = buildVisualData(lastToolName, lastToolResult, null) || undefined;
+    const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, visualData, cached: false };
     responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
     if (responseCache.size > 500) responseCache.delete(responseCache.keys().next().value);
     console.info("[ai-chat]", JSON.stringify({ userId, model: activeModel, tools: value.usedTools, usage: value.usage }));
@@ -342,11 +399,14 @@ export default async function handler(req, res) {
     try {
       const fallbackDb = createClient({ url, authToken });
       const answer = await verifiedFallbackAnswer(fallbackDb, userId, message, dashboardMonth);
+      const fallbackReport = await generateMonthlyReport(fallbackDb, userId, { month: dashboardMonth }, dashboardMonth).catch(() => null);
+      const visualData = buildVisualData("generate_monthly_report", fallbackReport, null) || undefined;
       return res.status(200).json({
         answer,
         model: "verified-dashboard-fallback",
         usedTools: ["generate_monthly_report"],
         usage: null,
+        visualData,
         cached: false,
         fallback: true,
       });

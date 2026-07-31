@@ -236,32 +236,73 @@ function renderMetricCards(model) {
   const balanceSpark = model.savingsCum.length ? model.savingsCum : [1, 2, 1, 3, 4, 3, 5];
   const incomeSpark = model.incomeDaily.length ? model.incomeDaily : [1, 2, 3, 2, 4, 3, 5];
   const expenseSpark = model.expenseDaily.length ? model.expenseDaily : [1, 3, 4, 3, 2, 5, 4];
+  const previousSaved = Number(model.previousIncomeMinor || 0) - Number(model.previousSpentMinor || 0);
+  const metrics = [
+    {
+      className: `balance ${model.savedMinor < 0 ? "is-negative" : ""}`,
+      label: "Balance",
+      value: Math.abs(model.savedMinor),
+      trend: percentChange(Math.abs(model.savedMinor), Math.abs(previousSaved)),
+      trendDirection: model.savedMinor >= 0 ? 1 : -1,
+      favorable: model.savedMinor >= 0,
+      iconName: "wallet",
+      spark: balanceSpark,
+      sparkTone: model.savedMinor < 0 ? "#ff334f" : "#2f63ff",
+    },
+    {
+      className: "income",
+      label: "Income",
+      value: model.incomeMinor,
+      trend: percentChange(model.incomeMinor, model.previousIncomeMinor),
+      trendDirection: percentChange(model.incomeMinor, model.previousIncomeMinor),
+      favorable: Number(model.incomeMinor || 0) >= Number(model.previousIncomeMinor || 0),
+      iconName: "analytics",
+      spark: incomeSpark,
+      sparkTone: "#0fbd71",
+    },
+    {
+      className: "expense",
+      label: "Spent",
+      value: model.spentMinor,
+      trend: percentChange(model.spentMinor, model.previousSpentMinor),
+      trendDirection: percentChange(model.spentMinor, model.previousSpentMinor),
+      favorable: Number(model.spentMinor || 0) <= Number(model.previousSpentMinor || 0),
+      iconName: "card",
+      spark: expenseSpark,
+      sparkTone: "#ff6a18",
+    },
+    {
+      className: `saving ${model.savedMinor < 0 ? "is-negative" : ""}`,
+      label: "Saved",
+      value: model.savedMinor,
+      trend: percentChange(model.savedMinor, previousSaved),
+      trendDirection: model.savedMinor >= 0 ? 1 : -1,
+      favorable: model.savedMinor >= 0,
+      iconName: "piggy",
+      spark: balanceSpark,
+      sparkTone: model.savedMinor < 0 ? "#4a65ff" : "#2563ff",
+    },
+  ];
   return `
     <section class="summary-grid" aria-label="Monthly summary">
-      <article class="metric-card balance ${model.savedMinor < 0 ? "is-negative" : ""}">
-        <span class="metric-icon">${icon(model.savedMinor < 0 ? "down" : "up")}</span>
-        <label>Balance</label>
-        <h2>${formatMoney(model.savedMinor, model.currency, { compact: true })}</h2>
-        ${spark(balanceSpark, model.savedMinor < 0 ? "#ff2d2f" : "#18b96f")}
-      </article>
-      <article class="metric-card income">
-        <span class="metric-icon">${icon("up")}</span>
-        <label>Income</label>
-        <h2>${formatMoney(model.incomeMinor, model.currency, { compact: true })}</h2>
-        ${spark(incomeSpark, "#18b96f")}
-      </article>
-      <article class="metric-card expense">
-        <span class="metric-icon">${icon("up")}</span>
-        <label>Spent</label>
-        <h2>${formatMoney(model.spentMinor, model.currency, { compact: true })}</h2>
-        ${spark(expenseSpark, "#ff4548")}
-      </article>
-      <article class="metric-card saving ${model.savedMinor < 0 ? "is-negative" : ""}">
-        <span class="metric-icon">${icon(model.savedMinor < 0 ? "down" : "up")}</span>
-        <label>Saved</label>
-        <h2>${formatMoney(model.savedMinor, model.currency, { compact: true })}</h2>
-        ${spark(balanceSpark, model.savedMinor < 0 ? "#ff4548" : "#2563ff")}
-      </article>
+      ${metrics.map((metric) => `
+        <article class="metric-card ${metric.className}">
+          <div class="metric-card-main">
+            <span class="metric-icon">${icon(metric.iconName)}</span>
+            <div class="metric-copy">
+              <label>${metric.label}</label>
+              <h2>${formatMoney(metric.value, model.currency, { compact: true })}</h2>
+              <span class="metric-trend ${metric.favorable ? "positive" : "negative"}">
+                ${icon(metric.trendDirection >= 0 ? "up" : "down")}
+                <b>${Math.abs(metric.trend).toFixed(1)}%</b>
+                <small>vs last month</small>
+              </span>
+            </div>
+            <span class="metric-direction ${metric.favorable ? "positive" : "negative"}">${icon(metric.favorable ? "up" : "down")}</span>
+          </div>
+          ${spark(metric.spark, metric.sparkTone)}
+        </article>
+      `).join("")}
     </section>
   `;
 }
@@ -367,6 +408,7 @@ function renderBudget(model) {
     <article class="panel budget-panel" id="budget">
       <div class="panel-head">
         <h3>Budget</h3>
+        <button class="panel-menu" data-panel="budget-editor" aria-label="Edit monthly budget">•••</button>
       </div>
       <div class="budget-ring" style="--budget:${ring}%">
         <div class="inner"><b>${model.budgetMinor ? `${used}%` : "--"}</b><span>${model.budgetMinor ? "used" : "No budget"}</span></div>
@@ -379,17 +421,28 @@ function renderBudget(model) {
 
 function renderCategories(model) {
   const total = Math.max(model.spentMinor || 0, 1);
-  const largest = Math.max(...(model.categories || []).map((category) => Number(category.amountMinor || 0)), 1);
+  let stop = 0;
+  const donutStops = (model.categories || []).slice(0, 5).map((category, index) => {
+    const start = stop;
+    stop += (Number(category.amountMinor || 0) / total) * 100;
+    return `${colors[index % colors.length]} ${start.toFixed(1)}% ${Math.min(stop, 100).toFixed(1)}%`;
+  });
+  if (stop < 100) donutStops.push(`#e8edf4 ${Math.max(stop, 0).toFixed(1)}% 100%`);
   const rows = (model.categories || []).slice(0, 5).map((category, index) => {
-    const width = Math.max(4, Math.round((category.amountMinor / largest) * 100));
-    return `<div class="category-line"><label>${esc(category.name)}</label><span class="category-track"><i style="--tone:${colors[index % colors.length]};--value:${width}%"></i></span><b>${formatMoney(category.amountMinor, model.currency, { compact: true })}</b></div>`;
+    const percentage = Math.round((Number(category.amountMinor || 0) / total) * 100);
+    return `<div class="category-line"><i style="--tone:${colors[index % colors.length]}">${icon(["up", "transactions", "card", "bills", "categories"][index] || "categories")}</i><label>${esc(category.name)}</label><b>${formatMoney(category.amountMinor, model.currency, { compact: true })} <small>(${percentage}%)</small></b></div>`;
   }).join("") || `<div class="empty-state">No category data yet.</div>`;
   return `
     <article class="panel spending-panel" id="categories">
       <div class="panel-head">
         <h3>Spending breakdown</h3>
       </div>
-      <div class="category-legend">${rows}</div>
+      <div class="spending-report">
+        <div class="spending-donut" style="--segments:${donutStops.length ? `conic-gradient(${donutStops.join(",")})` : "conic-gradient(#e8edf4 0 100%)"}">
+          <div><b>${formatMoney(model.spentMinor, model.currency, { compact: true })}</b><span>Total spent</span></div>
+        </div>
+        <div class="category-legend">${rows}</div>
+      </div>
       <button class="panel-footer-link" data-panel="categories">View all categories</button>
     </article>
   `;
@@ -508,6 +561,9 @@ function renderSidebar(model) {
     ["transactions", "Transactions", "transactions"],
     ["advisor", "AI Advisor", "analysis"],
     ["database", "Manage Data", "data-management"],
+    ["categories", "Categories", "categories"],
+    ["budget", "Budget", "budget"],
+    ["analytics", "Reports", "analytics"],
     ["settings", "Settings", "settings"],
   ];
   return `
@@ -542,7 +598,7 @@ function renderHeader(model) {
   return `
     <header class="topbar">
       <div class="headline">
-        <h1>Good morning, ${displayName}</h1>
+        <h1>Good morning, ${displayName} <span class="headline-wave" aria-hidden="true">👋</span></h1>
         <p>Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.</p>
       </div>
       <div class="toolbar">
@@ -752,6 +808,63 @@ function closeModal() {
   document.getElementById("dashboard-modal")?.remove();
 }
 
+function fmtVisualAmount(value, currency) {
+  const v = Math.abs(Number(value || 0));
+  const sign = Number(value || 0) < 0 ? "-" : "";
+  const formatted = v.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  if (currency === "BDT") return `${sign}\u09F3${formatted}`;
+  if (currency === "USD") return `${sign}$${formatted}`;
+  if (currency) return `${sign}${currency} ${formatted}`;
+  return `${sign}${formatted}`;
+}
+
+function renderVisualData(data) {
+  if (!data) return "";
+  let html = '<div class="ai-visual-panel">';
+
+  if (data.metrics?.length) {
+    html += '<div class="ai-metric-row">';
+    for (const m of data.metrics) {
+      const displayValue = m.currency ? fmtVisualAmount(m.value, m.currency) : m.value;
+      html += `<div class="ai-metric-card" style="--accent:${esc(m.color || "#2563ff")}"><span class="ai-metric-value">${esc(displayValue)}</span><span class="ai-metric-label">${esc(m.label)}</span></div>`;
+    }
+    html += '</div>';
+  }
+
+  if (data.progress) {
+    const p = data.progress;
+    const overBudget = p.percent > 100;
+    const barColor = overBudget ? "#ff4548" : p.percent > 80 ? "#f59e0b" : "#18b96f";
+    html += `<div class="ai-progress-block"><div class="ai-progress-head"><span>${esc(p.label)}</span><strong style="color:${barColor}">${p.percent}%</strong></div><div class="ai-progress-track"><div class="ai-progress-fill" style="width:${Math.min(100, p.percent)}%;background:${barColor}"></div></div></div>`;
+  }
+
+  if (data.pieChart?.length) {
+    const total = data.pieChart.reduce((s, c) => s + c.value, 0) || 1;
+    let cumulative = 0;
+    let arcs = "";
+    const radius = 42;
+    const circumference = 2 * Math.PI * radius;
+    for (const slice of data.pieChart) {
+      const fraction = slice.value / total;
+      const dashLen = fraction * circumference;
+      const dashOffset = -cumulative * circumference;
+      arcs += `<circle cx="50" cy="50" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="16" stroke-dasharray="${dashLen} ${circumference - dashLen}" stroke-dashoffset="${dashOffset}" />`;
+      cumulative += fraction;
+    }
+    html += '<div class="ai-pie-section">';
+    html += `<div class="ai-pie-wrap"><svg viewBox="0 0 100 100" class="ai-pie-svg">${arcs}</svg></div>`;
+    html += '<div class="ai-pie-legend">';
+    for (const slice of data.pieChart) {
+      const displayVal = data.metrics?.[0]?.currency ? fmtVisualAmount(slice.value, data.metrics[0].currency) : slice.value;
+      html += `<div class="ai-legend-item"><i style="background:${esc(slice.color)}"></i><span>${esc(slice.label)}</span><b>${esc(String(displayVal))}</b><small>${slice.percent}%</small></div>`;
+    }
+    html += '</div></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
 function aiAnswerHtml(value) {
   return esc(value || "I could not generate a response.")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -759,10 +872,11 @@ function aiAnswerHtml(value) {
     .replace(/\n/g, "<br>");
 }
 
-function appendAiMessage(role, content, meta = "", chatRoot = document) {
+function appendAiMessage(role, content, meta = "", chatRoot = document, visualData = null) {
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return;
-  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Expense Tracker AI"}</div><div class="ai-message-body">${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
+  const visualHtml = role === "assistant" ? renderVisualData(visualData) : "";
+  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Expense Tracker AI"}</div><div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
   list.scrollTop = list.scrollHeight;
 }
 
@@ -925,7 +1039,7 @@ async function submitAiQuestion(form) {
     if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");
     const tools = body.usedTools?.length ? `Verified with ${body.usedTools.join(", ")}` : "General guidance";
     loadingMessage?.remove();
-    appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot);
+    appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot, body.visualData || null);
   } catch (error) {
     if (error.code === "AUTH_REQUIRED") {
       closeModal();
