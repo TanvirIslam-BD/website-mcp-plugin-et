@@ -6207,6 +6207,41 @@ textarea:focus-visible {
     max-height: 76px;
     padding: 10px 42px 10px 34px;
   }
+  .ai-modal .ai-visual-panel {
+    margin-bottom: 6px;
+    padding: 8px;
+    border-radius: 10px;
+  }
+  .ai-modal .ai-metric-row {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .ai-modal .ai-metric-card {
+    min-width: 0;
+    padding: 8px 5px;
+    border-radius: 8px;
+  }
+  .ai-modal .ai-metric-value {
+    font-size: 14px;
+  }
+  .ai-modal .ai-metric-label {
+    margin-top: 2px;
+    font-size: 9px;
+    letter-spacing: .02em;
+  }
+  .ai-modal .ai-progress-block {
+    margin-bottom: 5px;
+  }
+  .ai-modal .ai-progress-head {
+    margin-bottom: 4px;
+    font-size: 10px;
+  }
+  .ai-modal .ai-progress-head strong {
+    font-size: 11px;
+  }
+  .ai-modal .ai-progress-track {
+    height: 6px;
+  }
 }
 
 @media (min-width: 1440px) {
