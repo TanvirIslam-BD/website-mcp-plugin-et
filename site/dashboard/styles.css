@@ -2936,6 +2936,11 @@ button {
     border-radius: 16px;
   }
 
+  body.dashboard-modal-open .modal.notifications-modal {
+    max-height: 88vh;
+    margin-bottom: 0;
+  }
+
   .modal-actions {
     display: grid;
     grid-template-columns: 1fr;
