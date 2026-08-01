@@ -49,18 +49,18 @@ function authRequiredError() {
   return error;
 }
 
-const colors = ["#ff4548", "#2563ff", "#ffb21c", "#22b76b", "#7c3fff", "#289bd6", "#4757d9"];
+const colors = ["#019a56", "#19b9aa", "#83c968", "#087f49", "#9ee4ce", "#4ec9a0", "#5eae77"];
 const tagColors = {
-  food: ["#ff4548", "#fff0f0"],
-  "food & dining": ["#ff4548", "#fff0f0"],
-  groceries: ["#22b76b", "#e9fbf2"],
-  shopping: ["#7c3fff", "#f2edff"],
-  travel: ["#ff4548", "#fff0f0"],
-  transport: ["#2563ff", "#edf3ff"],
-  utilities: ["#22b76b", "#e9fbf2"],
-  bills: ["#ffb21c", "#fff7e6"],
-  health: ["#289bd6", "#e9f8ff"],
-  income: ["#18b96f", "#e8faef"],
+  food: ["#72bf61", "#edf8e9"],
+  "food & dining": ["#72bf61", "#edf8e9"],
+  groceries: ["#42b87a", "#e8f7ef"],
+  shopping: ["#019a56", "#e7f6ee"],
+  travel: ["#19b9aa", "#e5f8f5"],
+  transport: ["#2ab8a2", "#e6f8f5"],
+  utilities: ["#087f49", "#e5f3eb"],
+  bills: ["#d6a51e", "#fff8df"],
+  health: ["#42b997", "#e7f7f2"],
+  income: ["#019a56", "#e7f6ee"],
 };
 
 const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -276,7 +276,7 @@ function renderMetricCards(model) {
       favorable: model.savedMinor >= 0,
       iconName: "wallet",
       spark: balanceSpark,
-      sparkTone: model.savedMinor < 0 ? "#ff334f" : "#2f63ff",
+      sparkTone: model.savedMinor < 0 ? "#ef4444" : "#019a56",
     },
     {
       className: "income",
@@ -287,7 +287,7 @@ function renderMetricCards(model) {
       favorable: Number(model.incomeMinor || 0) >= Number(model.previousIncomeMinor || 0),
       iconName: "analytics",
       spark: incomeSpark,
-      sparkTone: "#0fbd71",
+      sparkTone: "#019a56",
     },
     {
       className: "expense",
@@ -298,7 +298,7 @@ function renderMetricCards(model) {
       favorable: Number(model.spentMinor || 0) <= Number(model.previousSpentMinor || 0),
       iconName: "card",
       spark: expenseSpark,
-      sparkTone: "#ff6a18",
+      sparkTone: "#019a56",
     },
     {
       className: `saving ${model.savedMinor < 0 ? "is-negative" : ""}`,
@@ -309,7 +309,7 @@ function renderMetricCards(model) {
       favorable: model.savedMinor >= 0,
       iconName: "piggy",
       spark: balanceSpark,
-      sparkTone: model.savedMinor < 0 ? "#4a65ff" : "#2563ff",
+      sparkTone: model.savedMinor < 0 ? "#ef4444" : "#019a56",
     },
   ];
   return `
@@ -375,9 +375,9 @@ function renderIncomeExpense(model) {
         <h3>Cash flow</h3>
         <div class="chart-tools">
           <div class="legend">
-            <span><i style="--tone:#18b96f"></i>Income</span>
-            <span><i style="--tone:#ff4548"></i>Expenses</span>
-            <span><i style="--tone:#2563ff"></i>Savings</span>
+            <span><i style="--tone:#078f50"></i>Income</span>
+            <span><i style="--tone:#019a56"></i>Expenses</span>
+            <span><i style="--tone:#20bfa0"></i>Savings</span>
           </div>
           <select class="period-select" aria-label="Chart period" data-chart-mode>
             <option value="month">This Month</option>
@@ -402,9 +402,9 @@ function renderIncomeExpense(model) {
           <polyline class="chart-line expense" data-chart-line="expense" points="${expensePoints}"/>
           <polyline class="chart-line saving" data-chart-line="saving" points="${savingPoints}"/>
           <line class="chart-cursor" data-chart-cursor x1="0" x2="0" y1="${padY}" y2="${height - padY}"/>
-          <circle class="chart-point income" data-chart-point="income" r="4" stroke="#18b96f"/>
-          <circle class="chart-point expense" data-chart-point="expense" r="4" stroke="#ff4548"/>
-          <circle class="chart-point saving" data-chart-point="saving" r="4" stroke="#2563ff"/>
+          <circle class="chart-point income" data-chart-point="income" r="4" stroke="#078f50"/>
+          <circle class="chart-point expense" data-chart-point="expense" r="4" stroke="#019a56"/>
+          <circle class="chart-point saving" data-chart-point="saving" r="4" stroke="#20bfa0"/>
           <rect class="chart-hitbox" data-chart-hitbox x="${padX}" y="0" width="${width - padX * 2}" height="${height}" rx="4"/>
         </svg>
         <div class="chart-y-axis" aria-hidden="true">
@@ -483,8 +483,8 @@ function renderInsights(model) {
   const over = model.remainingMinor !== null && model.remainingMinor < 0;
   const forecastOver = model.budgetMinor && model.forecastMinor > model.budgetMinor;
   const items = [
-    top ? { tone: "#2563ff", bg: "#edf3ff", title: `You spent most on ${top.name}`, body: `${formatMoney(top.amountMinor, model.currency)} is your largest category this month.`, iconName: "budget" } : null,
-    over ? { tone: "#ff4548", bg: "#fff0f0", title: "Budget limit crossed", body: `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over the monthly limit.`, iconName: "up" } : { tone: "#18b96f", bg: "#e8faef", title: "Budget status is stable", body: model.budgetMinor ? `${formatMoney(model.remainingMinor, model.currency)} still available.` : "Create a monthly budget to unlock alerts.", iconName: "down" },
+    top ? { tone: "#18b9a6", bg: "#e6f8f4", title: `You spent most on ${top.name}`, body: `${formatMoney(top.amountMinor, model.currency)} is your largest category this month.`, iconName: "budget" } : null,
+    over ? { tone: "#019a56", bg: "#e7f6ee", title: "Budget limit crossed", body: `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over the monthly limit.`, iconName: "up" } : { tone: "#019a56", bg: "#e7f6ee", title: "Budget status is stable", body: model.budgetMinor ? `${formatMoney(model.remainingMinor, model.currency)} still available.` : "Create a monthly budget to unlock alerts.", iconName: "down" },
     forecastOver ? { tone: "#ff9f1c", bg: "#fff7e6", title: "Pace is running high", body: `Forecast is ${formatMoney(model.forecastMinor, model.currency)} by month end.`, iconName: "analytics" } : { tone: "#18b96f", bg: "#e8faef", title: "Possible monthly saving", body: `Current net is ${formatMoney(model.savedMinor, model.currency)}.`, iconName: "piggy" },
   ].filter(Boolean);
   return `
@@ -530,7 +530,7 @@ function renderGoals(model) {
 function renderBillsAndSubscriptions(model) {
   const recurring = (model.recurring || []).slice(0, 8);
   const bills = recurring.slice(0, 3).map((bill, index) => {
-    const [tone, bg] = [["#ff9f1c", "#fff7e6"], ["#2563ff", "#edf3ff"], ["#18b96f", "#e8faef"]][index % 3];
+    const [tone, bg] = [["#d6a51e", "#fff8df"], ["#19b9aa", "#e5f8f5"], ["#019a56", "#e7f6ee"]][index % 3];
     return `<div class="mini-row"><i class="bill-icon" style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "up" : "bills")}</i><span><b>${esc(bill.merchant || bill.description || bill.category)}</b><small>${esc(bill.nextDate || bill.frequency || "Scheduled")}</small></span><strong>${formatMoney(bill.amountMinor, model.currency, { compact: true })}</strong></div>`;
   }).join("") || `<div class="empty-state">No upcoming bills.</div>`;
   const subscriptions = recurring.slice(0, 4).map((bill, index) => {
@@ -923,7 +923,7 @@ function renderVisualData(data) {
     html += '<div class="ai-metric-row">';
     for (const m of data.metrics) {
       const displayValue = m.currency ? fmtVisualAmount(m.value, m.currency) : m.value;
-      html += `<div class="ai-metric-card" style="--accent:${esc(m.color || "#2563ff")}"><span class="ai-metric-value">${esc(displayValue)}</span><span class="ai-metric-label">${esc(m.label)}</span></div>`;
+      html += `<div class="ai-metric-card" style="--accent:${esc(m.color || "#019a56")}"><span class="ai-metric-value">${esc(displayValue)}</span><span class="ai-metric-label">${esc(m.label)}</span></div>`;
     }
     html += '</div>';
   }
