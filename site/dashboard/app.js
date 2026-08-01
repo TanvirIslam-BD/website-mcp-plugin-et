@@ -1396,13 +1396,29 @@ function openPanel(kind) {
     let currentModel = "gemini-2.5-flash";
     let compactMode = false;
     let autoSuggest = true;
+    let billReminders = true;
+    let incomeReceived = true;
+    let overdueAlerts = true;
+    let newsletter = true;
+    let emailNotifications = true;
     try {
       currentModel = localStorage.getItem("copilot_model") || "gemini-2.5-flash";
       compactMode = localStorage.getItem("compact_mode") === "true";
       autoSuggest = localStorage.getItem("auto_suggest") !== "false";
+      billReminders = localStorage.getItem("bill_reminders") !== "false";
+      incomeReceived = localStorage.getItem("income_received_notifications") !== "false";
+      overdueAlerts = localStorage.getItem("overdue_alerts") !== "false";
+      newsletter = localStorage.getItem("newsletter_notifications") !== "false";
+      emailNotifications = localStorage.getItem("email_notifications") !== "false";
     } catch(e) {}
 
-    openModal("Dashboard Settings", "Manage workspace preferences, AI model engine, currency, and privacy.", `
+    const pushSupported = "Notification" in window;
+    const pushPermission = pushSupported ? Notification.permission : "unsupported";
+    const pushEnabled = pushPermission === "granted";
+    const pushStatus = pushEnabled ? "Enabled" : pushPermission === "denied" ? "Blocked" : pushSupported ? "Disabled" : "Unavailable";
+    const pushButtonLabel = pushEnabled ? "Push Enabled" : pushPermission === "denied" ? "Review Access" : pushSupported ? "Enable Push" : "Not Supported";
+
+    openModal("Dashboard Settings", "Manage workspace preferences, notifications, AI settings, and privacy.", `
       <form data-form="settings" class="settings-form">
         
         <!-- Section 1: Display & Preferences -->
@@ -1474,7 +1490,75 @@ function openPanel(kind) {
           </div>
         </div>
 
-        <!-- Section 3: Privacy & Session Security -->
+        <!-- Section 3: Notifications -->
+        <div class="settings-section notification-settings-section">
+          <h4 class="settings-section-title notification-settings-title">${icon("bell")} Notifications</h4>
+
+          <div class="settings-row notification-setting-row">
+            <div class="settings-label">
+              <strong>Bill Reminders</strong>
+              <small>3 days and 1 day before due.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="bill_reminders" aria-label="Bill reminders" ${billReminders ? "checked" : ""}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-row notification-setting-row">
+            <div class="settings-label">
+              <strong>Income Received</strong>
+              <small>When income is detected.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="income_received_notifications" aria-label="Income received notifications" ${incomeReceived ? "checked" : ""}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-row notification-setting-row">
+            <div class="settings-label">
+              <strong>Overdue Alerts</strong>
+              <small>When bills become overdue.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="overdue_alerts" aria-label="Overdue alerts" ${overdueAlerts ? "checked" : ""}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-row notification-setting-row">
+            <div class="settings-label">
+              <strong>Newsletter</strong>
+              <small>Receive updates and tips from Money Copilot.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="newsletter_notifications" aria-label="Newsletter notifications" ${newsletter ? "checked" : ""}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-row notification-setting-row notification-delivery-row">
+            <div class="settings-label">
+              <strong>Push Notifications</strong>
+              <small class="notification-status ${pushEnabled ? "is-enabled" : pushPermission === "denied" ? "is-blocked" : ""}" data-push-status>${pushStatus}</small>
+            </div>
+            <button class="notification-enable-button ${pushEnabled ? "is-enabled" : ""}" type="button" data-enable-push ${pushSupported && !pushEnabled ? "" : "disabled"}>${pushButtonLabel}</button>
+          </div>
+
+          <div class="settings-row notification-setting-row notification-delivery-row">
+            <div class="settings-label">
+              <strong>Email Notifications</strong>
+              <small>Receive important alerts via email.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="email_notifications" aria-label="Email notifications" ${emailNotifications ? "checked" : ""}>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 4: Privacy & Session Security -->
         <div class="settings-section">
           <h4 class="settings-section-title">${icon("lock")} Privacy & Session Security</h4>
           
@@ -1849,6 +1933,40 @@ function bindEvents() {
       }
       return;
     }
+    const pushButton = event.target.closest("[data-enable-push]");
+    if (pushButton) {
+      const status = pushButton.closest(".notification-setting-row")?.querySelector("[data-push-status]");
+      if (!("Notification" in window)) {
+        if (status) status.textContent = "Unavailable";
+        return;
+      }
+      if (Notification.permission === "denied") {
+        if (status) {
+          status.textContent = "Blocked in browser settings";
+          status.classList.add("is-blocked");
+        }
+        return;
+      }
+      pushButton.disabled = true;
+      pushButton.textContent = "Enabling...";
+      Notification.requestPermission().then((permission) => {
+        const enabled = permission === "granted";
+        try { localStorage.setItem("push_notifications", String(enabled)); } catch(e) {}
+        if (status) {
+          status.textContent = enabled ? "Enabled" : permission === "denied" ? "Blocked" : "Disabled";
+          status.classList.toggle("is-enabled", enabled);
+          status.classList.toggle("is-blocked", permission === "denied");
+        }
+        pushButton.textContent = enabled ? "Push Enabled" : permission === "denied" ? "Review Access" : "Enable Push";
+        pushButton.classList.toggle("is-enabled", enabled);
+        pushButton.disabled = enabled;
+      }).catch(() => {
+        if (status) status.textContent = "Unavailable";
+        pushButton.textContent = "Enable Push";
+        pushButton.disabled = false;
+      });
+      return;
+    }
     const copilotModel = event.target.closest("[data-copilot-model]");
     if (copilotModel) {
       document.querySelectorAll("[data-copilot-model]").forEach((button) => button.classList.toggle("active", button === copilotModel));
@@ -1993,6 +2111,11 @@ function bindEvents() {
         if (modelName) localStorage.setItem("copilot_model", modelName);
         localStorage.setItem("compact_mode", String(Boolean(compact)));
         localStorage.setItem("auto_suggest", String(Boolean(autoSuggest)));
+        localStorage.setItem("bill_reminders", String(Boolean(form.elements.bill_reminders?.checked)));
+        localStorage.setItem("income_received_notifications", String(Boolean(form.elements.income_received_notifications?.checked)));
+        localStorage.setItem("overdue_alerts", String(Boolean(form.elements.overdue_alerts?.checked)));
+        localStorage.setItem("newsletter_notifications", String(Boolean(form.elements.newsletter_notifications?.checked)));
+        localStorage.setItem("email_notifications", String(Boolean(form.elements.email_notifications?.checked)));
       } catch(e) {}
 
       if (currency && currency !== window.dashboardModel?.currency) {
