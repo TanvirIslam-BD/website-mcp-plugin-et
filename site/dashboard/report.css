@@ -3077,3 +3077,60 @@ img[src$="money-copilot-app-logo.png"] {
   border-color:#26dc83;
   background:#36e38c;
 }
+
+/* Mobile Copilot bubbles should size to their content, not fill the chat viewport. */
+@media (max-width: 720px) {
+  .ai-modal .ai-chat-scroll .assistant-rail-messages {
+    flex:0 0 auto!important;
+    width:100%;
+    height:auto!important;
+    min-height:0!important;
+    align-content:start!important;
+    grid-auto-rows:max-content!important;
+    overflow:visible!important;
+  }
+
+  .ai-modal .assistant-rail-messages .ai-message {
+    height:auto!important;
+    min-height:0!important;
+    align-self:start!important;
+  }
+
+  .ai-modal .assistant-rail-messages .ai-message.user {
+    justify-self:end!important;
+  }
+
+  .ai-modal .assistant-rail-messages .ai-message-body {
+    min-height:0!important;
+  }
+}
+
+/* Money Copilot identity in the chat modal title. */
+.ai-modal .modal-heading { min-width:0; }
+
+.ai-modal .modal-title-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.ai-modal .modal-title-logo {
+  display:block;
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  object-fit:contain;
+  filter:none!important;
+}
+
+.ai-modal .modal-title-row h2 { margin-bottom:0; }
+.ai-modal .modal-heading > p { margin-top:3px; }
+
+@media (max-width: 720px) {
+  .ai-modal .modal-title-row { gap:6px; }
+  .ai-modal .modal-title-logo {
+    width:26px;
+    height:26px;
+    flex-basis:26px;
+  }
+}
