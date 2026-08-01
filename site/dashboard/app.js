@@ -587,7 +587,7 @@ function renderSidebar(model) {
     <aside class="sidebar">
       <div class="brand">
         <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-mark-dark.png" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-mark-light.png" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/logo-mark.svg" alt="">
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
