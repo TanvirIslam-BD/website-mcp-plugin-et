@@ -596,7 +596,6 @@ function renderSidebar(model) {
     ["database", "Manage Data", "data-management"],
     ["categories", "Categories", "categories"],
     ["budget", "Budget", "budget"],
-    ["analytics", "Reports", "analytics"],
     ["mail", "Email Report", "email-report"],
     ["settings", "Settings", "settings"],
   ];
@@ -2023,6 +2022,15 @@ function bindEvents() {
           rail.classList.remove("collapsed");
           rail.querySelector("textarea[name=message]")?.focus();
         } else openAiChat();
+        return;
+      }
+      const navPopup = {
+        transactions: "transactions",
+        categories: "categories",
+        budget: "budget-editor",
+      }[nav.dataset.nav];
+      if (navPopup) {
+        openPanel(navPopup);
         return;
       }
       const target = document.getElementById(nav.dataset.nav);
