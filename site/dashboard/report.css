@@ -847,23 +847,32 @@ body.is-resizing-copilot * {
 
 @media (max-width: 720px) {
   .ai-modal .ai-chat {
-    display: grid;
-    grid-template-rows: auto auto auto !important;
-    min-height: 0;
-    align-content: start;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    height: 100% !important;
   }
 
   .ai-modal .ai-chat-scroll {
-    display: grid;
-    grid-template-rows: auto auto auto;
-    max-height: min(48dvh, 500px);
-    overflow-y: auto;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
     overscroll-behavior: contain;
   }
 
   .ai-modal .ai-chat-scroll .ai-chat-messages {
     overflow: visible !important;
     max-height: none !important;
+  }
+
+  .ai-modal .assistant-rail-form,
+  .ai-modal .ai-chat-form {
+    margin-top: auto !important;
+    padding-bottom: max(4px, env(safe-area-inset-bottom)) !important;
   }
 
   .main {
