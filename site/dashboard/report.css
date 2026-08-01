@@ -1290,8 +1290,10 @@ body.is-resizing-copilot * {
   }
 
   .mobile-brand-title img {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    border-radius: 50%;
   }
 
   .mobile-brand-title span {
