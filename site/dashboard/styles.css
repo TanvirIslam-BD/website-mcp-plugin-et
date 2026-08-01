@@ -9755,3 +9755,77 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   box-shadow:none!important;
   transform:none!important;
 }
+
+/* Measured light-surface correction from deployed vs. reference screenshots */
+:root[data-theme="light"] body,
+:root[data-theme="light"] .main{
+  background:#f7fbfa!important;
+}
+:root[data-theme="light"] .sidebar,
+:root[data-theme="light"] .assistant-rail{
+  background:#fcfdfd!important;
+}
+:root[data-theme="light"] .metric-card,
+:root[data-theme="light"] .metric-card.balance,
+:root[data-theme="light"] .panel,
+:root[data-theme="light"] .large-chart,
+:root[data-theme="light"] .transactions thead{
+  background:#fefefe!important;
+}
+:root[data-theme="light"] .month-input,
+:root[data-theme="light"] .input-shell,
+:root[data-theme="light"] .notice-button,
+:root[data-theme="light"] .action-button:not(.primary),
+:root[data-theme="light"] .assistant-alert-actions button,
+:root[data-theme="light"] .assistant-integration-cta a,
+:root[data-theme="light"] .assistant-rail-form .copilot-compose{
+  background:#fff!important;
+}
+:root[data-theme="light"] .insight-item{
+  background:#fbfdfc!important;
+}
+:root[data-theme="light"] .assistant-alert,
+:root[data-theme="light"] .assistant-integration-cta{
+  background:#eff7f3!important;
+}
+:root[data-theme="light"] .assistant-rail .ai-message.user{
+  background:#e7f4ee!important;
+}
+:root[data-theme="light"] .assistant-rail .ai-message.assistant{
+  background:#fff!important;
+}
+:root[data-theme="light"] .budget-ring .inner,
+:root[data-theme="light"] .score-ring .inner,
+:root[data-theme="light"] .spending-donut>div{
+  background:#fefefe!important;
+}
+
+/* Final component-level audit corrections */
+@media (min-width:1181px){
+  .topbar{min-height:90px!important}
+  :root[data-theme="light"] .metric-card.saving .metric-icon,
+  :root[data-theme="light"] .metric-card.saving.is-negative .metric-icon,
+  :root[data-theme="light"] .metric-card.saving:not(.is-negative) .metric-icon{
+    color:#078a4c!important;
+    border-color:#d9eee3!important;
+    background:#e5f4ea!important;
+  }
+  :root[data-theme="dark"] .metric-card.saving .metric-icon,
+  :root[data-theme="dark"] .metric-card.saving.is-negative .metric-icon,
+  :root[data-theme="dark"] .metric-card.saving:not(.is-negative) .metric-icon{
+    color:#75efad!important;
+    border-color:#174d39!important;
+    background:#0e3528!important;
+  }
+}
+.sparkline polyline{stroke-width:1.8!important}
+.chart-line{stroke-width:2.3!important}
+.chart-point{stroke-width:2!important}
+:root[data-theme="light"] .grid-line{
+  stroke:#dce9e3!important;
+  stroke-dasharray:3 4!important;
+}
+:root[data-theme="dark"] .grid-line{
+  stroke:#26383d!important;
+  stroke-dasharray:3 4!important;
+}
