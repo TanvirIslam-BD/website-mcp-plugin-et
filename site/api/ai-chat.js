@@ -75,68 +75,8 @@ function decodeFinance(value) {
 }
 
 function selectModel(message) {
-  const text = message.toLowerCase();
-  if (/\b(6[ -]?month|six[ -]?month|financial plan|all spending behavior|comprehensive plan|long.term plan)\b/.test(text)) return { model: PREMIUM_MODEL, tier: "premium" };
-  if (/\b(why|abnormal|unusual|anomal|increase|decrease|trend|compare|strategy|strategies|forecast|reduce)\b/.test(text)) return { model: ADVANCED_MODEL, tier: "advanced" };
-  if (/\b(report|summary|explain|recommend|advice|plan)\b/.test(text)) return { model: DEFAULT_MODEL, tier: "standard" };
-  return { model: FAST_MODEL, tier: "fast" };
-}
-
-function checkRateLimit(userId) {
-  const now = Date.now();
-  const entry = rateLimits.get(userId);
-  if (!entry || now - entry.startedAt >= RATE_WINDOW_MS) {
-    rateLimits.set(userId, { startedAt: now, count: 1 });
-    return true;
-  } catch {
-    return null;
-  }
-}
-
-function cookieValue(req, name) {
-  return req.headers.cookie?.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`))?.[1];
-}
-
-function safeText(value, limit = 2000) {
-  return typeof value === "string" ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, limit) : "";
-}
-
-function safeHistory(value) {
-  if (!Array.isArray(value)) return [];
-  return value.slice(-6).map((entry) => ({
-    role: entry?.role === "assistant" ? "assistant" : "user",
-    content: safeText(entry?.content, 900),
-  })).filter((entry) => entry.content);
-}
-
-function validDate(value) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value || "") && new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
-}
-
-function currentMonth() {
-  return new Date().toISOString().slice(0, 7);
-}
-
-function validMonth(value) {
-  return /^\d{4}-(0[1-9]|1[0-2])$/.test(value || "");
-}
-
-function monthRange(month) {
-  const [year, monthNumber] = month.split("-").map(Number);
-  const days = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
-  return { startDate: `${month}-01`, endDate: `${month}-${String(days).padStart(2, "0")}` };
-}
-
-function decodeFinance(value) {
-  try { return JSON.parse(String(value || "{}")); } catch { return {}; }
-}
-
-function selectModel(message) {
-  const text = message.toLowerCase();
-  if (/\b(6[ -]?month|six[ -]?month|financial plan|all spending behavior|comprehensive plan|long.term plan)\b/.test(text)) return { model: PREMIUM_MODEL, tier: "premium" };
-  if (/\b(why|abnormal|unusual|anomal|increase|decrease|trend|compare|strategy|strategies|forecast|reduce)\b/.test(text)) return { model: ADVANCED_MODEL, tier: "advanced" };
-  if (/\b(report|summary|explain|recommend|advice|plan)\b/.test(text)) return { model: DEFAULT_MODEL, tier: "standard" };
-  return { model: FAST_MODEL, tier: "fast" };
+  // Always use the default Gemini Flash model and let it choose tools dynamically
+  return { model: DEFAULT_MODEL, tier: "standard" };
 }
 
 function checkRateLimit(userId) {
@@ -154,7 +94,7 @@ function toolDefinitions() {
   return [
     { type: "function", function: { name: "get_latest_expense", description: "Retrieve the authenticated user's single most recent expense across all dates. Always use this for latest expense, last expense, or most recent transaction questions.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
     { type: "function", function: { name: "get_expenses", description: "Retrieve the authenticated user's expenses for a date range and optional category. If the user gives no date, use the dashboard month supplied in the system context.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" }, category: { type: "string" } }, additionalProperties: false } } },
-    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, or save an expense.", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount" }, category: { type: "string", description: "Expense category e.g. Food, Travel" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount", "category"], additionalProperties: false } } },
+    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, save, or spent an expense (e.g., 'Add 500 bus rent expense', 'spent 50 on coffee').", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount e.g. 500" }, category: { type: "string", description: "Expense category e.g. Travel, Food, Transport, Rent" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount"], additionalProperties: false } } },
     { type: "function", function: { name: "get_incomes", description: "Retrieve recorded income entries for a date range.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" } }, additionalProperties: false } } },
     { type: "function", function: { name: "add_income", description: "Record a new income entry for the user. Use whenever user asks to add or record income.", parameters: { type: "object", properties: { amount: { type: "number", description: "Income amount" }, source: { type: "string", description: "Source of income e.g. Salary, Freelance" }, date: { type: "string", description: "YYYY-MM-DD" }, description: { type: "string" }, currency: { type: "string" } }, required: ["amount", "source"], additionalProperties: false } } },
     { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits for the dashboard month.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
@@ -296,8 +236,18 @@ async function addExpense(db, userId, input, dashboardMonth) {
   const amount = Number(input.amount || 0);
   if (amount <= 0) return { error: "Expense amount must be greater than 0" };
   const date = validDate(input.date) ? input.date : new Date().toISOString().slice(0, 10);
-  const category = safeText(input.category || "General", 60);
-  const description = safeText(input.description || input.merchant || category, 200);
+  const description = safeText(input.description || input.merchant || input.category || "Expense", 200);
+  let category = safeText(input.category || "", 60);
+
+  if (!category || category.toLowerCase() === "general") {
+    const text = `${description} ${input.merchant || ""}`.toLowerCase();
+    if (/\b(bus|train|taxi|uber|rent|fare|flight|travel|ride|transport|rickshaw)\b/.test(text)) category = "Travel";
+    else if (/\b(food|burger|pizza|coffee|lunch|dinner|cafe|restaurant|eat|snack)\b/.test(text)) category = "Food";
+    else if (/\b(shop|cloth|shirt|pants|grocer|buy|bought)\b/.test(text)) category = "Shopping";
+    else if (/\b(bill|electricity|water|wifi|net|recharge|phone)\b/.test(text)) category = "Bills & Utilities";
+    else category = "General";
+  }
+
   const merchant = safeText(input.merchant, 100);
   const paymentMethod = safeText(input.paymentMethod || "bKash", 50);
   const tags = safeText(input.tags, 100);
@@ -500,8 +450,8 @@ async function runTool(db, userId, name, rawInput, dashboardMonth) {
   return { error: `Unknown tool: ${name}` };
 }
 
-function systemPrompt(currentDate, dashboardMonth, hasVerifiedContext = false) {
-  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", query the most recent transaction across all dates. Never invent, assume, or estimate transactions. ${hasVerifiedContext ? "The server has already supplied verified private financial data below; answer only from that data and do not request another tool call." : "Use the available MCP tools for financial facts and requested actions."} You have access to the signed-in user's full MCPize finance tool catalog, including expense, income, budget, recurring expense, category, alert, import, export, and report tools. When the user clearly asks to make a change, execute the matching tool and report exactly what changed. Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
+function systemPrompt(currentDate, dashboardMonth) {
+  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data â€” never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. When the user asks to add income, call add_income. For budget questions, call get_budget_status. For reports or summaries, call generate_monthly_report. Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
 }
 
 function answerContent(message) {
@@ -536,7 +486,7 @@ async function callComet(model, messages, tools) {
 
 function fallbackMoney(amount, currency) {
   const value = Number(amount || 0);
-  const prefix = currency === "BDT" ? "৳" : currency === "USD" ? "$" : `${currency} `;
+  const prefix = currency === "BDT" ? "à§³" : currency === "USD" ? "$" : `${currency} `;
   return `${value < 0 ? "-" : ""}${prefix}${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
@@ -562,10 +512,121 @@ async function verifiedFallbackAnswer(db, userId, message, dashboardMonth) {
     return `## Verified saving idea\n\n${top ? `Your largest category is **${top.category}** at **${fallbackMoney(top.amount, report.currency)}**. Reducing it by 10% could free about **${fallbackMoney(target, report.currency)}**.` : "Record a few expenses first and I can identify the best saving opportunity."}\n\n${budgetLine}`;
   }
   if (/budget|plan/.test(question)) {
-    return `## Budget check — ${report.month}\n\n${budgetLine}\n\n**Next step:** ${report.budget === null ? "set an overall monthly limit, then add category limits for your largest expenses." : reportRemaining < 0 ? "pause discretionary spending in the largest category until the next budget period." : "reserve the remaining balance for essentials and savings."}`;
+    return `## Budget check â€” ${report.month}\n\n${budgetLine}\n\n**Next step:** ${report.budget === null ? "set an overall monthly limit, then add category limits for your largest expenses." : reportRemaining < 0 ? "pause discretionary spending in the largest category until the next budget period." : "reserve the remaining balance for essentials and savings."}`;
   }
   if (/report|summary|month|spend|expense|how much|why|explain/.test(question)) {
-    return `## Monthly spending — ${report.month}\n\n- Total spent: **${fallbackMoney(report.spent, report.currency)}** across **${report.expenseCount}** expenses\n- Income recorded: **${fallbackMoney(report.income, report.currency)}**\n- Net cash flow: **${fallbackMoney(report.netCashFlow, report.currency)}**\n\n### Top categories\n${categoryLines}\n\n${budgetLine}`;
+    return `## Monthly spending â€” ${report.month}\n\n- Total spent: **${fallbackMoney(report.spent, report.currency)}** across **${report.expenseCount}** expenses\n- Income recorded: **${fallbackMoney(report.income, report.currency)}**\n- Net cash flow: **${fallbackMoney(report.netCashFlow, report.currency)}**\n\n### Top categories\n${categoryLines}\n\n${budgetLine}`;
+  }
+  return `I can verify your expenses, budgets, and monthly reports. For ${report.month}, you have recorded **${fallbackMoney(report.spent, report.currency)}** in expenses. Ask me for a monthly report, a category breakdown, or savings ideas.`;
+}
+
+function buildVisualData(toolName, toolResult, currency) {
+  if (!toolResult || toolResult.error) return null;
+  const fmt = (v) => Number(v || 0).toFixed(2);
+  if (toolName === "get_budget_status") {
+    const r = toolResult;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
+      { label: "Budget", value: r.budget !== null ? fmt(r.budget) : null, currency: cur, color: "#2563ff" },
+      { label: "Remaining", value: r.remaining !== null ? fmt(r.remaining) : null, currency: cur, color: r.remaining < 0 ? "#ff4548" : "#18b96f" },
+    ].filter((m) => m.value !== null);
+    const progress = r.budget ? { value: r.spent, max: r.budget, percent: r.usedPercent || 0, label: "Budget Used" } : null;
+    const categories = (r.categoryLimits || []).slice(0, 6).map((c) => ({ name: c.category, limit: c.amount, currency: c.currency }));
+    return { type: "budget_status", metrics, progress, categories: categories.length ? categories : null };
+  }
+  if (toolName === "generate_monthly_report") {
+    const r = toolResult;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Total Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
+      { label: "Income", value: fmt(r.income), currency: cur, color: "#18b96f" },
+      { label: "Net Cash Flow", value: fmt(r.netCashFlow), currency: cur, color: r.netCashFlow >= 0 ? "#18b96f" : "#ff4548" },
+    ];
+    if (r.budget !== null) metrics.push({ label: "Budget", value: fmt(r.budget), currency: cur, color: "#2563ff" });
+    const total = r.categories.reduce((s, c) => s + c.amount, 0) || 1;
+    const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+    const pieChart = r.categories.slice(0, 7).map((c, i) => ({
+      label: c.category, value: c.amount, percent: Math.round((c.amount / total) * 100), color: pieColors[i % pieColors.length],
+    }));
+    return { type: "monthly_report", metrics, pieChart: pieChart.length ? pieChart : null };
+  }
+  if (toolName === "get_expenses") {
+    const r = toolResult;
+    if (!r.count) return null;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Transactions", value: String(r.count), color: "#2563ff" },
+      { label: "Total", value: fmt(r.total), currency: cur, color: "#ff4548" },
+    ];
+    const byCategory = {};
+    (r.expenses || []).forEach((e) => { byCategory[e.category] = (byCategory[e.category] || 0) + e.amount; });
+    const cats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const maxCat = cats[0]?.[1] || 1;
+    const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899"];
+
+function answerContent(message) {
+  if (typeof message?.content === "string") return message.content;
+  if (Array.isArray(message?.content)) return message.content.map((part) => part?.text || "").join("");
+  return "I could not generate an answer from the available financial data.";
+}
+
+async function callComet(model, messages, tools) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch(`${COMET_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.COMET_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages,
+        ...(Array.isArray(tools) && tools.length ? { tools, tool_choice: "auto" } : {}),
+        temperature: 0.2,
+        max_tokens: 900,
+      }),
+      signal: controller.signal,
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error?.message || `CometAPI request failed (${response.status})`);
+    return body;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function fallbackMoney(amount, currency) {
+  const value = Number(amount || 0);
+  const prefix = currency === "BDT" ? "à§³" : currency === "USD" ? "$" : `${currency} `;
+  return `${value < 0 ? "-" : ""}${prefix}${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+async function verifiedFallbackAnswer(db, userId, message, dashboardMonth) {
+  const requestedMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1] || dashboardMonth;
+  if (/\b(last|latest|most recent)\b.*\b(expense|transaction|purchase)\b|\b(expense|transaction|purchase)\b.*\b(last|latest|most recent)\b/i.test(message)) {
+    const latest = (await getLatestExpense(db, userId)).expense;
+    return latest
+      ? `## Latest expense\n\n- **${latest.description || latest.category}**\n- Amount: **${fallbackMoney(latest.amount, latest.currency)}**\n- Category: **${latest.category}**\n- Date: **${latest.date}**`
+      : "You do not have any recorded expenses yet.";
+  }
+  const report = await generateMonthlyReport(db, userId, { month: requestedMonth }, dashboardMonth);
+  const top = report.categories[0];
+  const question = message.toLowerCase();
+  const categoryLines = report.categories.slice(0, 3).map((item) => `- ${item.category}: ${fallbackMoney(item.amount, report.currency)}`).join("\n") || "- No expenses recorded";
+  const budgetLine = report.budget === null
+    ? "No overall monthly budget has been set yet."
+    : `${fallbackMoney(report.spent, report.currency)} spent from a ${fallbackMoney(report.budget, report.currency)} budget (${Math.round((report.spent / Math.max(report.budget, 1)) * 100)}% used).`;
+  const reportRemaining = report.budget === null ? null : report.budget - report.spent;
+
+  if (/saving|reduce|cut|where can i/.test(question)) {
+    const target = top ? Math.round(top.amount * .1) : 0;
+    return `## Verified saving idea\n\n${top ? `Your largest category is **${top.category}** at **${fallbackMoney(top.amount, report.currency)}**. Reducing it by 10% could free about **${fallbackMoney(target, report.currency)}**.` : "Record a few expenses first and I can identify the best saving opportunity."}\n\n${budgetLine}`;
+  }
+  if (/budget|plan/.test(question)) {
+    return `## Budget check â€” ${report.month}\n\n${budgetLine}\n\n**Next step:** ${report.budget === null ? "set an overall monthly limit, then add category limits for your largest expenses." : reportRemaining < 0 ? "pause discretionary spending in the largest category until the next budget period." : "reserve the remaining balance for essentials and savings."}`;
+  }
+  if (/report|summary|month|spend|expense|how much|why|explain/.test(question)) {
+    return `## Monthly spending â€” ${report.month}\n\n- Total spent: **${fallbackMoney(report.spent, report.currency)}** across **${report.expenseCount}** expenses\n- Income recorded: **${fallbackMoney(report.income, report.currency)}**\n- Net cash flow: **${fallbackMoney(report.netCashFlow, report.currency)}**\n\n### Top categories\n${categoryLines}\n\n${budgetLine}`;
   }
   return `I can verify your expenses, budgets, and monthly reports. For ${report.month}, you have recorded **${fallbackMoney(report.spent, report.currency)}** in expenses. Ask me for a monthly report, a category breakdown, or savings ideas.`;
 }
@@ -622,27 +683,8 @@ function buildVisualData(toolName, toolResult, currency) {
   return null;
 }
 
-function isLatestExpenseIntent(message) {
-  return /\b(last|latest|most recent)\b.*\b(expense|transaction|purchase)\b|\b(expense|transaction|purchase)\b.*\b(last|latest|most recent)\b/i.test(message);
-}
-
 function needsFinancialData(message) {
   return /\b(expense|spend|spent|transaction|purchase|income|budget|saving|category|merchant|report|summary|cash flow|balance|bill|subscription|forecast)\b/i.test(message);
-}
-
-async function preloadFinancialContext(db, userId, message, dashboardMonth, tier) {
-  if (!needsFinancialData(message) || ["advanced", "premium"].includes(tier)) return null;
-  if (isLatestExpenseIntent(message)) {
-    return { name: "get_latest_expense", result: await getLatestExpense(db, userId) };
-  }
-  if (/\bbudget\b/i.test(message) && !/\breport|summary\b/i.test(message)) {
-    return { name: "get_budget_status", result: await getBudgetStatus(db, userId, dashboardMonth) };
-  }
-  const explicitMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1];
-  return {
-    name: "generate_monthly_report",
-    result: await generateMonthlyReport(db, userId, { month: explicitMonth || dashboardMonth }, dashboardMonth),
-  };
 }
 
 export default async function handler(req, res) {
@@ -677,22 +719,20 @@ export default async function handler(req, res) {
       await recordActivity(db, { userId, source: "dashboard_ai", eventType: "ai_answer_cached", detail: { model: cached.value.model, month: dashboardMonth } });
       return res.status(200).json({ ...cached.value, cached: true });
     }
-    const preloaded = mcpAccessToken ? null : await preloadFinancialContext(db, userId, message, dashboardMonth, modelChoice.tier);
     const availableTools = mcpAccessToken ? await mcpToolDefinitions(mcpAccessToken) : toolDefinitions();
     const messages = [
-      { role: "system", content: systemPrompt(currentDate, dashboardMonth, Boolean(preloaded)) },
-      ...(preloaded ? [{ role: "system", content: `Verified tool result (${preloaded.name}): ${JSON.stringify(preloaded.result)}` }] : []),
+      { role: "system", content: systemPrompt(currentDate, dashboardMonth) },
       ...safeHistory(req.body?.history),
       { role: "user", content: message },
     ];
-    const usedTools = preloaded ? [preloaded.name] : [];
-    let lastToolName = preloaded?.name || null;
-    let lastToolResult = preloaded?.result || null;
+    const usedTools = [];
+    let lastToolName = null;
+    let lastToolResult = null;
     let activeModel = modelChoice.model;
     let completion;
     for (let pass = 0; pass < 4; pass += 1) {
       try {
-        completion = await callComet(activeModel, messages, preloaded ? [] : availableTools);
+        completion = await callComet(activeModel, messages, availableTools);
       } catch (error) {
         if (activeModel !== DEFAULT_MODEL) {
           activeModel = DEFAULT_MODEL;
