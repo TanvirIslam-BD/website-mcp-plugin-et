@@ -850,7 +850,8 @@ button {
 }
 
 .assistant-rail-chat {
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - 75px);
   min-height: 0;
   gap: 12px;
@@ -896,10 +897,13 @@ button {
   font-size: 9px;
 }
 
-.assistant-rail-messages {
-  align-content: start;
-  max-height: none;
-  min-height: 0;
+.assistant-rail-messages,
+.assistant-rail-chat .ai-chat-messages {
+  flex: 1 1 auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  align-content: normal !important;
   padding-right: 4px;
 }
 
@@ -4244,7 +4248,8 @@ body {
 }
 
 .assistant-rail-chat {
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - 79px);
   gap: 13px;
   padding: 18px 12px 11px;
