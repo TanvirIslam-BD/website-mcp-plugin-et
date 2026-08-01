@@ -1025,11 +1025,16 @@ function buildNotifications(model) {
 
 function openModal(title, subtitle, content, options = {}) {
   closeModal();
+  const modalClasses = String(options.className || "").split(/\s+/);
+  const isAiModal = modalClasses.includes("ai-modal");
   document.body.insertAdjacentHTML("beforeend", `
     <div class="modal-backdrop" id="dashboard-modal" role="dialog" aria-modal="true">
       <section class="modal ${options.wide ? "wide" : ""} ${options.className || ""}">
         <div class="modal-top">
-          <div><h2>${esc(title)}</h2><p>${esc(subtitle || "")}</p></div>
+          <div class="modal-heading">
+            <div class="modal-title-row">${isAiModal ? '<img class="modal-title-logo" src="/assets/logo/money-copilot-app-logo.png" alt="">' : ""}<h2>${esc(title)}</h2></div>
+            <p>${esc(subtitle || "")}</p>
+          </div>
           <button class="modal-close" data-close aria-label="Close">${icon("close")}</button>
         </div>
         ${content}
@@ -1037,7 +1042,7 @@ function openModal(title, subtitle, content, options = {}) {
     </div>
   `);
   document.body.classList.add("dashboard-modal-open");
-  document.body.classList.toggle("finance-copilot-open", String(options.className || "").split(/\s+/).includes("ai-modal"));
+  document.body.classList.toggle("finance-copilot-open", isAiModal);
 }
 
 function closeModal() {
@@ -2077,7 +2082,6 @@ function bindEvents() {
       const collapsed = app.classList.toggle("sidebar-collapsed");
       sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
       sidebarToggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
-      try { localStorage.setItem("expenseTrackerSidebar", collapsed ? "collapsed" : "expanded"); } catch {}
       return;
     }
     const themeChoice = event.target.closest("[data-theme-choice]");
@@ -2405,8 +2409,9 @@ loadDashboard()
     else renderEmptyDashboard(window.dashboardModel);
     syncThemeSwitch();
     try {
-      if (localStorage.getItem("expenseTrackerSidebar") === "collapsed") app.classList.add("sidebar-collapsed");
+      localStorage.removeItem("expenseTrackerSidebar");
     } catch {}
+    app.classList.remove("sidebar-collapsed");
     initializeAssistantRailResize();
     bindEvents();
     runNotificationPreferences(window.dashboardModel);

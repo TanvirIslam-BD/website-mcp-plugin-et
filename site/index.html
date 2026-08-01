@@ -132,6 +132,32 @@
   .hero .lead{margin:22px 0 0;font-size:18px;max-width:380px;}
   .hero .cta{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
   .hero .cta .btn{padding:16px 26px;font-size:16px;}
+  .hero .cta .btn-primary{
+    color:#fff;
+    border-color:#079457;
+    background:linear-gradient(105deg,#079a59 0%,#08b86b 54%,#25d78a 100%);
+    box-shadow:0 10px 24px -12px rgba(6,151,84,.62),inset 0 1px 0 rgba(255,255,255,.28);
+  }
+  .hero .cta .btn-primary .client-ico{
+    width:32px;height:32px;flex-basis:32px;
+    padding:0;
+    border-radius:9px;
+    background:rgba(255,255,255,.2);
+    transform:scale(1.12);
+  }
+  .hero .cta .btn-primary:hover{
+    border-color:#06834d;
+    background:linear-gradient(105deg,#078f53 0%,#07aa62 54%,#1fca7d 100%);
+    box-shadow:0 16px 30px -14px rgba(4,132,74,.68),inset 0 1px 0 rgba(255,255,255,.32);
+  }
+  .hero .cta .btn-primary:focus-visible{
+    outline-color:#31d98c;
+    box-shadow:0 0 0 4px rgba(34,211,139,.18),0 12px 28px -14px rgba(4,132,74,.62);
+  }
+  .hero .cta .btn-primary:active{
+    transform:translateY(0);
+    background:#078f53;
+  }
   .pill{display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:999px;
     border:1px solid rgba(45,212,191,.32);background:rgba(20,184,166,.07);font-size:15px;color:var(--ink);font-weight:500;}
   .pill svg{width:17px;height:17px;fill:var(--green);}
