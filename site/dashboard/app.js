@@ -1013,14 +1013,14 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   }
 }
 
-function appendAiLoading(chatRoot = document) {
+function appendAiLoading(chatRoot = document, message = "Processing your data....") {
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return null;
   const id = `ai-loading-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
       <div class="ai-message-label">Money Copilot AI</div>
-      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Processing your data....</span></div>
+      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>${esc(message)}</span></div>
     </div>
   `);
   list.scrollTop = list.scrollHeight;
@@ -1171,7 +1171,8 @@ async function submitAiQuestion(form) {
   const message = String(textarea?.value || "").trim();
   if (!message) return;
   appendAiMessage("user", message, "", chatRoot);
-  const loadingMessage = appendAiLoading(chatRoot);
+  const isQuickExpense = /^\s*(?:add|record|save|spent)\s+(?:[$\u09F3]\s*)?\d/i.test(message);
+  const loadingMessage = appendAiLoading(chatRoot, isQuickExpense ? "Saving your expense..." : undefined);
   textarea.value = "";
   textarea.disabled = true;
   setAiSubmitLoading(button, true);

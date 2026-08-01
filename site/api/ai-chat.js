@@ -80,7 +80,11 @@ function decodeFinance(value) {
 }
 
 function selectModel(message) {
-  // Always use the default Gemini Flash model and let it choose tools dynamically
+  const text = safeText(message, 500).toLowerCase();
+  const needsDeeperReasoning = /\b(compare|forecast|trend|why|explain|advice|recommend|plan|saving|reduce|report|summary|analysis|split|yesterday|tomorrow|last|next|weekly|monthly|every)\b|\b20\d{2}-\d{2}-\d{2}\b/.test(text);
+  const isQuickLookup = text.length <= 180 && /^(?:what|show|list|how much|latest|last|recent|my\s+budget|budget\s+status|balance)\b/.test(text);
+  const isSimpleEntry = /^\s*(?:add|record|save|spent)\s+(?:[$\u09F3]\s*)?\d+(?:\.\d{1,2})?\b/i.test(text);
+  if ((isQuickLookup || isSimpleEntry) && !needsDeeperReasoning) return { model: FAST_MODEL, tier: "fast" };
   return { model: DEFAULT_MODEL, tier: "standard" };
 }
 
