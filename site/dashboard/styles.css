@@ -2034,6 +2034,8 @@ button {
 
 .transactions-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
 }
 
 .transactions {
@@ -4997,7 +4999,7 @@ textarea:focus-visible {
   html,
   body {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
@@ -5011,6 +5013,7 @@ textarea:focus-visible {
 
   .brand {
     min-height: 40px;
+    padding-right: 96px;
   }
 
   .brand img {
