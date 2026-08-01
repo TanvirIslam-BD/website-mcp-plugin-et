@@ -1224,14 +1224,55 @@ function openPanel(kind) {
   if (!model) return;
   if (kind === "email-report") {
     const month = monthLabel(model.month);
-    const budgetLine = model.budgetMinor
-      ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)`
-      : "No monthly budget is set";
-    openModal("Email your report", "Send a private spending and budget summary to your inbox.", `
+    let savedEmail = "";
+    try { savedEmail = localStorage.getItem("user_email") || ""; } catch (e) {}
+    const userEmail = model.user?.email || savedEmail || "";
+    const spentStr = formatMoney(model.spentMinor, model.currency);
+    const budgetStr = model.budgetMinor ? formatMoney(model.budgetMinor, model.currency) : "No budget set";
+    const remainingStr = model.remainingMinor === null ? "N/A" : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over` : `${formatMoney(model.remainingMinor, model.currency)} remaining`;
+    const budgetUsedStr = model.budgetMinor ? `${model.budgetUsed}%` : "0%";
+    const isOver = model.remainingMinor < 0;
+
+    openModal("Email your report", "Send a private spending and budget summary directly to your inbox.", `
       <form data-form="email-report" class="email-report-form">
-        <div class="field"><label for="report-email">Email address</label><input id="report-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-        <div class="email-report-preview"><b>${esc(month)} summary</b><span>${esc(budgetLine)}</span><span>${esc(model.remainingMinor === null ? "Add a budget to track remaining funds." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`)}</span></div>
-        <p class="form-error" data-error></p><div class="modal-actions"><button type="submit" class="action-button primary">${icon("mail")} Send report by email</button></div>
+        <div class="field">
+          <label for="report-email">Recipient Email Address</label>
+          <div class="input-with-icon">
+            ${icon("mail")}
+            <input id="report-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" value="${esc(userEmail)}" required>
+          </div>
+        </div>
+
+        <div class="email-report-card">
+          <div class="email-report-card-header">
+            <span class="report-badge">${icon("sparkles")} ${esc(month)} Financial Summary</span>
+          </div>
+          <div class="email-report-grid">
+            <div class="report-stat">
+              <span>Total Spent</span>
+              <strong class="spent">${esc(spentStr)}</strong>
+            </div>
+            <div class="report-stat">
+              <span>Monthly Budget</span>
+              <strong class="budget">${esc(budgetStr)}</strong>
+            </div>
+            <div class="report-stat">
+              <span>Budget Used</span>
+              <strong class="used">${esc(budgetUsedStr)}</strong>
+            </div>
+            <div class="report-stat">
+              <span>Remaining</span>
+              <strong class="remaining ${isOver ? 'over-budget' : 'under-budget'}">${esc(remainingStr)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <p class="form-error" data-error></p>
+        <div class="modal-actions">
+          <button type="submit" class="action-button primary send-report-btn">
+            ${icon("mail")} Send Report via Email
+          </button>
+        </div>
       </form>
     `, { wide: false });
     return;
@@ -1701,14 +1742,64 @@ function bindEvents() {
     if (form.dataset.form === "email-report") {
       const email = form.elements.email?.value.trim();
       if (!email) return;
+
+      try { localStorage.setItem("user_email", email); } catch(e) {}
+
+      const submitBtn = form.querySelector(".send-report-btn");
+      const errorEl = form.querySelector("[data-error]");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `${icon("loader")} Sending report...`;
+      }
+      if (errorEl) errorEl.textContent = "";
+
       const model = window.dashboardModel;
-      const subject = `${monthLabel(model.month)} Money Copilot report`;
-      const budget = model.budgetMinor ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)` : "No monthly budget is set";
-      const status = model.remainingMinor === null ? "No budget remaining status available." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget.` : `${formatMoney(model.remainingMinor, model.currency)} remaining.`;
-      const bodyText = `Money Copilot report for ${monthLabel(model.month)}\n\n${budget}\n${status}\nTotal income: ${formatMoney(model.incomeMinor, model.currency)}\nNet cash flow: ${formatMoney(model.savedMinor, model.currency)}`;
-      const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-      window.location.assign(mailto);
-      closeModal();
+      const payload = {
+        recipientEmail: email,
+        month: monthLabel(model.month),
+        currency: model.currency,
+        spentFormatted: formatMoney(model.spentMinor, model.currency),
+        budgetFormatted: model.budgetMinor ? formatMoney(model.budgetMinor, model.currency) : "No budget set",
+        budgetUsed: model.budgetMinor ? model.budgetUsed : 0,
+        remainingFormatted: model.remainingMinor === null ? "N/A" : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`,
+        incomeFormatted: formatMoney(model.incomeMinor, model.currency),
+        savedFormatted: formatMoney(model.savedMinor, model.currency),
+        categories: (model.categories || []).map(c => ({ name: c.name, amountFormatted: formatMoney(c.amountMinor, model.currency) })),
+        displayName: model.user?.displayName || "User"
+      };
+
+      fetch("/api/send-report-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) {
+          if (errorEl) errorEl.textContent = res.error;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
+          }
+        } else {
+          openModal("Report Sent! ✉️", "Your private financial summary has been delivered.", `
+            <div class="report-success-state">
+              <div class="success-icon">${icon("check")}</div>
+              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> has been dispatched to <b>${esc(email)}</b>.</p>
+              <div class="modal-actions" style="margin-top:12px; width:100%;">
+                <button type="button" class="action-button primary" onclick="closeModal()" style="width:100%;">Done</button>
+              </div>
+            </div>
+          `, { wide: false });
+        }
+      })
+      .catch(err => {
+        if (errorEl) errorEl.textContent = "Network error. Please try again.";
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
+        }
+      });
       return;
     }
     submitPanelForm(form);
