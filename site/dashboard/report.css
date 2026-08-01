@@ -1668,19 +1668,19 @@ body.is-resizing-copilot * {
   .spending-panel {
     grid-column: 1;
     order: 2;
-    height: 150px;
-    min-height: 150px;
-    overflow: hidden;
-    padding: 7px !important;
+    min-height: 172px;
+    height: auto;
+    padding: 10px !important;
   }
 
   .budget-panel {
     grid-column: 2;
     order: 3;
-    height: 150px;
-    min-height: 150px;
-    overflow: hidden;
-    padding: 7px !important;
+    min-height: 172px;
+    height: auto;
+    padding: 10px !important;
+    display: flex;
+    flex-direction: column;
   }
 
   .financial-health {
@@ -1776,6 +1776,10 @@ body.is-resizing-copilot * {
     height: 68px;
     margin: 0 auto 3px;
     flex: 0 0 68px;
+  }
+
+  .budget-ring::after {
+    display: none;
   }
 
   .budget-ring .inner {
