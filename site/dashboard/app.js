@@ -643,9 +643,13 @@ function renderMobileDashboardHeader(model) {
       </div>
       <div class="mobile-quickbar">
         <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
-        <div>
+        <div class="mobile-brand-title">
+          <img src="/assets/logo/logo-mark.svg" width="22" height="22" alt="Money Copilot">
+          <span>Money Copilot</span>
+        </div>
+        <div class="mobile-top-actions">
           <button class="mobile-notice-button" type="button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${alertCount}</b></button>
-          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
+          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt="Money Copilot AI"></button>
         </div>
       </div>
       <div class="mobile-greeting">
