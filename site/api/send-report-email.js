@@ -47,7 +47,7 @@ export default async function handler(req, res) {
               <!-- Header -->
               <tr>
                 <td style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 32px 28px; text-align: center; color: #ffffff;">
-                  <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/logo-mark.svg" width="48" height="48" alt="Money Copilot" style="margin-bottom: 12px; vertical-align: middle;">
+                  <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="48" height="48" alt="Money Copilot" style="margin-bottom: 12px; vertical-align: middle;">
                   <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Money Copilot</h1>
                   <p style="margin: 6px 0 0; font-size: 14px; opacity: 0.9;">Monthly Financial Report • ${month}</p>
                 </td>

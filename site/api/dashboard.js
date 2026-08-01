@@ -79,6 +79,29 @@ function defaultFinance() {
     alertThresholds: [50, 80, 100],
     expenseMetadata: {},
     goals: [],
+    settings: {},
+  };
+}
+
+function safeSettings(value) {
+  const settings = value && typeof value === "object" ? value : {};
+  const currency = cleanText(settings.currency, 3).toUpperCase();
+  const theme = settings.theme === "dark" ? "dark" : settings.theme === "light" ? "light" : "";
+  const copilotModel = ["gemini-2.5-flash", "gemini-2.5-pro"].includes(settings.copilotModel)
+    ? settings.copilotModel
+    : "gemini-2.5-flash";
+  return {
+    currency: /^[A-Z]{3}$/.test(currency) ? currency : "",
+    theme,
+    compactMode: settings.compactMode === true,
+    copilotModel,
+    autoSuggest: settings.autoSuggest !== false,
+    billReminders: settings.billReminders !== false,
+    incomeReceived: settings.incomeReceived !== false,
+    overdueAlerts: settings.overdueAlerts !== false,
+    newsletter: settings.newsletter !== false,
+    pushNotifications: settings.pushNotifications === true,
+    emailNotifications: settings.emailNotifications !== false,
   };
 }
 
@@ -209,6 +232,14 @@ export default async function handler(req, res) {
           { sql: "INSERT INTO finance_state (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at", args: [userId, JSON.stringify(finance), now] },
         ], "write");
         return res.status(200).json({ ok: true });
+      }
+
+      if (kind === "settings") {
+        const finance = await readFinance(db, userId);
+        finance.settings = safeSettings(body.settings);
+        await writeFinance(db, userId, finance);
+        await recordActivity(db, { userId, source: "dashboard", eventType: "settings_updated", detail: { theme: finance.settings.theme, currency: finance.settings.currency, copilotModel: finance.settings.copilotModel } });
+        return res.status(200).json({ ok: true, settings: finance.settings });
       }
 
       if (kind === "budget") {
@@ -372,6 +403,8 @@ export default async function handler(req, res) {
       goals: Array.isArray(finance.goals) ? finance.goals : [],
       expenseMetadata: finance.expenseMetadata || {},
       alertThresholds: Array.isArray(finance.alertThresholds) ? finance.alertThresholds : [50, 80, 100],
+      preferences: safeSettings(finance.settings),
+      preferencesConfigured: Boolean(finance.settings && Object.keys(finance.settings).length),
       labels: { spent: money(spentMinor, currency), income: money(incomeMinor, currency) },
     });
   } catch (error) {
