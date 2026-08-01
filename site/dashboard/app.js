@@ -78,6 +78,7 @@ function icon(name) {
     card: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='M3 10h18'/>",
     lock: "<rect x='5' y='10' width='14' height='11' rx='2'/><path d='M8 10V7a4 4 0 0 1 8 0v3'/>",
     attachment: "<path d='m20.5 11.5-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 1 1-2.8-2.8l8.9-8.9'/>",
+    copy: "<rect x='9' y='9' width='13' height='13' rx='2' ry='2'/><path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/>",
     mail: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='m3 7 9 6 9-6'/>",
     send: "<path d='m4 4 17 8-17 8 3-8z'/><path d='M7 12h14'/>",
     database: "<ellipse cx='12' cy='5' rx='8' ry='3'/><path d='M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5'/><path d='M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6'/>",
@@ -956,7 +957,32 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return;
   const visualHtml = role === "assistant" ? renderVisualData(visualData) : "";
-  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Money Copilot AI"}</div><div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
+  const msgId = `msg-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`;
+  
+  let actionToolbar = "";
+  if (role === "assistant") {
+    actionToolbar = `
+      <div class="ai-message-footer">
+        <button type="button" class="ai-action-btn" data-copy-msg="${msgId}">${icon("copy")} <span>Copy</span></button>
+        <div class="ai-rating-btns">
+          <button type="button" class="ai-rate-btn" data-rate="up" title="Helpful">👍</button>
+          <button type="button" class="ai-rate-btn" data-rate="down" title="Not helpful">👎</button>
+        </div>
+      </div>
+    `;
+  }
+
+  list.insertAdjacentHTML("beforeend", `
+    <div class="ai-message ${role}" id="${msgId}">
+      <div class="ai-message-header">
+        <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot AI`}</div>
+        ${meta ? `<small class="ai-meta-tag">${esc(meta)}</small>` : ""}
+      </div>
+      <div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>
+      ${actionToolbar}
+    </div>
+  `);
+
   const message = list.lastElementChild;
   if (role === "assistant" && message) {
     list.scrollTo({ top: Math.max(0, message.offsetTop - 8), behavior: "smooth" });
@@ -1775,6 +1801,32 @@ function bindEvents() {
       if (input) {
         input.value = suggestion.dataset.aiSuggestion || "";
         input.focus();
+      }
+      return;
+    }
+    const copyBtn = event.target.closest("[data-copy-msg]");
+    if (copyBtn) {
+      const msgId = copyBtn.dataset.copyMsg;
+      const msgEl = document.getElementById(msgId);
+      const text = msgEl?.querySelector(".ai-message-body")?.innerText || "";
+      if (text) {
+        try {
+          navigator.clipboard.writeText(text).then(() => {
+            copyBtn.innerHTML = `${icon("check")} <span>Copied!</span>`;
+            setTimeout(() => {
+              copyBtn.innerHTML = `${icon("copy")} <span>Copy</span>`;
+            }, 2000);
+          });
+        } catch(e) {}
+      }
+      return;
+    }
+    const rateBtn = event.target.closest("[data-rate]");
+    if (rateBtn) {
+      const group = rateBtn.closest(".ai-rating-btns");
+      if (group) {
+        group.querySelectorAll(".ai-rate-btn").forEach(b => b.classList.remove("active"));
+        rateBtn.classList.add("active");
       }
       return;
     }
