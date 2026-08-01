@@ -947,9 +947,17 @@ function renderVisualData(data) {
 }
 
 function aiAnswerHtml(value) {
-  return esc(value || "I could not generate a response.")
+  let text = esc(value || "I could not generate a response.");
+  return text
+    .replace(/^#### (.*?)$/gm, "<h5 class='ai-heading'>$1</h5>")
+    .replace(/^### (.*?)$/gm, "<h4 class='ai-heading'>$1</h4>")
+    .replace(/^## (.*?)$/gm, "<h3 class='ai-heading'>$1</h3>")
+    .replace(/^# (.*?)$/gm, "<h2 class='ai-heading'>$1</h2>")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/`(.+?)`/g, "<code>$1</code>")
+    .replace(/^---$/gm, "<hr class='ai-hr'>")
+    .replace(/^[\*\-] (.*?)$/gm, "<div class='ai-bullet'>• $1</div>")
     .replace(/\n/g, "<br>");
 }
 
@@ -976,7 +984,7 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
     <div class="ai-message ${role}" id="${msgId}">
       <div class="ai-message-header">
         <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot AI`}</div>
-        ${meta ? `<small class="ai-meta-tag">${esc(meta)}</small>` : ""}
+        ${meta ? `<small class="ai-meta-tag" title="${esc(meta)}">${esc(meta)}</small>` : ""}
       </div>
       <div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>
       ${actionToolbar}

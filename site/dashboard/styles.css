@@ -8727,7 +8727,8 @@ textarea:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  width: 100%;
 }
 
 .ai-message-label {
@@ -8738,6 +8739,8 @@ textarea:focus-visible {
   font-weight: 700;
   color: #64748b;
   letter-spacing: -0.01em;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .ai-bot-avatar {
@@ -8747,6 +8750,7 @@ textarea:focus-visible {
   height: 18px;
   border-radius: 50%;
   background: #dbeafe;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
@@ -8758,10 +8762,40 @@ textarea:focus-visible {
 
 .ai-meta-tag {
   font-size: 10px;
-  color: #94a3b8;
+  font-weight: 500;
+  color: #64748b;
   background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 1;
+}
+
+.ai-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 10px 0 4px;
+}
+
+.ai-heading:first-child {
+  margin-top: 0;
+}
+
+.ai-bullet {
+  padding-left: 4px;
+  margin: 2px 0;
+  line-height: 1.4;
+}
+
+.ai-hr {
+  border: 0;
+  border-top: 1px dashed #cbd5e1;
+  margin: 8px 0;
 }
 
 .ai-message-footer {
