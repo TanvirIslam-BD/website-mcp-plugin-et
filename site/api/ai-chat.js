@@ -88,6 +88,63 @@ function checkRateLimit(userId) {
   if (!entry || now - entry.startedAt >= RATE_WINDOW_MS) {
     rateLimits.set(userId, { startedAt: now, count: 1 });
     return true;
+  } catch {
+    return null;
+  }
+}
+
+function cookieValue(req, name) {
+  return req.headers.cookie?.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`))?.[1];
+}
+
+function safeText(value, limit = 2000) {
+  return typeof value === "string" ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, limit) : "";
+}
+
+function safeHistory(value) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(-6).map((entry) => ({
+    role: entry?.role === "assistant" ? "assistant" : "user",
+    content: safeText(entry?.content, 900),
+  })).filter((entry) => entry.content);
+}
+
+function validDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value || "") && new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
+}
+
+function currentMonth() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function validMonth(value) {
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(value || "");
+}
+
+function monthRange(month) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const days = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  return { startDate: `${month}-01`, endDate: `${month}-${String(days).padStart(2, "0")}` };
+}
+
+function decodeFinance(value) {
+  try { return JSON.parse(String(value || "{}")); } catch { return {}; }
+}
+
+function selectModel(message) {
+  const text = message.toLowerCase();
+  if (/\b(6[ -]?month|six[ -]?month|financial plan|all spending behavior|comprehensive plan|long.term plan)\b/.test(text)) return { model: PREMIUM_MODEL, tier: "premium" };
+  if (/\b(why|abnormal|unusual|anomal|increase|decrease|trend|compare|strategy|strategies|forecast|reduce)\b/.test(text)) return { model: ADVANCED_MODEL, tier: "advanced" };
+  if (/\b(report|summary|explain|recommend|advice|plan)\b/.test(text)) return { model: DEFAULT_MODEL, tier: "standard" };
+  return { model: FAST_MODEL, tier: "fast" };
+}
+
+function checkRateLimit(userId) {
+  const now = Date.now();
+  const entry = rateLimits.get(userId);
+  if (!entry || now - entry.startedAt >= RATE_WINDOW_MS) {
+    rateLimits.set(userId, { startedAt: now, count: 1 });
+    return true;
   }
   entry.count += 1;
   return entry.count <= MAX_REQUESTS_PER_WINDOW;
@@ -97,7 +154,15 @@ function toolDefinitions() {
   return [
     { type: "function", function: { name: "get_latest_expense", description: "Retrieve the authenticated user's single most recent expense across all dates. Always use this for latest expense, last expense, or most recent transaction questions.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
     { type: "function", function: { name: "get_expenses", description: "Retrieve the authenticated user's expenses for a date range and optional category. If the user gives no date, use the dashboard month supplied in the system context.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" }, category: { type: "string" } }, additionalProperties: false } } },
+    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, or save an expense.", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount" }, category: { type: "string", description: "Expense category e.g. Food, Travel" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount", "category"], additionalProperties: false } } },
+    { type: "function", function: { name: "get_incomes", description: "Retrieve recorded income entries for a date range.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" } }, additionalProperties: false } } },
+    { type: "function", function: { name: "add_income", description: "Record a new income entry for the user. Use whenever user asks to add or record income.", parameters: { type: "object", properties: { amount: { type: "number", description: "Income amount" }, source: { type: "string", description: "Source of income e.g. Salary, Freelance" }, date: { type: "string", description: "YYYY-MM-DD" }, description: { type: "string" }, currency: { type: "string" } }, required: ["amount", "source"], additionalProperties: false } } },
     { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits for the dashboard month.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
+    { type: "function", function: { name: "set_budget", description: "Set or update monthly budget limits for overall account or specific category. Use whenever user asks to set or change a budget.", parameters: { type: "object", properties: { amount: { type: "number", description: "Monthly limit amount" }, category: { type: "string", description: "Optional category name" }, currency: { type: "string" } }, required: ["amount"], additionalProperties: false } } },
+    { type: "function", function: { name: "get_goals", description: "Retrieve savings goals and targets.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
+    { type: "function", function: { name: "add_goal", description: "Create or update a primary savings goal.", parameters: { type: "object", properties: { name: { type: "string" }, target: { type: "number" }, currency: { type: "string" } }, required: ["name", "target"], additionalProperties: false } } },
+    { type: "function", function: { name: "get_recurring_expenses", description: "Retrieve upcoming recurring bills and subscriptions.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
+    { type: "function", function: { name: "add_recurring_expense", description: "Add a recurring bill or subscription.", parameters: { type: "object", properties: { merchant: { type: "string" }, amount: { type: "number" }, category: { type: "string" }, frequency: { type: "string" }, nextDate: { type: "string", description: "YYYY-MM-DD" }, currency: { type: "string" } }, required: ["merchant", "amount"], additionalProperties: false } } },
     { type: "function", function: { name: "generate_monthly_report", description: "Generate a verified report for one calendar month. Use when the user asks for a monthly summary, report, or category breakdown.", parameters: { type: "object", properties: { month: { type: "string", description: "YYYY-MM" } }, required: ["month"], additionalProperties: false } } },
   ];
 }
@@ -177,6 +242,60 @@ async function getExpenses(db, userId, input, dashboardMonth) {
   return { startDate, endDate, category: category || null, count: expenses.length, total, currency: expenses[0]?.currency || "USD", expenses };
 }
 
+async function addExpense(db, userId, input, dashboardMonth) {
+  const amount = Number(input.amount || 0);
+  if (amount <= 0) return { error: "Expense amount must be greater than 0" };
+  const date = validDate(input.date) ? input.date : new Date().toISOString().slice(0, 10);
+  const category = safeText(input.category || "General", 60);
+  const description = safeText(input.description || input.merchant || category, 200);
+  const merchant = safeText(input.merchant, 100);
+  const paymentMethod = safeText(input.paymentMethod || "bKash", 50);
+  const tags = safeText(input.tags, 100);
+  const currency = safeText(input.currency || "BDT", 3).toUpperCase();
+  const id = randomUUID();
+  const amountMinor = Math.round(amount * 100);
+
+  await db.execute({
+    sql: "INSERT INTO expenses (id, user_id, date, category, description, merchant, payment_method, tags, amount_minor, currency, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    args: [id, userId, date, category, description, merchant, paymentMethod, tags, amountMinor, currency, Date.now()],
+  });
+
+  return { success: true, message: `Recorded expense of ${currency} ${amount.toFixed(2)} for ${category} on ${date}`, expense: { id, date, category, description, amount, currency } };
+}
+
+async function getIncomes(db, userId, input, dashboardMonth) {
+  const fallbackRange = monthRange(dashboardMonth);
+  const startDate = validDate(input.startDate) ? input.startDate : fallbackRange.startDate;
+  const endDate = validDate(input.endDate) ? input.endDate : fallbackRange.endDate;
+  const result = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(result.rows[0]?.data);
+  const incomes = (finance.incomes || []).filter(e => e.date >= startDate && e.date <= endDate);
+  const total = incomes.reduce((s, e) => s + (Number(e.amountMinor || 0) / 100), 0);
+  return { startDate, endDate, count: incomes.length, total, incomes };
+}
+
+async function addIncome(db, userId, input) {
+  const amount = Number(input.amount || 0);
+  if (amount <= 0) return { error: "Income amount must be greater than 0" };
+  const date = validDate(input.date) ? input.date : new Date().toISOString().slice(0, 10);
+  const source = safeText(input.source || "Salary", 60);
+  const description = safeText(input.description || source, 200);
+  const currency = safeText(input.currency || "BDT", 3).toUpperCase();
+
+  const result = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(result.rows[0]?.data);
+  finance.incomes = finance.incomes || [];
+  const entry = { id: randomUUID(), date, source, description, amountMinor: Math.round(amount * 100), currency };
+  finance.incomes.unshift(entry);
+
+  await db.execute({
+    sql: "INSERT INTO finance_state (user_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
+    args: [userId, JSON.stringify(finance), Date.now()],
+  });
+
+  return { success: true, message: `Recorded income of ${currency} ${amount.toFixed(2)} from ${source}`, income: entry };
+}
+
 async function getBudgetStatus(db, userId, dashboardMonth) {
   const { startDate, endDate } = monthRange(dashboardMonth);
   const [budgetResult, expenseResult] = await Promise.all([
@@ -188,6 +307,77 @@ async function getBudgetStatus(db, userId, dashboardMonth) {
   const spent = expenseResult.rows.filter((row) => row.currency === currency).reduce((sum, row) => sum + Number(row.amount_minor || 0), 0) / 100;
   const overall = budgets.find((budget) => budget.category === null && budget.currency === currency);
   return { month: dashboardMonth, currency, spent, budget: overall?.amount ?? null, remaining: overall ? overall.amount - spent : null, usedPercent: overall?.amount ? Math.round((spent / overall.amount) * 100) : null, categoryLimits: budgets.filter((budget) => budget.category !== null) };
+}
+
+async function setBudget(db, userId, input, dashboardMonth) {
+  const amount = Number(input.amount || 0);
+  if (amount <= 0) return { error: "Budget limit must be greater than 0" };
+  const category = input.category ? safeText(input.category, 60) : null;
+  const currency = safeText(input.currency || "BDT", 3).toUpperCase();
+  const amountMinor = Math.round(amount * 100);
+  const id = randomUUID();
+
+  await db.execute({
+    sql: "INSERT INTO budgets (id, user_id, category, amount_minor, currency, period, created_at) VALUES (?, ?, ?, ?, ?, 'monthly', ?)",
+    args: [id, userId, category, amountMinor, currency, Date.now()],
+  });
+
+  return { success: true, message: `Set ${category ? `${category} ` : "overall "}monthly budget to ${currency} ${amount.toFixed(2)}` };
+}
+
+async function getGoals(db, userId) {
+  const result = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(result.rows[0]?.data);
+  return { goals: finance.goals || [] };
+}
+
+async function addGoal(db, userId, input) {
+  const name = safeText(input.name || "Savings Goal", 100);
+  const target = Number(input.target || 0);
+  if (target <= 0) return { error: "Target amount must be greater than 0" };
+  const currency = safeText(input.currency || "BDT", 3).toUpperCase();
+
+  const result = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(result.rows[0]?.data);
+  finance.goals = finance.goals || [];
+  const goal = { id: randomUUID(), name, targetMinor: Math.round(target * 100), savedMinor: 0, currency };
+  finance.goals = [goal];
+
+  await db.execute({
+    sql: "INSERT INTO finance_state (user_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
+    args: [userId, JSON.stringify(finance), Date.now()],
+  });
+
+  return { success: true, message: `Updated savings goal "${name}" with target ${currency} ${target.toFixed(2)}`, goal };
+}
+
+async function getRecurringExpenses(db, userId) {
+  const result = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(result.rows[0]?.data);
+  return { recurring: finance.recurring || [] };
+}
+
+async function addRecurringExpense(db, userId, input) {
+  const merchant = safeText(input.merchant || input.category || "Subscription", 100);
+  const amount = Number(input.amount || 0);
+  if (amount <= 0) return { error: "Amount must be greater than 0" };
+  const category = safeText(input.category || "Subscriptions", 60);
+  const frequency = safeText(input.frequency || "Monthly", 30);
+  const nextDate = validDate(input.nextDate) ? input.nextDate : new Date().toISOString().slice(0, 10);
+  const currency = safeText(input.currency || "BDT", 3).toUpperCase();
+
+  const result = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(result.rows[0]?.data);
+  finance.recurring = finance.recurring || [];
+  const item = { id: randomUUID(), merchant, category, amountMinor: Math.round(amount * 100), frequency, nextDate, currency };
+  finance.recurring.push(item);
+
+  await db.execute({
+    sql: "INSERT INTO finance_state (user_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
+    args: [userId, JSON.stringify(finance), Date.now()],
+  });
+
+  return { success: true, message: `Added recurring bill for ${merchant} (${currency} ${amount.toFixed(2)} / ${frequency})`, item };
 }
 
 async function generateMonthlyReport(db, userId, input, dashboardMonth = currentMonth()) {
@@ -213,7 +403,15 @@ async function runTool(db, userId, name, rawInput, dashboardMonth) {
   const input = rawInput && typeof rawInput === "object" ? rawInput : {};
   if (name === "get_latest_expense") return getLatestExpense(db, userId);
   if (name === "get_expenses") return getExpenses(db, userId, input, dashboardMonth);
+  if (name === "add_expense") return addExpense(db, userId, input, dashboardMonth);
+  if (name === "get_incomes") return getIncomes(db, userId, input, dashboardMonth);
+  if (name === "add_income") return addIncome(db, userId, input);
   if (name === "get_budget_status") return getBudgetStatus(db, userId, dashboardMonth);
+  if (name === "set_budget") return setBudget(db, userId, input, dashboardMonth);
+  if (name === "get_goals") return getGoals(db, userId);
+  if (name === "add_goal") return addGoal(db, userId, input);
+  if (name === "get_recurring_expenses") return getRecurringExpenses(db, userId);
+  if (name === "add_recurring_expense") return addRecurringExpense(db, userId, input);
   if (name === "generate_monthly_report") return generateMonthlyReport(db, userId, input, dashboardMonth);
   return { error: `Unknown tool: ${name}` };
 }
