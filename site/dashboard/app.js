@@ -4,20 +4,96 @@ const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 
-function localDisplayCurrency() {
+function localDisplayCurrency(fallbackCurrency = "") {
   const saved = (() => {
     try { return localStorage.getItem("dashboard_display_currency"); } catch { return ""; }
   })();
   if (/^[A-Z]{3}$/.test(saved || "")) return saved;
 
-  const modelCurrency = window.dashboardModel?.currency;
-  if (/^[A-Z]{3}$/.test(modelCurrency || "")) return modelCurrency;
-
   const region = (() => {
     try { return new Intl.Locale(navigator.language).region || ""; } catch { return ""; }
   })();
   const regionalCurrency = { BD: "BDT", IN: "INR", GB: "GBP", CA: "CAD", AU: "AUD", EU: "EUR", DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", PT: "EUR" }[region];
-  return regionalCurrency || "USD";
+  return regionalCurrency || (/^[A-Z]{3}$/.test(fallbackCurrency) ? fallbackCurrency : "USD");
+}
+
+function setTheme(mode) {
+  const theme = mode === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem("expenseTrackerTheme", theme); } catch {}
+  syncThemeSwitch();
+}
+
+function readLocalPreferences(fallback = {}) {
+  const readBoolean = (key, defaultValue) => {
+    try {
+      const value = localStorage.getItem(key);
+      return value === null ? defaultValue : value === "true";
+    } catch { return defaultValue; }
+  };
+  let copilotModel = fallback.copilotModel || "gemini-2.5-flash";
+  try { copilotModel = localStorage.getItem("copilot_model") || copilotModel; } catch {}
+  return {
+    ...fallback,
+    currency: localDisplayCurrency(fallback.currency || ""),
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+    compactMode: readBoolean("compact_mode", fallback.compactMode === true),
+    copilotModel,
+    autoSuggest: readBoolean("auto_suggest", fallback.autoSuggest !== false),
+    billReminders: readBoolean("bill_reminders", fallback.billReminders !== false),
+    incomeReceived: readBoolean("income_received_notifications", fallback.incomeReceived !== false),
+    overdueAlerts: readBoolean("overdue_alerts", fallback.overdueAlerts !== false),
+    newsletter: readBoolean("newsletter_notifications", fallback.newsletter !== false),
+    pushNotifications: readBoolean("push_notifications", fallback.pushNotifications === true),
+    emailNotifications: readBoolean("email_notifications", fallback.emailNotifications !== false),
+  };
+}
+
+function applyDashboardPreferences(preferences = {}) {
+  if (preferences.theme === "dark" || preferences.theme === "light") setTheme(preferences.theme);
+  document.documentElement.dataset.density = preferences.compactMode ? "compact" : "comfortable";
+  try {
+    if (preferences.currency) localStorage.setItem("dashboard_display_currency", preferences.currency);
+    if (preferences.copilotModel) localStorage.setItem("copilot_model", preferences.copilotModel);
+    localStorage.setItem("compact_mode", String(Boolean(preferences.compactMode)));
+    localStorage.setItem("auto_suggest", String(preferences.autoSuggest !== false));
+    localStorage.setItem("bill_reminders", String(preferences.billReminders !== false));
+    localStorage.setItem("income_received_notifications", String(preferences.incomeReceived !== false));
+    localStorage.setItem("overdue_alerts", String(preferences.overdueAlerts !== false));
+    localStorage.setItem("newsletter_notifications", String(preferences.newsletter !== false));
+    localStorage.setItem("push_notifications", String(preferences.pushNotifications === true));
+    localStorage.setItem("email_notifications", String(preferences.emailNotifications !== false));
+  } catch {}
+}
+
+function showNotificationOnce(key, title, body) {
+  try {
+    const storageKey = `money_copilot_notification:${key}`;
+    if (localStorage.getItem(storageKey)) return;
+    new Notification(title, { body, icon: "/assets/logo/money-copilot-app-logo.png", tag: key });
+    localStorage.setItem(storageKey, new Date().toISOString());
+  } catch {}
+}
+
+function runNotificationPreferences(model) {
+  const preferences = model?.preferences || {};
+  if (!("Notification" in window) || Notification.permission !== "granted" || preferences.pushNotifications !== true) return;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const bill of model.recurring || []) {
+    const dueDate = /^\d{4}-\d{2}-\d{2}$/.test(bill.nextDate || "") ? new Date(`${bill.nextDate}T00:00:00`) : null;
+    if (!dueDate || Number.isNaN(dueDate.getTime())) continue;
+    const daysUntilDue = Math.round((dueDate.getTime() - today.getTime()) / 86400000);
+    const name = bill.merchant || bill.description || bill.category || "Recurring bill";
+    if (preferences.overdueAlerts !== false && daysUntilDue < 0) {
+      showNotificationOnce(`overdue:${bill.id || name}:${bill.nextDate}`, "Overdue bill", `${name} was due ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) === 1 ? "" : "s"} ago.`);
+    } else if (preferences.billReminders !== false && (daysUntilDue === 1 || daysUntilDue === 3)) {
+      showNotificationOnce(`bill:${bill.id || name}:${bill.nextDate}:${daysUntilDue}`, "Bill reminder", `${name} is due in ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"}.`);
+    }
+  }
+  if (preferences.incomeReceived !== false && Number(model.incomeMinor || 0) > 0) {
+    showNotificationOnce(`income:${model.month}:${model.incomeMinor}`, "Income received", `${formatMoney(model.incomeMinor, model.currency, { compact: true })} is recorded for ${monthLabel(model.month)}.`);
+  }
 }
 
 function timeGreeting(date = new Date()) {
@@ -34,6 +110,12 @@ function syncThemeSwitch() {
     const active = button.dataset.themeChoice === current;
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
+  });
+  document.querySelectorAll("[data-mobile-theme-toggle]").forEach((button) => {
+    const nextTheme = current === "dark" ? "light" : "dark";
+    button.innerHTML = `${icon(nextTheme === "dark" ? "moon" : "sun")}<span>${nextTheme === "dark" ? "Dark" : "Light"}</span>`;
+    button.setAttribute("aria-label", `Use ${nextTheme} theme`);
+    button.setAttribute("aria-pressed", String(current === "dark"));
   });
 }
 
@@ -107,6 +189,7 @@ function icon(name) {
     menu: "<path d='M4 6h16M4 12h16M4 18h16'/>",
     microphone: "<rect x='9' y='3' width='6' height='12' rx='3'/><path d='M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6'/>",
     camera: "<path d='M4 7h4l1.5-2h5L16 7h4v12H4z'/><circle cx='12' cy='13' r='3.5'/>",
+    calendar: "<rect x='3' y='5' width='18' height='16' rx='2'/><path d='M16 3v4M8 3v4M3 10h18'/>",
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.dashboard}</svg>`;
 }
@@ -126,6 +209,63 @@ function formatMoney(minor, currency, options = {}) {
 function monthLabel(month) {
   const [year, number] = month.split("-").map(Number);
   return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(Date.UTC(year, number - 1, 1)));
+}
+
+const MONTH_NAMES_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function renderMonthPicker(month) {
+  const [year, monthNumber] = String(month || selectedMonth).split("-").map(Number);
+  const safeYear = Number.isInteger(year) ? year : new Date().getFullYear();
+  const safeMonth = monthNumber >= 1 && monthNumber <= 12 ? monthNumber : 1;
+  const options = MONTH_NAMES_SHORT.map((name, index) => {
+    const value = `${safeYear}-${String(index + 1).padStart(2, "0")}`;
+    const selected = index + 1 === safeMonth;
+    return `<button type="button" role="option" aria-selected="${selected}" class="month-picker-option${selected ? " selected" : ""}" data-month-value="${value}" data-month-number="${index + 1}">${name}</button>`;
+  }).join("");
+  return `
+    <div class="month-picker" data-month-picker data-year="${safeYear}" data-selected-month="${esc(month)}">
+      <button class="month-picker-trigger" type="button" aria-label="Select month" aria-haspopup="dialog" aria-expanded="false" data-month-picker-toggle>
+        <span>${esc(monthLabel(`${safeYear}-${String(safeMonth).padStart(2, "0")}`))}</span>${icon("calendar")}
+      </button>
+      <div class="month-picker-popover" role="dialog" aria-label="Choose dashboard month" data-month-picker-menu hidden>
+        <div class="month-picker-year">
+          <button type="button" aria-label="Previous year" data-month-year-step="-1">&#8249;</button>
+          <strong data-month-year-label>${safeYear}</strong>
+          <button type="button" aria-label="Next year" data-month-year-step="1">&#8250;</button>
+        </div>
+        <div class="month-picker-grid" role="listbox" aria-label="Months">${options}</div>
+        <div class="month-picker-footer">
+          <button type="button" data-month-clear>Current month</button>
+          <button type="button" data-month-today>Today</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function closeMonthPickers(except = null) {
+  document.querySelectorAll("[data-month-picker]").forEach((picker) => {
+    if (picker === except) return;
+    picker.classList.remove("open");
+    picker.querySelector("[data-month-picker-toggle]")?.setAttribute("aria-expanded", "false");
+    const menu = picker.querySelector("[data-month-picker-menu]");
+    if (menu) menu.hidden = true;
+  });
+}
+
+function updateMonthPickerYear(picker, year) {
+  if (!picker || !Number.isInteger(year)) return;
+  picker.dataset.year = String(year);
+  const label = picker.querySelector("[data-month-year-label]");
+  if (label) label.textContent = String(year);
+  const selectedMonthValue = picker.dataset.selectedMonth;
+  picker.querySelectorAll("[data-month-number]").forEach((button) => {
+    const value = `${year}-${String(button.dataset.monthNumber).padStart(2, "0")}`;
+    button.dataset.monthValue = value;
+    const selected = value === selectedMonthValue;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-selected", String(selected));
+  });
 }
 
 function percentChange(current, previous, inverse = false) {
@@ -216,7 +356,8 @@ async function loadDashboard() {
 }
 
 function buildModel(data) {
-  const currency = data.currency || "USD";
+  const preferences = data.preferences && typeof data.preferences === "object" ? data.preferences : {};
+  const currency = /^[A-Z]{3}$/.test(preferences.currency || "") ? preferences.currency : localDisplayCurrency(data.currency || "USD");
   const month = data.month || selectedMonth;
   const expenseDaily = groupByDate(data.daily || data.expenses || [], month);
   const incomeDaily = groupByDate(data.dailyIncome || data.incomes || [], month);
@@ -243,6 +384,7 @@ function buildModel(data) {
   );
   return {
     ...data,
+    preferences,
     currency,
     month,
     expenseDaily,
@@ -479,6 +621,15 @@ function renderCategories(model) {
 }
 
 function renderInsights(model) {
+  if (model.preferences?.autoSuggest === false) {
+    return `
+      <article class="panel insights-panel insights-disabled">
+        <div class="panel-head"><h3>Smart insights</h3></div>
+        <div class="empty-state">Automatic insights are paused in Dashboard Settings.</div>
+        <button class="panel-footer-link" data-panel="settings">Enable smart insights</button>
+      </article>
+    `;
+  }
   const top = model.categories?.[0];
   const over = model.remainingMinor !== null && model.remainingMinor < 0;
   const forecastOver = model.budgetMinor && model.forecastMinor > model.budgetMinor;
@@ -588,7 +739,7 @@ function renderTransactions(model) {
 
 function renderSidebar(model) {
   const displayName = esc(model.user?.displayName || "User");
-  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/icon-512.png");
+  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo.png");
   const nav = [
     ["dashboard", "Dashboard", "dashboard"],
     ["transactions", "Transactions", "transactions"],
@@ -596,15 +747,14 @@ function renderSidebar(model) {
     ["database", "Manage Data", "data-management"],
     ["categories", "Categories", "categories"],
     ["budget", "Budget", "budget"],
-    ["analytics", "Reports", "analytics"],
     ["mail", "Email Report", "email-report"],
     ["settings", "Settings", "settings"],
   ];
   return `
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-mark-dark.png" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/logo-mark.svg" alt="">
+        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-app-logo.png" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-app-logo.png" alt="">
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
@@ -636,7 +786,7 @@ function renderHeader(model) {
         <p>Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.</p>
       </div>
       <div class="toolbar">
-        <input class="month-input" type="month" aria-label="Select month" value="${esc(model.month)}" data-month-picker>
+        ${renderMonthPicker(model.month)}
         <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
         <button class="notice-button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${buildNotifications(model).length}</b></button>
         <div class="toolbar-actions">
@@ -650,28 +800,18 @@ function renderHeader(model) {
 
 function renderMobileDashboardHeader(model) {
   const displayName = esc(model.user?.displayName || "User");
+  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo.png");
   const month = esc(monthLabel(model.month).split(" ")[0]);
-  const alertCount = Math.max(2, buildNotifications(model).length);
   return `
     <header class="mobile-dashboard-header">
-      <div class="mobile-statusbar" aria-hidden="true">
-        <b>9:41</b>
-        <span class="mobile-device-status"><i class="mobile-signal"><em></em><em></em><em></em><em></em></i><i class="mobile-wifi"></i><i class="mobile-battery"></i></span>
-      </div>
-      <div class="mobile-quickbar">
-        <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
-        <div class="mobile-brand-title">
-          <img src="/assets/logo/money-copilot-mark-light.png" width="22" height="22" alt="Money Copilot">
-          <span>Money Copilot</span>
-        </div>
-        <div class="mobile-top-actions">
-          <button class="mobile-notice-button" type="button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${alertCount}</b></button>
-          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt="Money Copilot AI"></button>
-        </div>
-      </div>
       <div class="mobile-greeting">
-        <h1>${timeGreeting()},<br>${displayName} <span aria-hidden="true">👋</span></h1>
-        <p>Here&rsquo;s your financial picture for ${month}.</p>
+        <div class="mobile-greeting-copy">
+          <h1>${timeGreeting()},<br>${displayName} <span aria-hidden="true">👋</span></h1>
+          <p>Here&rsquo;s your financial picture for ${month}.</p>
+        </div>
+        <button class="mobile-profile-button" type="button" data-mobile-menu-toggle aria-label="Open profile and navigation" aria-expanded="false">
+          <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
+        </button>
       </div>
     </header>
   `;
@@ -680,7 +820,7 @@ function renderMobileDashboardHeader(model) {
 function renderMobileCopilotComposer() {
   return `
     <section class="mobile-finance-composer" aria-label="Money Copilot quick actions">
-      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
+      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></button>
       <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
       <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Money Copilot">${icon("send")}</button>
       <button class="mobile-composer-action" type="button" data-entry="expense" aria-label="Scan a receipt">${icon("camera")}</button>
@@ -689,13 +829,14 @@ function renderMobileCopilotComposer() {
 }
 
 function renderMobileBottomNav() {
+  const darkTheme = document.documentElement.dataset.theme === "dark";
   return `
     <nav class="mobile-bottom-nav" aria-label="Mobile dashboard navigation">
       <button class="active" type="button" data-nav="dashboard">${icon("dashboard")}<span>Dashboard</span></button>
       <button type="button" data-nav="transactions">${icon("transactions")}<span>Transactions</span></button>
       <button class="mobile-add-button" type="button" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
       <button type="button" data-nav="budget">${icon("budget")}<span>Budget</span></button>
-      <button type="button" data-nav="analytics">${icon("analytics")}<span>Reports</span></button>
+      <button type="button" data-mobile-theme-toggle aria-label="Use ${darkTheme ? "light" : "dark"} theme" aria-pressed="${darkTheme}">${icon(darkTheme ? "sun" : "moon")}<span>${darkTheme ? "Light" : "Dark"}</span></button>
     </nav>
   `;
 }
@@ -732,7 +873,7 @@ function renderAiAssistantRail(model) {
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -749,7 +890,7 @@ function renderAiAssistantRail(model) {
         </div>
         <div class="assistant-day"><span>Today</span></div>
         <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
-          <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
+          <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
           <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${esc(monthLabel(model.month).split(" ")[0])}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
         </div>
         ${renderAssistantIntegrationCta()}
@@ -768,15 +909,15 @@ function renderEmptyAssistantRail() {
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
       </div>
       <div class="empty-copilot-body" data-ai-chat>
-        <img src="/assets/finance-copilot-robot.png" alt="Money Copilot">
+        <img src="/assets/logo/money-copilot-app-logo.png" alt="Money Copilot">
         <h2>Hi, I’m your Money Copilot</h2>
         <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
-        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot-robot.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-copilot-greeting"><span><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span>What would you like to do first?</div>
         <div class="empty-divider"><span>Suggested questions</span></div>
         <div class="empty-questions">
           <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
@@ -867,7 +1008,7 @@ function renderDashboard(model) {
       </section>
     </section>
     ${renderAiAssistantRail(model)}
-    <button class="floating-ai" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
+    <button class="floating-ai" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></button>
     ${renderMobileCopilotComposer()}
     ${renderMobileBottomNav()}
   `;
@@ -999,7 +1140,7 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message ${role}" id="${msgId}">
       <div class="ai-message-header">
-        <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot AI`}</div>
+        <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI`}</div>
         ${meta ? `<small class="ai-meta-tag" title="${esc(meta)}">${esc(meta)}</small>` : ""}
       </div>
       <div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>
@@ -1051,10 +1192,10 @@ function openEmptyAiChat(prefill = "") {
     </div>
     <div class="empty-mobile-copilot" data-ai-chat>
       <div class="empty-mobile-copilot-intro">
-        <img src="/assets/finance-copilot-robot.png" alt="Money Copilot">
+        <img src="/assets/logo/money-copilot-app-logo.png" alt="Money Copilot">
         <h2>Hi, I’m your Money Copilot</h2>
         <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
-        <div class="empty-copilot-greeting"><span><img src="/assets/finance-copilot-robot.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-copilot-greeting"><span><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span>What would you like to do first?</div>
       </div>
       <div class="empty-divider"><span>Suggested questions</span></div>
       <div class="empty-questions">
@@ -1111,7 +1252,7 @@ function openAiChat(prefill = "") {
       </div>
       <div class="assistant-day"><span>Today</span></div>
       <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
-        <div class="ai-message user"><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
+        <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
         <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${reportMonth}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model?.budgetUsed || 0)}%"></i><strong>${model?.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} of ${model?.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model?.remainingMinor === null || !model ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
       </div>
       </div>
@@ -1177,11 +1318,14 @@ async function submitAiQuestion(form) {
   textarea.disabled = true;
   setAiSubmitLoading(button, true);
   try {
+    const preferredModel = window.dashboardModel?.preferences?.copilotModel || (() => {
+      try { return localStorage.getItem("copilot_model") || "gemini-2.5-flash"; } catch { return "gemini-2.5-flash"; }
+    })();
     const response = await fetch("/api/ai-chat", {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, month: selectedMonth, currency: localDisplayCurrency() }),
+      body: JSON.stringify({ message, month: selectedMonth, currency: localDisplayCurrency(window.dashboardModel?.currency), model: preferredModel }),
     });
     const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) throw authRequiredError();
@@ -1201,7 +1345,7 @@ async function submitAiQuestion(form) {
     if (window.activeAiChatRoot === chatRoot) window.activeAiChatRoot = null;
     textarea.disabled = false;
     setAiSubmitLoading(button, false);
-    textarea.focus();
+    textarea.focus({ preventScroll: true });
   }
 }
 
@@ -1410,6 +1554,7 @@ function openPanel(kind) {
   }
   if (kind === "settings") {
     const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    const savedPreferences = model.preferences && typeof model.preferences === "object" ? model.preferences : {};
     let currentModel = "gemini-2.5-flash";
     let compactMode = false;
     let autoSuggest = true;
@@ -1417,6 +1562,7 @@ function openPanel(kind) {
     let incomeReceived = true;
     let overdueAlerts = true;
     let newsletter = true;
+    let pushNotifications = false;
     let emailNotifications = true;
     try {
       currentModel = localStorage.getItem("copilot_model") || "gemini-2.5-flash";
@@ -1426,14 +1572,25 @@ function openPanel(kind) {
       incomeReceived = localStorage.getItem("income_received_notifications") !== "false";
       overdueAlerts = localStorage.getItem("overdue_alerts") !== "false";
       newsletter = localStorage.getItem("newsletter_notifications") !== "false";
+      pushNotifications = localStorage.getItem("push_notifications") === "true";
       emailNotifications = localStorage.getItem("email_notifications") !== "false";
     } catch(e) {}
 
+    currentModel = savedPreferences.copilotModel || currentModel;
+    compactMode = savedPreferences.compactMode ?? compactMode;
+    autoSuggest = savedPreferences.autoSuggest ?? autoSuggest;
+    billReminders = savedPreferences.billReminders ?? billReminders;
+    incomeReceived = savedPreferences.incomeReceived ?? incomeReceived;
+    overdueAlerts = savedPreferences.overdueAlerts ?? overdueAlerts;
+    newsletter = savedPreferences.newsletter ?? newsletter;
+    pushNotifications = savedPreferences.pushNotifications ?? pushNotifications;
+    emailNotifications = savedPreferences.emailNotifications ?? emailNotifications;
+
     const pushSupported = "Notification" in window;
     const pushPermission = pushSupported ? Notification.permission : "unsupported";
-    const pushEnabled = pushPermission === "granted";
+    const pushEnabled = pushPermission === "granted" && pushNotifications;
     const pushStatus = pushEnabled ? "Enabled" : pushPermission === "denied" ? "Blocked" : pushSupported ? "Disabled" : "Unavailable";
-    const pushButtonLabel = pushEnabled ? "Push Enabled" : pushPermission === "denied" ? "Review Access" : pushSupported ? "Enable Push" : "Not Supported";
+    const pushButtonLabel = pushEnabled ? "Disable Push" : pushPermission === "denied" ? "Review Access" : pushSupported ? "Enable Push" : "Not Supported";
 
     openModal("Dashboard Settings", "Manage workspace preferences, notifications, AI settings, and privacy.", `
       <form data-form="settings" class="settings-form">
@@ -1445,7 +1602,7 @@ function openPanel(kind) {
           <div class="settings-row">
             <div class="settings-label">
               <strong>Workspace Currency</strong>
-              <small>Default currency used for budgets, expenses, and AI calculations.</small>
+              <small>Display currency for the dashboard and AI responses. It never filters or converts records.</small>
             </div>
             <select name="currency" class="settings-select" data-setting="currency">
               <option value="BDT" ${model.currency === "BDT" ? "selected" : ""}>BDT (৳) - Bangladeshi Taka</option>
@@ -1560,7 +1717,8 @@ function openPanel(kind) {
               <strong>Push Notifications</strong>
               <small class="notification-status ${pushEnabled ? "is-enabled" : pushPermission === "denied" ? "is-blocked" : ""}" data-push-status>${pushStatus}</small>
             </div>
-            <button class="notification-enable-button ${pushEnabled ? "is-enabled" : ""}" type="button" data-enable-push ${pushSupported && !pushEnabled ? "" : "disabled"}>${pushButtonLabel}</button>
+            <input type="hidden" name="push_notifications" value="${pushEnabled ? "true" : "false"}">
+            <button class="notification-enable-button ${pushEnabled ? "is-enabled" : ""}" type="button" data-enable-push ${pushSupported ? "" : "disabled"}>${pushButtonLabel}</button>
           </div>
 
           <div class="settings-row notification-setting-row notification-delivery-row">
@@ -1838,10 +1996,40 @@ function bindEvents() {
   const profilePhoto = document.querySelector("[data-profile-photo]");
   profilePhoto?.addEventListener("error", () => {
     profilePhoto.removeAttribute("data-profile-photo");
-    profilePhoto.src = "/assets/logo/icon-512.png";
+    profilePhoto.src = "/assets/logo/money-copilot-app-logo.png";
   }, { once: true });
 
   document.addEventListener("click", (event) => {
+    const monthPickerToggle = event.target.closest("[data-month-picker-toggle]");
+    if (monthPickerToggle) {
+      const picker = monthPickerToggle.closest("[data-month-picker]");
+      const willOpen = !picker.classList.contains("open");
+      closeMonthPickers(picker);
+      picker.classList.toggle("open", willOpen);
+      monthPickerToggle.setAttribute("aria-expanded", String(willOpen));
+      const menu = picker.querySelector("[data-month-picker-menu]");
+      if (menu) menu.hidden = !willOpen;
+      if (willOpen) picker.querySelector(".month-picker-option.selected")?.focus();
+      return;
+    }
+    const monthYearStep = event.target.closest("[data-month-year-step]");
+    if (monthYearStep) {
+      const picker = monthYearStep.closest("[data-month-picker]");
+      updateMonthPickerYear(picker, Number(picker.dataset.year) + Number(monthYearStep.dataset.monthYearStep));
+      return;
+    }
+    const monthOption = event.target.closest("[data-month-value]");
+    if (monthOption) {
+      location.href = `${location.pathname}?month=${encodeURIComponent(monthOption.dataset.monthValue)}`;
+      return;
+    }
+    const monthToday = event.target.closest("[data-month-today], [data-month-clear]");
+    if (monthToday) {
+      const month = new Date().toISOString().slice(0, 7);
+      location.href = `${location.pathname}?month=${encodeURIComponent(month)}`;
+      return;
+    }
+    if (!event.target.closest("[data-month-picker]")) closeMonthPickers();
     const close = event.target.closest("[data-close]");
     if (close) {
       event.preventDefault();
@@ -1852,9 +2040,9 @@ function bindEvents() {
     const mobileMenuToggle = event.target.closest("[data-mobile-menu-toggle]");
     if (mobileMenuToggle) {
       const open = app.classList.toggle("mobile-menu-open");
-      const menuButton = document.querySelector(".mobile-menu-button");
+      const menuButton = document.querySelector(".mobile-menu-button, .mobile-profile-button");
       menuButton?.setAttribute("aria-expanded", String(open));
-      menuButton?.setAttribute("aria-label", open ? "Close dashboard menu" : "Open dashboard menu");
+      menuButton?.setAttribute("aria-label", open ? "Close profile and navigation" : "Open profile and navigation");
       return;
     }
     const entry = event.target.closest("[data-entry]");
@@ -1898,6 +2086,11 @@ function bindEvents() {
       document.documentElement.dataset.theme = theme;
       try { localStorage.setItem("expenseTrackerTheme", theme); } catch {}
       syncThemeSwitch();
+      return;
+    }
+    const mobileThemeToggle = event.target.closest("[data-mobile-theme-toggle]");
+    if (mobileThemeToggle) {
+      setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
       return;
     }
     if (event.target.closest("[data-sidebar-search]")) {
@@ -1952,9 +2145,22 @@ function bindEvents() {
     }
     const pushButton = event.target.closest("[data-enable-push]");
     if (pushButton) {
-      const status = pushButton.closest(".notification-setting-row")?.querySelector("[data-push-status]");
+      const row = pushButton.closest(".notification-setting-row");
+      const status = row?.querySelector("[data-push-status]");
+      const preference = row?.querySelector('input[name="push_notifications"]');
       if (!("Notification" in window)) {
         if (status) status.textContent = "Unavailable";
+        return;
+      }
+      if (Notification.permission === "granted" && preference?.value === "true") {
+        preference.value = "false";
+        try { localStorage.setItem("push_notifications", "false"); } catch(e) {}
+        if (status) {
+          status.textContent = "Disabled";
+          status.classList.remove("is-enabled", "is-blocked");
+        }
+        pushButton.textContent = "Enable Push";
+        pushButton.classList.remove("is-enabled");
         return;
       }
       if (Notification.permission === "denied") {
@@ -1969,14 +2175,15 @@ function bindEvents() {
       Notification.requestPermission().then((permission) => {
         const enabled = permission === "granted";
         try { localStorage.setItem("push_notifications", String(enabled)); } catch(e) {}
+        if (preference) preference.value = String(enabled);
         if (status) {
           status.textContent = enabled ? "Enabled" : permission === "denied" ? "Blocked" : "Disabled";
           status.classList.toggle("is-enabled", enabled);
           status.classList.toggle("is-blocked", permission === "denied");
         }
-        pushButton.textContent = enabled ? "Push Enabled" : permission === "denied" ? "Review Access" : "Enable Push";
+        pushButton.textContent = enabled ? "Disable Push" : permission === "denied" ? "Review Access" : "Enable Push";
         pushButton.classList.toggle("is-enabled", enabled);
-        pushButton.disabled = enabled;
+        pushButton.disabled = false;
       }).catch(() => {
         if (status) status.textContent = "Unavailable";
         pushButton.textContent = "Enable Push";
@@ -2015,7 +2222,7 @@ function bindEvents() {
     const nav = event.target.closest("[data-nav]");
     if (nav) {
       app.classList.remove("mobile-menu-open");
-      document.querySelector(".mobile-menu-button")?.setAttribute("aria-expanded", "false");
+      document.querySelector(".mobile-menu-button, .mobile-profile-button")?.setAttribute("aria-expanded", "false");
       document.querySelectorAll(".nav button, .mobile-bottom-nav [data-nav]").forEach((button) => button.classList.toggle("active", button.dataset.nav === nav.dataset.nav));
       if (nav.dataset.nav === "analysis") {
         const rail = document.querySelector(".assistant-rail");
@@ -2023,6 +2230,15 @@ function bindEvents() {
           rail.classList.remove("collapsed");
           rail.querySelector("textarea[name=message]")?.focus();
         } else openAiChat();
+        return;
+      }
+      const navPopup = {
+        transactions: "transactions",
+        categories: "categories",
+        budget: "budget-editor",
+      }[nav.dataset.nav];
+      if (navPopup) {
+        openPanel(navPopup);
         return;
       }
       const target = document.getElementById(nav.dataset.nav);
@@ -2123,6 +2339,19 @@ function bindEvents() {
       const modelName = form.elements.copilot_model?.value;
       const compact = form.elements.compact_mode?.checked;
       const autoSuggest = form.elements.auto_suggest?.checked;
+      const settings = {
+        currency,
+        theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+        compactMode: Boolean(compact),
+        copilotModel: modelName,
+        autoSuggest: Boolean(autoSuggest),
+        billReminders: Boolean(form.elements.bill_reminders?.checked),
+        incomeReceived: Boolean(form.elements.income_received_notifications?.checked),
+        overdueAlerts: Boolean(form.elements.overdue_alerts?.checked),
+        newsletter: Boolean(form.elements.newsletter_notifications?.checked),
+        pushNotifications: form.elements.push_notifications?.value === "true",
+        emailNotifications: Boolean(form.elements.email_notifications?.checked),
+      };
 
       try {
         if (modelName) localStorage.setItem("copilot_model", modelName);
@@ -2133,23 +2362,11 @@ function bindEvents() {
         localStorage.setItem("income_received_notifications", String(Boolean(form.elements.income_received_notifications?.checked)));
         localStorage.setItem("overdue_alerts", String(Boolean(form.elements.overdue_alerts?.checked)));
         localStorage.setItem("newsletter_notifications", String(Boolean(form.elements.newsletter_notifications?.checked)));
+        localStorage.setItem("push_notifications", String(settings.pushNotifications));
         localStorage.setItem("email_notifications", String(Boolean(form.elements.email_notifications?.checked)));
       } catch(e) {}
 
-      if (currency && currency !== window.dashboardModel?.currency) {
-        postDashboard({ kind: "budget", amount: window.dashboardModel?.budgetMinor ? window.dashboardModel.budgetMinor / 100 : 0, currency }, form);
-        return;
-      }
-
-      openModal("Preferences Saved! ✨", "Your workspace settings have been updated.", `
-        <div class="report-success-state">
-          <div class="success-icon">${icon("check")}</div>
-          <p>Your dashboard settings have been applied successfully.</p>
-          <div class="modal-actions" style="margin-top:12px; width:100%;">
-            <button type="button" class="action-button primary" onclick="closeModal(); location.reload();" style="width:100%;">Apply & Reload</button>
-          </div>
-        </div>
-      `, { wide: false });
+      postDashboard({ kind: "settings", settings }, form);
       return;
     }
     submitPanelForm(form);
@@ -2157,12 +2374,9 @@ function bindEvents() {
 
   document.addEventListener("input", (event) => {
     if (event.target.matches("[data-search]")) filterDashboard(event.target.value);
-  });
-
-  document.addEventListener("change", (event) => {
-    if (!event.target.matches("[data-month-picker]")) return;
-    const month = event.target.value || selectedMonth;
-    location.href = `${location.pathname}?month=${encodeURIComponent(month)}`;
+    if (event.target.matches('input[name="compact_mode"]')) {
+      document.documentElement.dataset.density = event.target.checked ? "compact" : "comfortable";
+    }
   });
 
   document.addEventListener("keydown", (event) => {
@@ -2175,12 +2389,17 @@ function bindEvents() {
       event.preventDefault();
       document.querySelector("[data-search]")?.focus();
     }
-    if (event.key === "Escape") closeModal();
+    if (event.key === "Escape") {
+      closeMonthPickers();
+      closeModal();
+    }
   });
 }
 
 loadDashboard()
   .then((data) => {
+    if (!data.preferencesConfigured) data.preferences = readLocalPreferences(data.preferences || {});
+    applyDashboardPreferences(data.preferences || {});
     window.dashboardModel = buildModel(data);
     if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
     else renderEmptyDashboard(window.dashboardModel);
@@ -2190,6 +2409,7 @@ loadDashboard()
     } catch {}
     initializeAssistantRailResize();
     bindEvents();
+    runNotificationPreferences(window.dashboardModel);
     bindIncomeExpenseChart();
   })
   .catch((error) => {

@@ -79,13 +79,14 @@ function decodeFinance(value) {
   try { return JSON.parse(String(value || "{}")); } catch { return {}; }
 }
 
-function selectModel(message) {
+function selectModel(message, preferredModel = "") {
   const text = safeText(message, 500).toLowerCase();
+  const preferred = preferredModel === "gemini-2.5-pro" ? "gemini-2.5-pro" : DEFAULT_MODEL;
   const needsDeeperReasoning = /\b(compare|forecast|trend|why|explain|advice|recommend|plan|saving|reduce|report|summary|analysis|split|yesterday|tomorrow|last|next|weekly|monthly|every)\b|\b20\d{2}-\d{2}-\d{2}\b/.test(text);
   const isQuickLookup = text.length <= 180 && /^(?:what|show|list|how much|latest|last|recent|my\s+budget|budget\s+status|balance)\b/.test(text);
   const isSimpleEntry = /^\s*(?:add|record|save|spent)\s+(?:[$\u09F3]\s*)?\d+(?:\.\d{1,2})?\b/i.test(text);
   if ((isQuickLookup || isSimpleEntry) && !needsDeeperReasoning) return { model: FAST_MODEL, tier: "fast" };
-  return { model: DEFAULT_MODEL, tier: "standard" };
+  return { model: preferred, tier: preferredModel === "gemini-2.5-pro" ? "advanced" : "standard" };
 }
 
 function checkRateLimit(userId) {
@@ -609,7 +610,7 @@ export default async function handler(req, res) {
   const currentDate = new Date().toISOString().slice(0, 10);
   const claimedUserId = safeText(req.body?.userId, 200);
   if (claimedUserId && claimedUserId !== userId) return res.status(403).json({ error: "The requested user does not match this dashboard session." });
-  const modelChoice = selectModel(message);
+  const modelChoice = selectModel(message, safeText(req.body?.model, 40));
   const url = process.env.TURSO_DATABASE_URL;
   const authToken = process.env.TURSO_AUTH_TOKEN;
   if (!url || !authToken) return res.status(503).json({ error: "Expense data is not configured." });

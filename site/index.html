@@ -6,9 +6,8 @@
 <title>Money Copilot AI — Ask where your money went</title>
 <meta name="description" content="Money Copilot AI is your conversational finance assistant for tracking expenses, scanning receipts, and understanding spending across ChatGPT, Claude, and any MCP client." />
 <meta name="theme-color" id="themeColor" content="#050810" />
-<link rel="icon" type="image/svg+xml" href="assets/logo/logo-mark.svg" />
-<link rel="icon" type="image/png" sizes="512x512" href="assets/logo/money-copilot-mark-light.png" />
-<link rel="apple-touch-icon" href="assets/logo/money-copilot-mark-light.png" />
+<link rel="icon" type="image/png" sizes="1024x1024" href="assets/logo/money-copilot-app-logo.png" />
+<link rel="apple-touch-icon" href="assets/logo/money-copilot-app-logo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -339,7 +338,7 @@
   .aic{border-radius:9px;overflow:hidden;display:block;}
   .aic img{width:100%;height:100%;display:block;border-radius:inherit;}
   .theme-mark{position:relative;overflow:hidden;background:var(--panel2);}
-  .theme-mark img{position:absolute;width:555%;max-width:none;height:auto;left:-64%;top:-79%;border-radius:0;}
+  .theme-mark img{position:static;width:100%;max-width:100%;height:100%;object-fit:contain;border-radius:inherit;}
   .theme-mark .theme-mark-light{display:none;}
   html[data-theme="light"] .theme-mark .theme-mark-dark{display:none;}
   html[data-theme="light"] .theme-mark .theme-mark-light{display:block;}
@@ -608,7 +607,7 @@
     box-shadow:0 12px 32px -18px rgba(0,0,0,.9);color:#fff;text-align:left;line-height:1.05;}
   .promo-brand img{width:34px;height:34px;flex:0 0 34px;border-radius:9px;}
   .promo-brand .theme-mark{width:34px;height:34px;flex:0 0 34px;border-radius:9px;}
-  .promo-brand .theme-mark img{width:555%;max-width:none;height:auto;left:-64%;top:-79%;border-radius:0;}
+  .promo-brand .theme-mark img{width:100%;max-width:100%;height:100%;object-fit:contain;border-radius:inherit;}
   .promo-brand b{display:block;font-size:15px;letter-spacing:-.02em;}
   .promo-brand .promo-copy{display:block;}
   .promo-brand .promo-copy>span{display:block;font-size:13px;font-weight:800;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
@@ -1304,7 +1303,7 @@
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top">
-      <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-mark-light.png" alt="Money Copilot AI Logo"></span>
+      <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.png" alt="Money Copilot AI Logo"></span>
       <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
     </a>
     <nav>
@@ -1344,7 +1343,7 @@
         <p class="lead">Your AI-powered personal finance assistant that tracks spending through simple conversations.</p>
         <div class="cta">
           <a class="btn btn-primary" href="/dashboard">
-            <svg class="client-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M9 12h6M12 9v6"/></svg>
+            <img class="client-ico" src="assets/logo/money-copilot-app-logo.png" alt="">
             Start with Money Copilot
           </a>
           <a class="btn btn-chatgpt" href="#how">
@@ -1582,7 +1581,7 @@
           <div class="pmsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Money Copilot AI<span class="x">&#10005;</span></div>
           <div class="pmtabs"><span class="on">Featured</span><span>Top</span><span>Popular</span><span>New</span></div>
           <div class="approw hl">
-            <span class="ai aic theme-mark"><img class="theme-mark-dark" src="assets/logo/money-copilot-logo-dark.png" alt=""><img class="theme-mark-light" src="assets/logo/money-copilot-logo-light.png" alt=""></span>
+            <span class="ai aic theme-mark"><img src="assets/logo/money-copilot-app-logo.png" alt=""></span>
             <span class="tx"><b>Money Copilot AI</b><small>Track expenses, scan receipts, get insights and reports.</small><span class="rate"><i>&#9733;</i> 4.9</span></span>
             <span class="install">Install</span>
           </div>
@@ -1613,7 +1612,7 @@
             <div class="logos">
               <span class="lg gpt"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 4.3 2.5A5 5 0 0 1 20 12a5 5 0 0 1-1.7 6.5A5 5 0 0 1 12 22a5 5 0 0 1-4.3-2.5A5 5 0 0 1 4 12a5 5 0 0 1 1.7-6.5A5 5 0 0 1 12 2zm0 2.4a2.6 2.6 0 0 0-2.5 1.9l3.4 2a1 1 0 0 1 .5.9v4l1.9-1.1V8a2.6 2.6 0 0 0-1.3-2.3 2.6 2.6 0 0 0-2-1.3zm-4.6 3A2.6 2.6 0 0 0 6.6 11l3.4-2 3.4 2-1.9 1.1-2.9-1.7-1.2.7v-3.7zm9.2 4-3.4 2-3.4-2 1.9-1.1 2.9 1.7 1.2-.7v3.7zM7.9 15.6l3.4-2v3.9a1 1 0 0 1-.5.9l-3.4 2A2.6 2.6 0 0 1 6.1 18a2.6 2.6 0 0 1 1.8-2.4z"/></svg></span>
               <span class="dots">&#8226;&#8226;&#8226;</span>
-              <span class="lg aic theme-mark"><img class="theme-mark-dark" src="assets/logo/money-copilot-logo-dark.png" alt=""><img class="theme-mark-light" src="assets/logo/money-copilot-logo-light.png" alt=""></span>
+              <span class="lg aic theme-mark"><img src="assets/logo/money-copilot-app-logo.png" alt=""></span>
             </div>
             <div class="t">Connect<br>Money Copilot AI</div>
             <div class="perm"><i>&#10003;</i>Create and manage expenses</div>
@@ -1643,7 +1642,7 @@
           <div class="pmnav"><span class="ic">&#9776;</span><b>ChatGPT &#8964;</b><span class="ic">&#9998;</span></div>
           <div class="pmchat">
             <span class="pmu"><b>@Money Copilot AI</b><br>Show my expenses for July</span>
-            <div class="pma"><span class="aic theme-mark"><img class="theme-mark-dark" src="assets/logo/money-copilot-logo-dark.png" alt=""><img class="theme-mark-light" src="assets/logo/money-copilot-logo-light.png" alt=""></span>Money Copilot AI</div>
+            <div class="pma"><span class="aic theme-mark"><img src="assets/logo/money-copilot-app-logo.png" alt=""></span>Money Copilot AI</div>
             <div class="asay">Here&rsquo;s your expense summary for July 2026.</div>
             <div class="pmrep">
               <div class="dn">
@@ -1826,7 +1825,7 @@
 
       <figure class="live reveal" aria-label="Money Copilot AI promotional preview">
         <span class="live-promo">
-          <span class="promo-brand"><span class="aic theme-mark"><img class="theme-mark-dark" src="assets/logo/money-copilot-logo-dark.png" alt=""><img class="theme-mark-light" src="assets/logo/money-copilot-logo-light.png" alt=""></span><span class="promo-copy"><b>Money</b><span>Copilot AI</span></span></span>
+          <span class="promo-brand"><span class="aic theme-mark"><img src="assets/logo/money-copilot-app-logo.png" alt=""></span><span class="promo-copy"><b>Money</b><span>Copilot AI</span></span></span>
           <img class="promo-img-dark" src="assets/dashboard/expense-tracker-ai-promo.png" alt="Money Copilot AI dark promotional preview showing ChatGPT and Claude support">
           <img class="promo-img-light" src="assets/dashboard/money-copilot-ai-promo-light.png" alt="Money Copilot AI light promotional preview showing ChatGPT and Claude support">
         </span>
@@ -2177,7 +2176,7 @@
   <div class="wrap">
     <div>
       <div class="brand">
-        <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-mark-light.png" alt="Money Copilot AI Logo"></span>
+        <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.png" alt="Money Copilot AI Logo"></span>
         <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
       </div>
       <div class="sub">Track expenses by typing &mdash; made for AI assistants you already use.</div>
