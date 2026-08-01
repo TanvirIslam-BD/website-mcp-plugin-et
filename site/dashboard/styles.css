@@ -9373,3 +9373,157 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 :root[data-theme="light"] .assistant-rail-form textarea::placeholder{color:#647789}
 :root[data-theme="light"] .compose-clip{color:#019a56}
 :root[data-theme="light"] .assistant-send{color:#fff;background:linear-gradient(135deg,#019a56,#05ad64);box-shadow:0 6px 15px rgba(1,154,86,.18)}
+
+/* Final desktop reference lock: wins over the legacy dashboard cascade */
+@media (min-width:1181px) {
+  .dashboard-shell:has(.assistant-rail),
+  .dashboard-shell.sidebar-collapsed:has(.assistant-rail){
+    grid-template-columns:218px minmax(0,1fr) 292px!important;
+  }
+  .sidebar{width:218px!important;padding:23px 14px 15px!important}
+  .assistant-rail{width:292px!important;min-width:292px!important;max-width:292px!important}
+  .sidebar-toggle,.assistant-resizer,.assistant-collapse{display:none!important}
+  .main{padding:0 18px 30px!important}
+  .topbar{min-height:88px!important;margin:0 0 18px!important;padding:16px 4px 10px!important}
+  .headline h1{font-size:25px!important;font-weight:700!important;line-height:1.12!important}
+  .headline p{font-size:12px!important;font-weight:400!important}
+  .summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important;margin-bottom:15px!important}
+  .metric-card,.metric-card.balance{height:177px!important;min-height:177px!important;padding:21px 20px 12px!important;border-radius:12px!important}
+  .metric-card-main{display:flex!important;align-items:flex-start!important}
+  .metric-card label,.metric-card.balance label{font-size:11px!important;font-weight:650!important;line-height:1.25!important}
+  .metric-card h2,.metric-card.balance h2{margin:8px 0!important;font-size:26px!important;font-weight:700!important;line-height:1!important}
+  .metric-icon,.metric-card.balance .metric-icon,.metric-card.saving.is-negative .metric-icon{position:static!important;width:54px!important;height:54px!important;margin-right:18px!important;border-radius:50%!important;color:#fff!important;background:radial-gradient(circle at 32% 26%,#35d58c,#019a56 72%)!important;box-shadow:0 9px 18px rgba(1,154,86,.19)!important}
+  .metric-direction{top:18px!important;right:14px!important;width:30px!important;height:30px!important}
+  .metric-trend{font-size:9px!important;font-weight:600!important}
+  .sparkline{right:18px!important;bottom:12px!important;left:18px!important;height:44px!important}
+  .content-grid{grid-template-columns:1.82fr .88fr!important;gap:14px!important}
+  .large-chart{grid-column:1!important;grid-row:1!important;min-height:260px!important;height:260px!important}
+  .budget-panel{grid-column:2!important;grid-row:1!important;min-height:260px!important;height:260px!important}
+  .spending-panel{grid-column:1!important;grid-row:2!important;width:49.25%!important;min-height:232px!important;height:232px!important;justify-self:start!important}
+  .financial-health{grid-column:1!important;grid-row:2!important;width:49.25%!important;min-height:232px!important;height:232px!important;justify-self:end!important}
+  .insights-panel{grid-column:2!important;grid-row:2!important;min-height:232px!important;height:232px!important}
+  .transactions-panel{grid-column:1/-1!important;grid-row:3!important}
+  .panel{padding:15px!important;border-radius:12px!important}
+  .panel h3{font-size:14px!important;font-weight:700!important}
+  .panel-head{margin-bottom:11px!important;padding-bottom:0!important}
+  .assistant-rail-header{height:101px!important;min-height:101px!important;padding:16px 15px!important}
+  .assistant-rail-chat{height:calc(100vh - 101px)!important;padding:16px 10px 14px!important}
+  .assistant-title{font-size:13px!important;font-weight:700!important}
+  .assistant-alert{padding:13px!important;border-radius:12px!important}
+  .assistant-alert-actions button{min-height:35px!important;font-size:9px!important;font-weight:600!important}
+  .assistant-rail .ai-message{font-size:11px!important;font-weight:400!important}
+  .assistant-integration-cta strong{font-size:10px!important}
+  .sidebar .nav button{font-size:11px!important;font-weight:600!important}
+  .sidebar .profile-card b{font-size:11px!important;font-weight:650!important}
+  .copilot-logo img,.mobile-copilot-button img,.mobile-composer-bot img{filter:hue-rotate(-65deg) saturate(1.15)}
+  .sidebar .brand-logo-light{filter:hue-rotate(-65deg) saturate(1.25)}
+}
+
+:root[data-theme="light"] body,
+:root[data-theme="light"] .main{background:#f7fbfa!important}
+:root[data-theme="light"] .sidebar,
+:root[data-theme="light"] .assistant-rail{background:#fcfdfd!important}
+:root[data-theme="light"] .metric-card,
+:root[data-theme="light"] .metric-card.balance,
+:root[data-theme="light"] .panel{border-color:#e3eeea!important;background:linear-gradient(145deg,#fff 0%,#fefefe 64%,#f8fbfa 100%)!important;box-shadow:0 4px 16px rgba(33,79,57,.025)!important}
+:root[data-theme="light"] .metric-card.saving.is-negative h2{color:#11293c!important}
+:root[data-theme="light"] .metric-card.saving.is-negative .metric-direction{color:#019a56!important;background:#e7f5ee!important}
+:root[data-theme="light"] .budget-ring{background:conic-gradient(from -90deg,#80d9b4 0 38%,#019a56 38% 79%,#3bc888 79% 100%)!important}
+
+/* Reference material system: gradient, bloom, inset light and surface depth */
+:root[data-theme="light"] body{
+  background:
+    radial-gradient(circle at 54% -12%,rgba(219,244,233,.62),transparent 34rem),
+    linear-gradient(180deg,#f6faf9 0%,#f8fbfa 100%)!important;
+}
+:root[data-theme="light"] .main{
+  background:
+    radial-gradient(circle at 55% -14%,rgba(220,244,234,.55),transparent 32rem),
+    linear-gradient(180deg,#f6faf9 0%,#f8fbfa 100%)!important;
+}
+:root[data-theme="light"] .sidebar .nav button.active{
+  border-color:#08a962!important;
+  background:linear-gradient(108deg,#04894f 0%,#019b59 52%,#13b570 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,102,61,.14),0 7px 17px rgba(1,154,86,.18)!important;
+}
+:root[data-theme="light"] .action-button.primary{
+  border-color:#029c59!important;
+  background:linear-gradient(112deg,#038c51 0%,#019d58 58%,#0bad67 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,100,58,.16),0 8px 18px rgba(1,154,86,.18)!important;
+}
+:root[data-theme="light"] .action-button:not(.primary),
+:root[data-theme="light"] .notice-button,
+:root[data-theme="light"] .month-input,
+:root[data-theme="light"] .input-shell{
+  background:linear-gradient(145deg,#fff 0%,#fbfdfc 72%,#f3f9f6 100%)!important;
+  box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(30,82,56,.035)!important;
+}
+:root[data-theme="light"] .metric-card,
+:root[data-theme="light"] .metric-card.balance,
+:root[data-theme="light"] .panel{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(255,255,255,.98),transparent 38%),
+    linear-gradient(145deg,#fff 0%,#fafdfc 62%,#f2f8f6 100%)!important;
+  box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(28,75,52,.018),0 7px 22px rgba(28,75,52,.04)!important;
+}
+@media (min-width:1181px){
+  :root[data-theme="light"] .metric-icon,
+  :root[data-theme="light"] .metric-card.balance .metric-icon,
+  :root[data-theme="light"] .metric-card.income .metric-icon,
+  :root[data-theme="light"] .metric-card.expense .metric-icon,
+  :root[data-theme="light"] .metric-card.saving.is-negative .metric-icon,
+  :root[data-theme="light"] .metric-card.saving:not(.is-negative) .metric-icon{
+    border:1px solid rgba(0,151,86,.12)!important;
+    background:linear-gradient(145deg,#59d7a1 0%,#27bf7e 46%,#019a59 100%)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 -9px 18px rgba(0,117,69,.1),0 8px 20px rgba(1,154,86,.2)!important;
+  }
+}
+:root[data-theme="light"] .metric-direction{
+  background:linear-gradient(145deg,#eff9f4,#e1f3ea)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+:root[data-theme="light"] .budget-ring{
+  background:conic-gradient(from -90deg,#70d2ae 0 20%,#91dbc1 20% 40%,#5fcda1 40% 55%,#079f5c 55% 82%,#019858 82% 100%)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),0 9px 24px rgba(1,154,86,.12)!important;
+  filter:none!important;
+}
+:root[data-theme="light"] .budget-ring .inner{
+  background:radial-gradient(circle at 42% 32%,#fff,#f9fcfb 72%,#f0f7f4)!important;
+  box-shadow:inset 0 1px 0 #fff,0 2px 8px rgba(16,87,53,.06)!important;
+}
+:root[data-theme="light"] .score-ring{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 6px 16px rgba(1,154,86,.07)!important;
+}
+:root[data-theme="light"] .score-ring .inner,
+:root[data-theme="light"] .spending-donut>div{
+  background:radial-gradient(circle at 42% 30%,#fff,#f9fcfb 76%,#f1f7f4)!important;
+  box-shadow:inset 0 1px 0 #fff!important;
+}
+:root[data-theme="light"] .insight-item,
+:root[data-theme="light"] .assistant-alert,
+:root[data-theme="light"] .assistant-integration-cta{
+  background:linear-gradient(145deg,#f8fcfa 0%,#eef7f3 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 3px 10px rgba(29,76,53,.025)!important;
+}
+:root[data-theme="light"] .assistant-alert-actions button,
+:root[data-theme="light"] .assistant-integration-cta a,
+:root[data-theme="light"] .assistant-rail-form .copilot-compose{
+  background:linear-gradient(145deg,#fff,#f7fbf9)!important;
+  box-shadow:inset 0 1px 0 #fff,0 3px 9px rgba(29,76,53,.035)!important;
+}
+:root[data-theme="light"] .assistant-rail .ai-message.user{
+  background:linear-gradient(135deg,#e9f5ef 0%,#e1f2e9 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 4px 12px rgba(29,77,53,.045)!important;
+}
+:root[data-theme="light"] .assistant-rail .ai-message.assistant{
+  background:linear-gradient(145deg,#fff,#f9fcfb)!important;
+  box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(29,77,53,.035)!important;
+}
+:root[data-theme="light"] .theme-switch{
+  background:linear-gradient(145deg,#f3f8f6,#eaf3ef)!important;
+  box-shadow:inset 0 1px 2px rgba(25,72,49,.035)!important;
+}
+:root[data-theme="light"] .theme-switch button.active{
+  background:linear-gradient(145deg,#fff,#fafdfb)!important;
+  box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(25,72,49,.08)!important;
+}
