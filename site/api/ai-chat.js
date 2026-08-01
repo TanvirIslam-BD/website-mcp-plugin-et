@@ -154,7 +154,7 @@ function toolDefinitions() {
   return [
     { type: "function", function: { name: "get_latest_expense", description: "Retrieve the authenticated user's single most recent expense across all dates. Always use this for latest expense, last expense, or most recent transaction questions.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
     { type: "function", function: { name: "get_expenses", description: "Retrieve the authenticated user's expenses for a date range and optional category. If the user gives no date, use the dashboard month supplied in the system context.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" }, category: { type: "string" } }, additionalProperties: false } } },
-    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, or save an expense.", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount" }, category: { type: "string", description: "Expense category e.g. Food, Travel" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount", "category"], additionalProperties: false } } },
+    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, save, or spent an expense (e.g., 'Add 500 bus rent expense', 'spent 50 on coffee').", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount e.g. 500" }, category: { type: "string", description: "Expense category e.g. Travel, Food, Transport, Rent" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount"], additionalProperties: false } } },
     { type: "function", function: { name: "get_incomes", description: "Retrieve recorded income entries for a date range.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" } }, additionalProperties: false } } },
     { type: "function", function: { name: "add_income", description: "Record a new income entry for the user. Use whenever user asks to add or record income.", parameters: { type: "object", properties: { amount: { type: "number", description: "Income amount" }, source: { type: "string", description: "Source of income e.g. Salary, Freelance" }, date: { type: "string", description: "YYYY-MM-DD" }, description: { type: "string" }, currency: { type: "string" } }, required: ["amount", "source"], additionalProperties: false } } },
     { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits for the dashboard month.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
@@ -296,8 +296,18 @@ async function addExpense(db, userId, input, dashboardMonth) {
   const amount = Number(input.amount || 0);
   if (amount <= 0) return { error: "Expense amount must be greater than 0" };
   const date = validDate(input.date) ? input.date : new Date().toISOString().slice(0, 10);
-  const category = safeText(input.category || "General", 60);
-  const description = safeText(input.description || input.merchant || category, 200);
+  const description = safeText(input.description || input.merchant || input.category || "Expense", 200);
+  let category = safeText(input.category || "", 60);
+
+  if (!category || category.toLowerCase() === "general") {
+    const text = `${description} ${input.merchant || ""}`.toLowerCase();
+    if (/\b(bus|train|taxi|uber|rent|fare|flight|travel|ride|transport|rickshaw)\b/.test(text)) category = "Travel";
+    else if (/\b(food|burger|pizza|coffee|lunch|dinner|cafe|restaurant|eat|snack)\b/.test(text)) category = "Food";
+    else if (/\b(shop|cloth|shirt|pants|grocer|buy|bought)\b/.test(text)) category = "Shopping";
+    else if (/\b(bill|electricity|water|wifi|net|recharge|phone)\b/.test(text)) category = "Bills & Utilities";
+    else category = "General";
+  }
+
   const merchant = safeText(input.merchant, 100);
   const paymentMethod = safeText(input.paymentMethod || "bKash", 50);
   const tags = safeText(input.tags, 100);
@@ -614,12 +624,127 @@ function buildVisualData(toolName, toolResult, currency) {
     const cats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const maxCat = cats[0]?.[1] || 1;
     const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899"];
+
+function answerContent(message) {
+  if (typeof message?.content === "string") return message.content;
+  if (Array.isArray(message?.content)) return message.content.map((part) => part?.text || "").join("");
+  return "I could not generate an answer from the available financial data.";
+}
+
+async function callComet(model, messages, tools) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch(`${COMET_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.COMET_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages,
+        ...(Array.isArray(tools) && tools.length ? { tools, tool_choice: "auto" } : {}),
+        temperature: 0.2,
+        max_tokens: 900,
+      }),
+      signal: controller.signal,
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error?.message || `CometAPI request failed (${response.status})`);
+    return body;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function fallbackMoney(amount, currency) {
+  const value = Number(amount || 0);
+  const prefix = currency === "BDT" ? "৳" : currency === "USD" ? "$" : `${currency} `;
+  return `${value < 0 ? "-" : ""}${prefix}${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+async function verifiedFallbackAnswer(db, userId, message, dashboardMonth) {
+  const requestedMonth = message.match(/\b(20\d{2}-(0[1-9]|1[0-2]))\b/)?.[1] || dashboardMonth;
+  if (/\b(last|latest|most recent)\b.*\b(expense|transaction|purchase)\b|\b(expense|transaction|purchase)\b.*\b(last|latest|most recent)\b/i.test(message)) {
+    const latest = (await getLatestExpense(db, userId)).expense;
+    return latest
+      ? `## Latest expense\n\n- **${latest.description || latest.category}**\n- Amount: **${fallbackMoney(latest.amount, latest.currency)}**\n- Category: **${latest.category}**\n- Date: **${latest.date}**`
+      : "You do not have any recorded expenses yet.";
+  }
+  const report = await generateMonthlyReport(db, userId, { month: requestedMonth }, dashboardMonth);
+  const top = report.categories[0];
+  const question = message.toLowerCase();
+  const categoryLines = report.categories.slice(0, 3).map((item) => `- ${item.category}: ${fallbackMoney(item.amount, report.currency)}`).join("\n") || "- No expenses recorded";
+  const budgetLine = report.budget === null
+    ? "No overall monthly budget has been set yet."
+    : `${fallbackMoney(report.spent, report.currency)} spent from a ${fallbackMoney(report.budget, report.currency)} budget (${Math.round((report.spent / Math.max(report.budget, 1)) * 100)}% used).`;
+  const reportRemaining = report.budget === null ? null : report.budget - report.spent;
+
+  if (/saving|reduce|cut|where can i/.test(question)) {
+    const target = top ? Math.round(top.amount * .1) : 0;
+    return `## Verified saving idea\n\n${top ? `Your largest category is **${top.category}** at **${fallbackMoney(top.amount, report.currency)}**. Reducing it by 10% could free about **${fallbackMoney(target, report.currency)}**.` : "Record a few expenses first and I can identify the best saving opportunity."}\n\n${budgetLine}`;
+  }
+  if (/budget|plan/.test(question)) {
+    return `## Budget check — ${report.month}\n\n${budgetLine}\n\n**Next step:** ${report.budget === null ? "set an overall monthly limit, then add category limits for your largest expenses." : reportRemaining < 0 ? "pause discretionary spending in the largest category until the next budget period." : "reserve the remaining balance for essentials and savings."}`;
+  }
+  if (/report|summary|month|spend|expense|how much|why|explain/.test(question)) {
+    return `## Monthly spending — ${report.month}\n\n- Total spent: **${fallbackMoney(report.spent, report.currency)}** across **${report.expenseCount}** expenses\n- Income recorded: **${fallbackMoney(report.income, report.currency)}**\n- Net cash flow: **${fallbackMoney(report.netCashFlow, report.currency)}**\n\n### Top categories\n${categoryLines}\n\n${budgetLine}`;
+  }
+  return `I can verify your expenses, budgets, and monthly reports. For ${report.month}, you have recorded **${fallbackMoney(report.spent, report.currency)}** in expenses. Ask me for a monthly report, a category breakdown, or savings ideas.`;
+}
+
+function buildVisualData(toolName, toolResult, currency) {
+  if (!toolResult || toolResult.error) return null;
+  const fmt = (v) => Number(v || 0).toFixed(2);
+  if (toolName === "get_budget_status") {
+    const r = toolResult;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
+      { label: "Budget", value: r.budget !== null ? fmt(r.budget) : null, currency: cur, color: "#2563ff" },
+      { label: "Remaining", value: r.remaining !== null ? fmt(r.remaining) : null, currency: cur, color: r.remaining < 0 ? "#ff4548" : "#18b96f" },
+    ].filter((m) => m.value !== null);
+    const progress = r.budget ? { value: r.spent, max: r.budget, percent: r.usedPercent || 0, label: "Budget Used" } : null;
+    const categories = (r.categoryLimits || []).slice(0, 6).map((c) => ({ name: c.category, limit: c.amount, currency: c.currency }));
+    return { type: "budget_status", metrics, progress, categories: categories.length ? categories : null };
+  }
+  if (toolName === "generate_monthly_report") {
+    const r = toolResult;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Total Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
+      { label: "Income", value: fmt(r.income), currency: cur, color: "#18b96f" },
+      { label: "Net Cash Flow", value: fmt(r.netCashFlow), currency: cur, color: r.netCashFlow >= 0 ? "#18b96f" : "#ff4548" },
+    ];
+    if (r.budget !== null) metrics.push({ label: "Budget", value: fmt(r.budget), currency: cur, color: "#2563ff" });
+    const total = r.categories.reduce((s, c) => s + c.amount, 0) || 1;
+    const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+    const pieChart = r.categories.slice(0, 7).map((c, i) => ({
+      label: c.category, value: c.amount, percent: Math.round((c.amount / total) * 100), color: pieColors[i % pieColors.length],
+    }));
+    return { type: "monthly_report", metrics, pieChart: pieChart.length ? pieChart : null };
+  }
+  if (toolName === "get_expenses") {
+    const r = toolResult;
+    if (!r.count) return null;
+    const cur = r.currency || currency || "USD";
+    const metrics = [
+      { label: "Transactions", value: String(r.count), color: "#2563ff" },
+      { label: "Total", value: fmt(r.total), currency: cur, color: "#ff4548" },
+    ];
+    const byCategory = {};
+    (r.expenses || []).forEach((e) => { byCategory[e.category] = (byCategory[e.category] || 0) + e.amount; });
+    const cats = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const maxCat = cats[0]?.[1] || 1;
+    const pieColors = ["#ff4548", "#2563ff", "#18b96f", "#f59e0b", "#8b5cf6", "#ec4899"];
     const pieChart = cats.map(([name, amount], i) => ({
       label: name, value: amount, percent: Math.round((amount / (r.total || 1)) * 100), color: pieColors[i % pieColors.length],
     }));
     return { type: "expense_list", metrics, pieChart: pieChart.length > 1 ? pieChart : null };
   }
   return null;
+}
+
+function isMutationIntent(message) {
+  return /\b(add|record|save|set|create|bought|pay|paid|spent|spend)\b/i.test(message);
 }
 
 function isLatestExpenseIntent(message) {
@@ -631,6 +756,7 @@ function needsFinancialData(message) {
 }
 
 async function preloadFinancialContext(db, userId, message, dashboardMonth, tier) {
+  if (isMutationIntent(message)) return null;
   if (!needsFinancialData(message) || ["advanced", "premium"].includes(tier)) return null;
   if (isLatestExpenseIntent(message)) {
     return { name: "get_latest_expense", result: await getLatestExpense(db, userId) };
