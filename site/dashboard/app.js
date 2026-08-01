@@ -645,7 +645,7 @@ function renderMobileDashboardHeader(model) {
       <div class="mobile-quickbar">
         <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
         <div class="mobile-brand-title">
-          <img src="/assets/logo/logo-mark.svg" width="22" height="22" alt="Money Copilot">
+          <img src="/assets/logo/money-copilot-mark-light.png" width="22" height="22" alt="Money Copilot">
           <span>Money Copilot</span>
         </div>
         <div class="mobile-top-actions">
@@ -947,9 +947,17 @@ function renderVisualData(data) {
 }
 
 function aiAnswerHtml(value) {
-  return esc(value || "I could not generate a response.")
+  let text = esc(value || "I could not generate a response.");
+  return text
+    .replace(/^#### (.*?)$/gm, "<h5 class='ai-heading'>$1</h5>")
+    .replace(/^### (.*?)$/gm, "<h4 class='ai-heading'>$1</h4>")
+    .replace(/^## (.*?)$/gm, "<h3 class='ai-heading'>$1</h3>")
+    .replace(/^# (.*?)$/gm, "<h2 class='ai-heading'>$1</h2>")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/`(.+?)`/g, "<code>$1</code>")
+    .replace(/^---$/gm, "<hr class='ai-hr'>")
+    .replace(/^[\*\-] (.*?)$/gm, "<div class='ai-bullet'>• $1</div>")
     .replace(/\n/g, "<br>");
 }
 
@@ -976,7 +984,7 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
     <div class="ai-message ${role}" id="${msgId}">
       <div class="ai-message-header">
         <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot AI`}</div>
-        ${meta ? `<small class="ai-meta-tag">${esc(meta)}</small>` : ""}
+        ${meta ? `<small class="ai-meta-tag" title="${esc(meta)}">${esc(meta)}</small>` : ""}
       </div>
       <div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>
       ${actionToolbar}
@@ -1940,12 +1948,26 @@ function bindEvents() {
             submitBtn.disabled = false;
             submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
           }
+        } else if (res.simulated) {
+          openModal("Report Generated ✉️", "Email dispatch status.", `
+            <div class="report-success-state">
+              <div class="success-icon">${icon("mail")}</div>
+              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> was generated for <b>${esc(email)}</b>.</p>
+              <div class="settings-section" style="margin-top:12px; text-align:left; background:#fffbe6; border:1px solid #ffe58f; border-radius:10px; padding:12px;">
+                <small style="color:#d48806; font-size:12px; line-height:1.4; display:block;"><strong>💡 Server Configuration Required:</strong><br>To deliver real emails directly to your inbox, add your <code>RESEND_API_KEY</code> environment variable in your Vercel project deployment settings.</small>
+              </div>
+              <div class="modal-actions" style="margin-top:14px; width:100%;">
+                <button type="button" class="action-button primary" onclick="closeModal()" style="width:100%;">Understood</button>
+              </div>
+            </div>
+          `, { wide: false });
         } else {
-          openModal("Report Sent! ✉️", "Your private financial summary has been delivered.", `
+          openModal("Report Delivered! ✉️", "Your private financial summary has been sent.", `
             <div class="report-success-state">
               <div class="success-icon">${icon("check")}</div>
-              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> has been dispatched to <b>${esc(email)}</b>.</p>
-              <div class="modal-actions" style="margin-top:12px; width:100%;">
+              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> has been delivered to <b>${esc(email)}</b>!</p>
+              <p style="font-size:12px; color:#64748b; margin-top:4px;">Please check your email inbox and spam folder.</p>
+              <div class="modal-actions" style="margin-top:14px; width:100%;">
                 <button type="button" class="action-button primary" onclick="closeModal()" style="width:100%;">Done</button>
               </div>
             </div>

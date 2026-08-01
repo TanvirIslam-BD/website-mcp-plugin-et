@@ -911,16 +911,26 @@ button {
   max-width: 100%;
   padding: 12px 13px;
   box-shadow: none;
+  height: auto !important;
+  flex: 0 0 auto !important;
+  align-self: flex-start;
 }
 
 .assistant-rail .ai-message.user {
   max-width: 90%;
   margin-left: auto;
+  align-self: flex-end;
+  height: auto !important;
+  flex: 0 0 auto !important;
 }
 
 .assistant-rail .ai-message small {
   color: inherit;
   opacity: .68;
+  display: block;
+  margin-top: 4px !important;
+  margin-bottom: 0 !important;
+  line-height: 1.2;
 }
 
 .assistant-rail .ai-message.assistant small {
@@ -4436,7 +4446,7 @@ body {
 }
 
 .copilot-summary p {
-  margin: 0 0 16px;
+  margin: 0 0 6px;
 }
 
 .copilot-summary .ai-message-body > b {
@@ -8726,8 +8736,10 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-bottom: 6px;
+  width: 100%;
+  min-width: 0;
 }
 
 .ai-message-label {
@@ -8738,6 +8750,8 @@ textarea:focus-visible {
   font-weight: 700;
   color: #64748b;
   letter-spacing: -0.01em;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 .ai-bot-avatar {
@@ -8747,6 +8761,7 @@ textarea:focus-visible {
   height: 18px;
   border-radius: 50%;
   background: #dbeafe;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
@@ -8758,10 +8773,40 @@ textarea:focus-visible {
 
 .ai-meta-tag {
   font-size: 10px;
-  color: #94a3b8;
+  font-weight: 500;
+  color: #64748b;
   background: #f1f5f9;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 6px;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 110px !important;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 1 !important;
+}
+
+.ai-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 10px 0 4px;
+}
+
+.ai-heading:first-child {
+  margin-top: 0;
+}
+
+.ai-bullet {
+  padding-left: 4px;
+  margin: 2px 0;
+  line-height: 1.4;
+}
+
+.ai-hr {
+  border: 0;
+  border-top: 1px dashed #cbd5e1;
+  margin: 8px 0;
 }
 
 .ai-message-footer {
