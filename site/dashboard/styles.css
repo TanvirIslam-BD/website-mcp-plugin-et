@@ -9527,3 +9527,231 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   background:linear-gradient(145deg,#fff,#fafdfb)!important;
   box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(25,72,49,.08)!important;
 }
+
+/* Flat reference finish: retain soft color texture, remove physical depth */
+:root[data-theme="light"] .sidebar,
+:root[data-theme="light"] .assistant-rail,
+:root[data-theme="light"] .sidebar .nav button,
+:root[data-theme="light"] .sidebar .profile-card,
+:root[data-theme="light"] .sidebar .profile-logout,
+:root[data-theme="light"] .sidebar-search,
+:root[data-theme="light"] .sidebar-search kbd,
+:root[data-theme="light"] .theme-switch,
+:root[data-theme="light"] .theme-switch button,
+:root[data-theme="light"] .month-input,
+:root[data-theme="light"] .input-shell,
+:root[data-theme="light"] .notice-button,
+:root[data-theme="light"] .action-button,
+:root[data-theme="light"] .metric-card,
+:root[data-theme="light"] .metric-card.balance,
+:root[data-theme="light"] .metric-icon,
+:root[data-theme="light"] .metric-direction,
+:root[data-theme="light"] .panel,
+:root[data-theme="light"] .period-select,
+:root[data-theme="light"] .panel-menu,
+:root[data-theme="light"] .budget-ring,
+:root[data-theme="light"] .budget-ring .inner,
+:root[data-theme="light"] .score-ring,
+:root[data-theme="light"] .score-ring .inner,
+:root[data-theme="light"] .spending-donut,
+:root[data-theme="light"] .spending-donut>div,
+:root[data-theme="light"] .insight-item,
+:root[data-theme="light"] .tag,
+:root[data-theme="light"] .assistant-alert,
+:root[data-theme="light"] .assistant-alert-icon,
+:root[data-theme="light"] .assistant-alert-actions button,
+:root[data-theme="light"] .assistant-rail .ai-message,
+:root[data-theme="light"] .assistant-integration-cta,
+:root[data-theme="light"] .assistant-integration-cta a,
+:root[data-theme="light"] .assistant-rail-form .copilot-compose,
+:root[data-theme="light"] .assistant-send{
+  box-shadow:none!important;
+  text-shadow:none!important;
+  filter:none!important;
+}
+:root[data-theme="light"] .metric-card:hover,
+:root[data-theme="light"] .metric-card.balance:hover,
+:root[data-theme="light"] .panel:hover,
+:root[data-theme="light"] .sidebar .nav button:hover,
+:root[data-theme="light"] .action-button:hover,
+:root[data-theme="light"] .insight-item:hover,
+:root[data-theme="light"] .assistant-alert-actions button:hover,
+:root[data-theme="light"] .assistant-integration-cta a:hover{
+  box-shadow:none!important;
+  transform:none!important;
+}
+@media (min-width:1181px){
+  :root[data-theme="light"] .metric-icon,
+  :root[data-theme="light"] .metric-card.balance .metric-icon,
+  :root[data-theme="light"] .metric-card.income .metric-icon,
+  :root[data-theme="light"] .metric-card.expense .metric-icon,
+  :root[data-theme="light"] .metric-card.saving.is-negative .metric-icon,
+  :root[data-theme="light"] .metric-card.saving:not(.is-negative) .metric-icon{
+    box-shadow:none!important;
+  }
+}
+
+/* Dark reference texture: flat black-teal surfaces with tonal separation */
+:root[data-theme="dark"]{
+  --ink:#f3f7f5;
+  --text:#e9f1ed;
+  --muted:#91a29b;
+  --line:#1b2c31;
+  --panel:#050f15;
+  --green:#18df80;
+}
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .main{
+  color:#e9f1ed;
+  background:linear-gradient(145deg,#01070b 0%,#020b10 48%,#010a0f 100%)!important;
+}
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .assistant-rail{
+  border-color:#17282e!important;
+  background:linear-gradient(180deg,#020a0e 0%,#030d13 52%,#020c12 100%)!important;
+}
+:root[data-theme="dark"] .metric-card,
+:root[data-theme="dark"] .metric-card.balance,
+:root[data-theme="dark"] .panel{
+  color:#e9f1ed!important;
+  border-color:#1a2c31!important;
+  background:linear-gradient(145deg,#061116 0%,#050f15 52%,#040e14 100%)!important;
+}
+:root[data-theme="dark"] .large-chart{
+  background:linear-gradient(145deg,#061116,#040e14)!important;
+}
+:root[data-theme="dark"] .month-input,
+:root[data-theme="dark"] .input-shell,
+:root[data-theme="dark"] .notice-button,
+:root[data-theme="dark"] .action-button:not(.primary),
+:root[data-theme="dark"] .sidebar-search,
+:root[data-theme="dark"] .period-select,
+:root[data-theme="dark"] .panel-menu{
+  color:#e8f0ec!important;
+  border-color:#1b3036!important;
+  background:linear-gradient(145deg,#07141a,#051118)!important;
+}
+:root[data-theme="dark"] .sidebar .nav button.active,
+:root[data-theme="dark"] .action-button.primary{
+  color:#fff!important;
+  border-color:#0ba962!important;
+  background:linear-gradient(110deg,#047b47 0%,#079c58 58%,#0bb369 100%)!important;
+}
+:root[data-theme="dark"] .sidebar .nav button:hover{
+  color:#fff!important;
+  border-color:#174b39!important;
+  background:#07231b!important;
+}
+@media (min-width:1181px){
+  :root[data-theme="dark"] .metric-icon,
+  :root[data-theme="dark"] .metric-card.balance .metric-icon,
+  :root[data-theme="dark"] .metric-card.income .metric-icon,
+  :root[data-theme="dark"] .metric-card.expense .metric-icon,
+  :root[data-theme="dark"] .metric-card.saving.is-negative .metric-icon,
+  :root[data-theme="dark"] .metric-card.saving:not(.is-negative) .metric-icon{
+    color:#effff7!important;
+    border:1px solid #0ba75f!important;
+    background:linear-gradient(145deg,#18b86e 0%,#078d50 56%,#045f39 100%)!important;
+  }
+}
+:root[data-theme="dark"] .metric-direction{
+  color:#70edac!important;
+  border-color:#1c4437!important;
+  background:linear-gradient(145deg,#0d2a22,#0a201a)!important;
+}
+:root[data-theme="dark"] .budget-ring{
+  background:conic-gradient(from -90deg,#78e5b4 0 20%,#9af0c7 20% 39%,#48d994 39% 55%,#08a85f 55% 82%,#027b49 82% 100%)!important;
+}
+:root[data-theme="dark"] .budget-ring .inner,
+:root[data-theme="dark"] .score-ring .inner,
+:root[data-theme="dark"] .spending-donut>div{
+  color:#f1f7f4!important;
+  background:linear-gradient(145deg,#071218,#040e14)!important;
+}
+:root[data-theme="dark"] .score-ring{
+  background:conic-gradient(#12d978 var(--score),#49645c var(--score),#172b2a 0)!important;
+}
+:root[data-theme="dark"] .grid-line{stroke:#26383d!important}
+:root[data-theme="dark"] .insight-item{
+  color:#e8f0ec!important;
+  border-color:#1b3036!important;
+  background:linear-gradient(145deg,#07151a,#051118)!important;
+}
+:root[data-theme="dark"] .transactions thead{background:#040e14!important}
+:root[data-theme="dark"] .transactions td,
+:root[data-theme="dark"] .transactions th{border-color:#192b30!important}
+:root[data-theme="dark"] .tag{color:#6ce8a9!important;border-color:#20523f!important;background:#08271e!important}
+:root[data-theme="dark"] .assistant-alert,
+:root[data-theme="dark"] .assistant-integration-cta{
+  border-color:#19332f!important;
+  background:linear-gradient(145deg,#071216,#051115)!important;
+}
+:root[data-theme="dark"] .assistant-alert-actions button,
+:root[data-theme="dark"] .assistant-integration-cta a,
+:root[data-theme="dark"] .assistant-rail .ai-message.assistant,
+:root[data-theme="dark"] .assistant-rail-form .copilot-compose{
+  color:#e8f0ec!important;
+  border-color:#1b3437!important;
+  background:linear-gradient(145deg,#07141a,#051118)!important;
+}
+:root[data-theme="dark"] .assistant-rail .ai-message.user{
+  color:#dcf4e8!important;
+  border-color:#12533d!important;
+  background:linear-gradient(135deg,#03251f,#02201c)!important;
+}
+:root[data-theme="dark"] .theme-switch{
+  border-color:#1b3035!important;
+  background:#061218!important;
+}
+:root[data-theme="dark"] .theme-switch button.active{
+  color:#fff!important;
+  background:#0c2921!important;
+}
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .assistant-rail,
+:root[data-theme="dark"] .sidebar .nav button,
+:root[data-theme="dark"] .sidebar .profile-card,
+:root[data-theme="dark"] .sidebar .profile-logout,
+:root[data-theme="dark"] .sidebar-search,
+:root[data-theme="dark"] .theme-switch,
+:root[data-theme="dark"] .theme-switch button,
+:root[data-theme="dark"] .month-input,
+:root[data-theme="dark"] .input-shell,
+:root[data-theme="dark"] .notice-button,
+:root[data-theme="dark"] .action-button,
+:root[data-theme="dark"] .metric-card,
+:root[data-theme="dark"] .metric-card.balance,
+:root[data-theme="dark"] .metric-icon,
+:root[data-theme="dark"] .metric-direction,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .period-select,
+:root[data-theme="dark"] .panel-menu,
+:root[data-theme="dark"] .budget-ring,
+:root[data-theme="dark"] .budget-ring .inner,
+:root[data-theme="dark"] .score-ring,
+:root[data-theme="dark"] .score-ring .inner,
+:root[data-theme="dark"] .spending-donut,
+:root[data-theme="dark"] .spending-donut>div,
+:root[data-theme="dark"] .insight-item,
+:root[data-theme="dark"] .tag,
+:root[data-theme="dark"] .assistant-alert,
+:root[data-theme="dark"] .assistant-alert-icon,
+:root[data-theme="dark"] .assistant-alert-actions button,
+:root[data-theme="dark"] .assistant-rail .ai-message,
+:root[data-theme="dark"] .assistant-integration-cta,
+:root[data-theme="dark"] .assistant-integration-cta a,
+:root[data-theme="dark"] .assistant-rail-form .copilot-compose,
+:root[data-theme="dark"] .assistant-send{
+  box-shadow:none!important;
+  text-shadow:none!important;
+  filter:none!important;
+}
+:root[data-theme="dark"] .metric-card:hover,
+:root[data-theme="dark"] .metric-card.balance:hover,
+:root[data-theme="dark"] .panel:hover,
+:root[data-theme="dark"] .sidebar .nav button:hover,
+:root[data-theme="dark"] .action-button:hover,
+:root[data-theme="dark"] .insight-item:hover{
+  box-shadow:none!important;
+  transform:none!important;
+}
