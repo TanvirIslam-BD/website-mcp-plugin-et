@@ -210,12 +210,31 @@ async function runMcpTool(accessToken, name, input) {
 }
 
 async function getLatestExpense(db, userId) {
-  const result = await db.execute({
-    sql: "SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT 1",
-    args: [userId],
-  });
-  const row = result.rows[0];
-  if (!row) return { expense: null };
+  const [sqlResult, financeResult] = await Promise.all([
+    db.execute({
+      sql: "SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT 1",
+      args: [userId],
+    }),
+    db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] })
+  ]);
+  const row = sqlResult.rows[0];
+  const finance = decodeFinance(financeResult.rows[0]?.data);
+  const jsonLatest = (finance.expenses || [])[0];
+
+  if (!row && !jsonLatest) return { expense: null };
+  if (jsonLatest && (!row || jsonLatest.date >= row.date)) {
+    return {
+      expense: {
+        id: jsonLatest.id,
+        date: jsonLatest.date,
+        category: jsonLatest.category,
+        description: jsonLatest.description,
+        amount: Number(jsonLatest.amountMinor || 0) / 100,
+        currency: jsonLatest.currency || finance.currency || "BDT",
+      }
+    };
+  }
+
   return {
     expense: {
       id: row.id,
@@ -230,16 +249,47 @@ async function getLatestExpense(db, userId) {
 
 async function getExpenses(db, userId, input, dashboardMonth) {
   const fallbackRange = monthRange(dashboardMonth);
-  const startDate = validDate(input.startDate) ? input.startDate : fallbackRange.startDate;
-  const endDate = validDate(input.endDate) ? input.endDate : fallbackRange.endDate;
-  if (startDate > endDate) return { error: "startDate must be before endDate" };
+  const currentMonthRange = monthRange(new Date().toISOString().slice(0, 7));
+  const startDate = validDate(input.startDate) ? input.startDate : (fallbackRange.startDate < currentMonthRange.startDate ? fallbackRange.startDate : currentMonthRange.startDate);
+  const endDate = validDate(input.endDate) ? input.endDate : (fallbackRange.endDate > currentMonthRange.endDate ? fallbackRange.endDate : currentMonthRange.endDate);
+
   const category = safeText(input.category, 60).toLowerCase();
-  const where = category ? " AND lower(category) = ?" : "";
-  const args = category ? [userId, startDate, endDate, category] : [userId, startDate, endDate];
-  const result = await db.execute({ sql: `SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?${where} ORDER BY date DESC, created_at DESC LIMIT 250`, args });
-  const expenses = result.rows.map((row) => ({ date: row.date, category: row.category, description: row.description, amount: Number(row.amount_minor || 0) / 100, currency: row.currency }));
+
+  const [sqlResult, financeResult] = await Promise.all([
+    db.execute({
+      sql: `SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?${category ? " AND lower(category) = ?" : ""} ORDER BY date DESC, created_at DESC LIMIT 250`,
+      args: category ? [userId, startDate, endDate, category] : [userId, startDate, endDate]
+    }),
+    db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] })
+  ]);
+
+  const finance = decodeFinance(financeResult.rows[0]?.data);
+  const sqlExpenses = sqlResult.rows.map((row) => ({ id: row.id, date: row.date, category: row.category, description: row.description, amount: Number(row.amount_minor || 0) / 100, currency: row.currency }));
+  
+  const jsonExpenses = (finance.expenses || [])
+    .filter(e => e.date >= startDate && e.date <= endDate)
+    .filter(e => !category || String(e.category || "").toLowerCase() === category)
+    .map(e => ({ id: e.id, date: e.date, category: e.category, description: e.description, amount: Number(e.amountMinor || 0) / 100, currency: e.currency || finance.currency || "BDT" }));
+
+  const map = new Map();
+  [...sqlExpenses, ...jsonExpenses].forEach(e => {
+    if (!map.has(e.id || `${e.date}-${e.amount}-${e.category}`)) {
+      map.set(e.id || `${e.date}-${e.amount}-${e.category}`, e);
+    }
+  });
+
+  const expenses = Array.from(map.values()).sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  return { startDate, endDate, category: category || null, count: expenses.length, total, currency: expenses[0]?.currency || "USD", expenses };
+
+  return {
+    startDate,
+    endDate,
+    category: category || null,
+    count: expenses.length,
+    total,
+    currency: expenses[0]?.currency || finance.currency || "BDT",
+    expenses
+  };
 }
 
 async function addExpense(db, userId, input, dashboardMonth) {
@@ -255,9 +305,22 @@ async function addExpense(db, userId, input, dashboardMonth) {
   const id = randomUUID();
   const amountMinor = Math.round(amount * 100);
 
+  // 1. Insert into SQL expenses table
   await db.execute({
     sql: "INSERT INTO expenses (id, user_id, date, category, description, merchant, payment_method, tags, amount_minor, currency, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     args: [id, userId, date, category, description, merchant, paymentMethod, tags, amountMinor, currency, Date.now()],
+  });
+
+  // 2. Sync to finance_state JSON
+  const financeResult = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
+  const finance = decodeFinance(financeResult.rows[0]?.data);
+  finance.expenses = finance.expenses || [];
+  const entry = { id, date, category, description, merchant, paymentMethod, tags, amountMinor, currency, createdAt: Date.now() };
+  finance.expenses.unshift(entry);
+
+  await db.execute({
+    sql: "INSERT INTO finance_state (user_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
+    args: [userId, JSON.stringify(finance), Date.now()],
   });
 
   return { success: true, message: `Recorded expense of ${currency} ${amount.toFixed(2)} for ${category} on ${date}`, expense: { id, date, category, description, amount, currency } };
@@ -298,15 +361,36 @@ async function addIncome(db, userId, input) {
 
 async function getBudgetStatus(db, userId, dashboardMonth) {
   const { startDate, endDate } = monthRange(dashboardMonth);
-  const [budgetResult, expenseResult] = await Promise.all([
+  const [budgetResult, expenseResult, financeResult] = await Promise.all([
     db.execute({ sql: "SELECT category,amount_minor,currency,period FROM budgets WHERE user_id = ? ORDER BY created_at DESC", args: [userId] }),
     db.execute({ sql: "SELECT amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, startDate, endDate] }),
+    db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] }),
   ]);
-  const budgets = budgetResult.rows.map((row) => ({ category: row.category, amount: Number(row.amount_minor || 0) / 100, currency: row.currency, period: row.period }));
-  const currency = budgets.find((budget) => budget.category === null)?.currency || expenseResult.rows[0]?.currency || "USD";
+
+  const finance = decodeFinance(financeResult.rows[0]?.data);
+  const sqlBudgets = budgetResult.rows.map((row) => ({ category: row.category, amount: Number(row.amount_minor || 0) / 100, currency: row.currency, period: row.period }));
+  
+  const currency = sqlBudgets.find((b) => b.category === null)?.currency || finance.currency || expenseResult.rows[0]?.currency || "BDT";
+  
+  let overallAmount = sqlBudgets.find((b) => b.category === null && b.currency === currency)?.amount;
+  if ((overallAmount === undefined || overallAmount === null) && finance.budgetMinor) {
+    overallAmount = Number(finance.budgetMinor) / 100;
+  }
+  if (overallAmount === undefined) overallAmount = null;
+
   const spent = expenseResult.rows.filter((row) => row.currency === currency).reduce((sum, row) => sum + Number(row.amount_minor || 0), 0) / 100;
-  const overall = budgets.find((budget) => budget.category === null && budget.currency === currency);
-  return { month: dashboardMonth, currency, spent, budget: overall?.amount ?? null, remaining: overall ? overall.amount - spent : null, usedPercent: overall?.amount ? Math.round((spent / overall.amount) * 100) : null, categoryLimits: budgets.filter((budget) => budget.category !== null) };
+  const remaining = overallAmount !== null ? overallAmount - spent : null;
+  const usedPercent = overallAmount ? Math.round((spent / overallAmount) * 100) : null;
+
+  return {
+    month: dashboardMonth,
+    currency,
+    spent,
+    budget: overallAmount,
+    remaining,
+    usedPercent,
+    categoryLimits: sqlBudgets.filter((b) => b.category !== null)
+  };
 }
 
 async function setBudget(db, userId, input, dashboardMonth) {
