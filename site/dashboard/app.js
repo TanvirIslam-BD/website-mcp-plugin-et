@@ -4,6 +4,22 @@ const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 
+function localDisplayCurrency() {
+  const saved = (() => {
+    try { return localStorage.getItem("dashboard_display_currency"); } catch { return ""; }
+  })();
+  if (/^[A-Z]{3}$/.test(saved || "")) return saved;
+
+  const modelCurrency = window.dashboardModel?.currency;
+  if (/^[A-Z]{3}$/.test(modelCurrency || "")) return modelCurrency;
+
+  const region = (() => {
+    try { return new Intl.Locale(navigator.language).region || ""; } catch { return ""; }
+  })();
+  const regionalCurrency = { BD: "BDT", IN: "INR", GB: "GBP", CA: "CAD", AU: "AUD", EU: "EUR", DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", PT: "EUR" }[region];
+  return regionalCurrency || "USD";
+}
+
 function timeGreeting(date = new Date()) {
   const hour = date.getHours();
   if (hour < 5) return "Good night";
@@ -1164,7 +1180,7 @@ async function submitAiQuestion(form) {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, month: selectedMonth }),
+      body: JSON.stringify({ message, month: selectedMonth, currency: localDisplayCurrency() }),
     });
     const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) throw authRequiredError();
@@ -2109,6 +2125,7 @@ function bindEvents() {
 
       try {
         if (modelName) localStorage.setItem("copilot_model", modelName);
+        if (currency) localStorage.setItem("dashboard_display_currency", currency);
         localStorage.setItem("compact_mode", String(Boolean(compact)));
         localStorage.setItem("auto_suggest", String(Boolean(autoSuggest)));
         localStorage.setItem("bill_reminders", String(Boolean(form.elements.bill_reminders?.checked)));

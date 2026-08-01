@@ -44,6 +44,11 @@ function safeText(value, limit = 2000) {
   return typeof value === "string" ? value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, limit) : "";
 }
 
+function validCurrency(value, fallback = "BDT") {
+  const currency = safeText(value, 3).toUpperCase();
+  return /^[A-Z]{3}$/.test(currency) ? currency : fallback;
+}
+
 function safeHistory(value) {
   if (!Array.isArray(value)) return [];
   return value.slice(-6).map((entry) => ({
@@ -147,6 +152,13 @@ async function mcpToolDefinitions(accessToken) {
 async function runMcpTool(accessToken, name, input) {
   const result = await callMcp(accessToken, "tools/call", { name, arguments: input });
   return result?.structuredContent || result?.content || result;
+}
+
+function applyDisplayCurrency(name, input, tools, displayCurrency) {
+  if (input.currency || !displayCurrency) return input;
+  const tool = tools.find((item) => item.function?.name === name);
+  if (!tool?.function?.parameters?.properties?.currency) return input;
+  return { ...input, currency: displayCurrency };
 }
 
 async function getLatestExpense(db, userId) {
@@ -328,7 +340,7 @@ async function getBudgetStatus(db, userId, dashboardMonth) {
   }
   if (overallAmount === undefined) overallAmount = null;
 
-  const spent = expenseResult.rows.filter((row) => row.currency === currency).reduce((sum, row) => sum + Number(row.amount_minor || 0), 0) / 100;
+  const spent = expenseResult.rows.reduce((sum, row) => sum + Number(row.amount_minor || 0), 0) / 100;
   const remaining = overallAmount !== null ? overallAmount - spent : null;
   const usedPercent = overallAmount ? Math.round((spent / overallAmount) * 100) : null;
 
@@ -425,12 +437,11 @@ async function generateMonthlyReport(db, userId, input, dashboardMonth = current
   const finance = decodeFinance(financeResult.rows[0]?.data);
   const expenses = expenseResult.rows.map((row) => ({ date: row.date, category: row.category, description: row.description, amount: Number(row.amount_minor || 0) / 100, currency: row.currency }));
   const currency = expenseResult.rows[0]?.currency || finance.incomes?.find((income) => String(income.date).startsWith(month))?.currency || "USD";
-  const scoped = expenses.filter((expense) => expense.currency === currency);
-  const categories = Object.entries(scoped.reduce((totals, expense) => { totals[expense.category] = (totals[expense.category] || 0) + expense.amount; return totals; }, {})).map(([category, amount]) => ({ category, amount })).sort((a, b) => b.amount - a.amount);
-  const income = (finance.incomes || []).filter((entry) => String(entry.date).startsWith(month) && entry.currency === currency).reduce((sum, entry) => sum + Number(entry.amountMinor || 0) / 100, 0);
-  const spent = scoped.reduce((sum, expense) => sum + expense.amount, 0);
-  const budget = budgetResult.rows.find((row) => row.category === null && row.currency === currency);
-  return { month, currency, expenseCount: scoped.length, spent, income, netCashFlow: income - spent, budget: budget ? Number(budget.amount_minor || 0) / 100 : null, categories, largestExpenses: scoped.slice().sort((a, b) => b.amount - a.amount).slice(0, 8) };
+  const categories = Object.entries(expenses.reduce((totals, expense) => { totals[expense.category] = (totals[expense.category] || 0) + expense.amount; return totals; }, {})).map(([category, amount]) => ({ category, amount })).sort((a, b) => b.amount - a.amount);
+  const income = (finance.incomes || []).filter((entry) => String(entry.date).startsWith(month)).reduce((sum, entry) => sum + Number(entry.amountMinor || 0) / 100, 0);
+  const spent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const budget = budgetResult.rows.find((row) => row.category === null);
+  return { month, currency, expenseCount: expenses.length, spent, income, netCashFlow: income - spent, budget: budget ? Number(budget.amount_minor || 0) / 100 : null, categories, largestExpenses: expenses.slice().sort((a, b) => b.amount - a.amount).slice(0, 8) };
 }
 
 async function runTool(db, userId, name, rawInput, dashboardMonth) {
@@ -450,8 +461,8 @@ async function runTool(db, userId, name, rawInput, dashboardMonth) {
   return { error: `Unknown tool: ${name}` };
 }
 
-function systemPrompt(currentDate, dashboardMonth) {
-  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data â€” never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. When the user asks to add income, call add_income. For budget questions, call get_budget_status. For reports or summaries, call generate_monthly_report. Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
+function systemPrompt(currentDate, dashboardMonth, displayCurrency) {
+  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. The user's local display currency is ${displayCurrency}. For any tool that accepts a currency, use ${displayCurrency} unless the user explicitly specifies another currency. Currency is a display and entry-default preference only: never exclude transactions, income, categories, or reports because their stored currency differs. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data â€” never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. When the user asks to add income, call add_income. For budget questions, call get_budget_status. For reports or summaries, call generate_monthly_report. Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
 }
 
 function answerContent(message) {
@@ -590,6 +601,7 @@ export default async function handler(req, res) {
   const message = safeText(req.body?.message, 2000);
   if (!message) return res.status(400).json({ error: "Enter a question for the assistant." });
   const dashboardMonth = validMonth(req.body?.month) ? req.body.month : currentMonth();
+  const displayCurrency = validCurrency(req.body?.currency);
   const currentDate = new Date().toISOString().slice(0, 10);
   const claimedUserId = safeText(req.body?.userId, 200);
   if (claimedUserId && claimedUserId !== userId) return res.status(403).json({ error: "The requested user does not match this dashboard session." });
@@ -611,7 +623,7 @@ export default async function handler(req, res) {
     }
     const availableTools = mcpAccessToken ? await mcpToolDefinitions(mcpAccessToken) : toolDefinitions();
     const messages = [
-      { role: "system", content: systemPrompt(currentDate, dashboardMonth) },
+      { role: "system", content: systemPrompt(currentDate, dashboardMonth, displayCurrency) },
       ...safeHistory(req.body?.history),
       { role: "user", content: message },
     ];
@@ -637,6 +649,7 @@ export default async function handler(req, res) {
         let input = {};
         try { input = JSON.parse(call.function?.arguments || "{}"); } catch { input = {}; }
         const name = safeText(call.function?.name, 64);
+        input = applyDisplayCurrency(name, input, availableTools, displayCurrency);
         const result = mcpAccessToken
           ? await runMcpTool(mcpAccessToken, name, input)
           : await runTool(db, userId, name, input, dashboardMonth);

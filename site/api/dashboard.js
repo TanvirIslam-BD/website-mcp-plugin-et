@@ -308,18 +308,16 @@ export default async function handler(req, res) {
 
     const budgets = budgetResult.rows.map((row) => ({ category: row.category, amountMinor: Number(row.amount_minor), currency: row.currency }));
     const currency = budgets.find((budget) => budget.category === null)?.currency || finance.currency || expenses[0]?.currency || finance.incomes?.[0]?.currency || "BDT";
-    const scoped = expenses.filter((expense) => expense.currency === currency);
+    const scoped = expenses;
     const spentMinor = scoped.reduce((sum, expense) => sum + expense.amountMinor, 0);
 
-    const incomes = (finance.incomes || []).filter((income) => (income.currency || finance.currency || "BDT") === currency && inMonth(income, month));
-    const previousIncomes = (finance.incomes || []).filter((income) => (income.currency || finance.currency || "BDT") === currency && inMonth(income, previous));
+    const incomes = (finance.incomes || []).filter((income) => inMonth(income, month));
+    const previousIncomes = (finance.incomes || []).filter((income) => inMonth(income, previous));
     const incomeMinor = incomes.reduce((sum, income) => sum + Number(income.amountMinor || 0), 0);
     const previousIncomeMinor = previousIncomes.reduce((sum, income) => sum + Number(income.amountMinor || 0), 0);
-    const previousSpentMinor = previousExpenseResult.rows
-      .filter((row) => row.currency === currency)
-      .reduce((sum, row) => sum + Number(row.amount_minor || 0), 0);
+    const previousSpentMinor = previousExpenseResult.rows.reduce((sum, row) => sum + Number(row.amount_minor || 0), 0);
 
-    let overallBudgetMinor = budgets.find((budget) => budget.category === null && budget.currency === currency)?.amountMinor;
+    let overallBudgetMinor = budgets.find((budget) => budget.category === null)?.amountMinor;
     if ((overallBudgetMinor === undefined || overallBudgetMinor === null) && finance.budgetMinor) {
       overallBudgetMinor = Number(finance.budgetMinor);
     }
@@ -336,7 +334,7 @@ export default async function handler(req, res) {
       days[income.date] = (days[income.date] || 0) + Number(income.amountMinor || 0);
       return days;
     }, {})).map(([date, amountMinor]) => ({ date, amountMinor })).sort((a, b) => a.date.localeCompare(b.date));
-    const recurring = (finance.recurring || []).filter((entry) => entry.active && entry.currency === currency);
+    const recurring = (finance.recurring || []).filter((entry) => entry.active);
 
     const mcpizeProfile = session.displayName && session.profilePhotoUrl
       ? { displayName: "", profilePhotoUrl: "" }
