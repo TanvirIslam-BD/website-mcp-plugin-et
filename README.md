@@ -2,7 +2,25 @@
 
 Money Copilot AI is a full-stack, Vercel-hosted personal finance dashboard featuring protected serverless functions, responsive light/dark themes, Model Context Protocol (MCP) tool integration, and an interactive Money Copilot AI assistant. It uses Turso/libSQL for persistent expense tracking and signed, HTTP-only cookies for session security—ensuring user IDs and raw API keys are never exposed to the client-side browser or LLM prompts.
 
-## Key Features & Experience
+---
+
+## 🎨 UI & Interface Showcase
+
+### Desktop Dashboard (Dark & Light Themes)
+
+| Dark Theme | Light Theme |
+| :--- | :--- |
+| ![Desktop Dashboard Dark Mode](work/dashboard-report-dark.png) | ![Desktop Dashboard Light Mode](work/dashboard-report-light.png) |
+
+### Mobile Dashboard & Landing Experience
+
+| Mobile Dashboard | Landing Page Showcase |
+| :--- | :--- |
+| ![Mobile Dashboard Experience](work/dashboard-report-mobile.png) | ![Landing Page Desktop & Mobile](work/home-live-desktop-visible.png) |
+
+---
+
+## 🚀 Key Features & Experience
 
 - **Responsive Mobile-First Dashboard**: Light and dark theme modes with dynamic greetings, spending cards, financial reports, budget progress, recent transactions, and smart insights.
 - **Sticky Blur Header & Theme Toggle**: Glassmorphism sticky top navigation bar with backdrop blur and an integrated mobile header theme toggle button.
@@ -11,14 +29,18 @@ Money Copilot AI is a full-stack, Vercel-hosted personal finance dashboard featu
 - **Touch & Mobile Optimizations**: WCAG-compliant 44px touch targets, momentum touch-scrolling for transaction tables, and safe-area inset protection (`env(safe-area-inset-bottom)`) for fixed mobile controls.
 - **Owner Monitoring Console**: Administrative console at `/owner/monitor` for auditing aggregate activity metrics without exposing user transaction descriptions or financial amounts.
 
-## Security Architecture
+---
+
+## 🔒 Security Architecture
 
 - **OAuth 2.0 PKCE Authentication**: Authorization flow against MCPize uses PKCE (`code_challenge` S256 + `code_verifier`), preventing authorization code interception attacks.
 - **Signed HTTP-Only Sessions**: Dashboard sessions are stored inside `HttpOnly; Secure; SameSite=Lax` cookies signed with HMAC-SHA256 (`DASHBOARD_SESSION_SECRET`) and verified using `crypto.timingSafeEqual`.
 - **Database & Data Boundary**: All database queries strictly use parameterized SQL (`WHERE user_id = ?`) to enforce multi-tenant data isolation and prevent SQL injection.
 - **Server-Side MCP Tool Execution**: MCP access tokens and LLM API keys remain strictly on the serverless backend (`/api/ai-chat`), never exposed to browser scripts.
 
-## Environment Variables
+---
+
+## ⚙️ Environment Variables
 
 Configure these environment variables in Vercel or `.env.local`:
 
@@ -47,7 +69,9 @@ To generate a compatible scrypt password hash for the owner console:
 node -e "const {randomBytes,scryptSync}=require('crypto');const p=process.argv[1],s=randomBytes(16);console.log('scrypt$'+s.toString('base64url')+'$'+scryptSync(p,s,64).toString('base64url'))" "your-password"
 ```
 
-## AI Endpoint (`POST /api/ai-chat`)
+---
+
+## 🤖 AI Endpoint (`POST /api/ai-chat`)
 
 ```json
 { 
@@ -60,7 +84,9 @@ The endpoint extracts the signed `expense_tracker_dashboard` cookie, discovers t
 
 Request routing automatically picks the optimal model tier (Flash-Lite for quick lookups, Flash for reports, Advanced for trend comparisons, Premium for complex financial planning) with automatic fallback handling, rate limiting (18 req/min), and prompt sanitization.
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```text
 .
@@ -70,6 +96,7 @@ Request routing automatically picks the optimal model tier (Flash-Lite for quick
 │   ├── api/                   # Serverless Backend Handlers (AI Chat, Auth, Dashboard, Owner)
 │   ├── dashboard/             # Customer Dashboard Frontend (app.js, styles.css, report.css)
 │   └── owner/                 # Administrative Monitoring Console
+├── work/                      # UI showcase & screenshot media assets
 ├── vercel.json                # Vercel routing rules & rewrites
-└── README.md                  # Project documentation
+└── README.md                  # Project documentation & UI showcase
 ```
