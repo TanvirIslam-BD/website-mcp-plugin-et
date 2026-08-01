@@ -966,7 +966,7 @@ function appendAiLoading(chatRoot = document) {
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
       <div class="ai-message-label">Money Copilot AI</div>
-      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Reviewing your dashboard data...</span></div>
+      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Processing your data....</span></div>
     </div>
   `);
   list.scrollTop = list.scrollHeight;
