@@ -645,7 +645,7 @@ function renderMobileDashboardHeader(model) {
       <div class="mobile-quickbar">
         <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
         <div class="mobile-brand-title">
-          <img src="/assets/finance-copilot-robot.png" width="22" height="22" alt="Money Copilot">
+          <img src="/assets/logo/money-copilot-mark-light.png" width="22" height="22" alt="Money Copilot">
           <span>Money Copilot</span>
         </div>
         <div class="mobile-top-actions">
