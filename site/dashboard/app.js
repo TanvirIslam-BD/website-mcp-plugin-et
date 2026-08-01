@@ -2082,7 +2082,6 @@ function bindEvents() {
       const collapsed = app.classList.toggle("sidebar-collapsed");
       sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
       sidebarToggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
-      try { localStorage.setItem("expenseTrackerSidebar", collapsed ? "collapsed" : "expanded"); } catch {}
       return;
     }
     const themeChoice = event.target.closest("[data-theme-choice]");
@@ -2410,8 +2409,9 @@ loadDashboard()
     else renderEmptyDashboard(window.dashboardModel);
     syncThemeSwitch();
     try {
-      if (localStorage.getItem("expenseTrackerSidebar") === "collapsed") app.classList.add("sidebar-collapsed");
+      localStorage.removeItem("expenseTrackerSidebar");
     } catch {}
+    app.classList.remove("sidebar-collapsed");
     initializeAssistantRailResize();
     bindEvents();
     runNotificationPreferences(window.dashboardModel);
