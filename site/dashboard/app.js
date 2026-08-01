@@ -66,7 +66,7 @@ function icon(name) {
     bills: "<path d='M7 3h10l2 4v14H5V7z'/><path d='M9 11h6M9 15h6'/>",
     goals: "<circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='4'/><circle cx='12' cy='12' r='1'/>",
     advisor: "<path d='m12 2 1.5 5L18 9l-4.5 2L12 16l-1.5-5L6 9l4.5-2z'/><path d='M5 16l.8 2.2L8 19l-2.2.8L5 22l-.8-2.2L2 19l2.2-.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z'/>",
-    settings: "<circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 3-.2-.1a1.7 1.7 0 0 0-2 .1 1.7 1.7 0 0 0-.8 1.7V22h-3.6v-.3a1.7 1.7 0 0 0-.8-1.7 1.7 1.7 0 0 0-2-.1l-.2.1-2-3 .1-.1A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.5-1.2H3v-3.6h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9L4.2 7l2-3 .2.1a1.7 1.7 0 0 0 2-.1 1.7 1.7 0 0 0 .8-1.7V2h3.6v.3a1.7 1.7 0 0 0 .8 1.7 1.7 1.7 0 0 0 2 .1l.2-.1 2 3-.1.1A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.5 1.2h.1v3.6h-.1A1.7 1.7 0 0 0 19.4 15z'/>",
+    settings: "<path d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'/><circle cx='12' cy='12' r='3'/>",
     wallet: "<path d='M4 7h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12'/><path d='M16 14h.01'/>",
     down: "<path d='M12 4v14'/><path d='m6 12 6 6 6-6'/>",
     up: "<path d='M12 20V6'/><path d='m6 12 6-6 6 6'/>",
@@ -78,6 +78,7 @@ function icon(name) {
     card: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='M3 10h18'/>",
     lock: "<rect x='5' y='10' width='14' height='11' rx='2'/><path d='M8 10V7a4 4 0 0 1 8 0v3'/>",
     attachment: "<path d='m20.5 11.5-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 1 1-2.8-2.8l8.9-8.9'/>",
+    copy: "<rect x='9' y='9' width='13' height='13' rx='2' ry='2'/><path d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/>",
     mail: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='m3 7 9 6 9-6'/>",
     send: "<path d='m4 4 17 8-17 8 3-8z'/><path d='M7 12h14'/>",
     database: "<ellipse cx='12' cy='5' rx='8' ry='3'/><path d='M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5'/><path d='M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6'/>",
@@ -587,7 +588,7 @@ function renderSidebar(model) {
     <aside class="sidebar">
       <div class="brand">
         <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-mark-dark.png" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-mark-light.png" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/logo-mark.svg" alt="">
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
@@ -643,9 +644,13 @@ function renderMobileDashboardHeader(model) {
       </div>
       <div class="mobile-quickbar">
         <button class="mobile-menu-button" type="button" data-mobile-menu-toggle aria-label="Open dashboard menu" aria-expanded="false">${icon("menu")}</button>
-        <div>
+        <div class="mobile-brand-title">
+          <img src="/assets/logo/logo-mark.svg" width="22" height="22" alt="Money Copilot">
+          <span>Money Copilot</span>
+        </div>
+        <div class="mobile-top-actions">
           <button class="mobile-notice-button" type="button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${alertCount}</b></button>
-          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt=""></button>
+          <button class="mobile-copilot-button" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/finance-copilot-robot.png" alt="Money Copilot AI"></button>
         </div>
       </div>
       <div class="mobile-greeting">
@@ -952,7 +957,32 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return;
   const visualHtml = role === "assistant" ? renderVisualData(visualData) : "";
-  list.insertAdjacentHTML("beforeend", `<div class="ai-message ${role}"><div class="ai-message-label">${role === "user" ? "You" : "Money Copilot AI"}</div><div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>${meta ? `<small>${esc(meta)}</small>` : ""}</div>`);
+  const msgId = `msg-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`;
+  
+  let actionToolbar = "";
+  if (role === "assistant") {
+    actionToolbar = `
+      <div class="ai-message-footer">
+        <button type="button" class="ai-action-btn" data-copy-msg="${msgId}">${icon("copy")} <span>Copy</span></button>
+        <div class="ai-rating-btns">
+          <button type="button" class="ai-rate-btn" data-rate="up" title="Helpful">👍</button>
+          <button type="button" class="ai-rate-btn" data-rate="down" title="Not helpful">👎</button>
+        </div>
+      </div>
+    `;
+  }
+
+  list.insertAdjacentHTML("beforeend", `
+    <div class="ai-message ${role}" id="${msgId}">
+      <div class="ai-message-header">
+        <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/finance-copilot-robot.png" alt=""></span> Money Copilot AI`}</div>
+        ${meta ? `<small class="ai-meta-tag">${esc(meta)}</small>` : ""}
+      </div>
+      <div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>
+      ${actionToolbar}
+    </div>
+  `);
+
   const message = list.lastElementChild;
   if (role === "assistant" && message) {
     list.scrollTo({ top: Math.max(0, message.offsetTop - 8), behavior: "smooth" });
@@ -966,7 +996,7 @@ function appendAiLoading(chatRoot = document) {
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
       <div class="ai-message-label">Money Copilot AI</div>
-      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Reviewing your dashboard data...</span></div>
+      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>Processing your data....</span></div>
     </div>
   `);
   list.scrollTop = list.scrollHeight;
@@ -1224,14 +1254,55 @@ function openPanel(kind) {
   if (!model) return;
   if (kind === "email-report") {
     const month = monthLabel(model.month);
-    const budgetLine = model.budgetMinor
-      ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)`
-      : "No monthly budget is set";
-    openModal("Email your report", "Send a private spending and budget summary to your inbox.", `
+    let savedEmail = "";
+    try { savedEmail = localStorage.getItem("user_email") || ""; } catch (e) {}
+    const userEmail = model.user?.email || savedEmail || "";
+    const spentStr = formatMoney(model.spentMinor, model.currency);
+    const budgetStr = model.budgetMinor ? formatMoney(model.budgetMinor, model.currency) : "No budget set";
+    const remainingStr = model.remainingMinor === null ? "N/A" : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over` : `${formatMoney(model.remainingMinor, model.currency)} remaining`;
+    const budgetUsedStr = model.budgetMinor ? `${model.budgetUsed}%` : "0%";
+    const isOver = model.remainingMinor < 0;
+
+    openModal("Email your report", "Send a private spending and budget summary directly to your inbox.", `
       <form data-form="email-report" class="email-report-form">
-        <div class="field"><label for="report-email">Email address</label><input id="report-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-        <div class="email-report-preview"><b>${esc(month)} summary</b><span>${esc(budgetLine)}</span><span>${esc(model.remainingMinor === null ? "Add a budget to track remaining funds." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`)}</span></div>
-        <p class="form-error" data-error></p><div class="modal-actions"><button type="submit" class="action-button primary">${icon("mail")} Send report by email</button></div>
+        <div class="field">
+          <label for="report-email">Recipient Email Address</label>
+          <div class="input-with-icon">
+            ${icon("mail")}
+            <input id="report-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" value="${esc(userEmail)}" required>
+          </div>
+        </div>
+
+        <div class="email-report-card">
+          <div class="email-report-card-header">
+            <span class="report-badge">${icon("sparkles")} ${esc(month)} Financial Summary</span>
+          </div>
+          <div class="email-report-grid">
+            <div class="report-stat">
+              <span>Total Spent</span>
+              <strong class="spent">${esc(spentStr)}</strong>
+            </div>
+            <div class="report-stat">
+              <span>Monthly Budget</span>
+              <strong class="budget">${esc(budgetStr)}</strong>
+            </div>
+            <div class="report-stat">
+              <span>Budget Used</span>
+              <strong class="used">${esc(budgetUsedStr)}</strong>
+            </div>
+            <div class="report-stat">
+              <span>Remaining</span>
+              <strong class="remaining ${isOver ? 'over-budget' : 'under-budget'}">${esc(remainingStr)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <p class="form-error" data-error></p>
+        <div class="modal-actions">
+          <button type="submit" class="action-button primary send-report-btn">
+            ${icon("mail")} Send Report via Email
+          </button>
+        </div>
       </form>
     `, { wide: false });
     return;
@@ -1313,14 +1384,106 @@ function openPanel(kind) {
     return;
   }
   if (kind === "settings") {
-    openModal("Dashboard Settings", "Current private session and display settings.", `
-      <div class="panel-metrics">
-        <div class="panel-metric"><span>Month</span><b>${esc(monthLabel(model.month))}</b></div>
-        <div class="panel-metric"><span>Currency</span><b>${esc(model.currency)}</b></div>
-        <div class="panel-metric"><span>Privacy</span><b>Signed session</b></div>
-      </div>
-      <p>This dashboard only loads data through the signed MCP dashboard session. The browser never chooses a user id.</p>
-    `);
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    let currentModel = "gemini-2.5-flash";
+    let compactMode = false;
+    let autoSuggest = true;
+    try {
+      currentModel = localStorage.getItem("copilot_model") || "gemini-2.5-flash";
+      compactMode = localStorage.getItem("compact_mode") === "true";
+      autoSuggest = localStorage.getItem("auto_suggest") !== "false";
+    } catch(e) {}
+
+    openModal("Dashboard Settings", "Manage workspace preferences, AI model engine, currency, and privacy.", `
+      <form data-form="settings" class="settings-form">
+        
+        <!-- Section 1: Display & Preferences -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">${icon("sparkles")} Display & Preferences</h4>
+          
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Workspace Currency</strong>
+              <small>Default currency used for budgets, expenses, and AI calculations.</small>
+            </div>
+            <select name="currency" class="settings-select" data-setting="currency">
+              <option value="BDT" ${model.currency === "BDT" ? "selected" : ""}>BDT (৳) - Bangladeshi Taka</option>
+              <option value="USD" ${model.currency === "USD" ? "selected" : ""}>USD ($) - US Dollar</option>
+              <option value="EUR" ${model.currency === "EUR" ? "selected" : ""}>EUR (€) - Euro</option>
+              <option value="GBP" ${model.currency === "GBP" ? "selected" : ""}>GBP (£) - British Pound</option>
+              <option value="INR" ${model.currency === "INR" ? "selected" : ""}>INR (₹) - Indian Rupee</option>
+              <option value="CAD" ${model.currency === "CAD" ? "selected" : ""}>CAD ($) - Canadian Dollar</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Appearance Theme</strong>
+              <small>Choose between Light and Dark interface theme.</small>
+            </div>
+            <div class="settings-pill-group">
+              <button type="button" class="settings-pill ${currentTheme === 'light' ? 'active' : ''}" data-theme-set="light">☀️ Light</button>
+              <button type="button" class="settings-pill ${currentTheme === 'dark' ? 'active' : ''}" data-theme-set="dark">🌙 Dark</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Compact Layout Density</strong>
+              <small>Use tighter spacing for transaction lists and budget panels.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="compact_mode" ${compactMode ? "checked" : ""} data-setting="compact">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 2: Money Copilot AI Intelligence -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">${icon("advisor")} Money Copilot AI Settings</h4>
+          
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>AI Model Engine</strong>
+              <small>Select the AI model used for real-time chat & insights.</small>
+            </div>
+            <select name="copilot_model" class="settings-select" data-setting="model">
+              <option value="gemini-2.5-flash" ${currentModel === "gemini-2.5-flash" ? "selected" : ""}>Gemini 2.5 Flash (Ultra Fast)</option>
+              <option value="gemini-2.5-pro" ${currentModel === "gemini-2.5-pro" ? "selected" : ""}>Gemini 2.5 Pro (Deep Analytics)</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Auto-Generate Smart Insights</strong>
+              <small>Automatically summarize budget alerts on workspace load.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="auto_suggest" ${autoSuggest ? "checked" : ""} data-setting="auto_suggest">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 3: Privacy & Session Security -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">${icon("lock")} Privacy & Session Security</h4>
+          
+          <div class="settings-info-card">
+            <div class="info-row"><span>Authentication</span><strong>OAuth 2.0 PKCE Signed Session</strong></div>
+            <div class="info-row"><span>User Account</span><strong>${esc(model.user?.displayName || "Connected Account")}</strong></div>
+            <div class="info-row"><span>Data Isolation</span><strong>Private Signed Session (No Shared DB)</strong></div>
+          </div>
+        </div>
+
+        <p class="form-error" data-error></p>
+        
+        <div class="modal-actions" style="margin-top: 10px;">
+          <button type="submit" class="action-button primary" style="width:100%;">${icon("sparkles")} Save Preferences</button>
+        </div>
+      </form>
+    `, { wide: true });
     return;
   }
   if (kind === "data-management") {
@@ -1329,7 +1492,7 @@ function openPanel(kind) {
       <div class="data-management-grid">
         <section class="data-action-card">
           <i>${icon("database")}</i><div><h3>Export data</h3><p>Download a portable CSV copy of your transactions and income.</p></div>
-          <div class="data-action-buttons"><a class="action-button" href="/api/dashboard?export=csv&scope=month&month=${month}">Export this month</a><a class="action-button" href="/api/dashboard?export=csv&scope=all&month=${month}">Export all data</a></div>
+          <div class="data-action-buttons"><a class="action-button export-btn" href="/api/dashboard?export=csv&scope=month&month=${month}">${icon("sparkles")} Export this month</a><a class="action-button export-btn" href="/api/dashboard?export=csv&scope=all&month=${month}">${icon("sparkles")} Export all data</a></div>
         </section>
         <section class="data-action-card danger-soft">
           <i>${icon("transactions")}</i><div><h3>Clear this month</h3><p>Deletes expenses and income from ${esc(monthLabel(model.month))}. Budgets, goals, and recurring settings stay intact.</p></div>
@@ -1641,6 +1804,43 @@ function bindEvents() {
       }
       return;
     }
+    const copyBtn = event.target.closest("[data-copy-msg]");
+    if (copyBtn) {
+      const msgId = copyBtn.dataset.copyMsg;
+      const msgEl = document.getElementById(msgId);
+      const text = msgEl?.querySelector(".ai-message-body")?.innerText || "";
+      if (text) {
+        try {
+          navigator.clipboard.writeText(text).then(() => {
+            copyBtn.innerHTML = `${icon("check")} <span>Copied!</span>`;
+            setTimeout(() => {
+              copyBtn.innerHTML = `${icon("copy")} <span>Copy</span>`;
+            }, 2000);
+          });
+        } catch(e) {}
+      }
+      return;
+    }
+    const rateBtn = event.target.closest("[data-rate]");
+    if (rateBtn) {
+      const group = rateBtn.closest(".ai-rating-btns");
+      if (group) {
+        group.querySelectorAll(".ai-rate-btn").forEach(b => b.classList.remove("active"));
+        rateBtn.classList.add("active");
+      }
+      return;
+    }
+    const themeBtn = event.target.closest("[data-theme-set]");
+    if (themeBtn) {
+      const mode = themeBtn.dataset.themeSet;
+      setTheme(mode);
+      const parent = themeBtn.closest(".settings-pill-group");
+      if (parent) {
+        parent.querySelectorAll(".settings-pill").forEach(b => b.classList.remove("active"));
+        themeBtn.classList.add("active");
+      }
+      return;
+    }
     const copilotModel = event.target.closest("[data-copilot-model]");
     if (copilotModel) {
       document.querySelectorAll("[data-copilot-model]").forEach((button) => button.classList.toggle("active", button === copilotModel));
@@ -1701,14 +1901,92 @@ function bindEvents() {
     if (form.dataset.form === "email-report") {
       const email = form.elements.email?.value.trim();
       if (!email) return;
+
+      try { localStorage.setItem("user_email", email); } catch(e) {}
+
+      const submitBtn = form.querySelector(".send-report-btn");
+      const errorEl = form.querySelector("[data-error]");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `${icon("loader")} Sending report...`;
+      }
+      if (errorEl) errorEl.textContent = "";
+
       const model = window.dashboardModel;
-      const subject = `${monthLabel(model.month)} Money Copilot report`;
-      const budget = model.budgetMinor ? `${formatMoney(model.spentMinor, model.currency)} spent of ${formatMoney(model.budgetMinor, model.currency)} budget (${model.budgetUsed}% used)` : "No monthly budget is set";
-      const status = model.remainingMinor === null ? "No budget remaining status available." : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget.` : `${formatMoney(model.remainingMinor, model.currency)} remaining.`;
-      const bodyText = `Money Copilot report for ${monthLabel(model.month)}\n\n${budget}\n${status}\nTotal income: ${formatMoney(model.incomeMinor, model.currency)}\nNet cash flow: ${formatMoney(model.savedMinor, model.currency)}`;
-      const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
-      window.location.assign(mailto);
-      closeModal();
+      const payload = {
+        recipientEmail: email,
+        month: monthLabel(model.month),
+        currency: model.currency,
+        spentFormatted: formatMoney(model.spentMinor, model.currency),
+        budgetFormatted: model.budgetMinor ? formatMoney(model.budgetMinor, model.currency) : "No budget set",
+        budgetUsed: model.budgetMinor ? model.budgetUsed : 0,
+        remainingFormatted: model.remainingMinor === null ? "N/A" : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`,
+        incomeFormatted: formatMoney(model.incomeMinor, model.currency),
+        savedFormatted: formatMoney(model.savedMinor, model.currency),
+        categories: (model.categories || []).map(c => ({ name: c.name, amountFormatted: formatMoney(c.amountMinor, model.currency) })),
+        displayName: model.user?.displayName || "User"
+      };
+
+      fetch("/api/send-report-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) {
+          if (errorEl) errorEl.textContent = res.error;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
+          }
+        } else {
+          openModal("Report Sent! ✉️", "Your private financial summary has been delivered.", `
+            <div class="report-success-state">
+              <div class="success-icon">${icon("check")}</div>
+              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> has been dispatched to <b>${esc(email)}</b>.</p>
+              <div class="modal-actions" style="margin-top:12px; width:100%;">
+                <button type="button" class="action-button primary" onclick="closeModal()" style="width:100%;">Done</button>
+              </div>
+            </div>
+          `, { wide: false });
+        }
+      })
+      .catch(err => {
+        if (errorEl) errorEl.textContent = "Network error. Please try again.";
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
+        }
+      });
+      return;
+    }
+    if (form.dataset.form === "settings") {
+      const currency = form.elements.currency?.value;
+      const modelName = form.elements.copilot_model?.value;
+      const compact = form.elements.compact_mode?.checked;
+      const autoSuggest = form.elements.auto_suggest?.checked;
+
+      try {
+        if (modelName) localStorage.setItem("copilot_model", modelName);
+        localStorage.setItem("compact_mode", String(Boolean(compact)));
+        localStorage.setItem("auto_suggest", String(Boolean(autoSuggest)));
+      } catch(e) {}
+
+      if (currency && currency !== window.dashboardModel?.currency) {
+        postDashboard({ kind: "budget", amount: window.dashboardModel?.budgetMinor ? window.dashboardModel.budgetMinor / 100 : 0, currency }, form);
+        return;
+      }
+
+      openModal("Preferences Saved! ✨", "Your workspace settings have been updated.", `
+        <div class="report-success-state">
+          <div class="success-icon">${icon("check")}</div>
+          <p>Your dashboard settings have been applied successfully.</p>
+          <div class="modal-actions" style="margin-top:12px; width:100%;">
+            <button type="button" class="action-button primary" onclick="closeModal(); location.reload();" style="width:100%;">Apply & Reload</button>
+          </div>
+        </div>
+      `, { wide: false });
       return;
     }
     submitPanelForm(form);
