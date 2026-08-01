@@ -8474,3 +8474,249 @@ textarea:focus-visible {
   background: #10b981;
   color: #ffffff;
 }
+
+/* Settings Modal Styling */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 6px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.settings-section-title svg {
+  width: 16px;
+  height: 16px;
+  color: #2563eb;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.settings-row:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.settings-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+}
+
+.settings-label strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.settings-label small {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.settings-select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  min-width: 160px;
+  outline: 0;
+  cursor: pointer;
+}
+
+.settings-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+}
+
+.settings-pill-group {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-pill {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.settings-pill.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, .25);
+}
+
+/* Custom Toggle Switch */
+.settings-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.settings-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  transition: .2s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+.settings-toggle input:checked + .toggle-slider {
+  background-color: #2563eb;
+}
+
+.settings-toggle input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.settings-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.info-row:last-child {
+  border-bottom: 0;
+}
+
+.info-row span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.info-row strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Dark mode overrides for Settings Modal */
+:root[data-theme="dark"] .settings-section {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+:root[data-theme="dark"] .settings-section-title {
+  color: #f8fafc;
+}
+
+:root[data-theme="dark"] .settings-row {
+  border-top-color: #1e293b;
+}
+
+:root[data-theme="dark"] .settings-label strong {
+  color: #f8fafc;
+}
+
+:root[data-theme="dark"] .settings-label small {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .settings-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+:root[data-theme="dark"] .settings-pill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .settings-pill.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .info-row {
+  border-bottom-color: #1e293b;
+}
+
+:root[data-theme="dark"] .info-row span {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .info-row strong {
+  color: #f8fafc;
+}
+
+@media (max-width: 620px) {
+  .settings-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .settings-select {
+    width: 100%;
+  }
+}

@@ -1354,14 +1354,106 @@ function openPanel(kind) {
     return;
   }
   if (kind === "settings") {
-    openModal("Dashboard Settings", "Current private session and display settings.", `
-      <div class="panel-metrics">
-        <div class="panel-metric"><span>Month</span><b>${esc(monthLabel(model.month))}</b></div>
-        <div class="panel-metric"><span>Currency</span><b>${esc(model.currency)}</b></div>
-        <div class="panel-metric"><span>Privacy</span><b>Signed session</b></div>
-      </div>
-      <p>This dashboard only loads data through the signed MCP dashboard session. The browser never chooses a user id.</p>
-    `);
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    let currentModel = "gemini-2.5-flash";
+    let compactMode = false;
+    let autoSuggest = true;
+    try {
+      currentModel = localStorage.getItem("copilot_model") || "gemini-2.5-flash";
+      compactMode = localStorage.getItem("compact_mode") === "true";
+      autoSuggest = localStorage.getItem("auto_suggest") !== "false";
+    } catch(e) {}
+
+    openModal("Dashboard Settings", "Manage workspace preferences, AI model engine, currency, and privacy.", `
+      <form data-form="settings" class="settings-form">
+        
+        <!-- Section 1: Display & Preferences -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">${icon("sparkles")} Display & Preferences</h4>
+          
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Workspace Currency</strong>
+              <small>Default currency used for budgets, expenses, and AI calculations.</small>
+            </div>
+            <select name="currency" class="settings-select" data-setting="currency">
+              <option value="BDT" ${model.currency === "BDT" ? "selected" : ""}>BDT (৳) - Bangladeshi Taka</option>
+              <option value="USD" ${model.currency === "USD" ? "selected" : ""}>USD ($) - US Dollar</option>
+              <option value="EUR" ${model.currency === "EUR" ? "selected" : ""}>EUR (€) - Euro</option>
+              <option value="GBP" ${model.currency === "GBP" ? "selected" : ""}>GBP (£) - British Pound</option>
+              <option value="INR" ${model.currency === "INR" ? "selected" : ""}>INR (₹) - Indian Rupee</option>
+              <option value="CAD" ${model.currency === "CAD" ? "selected" : ""}>CAD ($) - Canadian Dollar</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Appearance Theme</strong>
+              <small>Choose between Light and Dark interface theme.</small>
+            </div>
+            <div class="settings-pill-group">
+              <button type="button" class="settings-pill ${currentTheme === 'light' ? 'active' : ''}" data-theme-set="light">☀️ Light</button>
+              <button type="button" class="settings-pill ${currentTheme === 'dark' ? 'active' : ''}" data-theme-set="dark">🌙 Dark</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Compact Layout Density</strong>
+              <small>Use tighter spacing for transaction lists and budget panels.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="compact_mode" ${compactMode ? "checked" : ""} data-setting="compact">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 2: Money Copilot AI Intelligence -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">${icon("advisor")} Money Copilot AI Settings</h4>
+          
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>AI Model Engine</strong>
+              <small>Select the AI model used for real-time chat & insights.</small>
+            </div>
+            <select name="copilot_model" class="settings-select" data-setting="model">
+              <option value="gemini-2.5-flash" ${currentModel === "gemini-2.5-flash" ? "selected" : ""}>Gemini 2.5 Flash (Ultra Fast)</option>
+              <option value="gemini-2.5-pro" ${currentModel === "gemini-2.5-pro" ? "selected" : ""}>Gemini 2.5 Pro (Deep Analytics)</option>
+            </select>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">
+              <strong>Auto-Generate Smart Insights</strong>
+              <small>Automatically summarize budget alerts on workspace load.</small>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" name="auto_suggest" ${autoSuggest ? "checked" : ""} data-setting="auto_suggest">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 3: Privacy & Session Security -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">${icon("lock")} Privacy & Session Security</h4>
+          
+          <div class="settings-info-card">
+            <div class="info-row"><span>Authentication</span><strong>OAuth 2.0 PKCE Signed Session</strong></div>
+            <div class="info-row"><span>User Account</span><strong>${esc(model.user?.displayName || "Connected Account")}</strong></div>
+            <div class="info-row"><span>Data Isolation</span><strong>Private Signed Session (No Shared DB)</strong></div>
+          </div>
+        </div>
+
+        <p class="form-error" data-error></p>
+        
+        <div class="modal-actions" style="margin-top: 10px;">
+          <button type="submit" class="action-button primary" style="width:100%;">${icon("sparkles")} Save Preferences</button>
+        </div>
+      </form>
+    `, { wide: true });
     return;
   }
   if (kind === "data-management") {
@@ -1682,6 +1774,17 @@ function bindEvents() {
       }
       return;
     }
+    const themeBtn = event.target.closest("[data-theme-set]");
+    if (themeBtn) {
+      const mode = themeBtn.dataset.themeSet;
+      setTheme(mode);
+      const parent = themeBtn.closest(".settings-pill-group");
+      if (parent) {
+        parent.querySelectorAll(".settings-pill").forEach(b => b.classList.remove("active"));
+        themeBtn.classList.add("active");
+      }
+      return;
+    }
     const copilotModel = event.target.closest("[data-copilot-model]");
     if (copilotModel) {
       document.querySelectorAll("[data-copilot-model]").forEach((button) => button.classList.toggle("active", button === copilotModel));
@@ -1800,6 +1903,34 @@ function bindEvents() {
           submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
         }
       });
+      return;
+    }
+    if (form.dataset.form === "settings") {
+      const currency = form.elements.currency?.value;
+      const modelName = form.elements.copilot_model?.value;
+      const compact = form.elements.compact_mode?.checked;
+      const autoSuggest = form.elements.auto_suggest?.checked;
+
+      try {
+        if (modelName) localStorage.setItem("copilot_model", modelName);
+        localStorage.setItem("compact_mode", String(Boolean(compact)));
+        localStorage.setItem("auto_suggest", String(Boolean(autoSuggest)));
+      } catch(e) {}
+
+      if (currency && currency !== window.dashboardModel?.currency) {
+        postDashboard({ kind: "budget", amount: window.dashboardModel?.budgetMinor ? window.dashboardModel.budgetMinor / 100 : 0, currency }, form);
+        return;
+      }
+
+      openModal("Preferences Saved! ✨", "Your workspace settings have been updated.", `
+        <div class="report-success-state">
+          <div class="success-icon">${icon("check")}</div>
+          <p>Your dashboard settings have been applied successfully.</p>
+          <div class="modal-actions" style="margin-top:12px; width:100%;">
+            <button type="button" class="action-button primary" onclick="closeModal(); location.reload();" style="width:100%;">Apply & Reload</button>
+          </div>
+        </div>
+      `, { wide: false });
       return;
     }
     submitPanelForm(form);
