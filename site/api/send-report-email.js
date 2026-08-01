@@ -133,7 +133,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || "Money Copilot <noreply@resend.dev>",
+          from: process.env.EMAIL_FROM || "Money Copilot <onboarding@resend.dev>",
           to: [recipientEmail],
           subject: emailSubject,
           html: emailHtml

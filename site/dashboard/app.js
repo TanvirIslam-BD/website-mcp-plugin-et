@@ -1948,12 +1948,26 @@ function bindEvents() {
             submitBtn.disabled = false;
             submitBtn.innerHTML = `${icon("mail")} Send Report via Email`;
           }
+        } else if (res.simulated) {
+          openModal("Report Generated ✉️", "Email dispatch status.", `
+            <div class="report-success-state">
+              <div class="success-icon">${icon("mail")}</div>
+              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> was generated for <b>${esc(email)}</b>.</p>
+              <div class="settings-section" style="margin-top:12px; text-align:left; background:#fffbe6; border:1px solid #ffe58f; border-radius:10px; padding:12px;">
+                <small style="color:#d48806; font-size:12px; line-height:1.4; display:block;"><strong>💡 Server Configuration Required:</strong><br>To deliver real emails directly to your inbox, add your <code>RESEND_API_KEY</code> environment variable in your Vercel project deployment settings.</small>
+              </div>
+              <div class="modal-actions" style="margin-top:14px; width:100%;">
+                <button type="button" class="action-button primary" onclick="closeModal()" style="width:100%;">Understood</button>
+              </div>
+            </div>
+          `, { wide: false });
         } else {
-          openModal("Report Sent! ✉️", "Your private financial summary has been delivered.", `
+          openModal("Report Delivered! ✉️", "Your private financial summary has been sent.", `
             <div class="report-success-state">
               <div class="success-icon">${icon("check")}</div>
-              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> has been dispatched to <b>${esc(email)}</b>.</p>
-              <div class="modal-actions" style="margin-top:12px; width:100%;">
+              <p>Financial report for <b>${esc(monthLabel(model.month))}</b> has been delivered to <b>${esc(email)}</b>!</p>
+              <p style="font-size:12px; color:#64748b; margin-top:4px;">Please check your email inbox and spam folder.</p>
+              <div class="modal-actions" style="margin-top:14px; width:100%;">
                 <button type="button" class="action-button primary" onclick="closeModal()" style="width:100%;">Done</button>
               </div>
             </div>
