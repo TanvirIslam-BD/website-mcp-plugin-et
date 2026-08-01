@@ -295,19 +295,35 @@ export default async function handler(req, res) {
     ]);
 
     const finance = safeFinance(financeResult.rows[0]?.data);
-    const expenses = expenseResult.rows.map((row) => ({ id: row.id, date: row.date, category: row.category, description: row.description, amountMinor: Number(row.amount_minor), currency: row.currency }));
+    const sqlExpenses = expenseResult.rows.map((row) => ({ id: row.id, date: row.date, category: row.category, description: row.description, amountMinor: Number(row.amount_minor), currency: row.currency }));
+    const jsonExpenses = (finance.expenses || [])
+      .filter((e) => inMonth(e, month))
+      .map((e) => ({ id: e.id, date: e.date, category: e.category, description: e.description, amountMinor: Number(e.amountMinor || 0), currency: e.currency || finance.currency || "BDT" }));
+
+    const map = new Map();
+    [...sqlExpenses, ...jsonExpenses].forEach(e => {
+      if (!map.has(e.id || `${e.date}-${e.amountMinor}`)) map.set(e.id || `${e.date}-${e.amountMinor}`, e);
+    });
+    const expenses = Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
+
     const budgets = budgetResult.rows.map((row) => ({ category: row.category, amountMinor: Number(row.amount_minor), currency: row.currency }));
-    const currency = budgets.find((budget) => budget.category === null)?.currency || expenses[0]?.currency || finance.incomes?.[0]?.currency || "USD";
+    const currency = budgets.find((budget) => budget.category === null)?.currency || finance.currency || expenses[0]?.currency || finance.incomes?.[0]?.currency || "BDT";
     const scoped = expenses.filter((expense) => expense.currency === currency);
     const spentMinor = scoped.reduce((sum, expense) => sum + expense.amountMinor, 0);
-    const incomes = (finance.incomes || []).filter((income) => income.currency === currency && inMonth(income, month));
-    const previousIncomes = (finance.incomes || []).filter((income) => income.currency === currency && inMonth(income, previous));
+
+    const incomes = (finance.incomes || []).filter((income) => (income.currency || finance.currency || "BDT") === currency && inMonth(income, month));
+    const previousIncomes = (finance.incomes || []).filter((income) => (income.currency || finance.currency || "BDT") === currency && inMonth(income, previous));
     const incomeMinor = incomes.reduce((sum, income) => sum + Number(income.amountMinor || 0), 0);
     const previousIncomeMinor = previousIncomes.reduce((sum, income) => sum + Number(income.amountMinor || 0), 0);
     const previousSpentMinor = previousExpenseResult.rows
       .filter((row) => row.currency === currency)
       .reduce((sum, row) => sum + Number(row.amount_minor || 0), 0);
-    const overallBudget = budgets.find((budget) => budget.category === null && budget.currency === currency);
+
+    let overallBudgetMinor = budgets.find((budget) => budget.category === null && budget.currency === currency)?.amountMinor;
+    if ((overallBudgetMinor === undefined || overallBudgetMinor === null) && finance.budgetMinor) {
+      overallBudgetMinor = Number(finance.budgetMinor);
+    }
+    if (overallBudgetMinor === undefined) overallBudgetMinor = null;
     const categories = Object.entries(scoped.reduce((map, expense) => {
       map[expense.category] = (map[expense.category] || 0) + expense.amountMinor;
       return map;
@@ -348,7 +364,7 @@ export default async function handler(req, res) {
       incomeMinor,
       previousSpentMinor,
       previousIncomeMinor,
-      budgetMinor: overallBudget?.amountMinor ?? null,
+      budgetMinor: overallBudgetMinor ?? null,
       categories,
       expenses: scoped.slice(0, 200),
       daily,
