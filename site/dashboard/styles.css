@@ -9829,3 +9829,54 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   stroke:#26383d!important;
   stroke-dasharray:3 4!important;
 }
+:root[data-theme="light"] .budget-ring{
+  background:conic-gradient(from -90deg,#91dfbe 0%,#019a56 var(--budget),#e1eee8 var(--budget) 100%)!important;
+}
+:root[data-theme="dark"] .budget-ring{
+  background:conic-gradient(from -90deg,#9af0c7 0%,#079e59 var(--budget),#18352c var(--budget) 100%)!important;
+}
+
+/* Dark live audit: remove the remaining legacy blue, red and light surfaces */
+:root[data-theme="dark"] .metric-card h2,
+:root[data-theme="dark"] .metric-card.balance h2,
+:root[data-theme="dark"] .metric-card.expense h2,
+:root[data-theme="dark"] .metric-card.saving h2,
+:root[data-theme="dark"] .metric-card.is-negative h2{
+  color:#f3f7f5!important;
+}
+:root[data-theme="dark"] .chart-area-income{
+  fill:rgba(19,213,119,.09)!important;
+}
+:root[data-theme="dark"] .chart-area-expense{
+  fill:rgba(109,235,176,.045)!important;
+}
+:root[data-theme="dark"] .chart-line.income{stroke:#16d779!important}
+:root[data-theme="dark"] .chart-line.expense{stroke:#8cefc0!important}
+:root[data-theme="dark"] .chart-line.saving{stroke:#58dfaa!important}
+:root[data-theme="dark"] .sidebar .brand span{
+  color:#25e486!important;
+}
+:root[data-theme="dark"] .sidebar .brand-logo-dark,
+:root[data-theme="dark"] .copilot-logo img,
+:root[data-theme="dark"] .mobile-copilot-button img,
+:root[data-theme="dark"] .mobile-composer-bot img{
+  filter:hue-rotate(-68deg) saturate(1.45) brightness(1.14)!important;
+}
+:root[data-theme="dark"] .insight-item>i,
+:root[data-theme="dark"] .status-dot{
+  background:color-mix(in srgb,var(--tone) 16%,#07141a)!important;
+  border-color:color-mix(in srgb,var(--tone) 28%,#162a2e)!important;
+}
+:root[data-theme="dark"] .assistant-rail,
+:root[data-theme="dark"] .assistant-rail-header,
+:root[data-theme="dark"] .assistant-rail-chat{
+  background:#020c12!important;
+}
+:root[data-theme="dark"] .assistant-rail-header{
+  border-bottom-color:#17282e!important;
+}
+:root[data-theme="dark"] .legend,
+:root[data-theme="dark"] .chart-x-axis,
+:root[data-theme="dark"] .chart-y-axis{
+  color:#9baca5!important;
+}
