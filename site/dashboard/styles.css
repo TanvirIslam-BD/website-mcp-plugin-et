@@ -911,16 +911,26 @@ button {
   max-width: 100%;
   padding: 12px 13px;
   box-shadow: none;
+  height: auto !important;
+  flex: 0 0 auto !important;
+  align-self: flex-start;
 }
 
 .assistant-rail .ai-message.user {
   max-width: 90%;
   margin-left: auto;
+  align-self: flex-end;
+  height: auto !important;
+  flex: 0 0 auto !important;
 }
 
 .assistant-rail .ai-message small {
   color: inherit;
   opacity: .68;
+  display: block;
+  margin-top: 4px !important;
+  margin-bottom: 0 !important;
+  line-height: 1.2;
 }
 
 .assistant-rail .ai-message.assistant small {
@@ -4436,7 +4446,7 @@ body {
 }
 
 .copilot-summary p {
-  margin: 0 0 16px;
+  margin: 0 0 6px;
 }
 
 .copilot-summary .ai-message-body > b {
