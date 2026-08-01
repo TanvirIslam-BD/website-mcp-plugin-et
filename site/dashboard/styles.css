@@ -4927,12 +4927,40 @@ textarea {
 
 .data-action-buttons {
   display: flex;
-  gap: 7px;
+  gap: 10px;
+  align-items: center;
 }
 
-.data-action-buttons a {
-  min-width: 116px;
+.data-action-buttons a.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 130px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #10b981;
+  border-radius: 9px;
+  color: #047857;
+  background: #ecfdf5;
+  font-size: 12px;
+  font-weight: 700;
   text-decoration: none;
+  transition: all .15s ease;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, .08);
+}
+
+.data-action-buttons a.action-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.data-action-buttons a.action-button:hover,
+.data-action-buttons a.action-button:focus-visible {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, .25);
 }
 
 .data-action-card.danger-soft {
@@ -4949,6 +4977,9 @@ textarea {
   color: #fff;
   border-color: #e3383b;
   background: #e3383b;
+  min-height: 40px;
+  border-radius: 9px;
+  font-weight: 700;
 }
 
 .action-button.danger:hover {
@@ -4958,16 +4989,34 @@ textarea {
 @media (max-width: 620px) {
   .data-action-card {
     grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
   }
 
   .data-action-card > button,
   .data-action-buttons {
     grid-column: 1 / -1;
     width: 100%;
+    margin-top: 6px;
   }
 
   .data-action-buttons {
+    display: flex;
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .data-action-buttons a.action-button {
+    width: 100%;
+    min-height: 44px;
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+
+  .data-action-card > button.action-button.danger {
+    width: 100%;
+    min-height: 44px;
+    font-size: 13px;
   }
 }
 
@@ -8400,4 +8449,15 @@ textarea:focus-visible {
   background: rgba(37, 99, 235, .2);
   border-color: rgba(37, 99, 235, .4);
   color: #60a5fa;
+}
+
+:root[data-theme="dark"] .data-action-buttons a.action-button {
+  background: rgba(16, 185, 129, .15);
+  border-color: rgba(16, 185, 129, .4);
+  color: #34d399;
+}
+
+:root[data-theme="dark"] .data-action-buttons a.action-button:hover {
+  background: #10b981;
+  color: #ffffff;
 }

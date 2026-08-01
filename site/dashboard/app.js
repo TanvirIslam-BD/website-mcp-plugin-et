@@ -1370,7 +1370,7 @@ function openPanel(kind) {
       <div class="data-management-grid">
         <section class="data-action-card">
           <i>${icon("database")}</i><div><h3>Export data</h3><p>Download a portable CSV copy of your transactions and income.</p></div>
-          <div class="data-action-buttons"><a class="action-button" href="/api/dashboard?export=csv&scope=month&month=${month}">Export this month</a><a class="action-button" href="/api/dashboard?export=csv&scope=all&month=${month}">Export all data</a></div>
+          <div class="data-action-buttons"><a class="action-button export-btn" href="/api/dashboard?export=csv&scope=month&month=${month}">${icon("sparkles")} Export this month</a><a class="action-button export-btn" href="/api/dashboard?export=csv&scope=all&month=${month}">${icon("sparkles")} Export all data</a></div>
         </section>
         <section class="data-action-card danger-soft">
           <i>${icon("transactions")}</i><div><h3>Clear this month</h3><p>Deletes expenses and income from ${esc(monthLabel(model.month))}. Budgets, goals, and recurring settings stay intact.</p></div>
