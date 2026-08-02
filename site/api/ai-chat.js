@@ -668,7 +668,10 @@ export default async function handler(req, res) {
       }
     }
     if (needsFinancialData(message) && !usedTools.length) throw new Error("The model returned an unverified financial answer.");
-    const answer = answerContent(completion?.choices?.[0]?.message);
+    let answer = answerContent(completion?.choices?.[0]?.message);
+    if (!answer || answer.trim() === "I could not generate an answer from the available financial data.") {
+      answer = await verifiedFallbackAnswer(db, userId, message, dashboardMonth);
+    }
     const visualData = buildVisualData(lastToolName, lastToolResult, null) || undefined;
     const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, visualData, cached: false };
     if (!mcpAccessToken) {
