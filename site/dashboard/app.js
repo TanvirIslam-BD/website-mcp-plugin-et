@@ -1977,7 +1977,9 @@ function initializeAssistantRailResize() {
   let width = COPILOT_RAIL_DEFAULT_WIDTH;
   try {
     const savedWidth = Number(localStorage.getItem(COPILOT_RAIL_WIDTH_KEY));
-    if (Number.isFinite(savedWidth) && savedWidth > 0) width = savedWidth;
+    if (Number.isFinite(savedWidth) && savedWidth > 0) {
+      width = savedWidth === 380 ? COPILOT_RAIL_DEFAULT_WIDTH : savedWidth;
+    }
   } catch {}
 
   const applyWidth = (nextWidth, { persist = false } = {}) => {
