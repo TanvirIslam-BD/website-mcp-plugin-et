@@ -9378,11 +9378,11 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 @media (min-width:1181px) {
   .dashboard-shell:has(.assistant-rail),
   .dashboard-shell.sidebar-collapsed:has(.assistant-rail){
-    grid-template-columns:218px minmax(0,1fr) 292px!important;
+    grid-template-columns:218px minmax(0,1fr) var(--assistant-rail-width, 440px)!important;
   }
   .sidebar{width:218px!important;padding:23px 14px 15px!important}
-  .assistant-rail{width:292px!important;min-width:292px!important;max-width:292px!important}
-  .sidebar-toggle,.assistant-resizer,.assistant-collapse{display:none!important}
+  .assistant-rail{width:var(--assistant-rail-width, 440px);min-width:280px;max-width:560px}
+  .sidebar-toggle{display:none!important}
   .main{padding:0 18px 30px!important}
   .topbar{min-height:88px!important;margin:0 0 18px!important;padding:16px 4px 10px!important}
   .headline h1{font-size:25px!important;font-weight:700!important;line-height:1.12!important}
