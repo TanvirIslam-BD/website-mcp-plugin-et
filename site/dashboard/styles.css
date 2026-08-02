@@ -10025,3 +10025,23 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 :root[data-theme="dark"] .manage-card small {
   color: #8da1c2!important;
 }
+
+:root[data-theme="dark"] .tx-modal-search,
+:root[data-theme="dark"] .tx-modal-select {
+  background: #0d1e30!important;
+  border-color: #1e354e!important;
+  color: #cbd5e6!important;
+}
+
+:root[data-theme="dark"] .tx-modal-search input {
+  color: #f0f6ff!important;
+}
+
+:root[data-theme="dark"] .tx-modal-search input::placeholder {
+  color: #7b8fae!important;
+}
+
+:root[data-theme="dark"] .tx-modal-select option {
+  background: #0d1e30!important;
+  color: #f0f6ff!important;
+}
