@@ -875,7 +875,7 @@ function renderAiAssistantRail(model) {
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI Assistant</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -911,7 +911,7 @@ function renderEmptyAssistantRail() {
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI Assistant</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
       </div>
