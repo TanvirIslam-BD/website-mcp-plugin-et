@@ -888,7 +888,6 @@ function renderAiAssistantRail(model) {
             <button type="button" data-ai-suggestion="Record an expense of 50 BDT for food">${icon("plus")}Add expense</button>
             <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
             <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
-            <button type="button" data-ai-suggestion="Help me plan next month's budget.">${icon("bills")}Plan budget</button>
           </div>
         </div>
         <div class="assistant-day"><span>Today</span></div>
@@ -1322,7 +1321,6 @@ function openAiChat(prefill = "") {
           <button type="button" data-ai-suggestion="Record an expense of 50 BDT for food">${icon("plus")}Add expense</button>
           <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
           <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
-          <button type="button" data-ai-suggestion="Help me plan next month's budget.">${icon("bills")}Plan budget</button>
         </div>
       </div>
       <div class="assistant-day"><span>Today</span></div>
