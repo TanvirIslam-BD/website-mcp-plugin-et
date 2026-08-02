@@ -1,0 +1,18 @@
+[0:v]scale=720:1280,zoompan=z='min(zoom+0.0008,1.06)':d=300:s=720x1280:fps=30,format=rgba[bg];
+[1:v]scale=420:-1,format=rgba[logo];
+[bg]drawbox=x=0:y=0:w=720:h=1280:color=0x08111F@0.28:t=fill,
+drawbox=x=42:y=118:w=636:h=318:color=black@0.46:t=fill,
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='Ever wonder where all your money went?':fontsize=34:fontcolor=white:x=60:y=145:alpha='if(lt(t,2),1,0)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='Where did my money go?':fontsize=44:fontcolor=white:x=60:y=378:alpha='if(lt(t,2),1,0)',
+drawbox=x=32:y=90:w=656:h=1110:color=black@0.22:t=fill:enable='between(t,2,5)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='Just ask Money Copilot AI.':fontsize=40:fontcolor=white:x=58:y=154:enable='between(t,2,5)',
+drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='Where did my money go this month?':fontsize=30:fontcolor=white:x=74:y=1046:box=1:boxcolor=black@0.44:boxborderw=24:enable='between(t,2,5)',
+drawbox=x=34:y=822:w=652:h=260:color=black@0.50:t=fill:enable='between(t,5,8)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='Food     $392\\nCoffee    $84\\nTransport $156\\nShopping  $241':fontsize=34:fontcolor=white:x=72:y=862:line_spacing=18:enable='between(t,5,8)',
+drawbox=x=374:y=258:w=286:h=136:color=0x103B63@0.82:t=fill:enable='between(t,5,8)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='You spent 38%% more\\non food than last month.':fontsize=28:fontcolor=white:x=396:y=285:line_spacing=10:enable='between(t,5,8)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='AI knows every dollar.':fontsize=40:fontcolor=white:x=58:y=1152:enable='between(t,5,8)',
+drawbox=x=34:y=1022:w=652:h=174:color=black@0.52:t=fill:enable='between(t,8,10)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='Stop guessing. Start knowing.':fontsize=42:fontcolor=white:x=58:y=1052:enable='between(t,8,10)',
+drawtext=fontfile='C\:/Windows/Fonts/arialbd.ttf':text='Money Copilot AI':fontsize=30:fontcolor=white@0.95:x=58:y=1112:enable='between(t,8,10)'[base];
+[base][logo]overlay=x=150:y=80:enable='between(t,8,10)'[v]

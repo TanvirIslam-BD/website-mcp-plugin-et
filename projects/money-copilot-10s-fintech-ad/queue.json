@@ -1,0 +1,15 @@
+{
+  "project": "money-copilot-10s-fintech-ad",
+  "tasks": [
+    {
+      "id": "motion",
+      "label": "10s vertical fintech motion base",
+      "cmd": "pixverse create reference --model v6 --quality 720p --duration 10 --aspect-ratio 9:16 --images site/assets/marketing/chatgpt-report.png site/assets/dashboard/money-copilot-ai-promo-light.png site/assets/logo/money-copilot-logo-dark.png --prompt projects/money-copilot-10s-fintech-ad/prompts/video.txt --no-audio"
+    },
+    {
+      "id": "voiceover",
+      "label": "Money Copilot 10s voiceover",
+      "cmd": "pixverse create voice --model speech-2.8-hd --voice-id minimax_english_trustworth_man --language en --speed 1.22 --text projects/money-copilot-10s-fintech-ad/prompts/narration.txt"
+    }
+  ]
+}
