@@ -340,6 +340,9 @@ async function getBudgetStatus(db, userId, dashboardMonth) {
   const currency = sqlBudgets.find((b) => b.category === null)?.currency || finance.currency || expenseResult.rows[0]?.currency || "BDT";
   
   let overallAmount = sqlBudgets.find((b) => b.category === null && b.currency === currency)?.amount;
+  if (overallAmount === undefined || overallAmount === null) {
+    overallAmount = sqlBudgets.find((b) => b.category === null)?.amount;
+  }
   if ((overallAmount === undefined || overallAmount === null) && finance.budgetMinor) {
     overallAmount = Number(finance.budgetMinor) / 100;
   }
