@@ -1110,8 +1110,42 @@ function renderVisualData(data) {
   return html;
 }
 
+function renderMarkdownTable(tableText) {
+  const lines = tableText.trim().split("\n").filter(l => l.trim().startsWith("|"));
+  if (lines.length < 2) return tableText;
+
+  const parseRow = (line) => line.split("|").slice(1, -1).map(c => c.trim());
+  const header = parseRow(lines[0]);
+  
+  let dataRows = lines.slice(1);
+  if (dataRows[0] && /^\|?\s*:?-+:?\s*\|/.test(dataRows[0])) {
+    dataRows = dataRows.slice(1);
+  }
+
+  let html = '<div class="ai-table-wrap"><table class="ai-table"><thead><tr>';
+  header.forEach(h => { html += `<th>${h}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  dataRows.forEach(rowStr => {
+    const cells = parseRow(rowStr);
+    if (!cells.length) return;
+    html += '<tr>';
+    cells.forEach(c => { html += `<td>${c}</td>`; });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  return html;
+}
+
 function aiAnswerHtml(value) {
   let text = esc(value || "I could not generate a response.");
+
+  // Process markdown tables first before converting line breaks
+  text = text.replace(/((?:^\|.*?\|\s*$\n?)+)/gm, (match) => {
+    return renderMarkdownTable(match);
+  });
+
   return text
     .replace(/^#### (.*?)$/gm, "<h5 class='ai-heading'>$1</h5>")
     .replace(/^### (.*?)$/gm, "<h4 class='ai-heading'>$1</h4>")
@@ -1122,7 +1156,9 @@ function aiAnswerHtml(value) {
     .replace(/`(.+?)`/g, "<code>$1</code>")
     .replace(/^---$/gm, "<hr class='ai-hr'>")
     .replace(/^[\*\-] (.*?)$/gm, "<div class='ai-bullet'>• $1</div>")
-    .replace(/\n/g, "<br>");
+    .replace(/\n/g, "<br>")
+    .replace(/<\/div><br>/g, "</div>")
+    .replace(/<\/table><\/div><br>/g, "</table></div>");
 }
 
 function appendAiMessage(role, content, meta = "", chatRoot = document, visualData = null) {

@@ -7255,7 +7255,65 @@ textarea:focus-visible {
   background: #142337;
 }
 
-/* ─── AI Visual Data Components ─── */
+.ai-table-wrap {
+  width: 100%;
+  margin: 10px 0;
+  overflow-x: auto;
+  border: 1px solid #e5eeea;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(16, 33, 49, .03);
+}
+
+.ai-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+
+.ai-table th {
+  padding: 8px 10px;
+  background: #f4f8f6;
+  color: #102131;
+  font-weight: 700;
+  border-bottom: 1px solid #e5eeea;
+  white-space: nowrap;
+}
+
+.ai-table td {
+  padding: 8px 10px;
+  color: #243547;
+  border-bottom: 1px solid #edf4f0;
+}
+
+.ai-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ai-table tbody tr:hover td {
+  background: #f8fbf9;
+}
+
+:root[data-theme="dark"] .ai-table-wrap {
+  border-color: #234334;
+  background: #102119;
+}
+
+:root[data-theme="dark"] .ai-table th {
+  background: #172d22;
+  color: #ecf8f1;
+  border-bottom-color: #234334;
+}
+
+:root[data-theme="dark"] .ai-table td {
+  color: #d3e5dc;
+  border-bottom-color: #1a362a;
+}
+
+:root[data-theme="dark"] .ai-table tbody tr:hover td {
+  background: #162a20;
+}
 
 .ai-visual-panel {
   margin-bottom: 12px;
