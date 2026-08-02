@@ -1956,7 +1956,7 @@ function filterDashboard(query) {
 }
 
 const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
-const COPILOT_RAIL_DEFAULT_WIDTH = 380;
+const COPILOT_RAIL_DEFAULT_WIDTH = 440;
 const COPILOT_RAIL_MIN_WIDTH = 280;
 const COPILOT_RAIL_MAX_WIDTH = 560;
 
