@@ -474,9 +474,10 @@ function systemPrompt(currentDate, dashboardMonth, displayCurrency) {
 }
 
 function answerContent(message) {
-  if (typeof message?.content === "string") return message.content;
-  if (Array.isArray(message?.content)) return message.content.map((part) => part?.text || "").join("");
-  return "I could not generate an answer from the available financial data.";
+  let text = "";
+  if (typeof message?.content === "string") text = message.content.trim();
+  else if (Array.isArray(message?.content)) text = message.content.map((part) => part?.text || "").join("").trim();
+  return text || "I could not generate an answer from the available financial data.";
 }
 
 async function callComet(model, messages, tools) {
@@ -668,8 +669,14 @@ export default async function handler(req, res) {
       }
     }
     if (needsFinancialData(message) && !usedTools.length) throw new Error("The model returned an unverified financial answer.");
-    let answer = answerContent(completion?.choices?.[0]?.message);
-    if (!answer || answer.trim() === "I could not generate an answer from the available financial data.") {
+    let answer = "";
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant" && messages[i].content && typeof messages[i].content === "string" && messages[i].content.trim()) {
+        answer = messages[i].content.trim();
+        break;
+      }
+    }
+    if (!answer || answer === "I could not generate an answer from the available financial data.") {
       answer = await verifiedFallbackAnswer(db, userId, message, dashboardMonth);
     }
     const visualData = buildVisualData(lastToolName, lastToolResult, null) || undefined;
