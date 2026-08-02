@@ -897,7 +897,7 @@ function renderAiAssistantRail(model) {
         </div>
         ${renderAssistantIntegrationCta()}
         <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
-          <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask about your money..." aria-label="Ask AI Finance Assistant" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
+          <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask or add expense..." aria-label="Ask AI Finance Assistant" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
           <small>▣ Private · Uses only connected financial data</small>
         </form>
       </div>
@@ -1331,7 +1331,7 @@ function openAiChat(prefill = "") {
       </div>
       ${renderAssistantIntegrationCta()}
       <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
-        <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask about your money..." aria-label="Ask AI Finance Assistant" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
+        <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask or add expense..." aria-label="Ask AI Finance Assistant" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
         <small>▣ Private · Uses only connected financial data</small>
       </form>
     </div>
