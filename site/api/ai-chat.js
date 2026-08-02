@@ -679,7 +679,7 @@ export default async function handler(req, res) {
     if (!answer || answer === "I could not generate an answer from the available financial data.") {
       answer = await verifiedFallbackAnswer(db, userId, message, dashboardMonth);
     }
-    const visualData = buildVisualData(lastToolName, lastToolResult, null) || undefined;
+    const visualData = buildVisualData(lastToolName, lastToolResult, displayCurrency) || undefined;
     const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, visualData, cached: false };
     if (!mcpAccessToken) {
       responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
@@ -694,7 +694,7 @@ export default async function handler(req, res) {
       const fallbackDb = createClient({ url, authToken });
       const answer = await verifiedFallbackAnswer(fallbackDb, userId, message, dashboardMonth);
       const fallbackReport = await generateMonthlyReport(fallbackDb, userId, { month: dashboardMonth }, dashboardMonth).catch(() => null);
-      const visualData = buildVisualData("generate_monthly_report", fallbackReport, null) || undefined;
+      const visualData = buildVisualData("generate_monthly_report", fallbackReport, displayCurrency) || undefined;
       return res.status(200).json({
         answer,
         model: "verified-dashboard-fallback",
