@@ -1,6 +1,6 @@
 import { createClient } from "@libsql/client";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { readMcpizeProfile } from "./_mcpize-profile.js";
+import { cleanDisplayName, cleanProfilePhoto, readMcpizeProfile } from "./_mcpize-profile.js";
 import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
 
 const COOKIE = "expense_tracker_dashboard";
@@ -367,23 +367,35 @@ export default async function handler(req, res) {
     }, {})).map(([date, amountMinor]) => ({ date, amountMinor })).sort((a, b) => a.date.localeCompare(b.date));
     const recurring = (finance.recurring || []).filter((entry) => entry.active);
 
+    const storedProfileResult = await db.execute({
+      sql: "SELECT display_name,profile_photo_url FROM app_users WHERE user_id = ? LIMIT 1",
+      args: [userId],
+    });
+    const storedProfile = {
+      displayName: cleanDisplayName(storedProfileResult.rows[0]?.display_name),
+      profilePhotoUrl: cleanProfilePhoto(storedProfileResult.rows[0]?.profile_photo_url),
+    };
     const mcpizeProfile = session.displayName && session.profilePhotoUrl
       ? { displayName: "", profilePhotoUrl: "" }
       : await readMcpizeProfile(userId);
+    const resolvedProfile = {
+      displayName: session.displayName || mcpizeProfile.displayName || storedProfile.displayName || "",
+      profilePhotoUrl: session.profilePhotoUrl || mcpizeProfile.profilePhotoUrl || storedProfile.profilePhotoUrl || "",
+    };
 
     await recordActivity(db, {
       userId,
       source: "dashboard",
       eventType: "dashboard_viewed",
       detail: { month },
-      displayName: session.displayName || mcpizeProfile.displayName || "",
-      profilePhotoUrl: session.profilePhotoUrl || mcpizeProfile.profilePhotoUrl || "",
+      displayName: resolvedProfile.displayName,
+      profilePhotoUrl: resolvedProfile.profilePhotoUrl,
     });
 
     return res.status(200).json({
       user: {
-        displayName: session.displayName || mcpizeProfile.displayName || "User",
-        profilePhotoUrl: session.profilePhotoUrl || mcpizeProfile.profilePhotoUrl || "",
+        displayName: resolvedProfile.displayName || "User",
+        profilePhotoUrl: resolvedProfile.profilePhotoUrl,
       },
       month,
       previousMonth: previous,

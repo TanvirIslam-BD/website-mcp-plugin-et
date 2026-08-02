@@ -55,9 +55,11 @@ function identityFromAccessToken(accessToken) {
   if (parts.length !== 3) return null;
   try {
     const claims = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
-    const candidate = claims.sub || claims.user_id || claims.userId || claims.id || claims.user?.id;
+    const identityCandidates = [claims.sub, claims.user_id, claims.userId, claims.id, claims.user?.id, claims.data?.user?.id, claims.result?.user?.id];
+    const candidate = identityCandidates.find((value) => typeof value === "string" && /^[A-Za-z0-9:_-]{1,200}$/.test(value));
     if (typeof candidate !== "string" || !/^[A-Za-z0-9:_-]{1,200}$/.test(candidate)) return null;
-    const email = cleanDisplayName(claims.email || claims.user?.email);
+    const profileId = identityCandidates.find((value) => typeof value === "string" && /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(value)) || candidate;
+    const email = cleanDisplayName(claims.email || claims.user?.email || claims.data?.user?.email || claims.user_metadata?.email || claims.raw_user_meta_data?.email);
     const emailName = email.includes("@")
       ? email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase())
       : "";
@@ -69,6 +71,11 @@ function identityFromAccessToken(accessToken) {
       claims.username ||
       claims.user?.name ||
       claims.user_metadata?.full_name ||
+      claims.user_metadata?.name ||
+      claims.raw_user_meta_data?.full_name ||
+      claims.raw_user_meta_data?.name ||
+      claims.data?.user?.name ||
+      claims.data?.user?.full_name ||
       emailName,
     );
     const profilePhotoUrl = cleanProfilePhoto(
@@ -77,9 +84,15 @@ function identityFromAccessToken(accessToken) {
       claims.user?.picture ||
       claims.user?.avatar_url ||
       claims.user?.image ||
-      claims.user_metadata?.avatar_url,
+      claims.user_metadata?.avatar_url ||
+      claims.user_metadata?.picture ||
+      claims.raw_user_meta_data?.avatar_url ||
+      claims.raw_user_meta_data?.picture ||
+      claims.data?.user?.avatar_url ||
+      claims.data?.user?.picture ||
+      claims.data?.user?.image,
     );
-    return { userId: candidate, displayName, profilePhotoUrl };
+    return { userId: candidate, profileId, displayName, profilePhotoUrl };
   } catch {
     return null;
   }
@@ -135,12 +148,16 @@ export default async function handler(req, res) {
     // 200 response, so use the identity returned by the verified OAuth token
     // exchange as a secure fallback.
     const identity = identityFromAccessToken(tokenBody.access_token);
-    const mcpizeProfile = identity ? await readMcpizeProfile(identity.userId) : { displayName: "", profilePhotoUrl: "" };
+    const mcpizeProfile = identity ? await readMcpizeProfile(identity.profileId || identity.userId) : { displayName: "", profilePhotoUrl: "" };
     const responseDisplayName = cleanDisplayName(
       sessionBody?.user?.name ||
       sessionBody?.display_name ||
       tokenBody?.user?.name ||
-      tokenBody?.display_name,
+      tokenBody?.display_name ||
+      sessionBody?.data?.user?.name ||
+      sessionBody?.data?.user?.full_name ||
+      tokenBody?.data?.user?.name ||
+      tokenBody?.data?.user?.full_name,
     );
     const responseProfilePhoto = cleanProfilePhoto(
       sessionBody?.user?.picture ||
@@ -152,7 +169,13 @@ export default async function handler(req, res) {
       tokenBody?.user?.avatar_url ||
       tokenBody?.user?.image ||
       tokenBody?.picture ||
-      tokenBody?.avatar_url,
+      tokenBody?.avatar_url ||
+      sessionBody?.data?.user?.picture ||
+      sessionBody?.data?.user?.avatar_url ||
+      sessionBody?.data?.user?.image ||
+      tokenBody?.data?.user?.picture ||
+      tokenBody?.data?.user?.avatar_url ||
+      tokenBody?.data?.user?.image,
     );
     const privateSession = identity
       ? createDashboardSession(

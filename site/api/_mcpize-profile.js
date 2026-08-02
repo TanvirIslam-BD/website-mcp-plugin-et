@@ -19,11 +19,19 @@ export function cleanProfilePhoto(value) {
   }
 }
 
+function profileIdFromSubject(value) {
+  const subject = typeof value === "string" ? value.trim() : "";
+  const uuid = subject.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0];
+  return uuid || "";
+}
+
 export async function readMcpizeProfile(userId) {
-  if (!userId) return { displayName: "", profilePhotoUrl: "" };
+  const profileId = profileIdFromSubject(userId);
+  if (!profileId) return { displayName: "", profilePhotoUrl: "" };
   try {
     const url = new URL(MCPIZE_PROFILE_ENDPOINT);
-    url.searchParams.set("id", `eq.${userId}`);
+    // MCP OAuth subjects may be namespaced, while profiles.id is a UUID.
+    url.searchParams.set("id", `eq.${profileId}`);
     url.searchParams.set("select", "full_name,username,avatar_url");
     const response = await fetch(url, {
       headers: {
