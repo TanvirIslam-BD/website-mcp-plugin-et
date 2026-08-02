@@ -2404,7 +2404,7 @@ button {
 
 @media (min-width: 1440px) {
   .dashboard-shell {
-    grid-template-columns: 228px minmax(0, 1fr) 440px;
+    grid-template-columns: 228px minmax(0, 1fr) var(--assistant-rail-width, 440px);
   }
 
   .assistant-rail {
@@ -4549,7 +4549,7 @@ body {
 
 @media (min-width: 1440px) {
   .dashboard-shell {
-    grid-template-columns: 160px minmax(0, 1fr) 418px;
+    grid-template-columns: 160px minmax(0, 1fr) var(--assistant-rail-width, 418px);
   }
 
   .dashboard-shell:has(.assistant-rail.collapsed) {
@@ -6375,11 +6375,11 @@ textarea:focus-visible {
 
 @media (min-width: 1440px) {
   .dashboard-shell:has(.assistant-rail) {
-    grid-template-columns: 224px minmax(0, 1fr) 416px;
+    grid-template-columns: 224px minmax(0, 1fr) var(--assistant-rail-width, 440px);
   }
 
   .dashboard-shell.sidebar-collapsed:has(.assistant-rail) {
-    grid-template-columns: 76px minmax(0, 1fr) 416px;
+    grid-template-columns: 76px minmax(0, 1fr) var(--assistant-rail-width, 440px);
   }
 }
 
