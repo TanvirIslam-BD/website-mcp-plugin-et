@@ -2200,6 +2200,51 @@ button {
   font-size: 12px;
 }
 
+.tx-modal-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tx-modal-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 200px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line, #e2ebe6);
+  border-radius: 9px;
+  background: var(--page-mint, #f8fbfa);
+  color: var(--muted, #66778a);
+}
+
+.tx-modal-search input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--ink, #102131);
+  font: inherit;
+  font-size: 13px;
+  outline: 0;
+}
+
+.tx-modal-select {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line, #e2ebe6);
+  border-radius: 9px;
+  background: var(--page-mint, #f8fbfa);
+  color: var(--ink, #102131);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  outline: 0;
+  cursor: pointer;
+}
+
 .modal-close {
   display: grid;
   place-items: center;

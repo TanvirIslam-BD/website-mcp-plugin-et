@@ -1540,11 +1540,68 @@ function openPanel(kind) {
     return;
   }
   if (kind === "transactions") {
-    openModal("All Transactions", "Newest private transactions for this month.", panelRows(model.expenses || [], (expense, index) => {
-      const meta = model.expenseMetadata?.[expense.id] || {};
-      const [tone] = toneFor(expense.category, index);
-      return `<div class="plain-row"><span><b><i class="dot" style="--tone:${tone}"></i>${esc(meta.merchant || expense.description || "Expense")}</b><small>${esc(expense.date)} - ${esc(expense.category)} - ${esc(meta.paymentMethod || "Expense")}</small></span><strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong></div>`;
-    }), { wide: true });
+    const expenses = model.expenses || [];
+    const categories = Array.from(new Set(expenses.map(e => e.category).filter(Boolean))).sort();
+    const methods = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.paymentMethod).filter(Boolean))).sort();
+
+    const renderList = (filterText = "", selCategory = "", selMethod = "") => {
+      const query = filterText.toLowerCase().trim();
+      const filtered = expenses.filter(e => {
+        const meta = model.expenseMetadata?.[e.id] || {};
+        const merchant = (meta.merchant || e.description || "").toLowerCase();
+        const cat = (e.category || "").toLowerCase();
+        const desc = (e.description || "").toLowerCase();
+        const pMethod = (meta.paymentMethod || "").toLowerCase();
+        const matchesQuery = !query || merchant.includes(query) || cat.includes(query) || desc.includes(query) || pMethod.includes(query);
+        const matchesCategory = !selCategory || cat === selCategory.toLowerCase();
+        const matchesMethod = !selMethod || pMethod === selMethod.toLowerCase();
+        return matchesQuery && matchesCategory && matchesMethod;
+      });
+
+      return panelRows(filtered, (expense, index) => {
+        const meta = model.expenseMetadata?.[expense.id] || {};
+        const [tone] = toneFor(expense.category, index);
+        return `<div class="plain-row"><span><b><i class="dot" style="--tone:${tone}"></i>${esc(meta.merchant || expense.description || "Expense")}</b><small>${esc(expense.date)} - ${esc(expense.category)} - ${esc(meta.paymentMethod || "Expense")}</small></span><strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong></div>`;
+      });
+    };
+
+    const filterControlsHtml = `
+      <div class="tx-modal-filter-bar">
+        <label class="tx-modal-search">${icon("search")}<input type="search" placeholder="Filter by merchant, category..." data-tx-filter-search></label>
+        <select class="tx-modal-select" data-tx-filter-category>
+          <option value="">All categories</option>
+          ${categories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}
+        </select>
+        ${methods.length ? `
+        <select class="tx-modal-select" data-tx-filter-method>
+          <option value="">All methods</option>
+          ${methods.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("")}
+        </select>` : ""}
+      </div>
+      <div class="tx-modal-results" data-tx-results>
+        ${renderList()}
+      </div>
+    `;
+
+    openModal("All Transactions", "Newest private transactions for this month.", filterControlsHtml, { wide: true });
+
+    const modalEl = document.getElementById("dashboard-modal");
+    if (modalEl) {
+      const searchInput = modalEl.querySelector("[data-tx-filter-search]");
+      const catSelect = modalEl.querySelector("[data-tx-filter-category]");
+      const methodSelect = modalEl.querySelector("[data-tx-filter-method]");
+      const resultsContainer = modalEl.querySelector("[data-tx-results]");
+
+      const update = () => {
+        if (resultsContainer) {
+          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", methodSelect?.value || "");
+        }
+      };
+
+      searchInput?.addEventListener("input", update);
+      catSelect?.addEventListener("change", update);
+      methodSelect?.addEventListener("change", update);
+    }
     return;
   }
   if (kind === "bills") {
