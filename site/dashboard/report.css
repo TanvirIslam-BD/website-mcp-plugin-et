@@ -1811,8 +1811,8 @@ body.is-resizing-copilot * {
   .insights-panel {
     grid-column: 1;
     order: 4;
-    height: 124px;
-    min-height: 124px;
+    height: 148px;
+    min-height: 148px;
     overflow: hidden;
     padding: 7px !important;
   }
@@ -1820,8 +1820,8 @@ body.is-resizing-copilot * {
   .transactions-panel {
     grid-column: 2;
     order: 5;
-    height: 124px;
-    min-height: 124px;
+    height: 148px;
+    min-height: 148px;
     overflow: hidden;
     padding: 7px !important;
   }
