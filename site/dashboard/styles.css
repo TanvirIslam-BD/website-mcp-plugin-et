@@ -2348,6 +2348,9 @@ button {
   align-items: center;
   gap: 4px;
 }
+.ai-loading-text {
+  transition: opacity .18s ease-in-out;
+}
 .ai-typing i {
   width: 6px;
   height: 6px;

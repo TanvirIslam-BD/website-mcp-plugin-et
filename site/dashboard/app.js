@@ -1197,18 +1197,48 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   }
 }
 
-function appendAiLoading(chatRoot = document, message = "Processing your data....") {
+function appendAiLoading(chatRoot = document, message = "Processing your data...") {
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return null;
   const id = `ai-loading-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  
+  const steps = [
+    "Connecting to private financial database...",
+    "Verifying monthly expenses & budget limits...",
+    "Computing spending insights & patterns...",
+    "Generating personalized recommendations..."
+  ];
+
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
       <div class="ai-message-label">Money Copilot AI</div>
-      <div class="ai-message-body"><span class="ai-typing"><i></i><i></i><i></i></span><span>${esc(message)}</span></div>
+      <div class="ai-message-body">
+        <span class="ai-typing"><i></i><i></i><i></i></span>
+        <span class="ai-loading-text" data-loading-step>${esc(steps[0])}</span>
+      </div>
     </div>
   `);
+  
+  const el = list.querySelector(`#${id}`);
+  const stepText = el?.querySelector("[data-loading-step]");
+  let stepIdx = 0;
+  
+  const timer = setInterval(() => {
+    stepIdx = (stepIdx + 1) % steps.length;
+    if (stepText) {
+      stepText.style.opacity = "0";
+      setTimeout(() => {
+        if (stepText) {
+          stepText.textContent = steps[stepIdx];
+          stepText.style.opacity = "1";
+        }
+      }, 180);
+    }
+  }, 1600);
+
+  if (el) el._stepTimer = timer;
   list.scrollTop = list.scrollHeight;
-  return list.querySelector(`#${id}`);
+  return el;
 }
 
 function setAiSubmitLoading(button, isLoading) {
@@ -1374,6 +1404,7 @@ async function submitAiQuestion(form) {
     if (response.status === 401 || response.status === 403) throw authRequiredError();
     if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");
     const tools = body.usedTools?.length ? `Verified with ${body.usedTools.join(", ")}` : "General guidance";
+    if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
     loadingMessage?.remove();
     appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot, body.visualData || null);
   } catch (error) {
@@ -1382,6 +1413,7 @@ async function submitAiQuestion(form) {
       redirectToMcpizeAuth();
       return;
     }
+    if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
     loadingMessage?.remove();
     appendAiMessage("assistant", localDashboardAnswer(message), "Verified dashboard data · offline response", chatRoot);
   } finally {
