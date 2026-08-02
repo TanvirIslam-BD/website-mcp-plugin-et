@@ -3,6 +3,7 @@ const params = new URLSearchParams(location.search);
 const token = params.get("dashboard_token");
 const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
+const MONEY_COPILOT_MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
 
 function localDisplayCurrency(fallbackCurrency = "") {
   const saved = (() => {
@@ -190,6 +191,7 @@ function icon(name) {
     microphone: "<rect x='9' y='3' width='6' height='12' rx='3'/><path d='M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6'/>",
     camera: "<path d='M4 7h4l1.5-2h5L16 7h4v12H4z'/><circle cx='12' cy='13' r='3.5'/>",
     calendar: "<rect x='3' y='5' width='18' height='16' rx='2'/><path d='M16 3v4M8 3v4M3 10h18'/>",
+    check: "<path d='m5 12 4 4L19 6'/>",
   };
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.dashboard}</svg>`;
 }
@@ -847,8 +849,8 @@ function renderAssistantIntegrationCta() {
       <button class="assistant-integration-dismiss" type="button" data-dismiss-integration aria-label="Hide integration promotion">${icon("close")}</button>
       <div><strong>Connect Money Copilot AI with ChatGPT or Claude</strong><span>Scan receipts, voice log, AI insights &amp; more.</span></div>
       <nav aria-label="AI integrations">
-        <a href="/#how"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</a>
-        <a href="/#how"><img src="/assets/brands/claude.png" alt="">Claude</a>
+        <button type="button" data-panel="connections"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</button>
+        <button type="button" data-panel="connections"><img src="/assets/brands/claude.png" alt="">Claude</button>
       </nav>
     </section>
   `;
@@ -1426,6 +1428,50 @@ function panelRows(items, render) {
 function openPanel(kind) {
   const model = window.dashboardModel;
   if (!model) return;
+  if (kind === "connections") {
+    const endpoint = esc(MONEY_COPILOT_MCP_ENDPOINT);
+    openModal("Connect Money Copilot", "Use your private finance tools from ChatGPT, Claude, or another MCP client.", `
+      <section class="mcp-connect-card" aria-label="Money Copilot MCP connection">
+        <div class="mcp-connect-head">
+          <span class="mcp-connect-identity"><img src="/assets/logo/money-copilot-app-logo.png" alt=""><span><b>Money Copilot MCP</b><small>Remote MCP server</small></span></span>
+          <span class="mcp-ready"><i></i>Ready</span>
+        </div>
+        <div class="mcp-credential-status"><i></i><span><b>Secure connection available</b><small>Each user signs in with their own OAuth session.</small></span></div>
+        <div class="mcp-endpoint-field">
+          <span><small>MCP Endpoint</small><code>${endpoint}</code></span>
+          <button type="button" data-copy-mcp-endpoint="${endpoint}" aria-label="Copy MCP endpoint">${icon("copy")}<span>Copy</span></button>
+        </div>
+        <div class="mcp-auth-row"><span>${icon("lock")}Authentication</span><b>OAuth 2.0 + PKCE</b></div>
+        <p class="mcp-security-note">Your MCPize owner API key is never shown here. Connected clients authorize each user separately, keeping financial workspaces isolated.</p>
+      </section>
+
+      <section class="mcp-client-section">
+        <div class="mcp-client-heading"><div><h3>Choose your MCP client</h3><p>Select a client to see its connection steps.</p></div><span>3 options</span></div>
+        <div class="mcp-client-grid" role="tablist" aria-label="MCP clients">
+          <button class="active" type="button" role="tab" aria-selected="true" data-connect-client="chatgpt"><img src="/assets/brands/chatgpt.png" alt=""><span><b>ChatGPT</b><small>Custom MCP app</small></span>${icon("chevron")}</button>
+          <button type="button" role="tab" aria-selected="false" data-connect-client="claude"><img src="/assets/brands/claude.png" alt=""><span><b>Claude</b><small>Remote connector</small></span>${icon("chevron")}</button>
+          <button type="button" role="tab" aria-selected="false" data-connect-client="other"><img src="/assets/brands/mcp.png" alt=""><span><b>Any MCP client</b><small>Remote HTTP</small></span>${icon("chevron")}</button>
+        </div>
+
+        <div class="mcp-client-guide" data-connection-guide="chatgpt">
+          <strong>Connect with ChatGPT</strong>
+          <ol><li>Open ChatGPT Settings &gt; Apps and enable Developer Mode.</li><li>Select Create, then paste the MCP endpoint above.</li><li>Choose OAuth, complete sign-in, and scan the available tools.</li></ol>
+          <small>Full write actions such as adding expenses require a supported workspace plan and permissions.</small>
+        </div>
+        <div class="mcp-client-guide" data-connection-guide="claude" hidden>
+          <strong>Connect with Claude</strong>
+          <ol><li>Open Claude integrations or connector settings.</li><li>Add a remote MCP server and paste the endpoint above.</li><li>Complete OAuth authorization, then approve the Money Copilot tools.</li></ol>
+          <small>The exact menu name can vary between Claude.ai, Claude Desktop, and Claude Code.</small>
+        </div>
+        <div class="mcp-client-guide" data-connection-guide="other" hidden>
+          <strong>Connect another MCP client</strong>
+          <ol><li>Create a remote HTTP MCP connection.</li><li>Use the endpoint above as the server URL.</li><li>Choose OAuth/Bearer authentication and complete the authorization flow.</li></ol>
+          <small>Use only clients that support remote MCP over HTTPS and OAuth authentication.</small>
+        </div>
+      </section>
+    `, { wide: true, className: "connections-modal" });
+    return;
+  }
   if (kind === "email-report") {
     const month = monthLabel(model.month);
     let savedEmail = "";
@@ -2005,6 +2051,46 @@ function bindEvents() {
   }, { once: true });
 
   document.addEventListener("click", (event) => {
+    const copyMcpEndpoint = event.target.closest("[data-copy-mcp-endpoint]");
+    if (copyMcpEndpoint) {
+      const endpoint = copyMcpEndpoint.dataset.copyMcpEndpoint;
+      const copyEndpoint = navigator.clipboard?.writeText
+        ? navigator.clipboard.writeText(endpoint)
+        : new Promise((resolve, reject) => {
+            const field = document.createElement("textarea");
+            field.value = endpoint;
+            field.setAttribute("readonly", "");
+            field.style.position = "fixed";
+            field.style.opacity = "0";
+            document.body.appendChild(field);
+            field.select();
+            const copied = document.execCommand("copy");
+            field.remove();
+            copied ? resolve() : reject(new Error("Clipboard is unavailable."));
+          });
+      copyEndpoint.then(() => {
+        copyMcpEndpoint.classList.add("copied");
+        copyMcpEndpoint.innerHTML = `${icon("check")}<span>Copied</span>`;
+        setTimeout(() => {
+          if (!copyMcpEndpoint.isConnected) return;
+          copyMcpEndpoint.classList.remove("copied");
+          copyMcpEndpoint.innerHTML = `${icon("copy")}<span>Copy</span>`;
+        }, 1800);
+      }).catch(() => {});
+      return;
+    }
+    const connectClient = event.target.closest("[data-connect-client]");
+    if (connectClient) {
+      const key = connectClient.dataset.connectClient;
+      const modal = connectClient.closest(".connections-modal");
+      modal?.querySelectorAll("[data-connect-client]").forEach((button) => {
+        const active = button === connectClient;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      modal?.querySelectorAll("[data-connection-guide]").forEach((guide) => { guide.hidden = guide.dataset.connectionGuide !== key; });
+      return;
+    }
     const monthPickerToggle = event.target.closest("[data-month-picker-toggle]");
     if (monthPickerToggle) {
       const picker = monthPickerToggle.closest("[data-month-picker]");
