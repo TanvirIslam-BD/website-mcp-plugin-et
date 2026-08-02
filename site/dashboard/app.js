@@ -885,7 +885,7 @@ function renderAiAssistantRail(model) {
           <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
           <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
           <div class="assistant-alert-actions">
-            <button type="button" data-entry="expense">${icon("plus")}Add expense</button>
+            <button type="button" data-ai-suggestion="Record an expense of 50 BDT for food">${icon("plus")}Add expense</button>
             <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
             <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
             <button type="button" data-ai-suggestion="Help me plan next month's budget.">${icon("bills")}Plan budget</button>
@@ -1319,7 +1319,7 @@ function openAiChat(prefill = "") {
         <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
         <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
         <div class="assistant-alert-actions">
-          <button type="button" data-entry="expense">${icon("plus")}Add expense</button>
+          <button type="button" data-ai-suggestion="Record an expense of 50 BDT for food">${icon("plus")}Add expense</button>
           <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
           <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
           <button type="button" data-ai-suggestion="Help me plan next month's budget.">${icon("bills")}Plan budget</button>
