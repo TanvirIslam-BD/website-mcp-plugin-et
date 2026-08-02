@@ -1688,26 +1688,31 @@ body.is-resizing-copilot * {
   }
 
   .spending-report {
-    grid-template-columns: 66px minmax(0, 1fr);
-    gap: 6px;
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 8px;
     align-items: center;
   }
 
   .spending-donut {
-    width: 66px;
-    height: 66px;
+    width: 78px;
+    height: 78px;
+    padding: 6px;
   }
 
   .spending-donut > div {
-    inset: 10px;
+    width: 100%;
+    height: 100%;
+    padding: 2px;
   }
 
   .spending-donut b {
-    font-size: 11px;
+    font-size: 10px;
+    line-height: 1.1;
   }
 
   .spending-donut span {
-    font-size: 8px;
+    font-size: 7.5px;
+    margin-top: 1px;
   }
 
   .category-legend {
