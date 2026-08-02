@@ -1,0 +1,13 @@
+Create a polished 10-second vertical 9:16 fintech SaaS commercial with four clearly timed editorial beats and clean, fast cuts. The aesthetic is realistic, cinematic, premium, modern, soft directional lighting, refined navy/teal/electric-blue color, shallow depth of field, smooth controlled motion, and crisp commercial contrast.
+
+Use the reference images as strict anchors: @image1 defines the authentic ChatGPT mobile interface and spending-report visual language; @image2 defines Money Copilot AI's bright premium brand palette and clean dashboard presentation; @image3 defines the exact Money Copilot AI dark logo packshot and navy background treatment.
+
+0.0-2.0 seconds — In a softly lit modern apartment, a young professional in their late twenties checks a banking app on a smartphone. Close over-the-shoulder insert of a surprisingly low available balance, then a quick reaction close-up: confused, concerned, restrained and believable. One subject action and one subtle camera push-in. Keep the phone screen simple and planar for later compositing; do not invent readable interface copy.
+
+2.0-5.0 seconds — Match cut to the same professional opening ChatGPT on the phone. Shift to a nearly straight-on phone angle with the screen stable and unobstructed. Their thumb types a question, then a refined teal-and-blue loading pulse begins and a report starts forming instantly. Base the interface hierarchy on @image1. Keep the screen clean for exact post-production text; do not generate pseudo-letters or fake readable copy.
+
+5.0-8.0 seconds — Soft white light-flare transition into a beautiful full-screen AI spending report inspired by @image1 and @image2. Four category rows animate upward, a donut chart resolves, then an AI insight card glides into view. The UI is credible, spacious, premium, and easy to read, with reserved clean zones for exact text added in post. No invented claims, no fake currency copy, no decorative sci-fi panels.
+
+8.0-10.0 seconds — Smooth glow transition to a deep navy premium brand frame inspired by @image3. A clean Money Copilot AI dashboard sits softly out of focus in the background while the centered logo area resolves with a restrained teal-blue halo. Hold the final frame steady as a product packshot with generous safe margins for exact logo and tagline compositing.
+
+Continuity and safety: the same professional appears in the first two beats; natural hands and phone proportions; no extra faces or fingers; no camera shake; no warped screens; no baked captions; no subtitle text; no invented logos; no illegible pseudo-language; no music or generated audio. End on a clean, stable brand frame.
