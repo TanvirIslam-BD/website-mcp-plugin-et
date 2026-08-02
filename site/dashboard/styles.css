@@ -10045,3 +10045,43 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   background: #0d1e30!important;
   color: #f0f6ff!important;
 }
+
+:root[data-theme="dark"] .data-action-card {
+  background: #091724!important;
+  border-color: #1e3248!important;
+  color: #e4edf8!important;
+}
+
+:root[data-theme="dark"] .data-action-card h3 {
+  color: #f0f6ff!important;
+}
+
+:root[data-theme="dark"] .data-action-card p {
+  color: #8da1c2!important;
+}
+
+:root[data-theme="dark"] .data-action-card.danger-soft {
+  background: #170f1a!important;
+  border-color: #3b1c28!important;
+}
+
+:root[data-theme="dark"] .data-action-card > i {
+  background: #162438!important;
+  color: #58a6ff!important;
+}
+
+:root[data-theme="dark"] .data-action-card.danger-soft > i {
+  background: #2d141e!important;
+  color: #ff6b6e!important;
+}
+
+:root[data-theme="dark"] .data-action-buttons a.action-button {
+  background: #122820!important;
+  border-color: #1b4d3a!important;
+  color: #38d996!important;
+}
+
+:root[data-theme="dark"] .data-action-buttons a.action-button:hover {
+  background: #1b4d3a!important;
+  color: #ffffff!important;
+}
