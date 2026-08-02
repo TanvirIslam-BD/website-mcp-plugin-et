@@ -9993,3 +9993,35 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 :root[data-theme="dark"] .chart-y-axis{
   color:#9baca5!important;
 }
+
+:root[data-theme="dark"] .plain-row {
+  background: #091724!important;
+  border-color: #1e3248!important;
+  color: #e4edf8!important;
+}
+
+:root[data-theme="dark"] .plain-row b {
+  color: #f0f6ff!important;
+}
+
+:root[data-theme="dark"] .plain-row small {
+  color: #8da1c2!important;
+}
+
+:root[data-theme="dark"] .plain-row .amount {
+  color: #ff6b6e!important;
+}
+
+:root[data-theme="dark"] .manage-card {
+  background: #091724!important;
+  border-color: #1e3248!important;
+  color: #e4edf8!important;
+}
+
+:root[data-theme="dark"] .manage-card b {
+  color: #f0f6ff!important;
+}
+
+:root[data-theme="dark"] .manage-card small {
+  color: #8da1c2!important;
+}
