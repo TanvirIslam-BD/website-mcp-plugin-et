@@ -127,7 +127,7 @@ export default async function handler(req, res) {
                       <table cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
                         <tr>
                           <td style="padding-right: 10px; vertical-align: middle;">
-                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="36" height="36" alt="Money Copilot AI" style="display: block;">
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="36" height="36" alt="Money Copilot AI" style="display: block; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                           </td>
                           <td style="vertical-align: middle;">
                             <h1 style="margin: 0; font-size: 17px; font-weight: 800; color: #ffffff; line-height: 1.2; letter-spacing: -0.3px;">Money Copilot AI</h1>
@@ -581,7 +581,7 @@ export default async function handler(req, res) {
                       <table cellpadding="0" cellspacing="0" class="mobile-footer-table" style="margin: 0 auto;">
                         <tr>
                           <td width="34" style="padding-right: 8px; vertical-align: middle;">
-                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="28" height="28" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto;">
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="28" height="28" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto; border-radius: 8px; overflow: hidden;">
                           </td>
                           <td style="vertical-align: middle; text-align: left;">
                             <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2; white-space: nowrap;">Money Copilot AI</div>
