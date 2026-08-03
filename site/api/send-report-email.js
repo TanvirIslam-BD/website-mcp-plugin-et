@@ -23,10 +23,17 @@ export default async function handler(req, res) {
 
   const emailSubject = `📊 Money Copilot Report - ${month}`;
 
-  // Color lookup for spending categories
+  // Helper to strictly parse numeric amounts from number or formatted string
+  const getNumericAmount = (cat) => {
+    if (typeof cat.amount === "number" && !isNaN(cat.amount)) return cat.amount;
+    const str = String(cat.amountFormatted || cat.amount || "0").replace(/[^0-9.]/g, "");
+    return parseFloat(str) || 0;
+  };
+
+  // Color lookup for spending categories matching mockup
   const categoryMeta = {
     health: { color: "#ef4444", icon: "❤️", bg: "#fef2f2" },
-    education: { color: "#3b82f6", icon: "📘", bg: "#eff6ff" },
+    education: { color: "#3b82f6", icon: "🎓", bg: "#eff6ff" },
     food: { color: "#f97316", icon: "🍴", bg: "#fff7ed" },
     groceries: { color: "#10b981", icon: "🛒", bg: "#ecfdf5" },
     shopping: { color: "#ec4899", icon: "🛍️", bg: "#fdf2f8" },
@@ -35,70 +42,39 @@ export default async function handler(req, res) {
     transport: { color: "#6366f1", icon: "🚗", bg: "#eef2ff" }
   };
 
-  // Compute category breakdown with percentage bars
-  const categoryTotal = (categories || []).reduce((sum, c) => sum + (c.amount || 0), 0) || 1;
+  // Compute category breakdown with accurate percentage bars
+  const categoryTotal = (categories || []).reduce((sum, c) => sum + getNumericAmount(c), 0) || 1;
   const breakdownRows = (categories || []).slice(0, 4).map((cat) => {
     const key = (cat.name || "").toLowerCase().trim();
     const meta = categoryMeta[key] || { color: "#10b981", icon: "🏷️", bg: "#ecfdf5" };
     const nameFormatted = cat.name ? cat.name.charAt(0).toUpperCase() + cat.name.slice(1) : "Uncategorized";
-    const amountVal = typeof cat.amount === "number" ? cat.amount : parseFloat(String(cat.amountFormatted || cat.amount || "0").replace(/[^0-9.]/g, "")) || 0;
-    const percent = Math.round((amountVal / categoryTotal) * 100);
+    const amountVal = getNumericAmount(cat);
+    const percent = Math.min(100, Math.max(1, Math.round((amountVal / categoryTotal) * 100)));
     const amountDisp = cat.amountFormatted || `${currency === "BDT" ? "৳" : currency === "USD" ? "$" : ""}${amountVal.toLocaleString("en-US")}`;
 
     return `
     <tr>
-      <td style="padding: 8px 0; vertical-align: middle;" width="28">
+      <td style="padding: 6px 0; vertical-align: middle;" width="28">
         <div style="width: 28px; height: 28px; background-color: ${meta.bg}; border-radius: 50%; text-align: center; line-height: 28px; font-size: 13px;">${meta.icon}</div>
       </td>
-      <td style="padding: 8px 6px; vertical-align: middle;">
-        <div style="font-size: 13px; font-weight: 600; color: #1e293b;">${nameFormatted}</div>
+      <td style="padding: 6px 8px; vertical-align: middle;">
+        <div style="font-size: 13px; font-weight: 700; color: #1e293b;">${nameFormatted}</div>
       </td>
-      <td style="padding: 8px 0; vertical-align: middle; text-align: right; white-space: nowrap;" width="80">
-        <strong style="font-size: 13px; font-weight: 800; color: #0f172a;">${amountDisp}</strong>
+      <td style="padding: 6px 0; vertical-align: middle; text-align: right; white-space: nowrap;">
+        <div style="font-size: 13px; font-weight: 800; color: #0f172a;">${amountDisp}</div>
+        <div style="font-size: 11px; font-weight: 700; color: ${meta.color}; margin-top: 1px;">${percent}%</div>
       </td>
     </tr>
     <tr>
       <td></td>
-      <td colspan="2" style="padding: 0 0 4px 0;">
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td>
-              <div style="width: 100%; height: 6px; background-color: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: ${Math.min(100, percent)}%; height: 100%; background-color: ${meta.color}; border-radius: 99px;"></div>
-              </div>
-            </td>
-            <td style="padding-left: 8px; width: 32px; text-align: right;">
-              <span style="font-size: 11px; color: ${meta.color}; font-weight: 700;">${percent}%</span>
-            </td>
-          </tr>
-        </table>
+      <td colspan="2" style="padding: 0 0 10px 0;">
+        <div style="width: 100%; height: 7px; background-color: #f1f5f9; border-radius: 99px; overflow: hidden;">
+          <div style="width: ${percent}%; height: 100%; background-color: ${meta.color}; border-radius: 99px;"></div>
+        </div>
       </td>
     </tr>
     `;
   }).join("");
-
-  // SVG for header dashboard illustration
-  const headerGraphicSvg = `<svg width="160" height="120" viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Bar chart -->
-    <rect x="8" y="60" width="12" height="40" rx="3" fill="#10b981" opacity="0.5"/>
-    <rect x="24" y="45" width="12" height="55" rx="3" fill="#10b981" opacity="0.7"/>
-    <rect x="40" y="30" width="12" height="70" rx="3" fill="#10b981"/>
-    <rect x="56" y="50" width="12" height="50" rx="3" fill="#34d399" opacity="0.6"/>
-    <!-- Pie/donut segment -->
-    <circle cx="110" cy="45" r="28" stroke="#1e3a5f" stroke-width="8" fill="none" opacity="0.3"/>
-    <circle cx="110" cy="45" r="28" stroke="#10b981" stroke-width="8" fill="none" stroke-dasharray="44 132" stroke-dashoffset="0" stroke-linecap="round"/>
-    <circle cx="110" cy="45" r="28" stroke="#34d399" stroke-width="8" fill="none" stroke-dasharray="26 150" stroke-dashoffset="-44" stroke-linecap="round" opacity="0.7"/>
-    <!-- Speedometer arc -->
-    <path d="M 20 105 A 30 30 0 0 1 80 105" stroke="#1e3a5f" stroke-width="5" fill="none" opacity="0.3" stroke-linecap="round"/>
-    <path d="M 20 105 A 30 30 0 0 1 60 82" stroke="#10b981" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <circle cx="58" cy="84" r="3" fill="#34d399"/>
-    <!-- Currency symbol -->
-    <text x="105" y="100" fill="#34d399" font-size="18" font-weight="800" font-family="sans-serif" opacity="0.6">৳</text>
-    <!-- Decorative dots -->
-    <circle cx="140" cy="20" r="2" fill="#10b981" opacity="0.4"/>
-    <circle cx="148" cy="35" r="1.5" fill="#34d399" opacity="0.3"/>
-    <circle cx="5" cy="25" r="1.5" fill="#10b981" opacity="0.3"/>
-  </svg>`;
 
   const emailHtml = `
     <!DOCTYPE html>
@@ -112,7 +88,7 @@ export default async function handler(req, res) {
         body, td, th, p, div, span, a, h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; }
       </style>
     </head>
-    <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color: #0f172a;">
+    <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; color: #0f172a;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 24px 10px;">
         <tr>
           <td align="center">
@@ -122,12 +98,12 @@ export default async function handler(req, res) {
               <!-- 1. HEADER: Dark Navy Banner + Dashboard Illustration       -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td style="background: linear-gradient(145deg, #040914 0%, #0a1a2e 60%, #0d2a3a 100%); padding: 28px 28px 26px 28px;">
+                <td style="background: linear-gradient(145deg, #030712 0%, #061325 55%, #082436 100%); padding: 28px 28px 24px 28px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <!-- Left: Brand + Title -->
-                      <td style="vertical-align: top;" width="62%">
-                        <table cellpadding="0" cellspacing="0" style="margin-bottom: 18px;">
+                      <!-- Left: Logo & Titles -->
+                      <td style="vertical-align: top;" width="64%">
+                        <table cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
                           <tr>
                             <td style="padding-right: 10px; vertical-align: middle;">
                               <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="36" height="36" alt="Money Copilot AI" style="display: block;">
@@ -142,9 +118,28 @@ export default async function handler(req, res) {
                         <div style="font-size: 16px; font-weight: 800; color: #34d399; margin-bottom: 8px;">${month}</div>
                         <p style="margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">AI analyzed your spending and found opportunities to save more.</p>
                       </td>
-                      <!-- Right: Dashboard Illustration -->
-                      <td style="vertical-align: top; text-align: right;" width="38%">
-                        ${headerGraphicSvg}
+                      <!-- Right: Email-safe Dashboard Card Window -->
+                      <td style="vertical-align: top; text-align: right;" width="36%">
+                        <div style="display: inline-block; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 14px; padding: 10px 12px; width: 140px; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                          <div style="margin-bottom: 8px;">
+                            <span style="display: inline-block; width: 6px; height: 6px; background-color: #ef4444; border-radius: 50%; margin-right: 3px;"></span>
+                            <span style="display: inline-block; width: 6px; height: 6px; background-color: #f59e0b; border-radius: 50%; margin-right: 3px;"></span>
+                            <span style="display: inline-block; width: 6px; height: 6px; background-color: #10b981; border-radius: 50%;"></span>
+                          </div>
+                          <!-- Mini Bar Chart -->
+                          <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 8px;">
+                            <tr>
+                              <td style="vertical-align: bottom; height: 36px; padding-right: 3px;"><div style="background-color: #10b981; height: 18px; border-radius: 2px; opacity: 0.6;"></div></td>
+                              <td style="vertical-align: bottom; height: 36px; padding-right: 3px;"><div style="background-color: #10b981; height: 26px; border-radius: 2px; opacity: 0.8;"></div></td>
+                              <td style="vertical-align: bottom; height: 36px; padding-right: 3px;"><div style="background-color: #10b981; height: 36px; border-radius: 2px;"></div></td>
+                              <td style="vertical-align: bottom; height: 36px;"><div style="background-color: #34d399; height: 22px; border-radius: 2px; opacity: 0.7;"></div></td>
+                            </tr>
+                          </table>
+                          <!-- Donut Ring & Status -->
+                          <div style="background-color: rgba(16, 185, 129, 0.15); border-radius: 6px; padding: 4px 6px; text-align: center;">
+                            <span style="font-size: 9px; font-weight: 800; color: #34d399;">Budget: 20%</span>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   </table>
@@ -155,21 +150,21 @@ export default async function handler(req, res) {
               <!-- 2. GREETING + AI INSIGHT CARD                              -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td style="padding: 26px 24px 18px 24px; background-color: #ffffff;">
+                <td style="padding: 24px 24px 18px 24px; background-color: #ffffff;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="vertical-align: top; padding-right: 16px;" width="40%">
+                      <td style="vertical-align: top; padding-right: 16px;" width="42%">
                         <h3 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2;">Hi ${displayName}! 👋</h3>
                         <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #64748b;">
                           Here's your AI-powered financial summary for ${month}.
                         </p>
                       </td>
-                      <td width="60%" style="vertical-align: top;">
-                        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 14px 16px;">
+                      <td width="58%" style="vertical-align: top;">
+                        <div style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 14px; padding: 14px 16px;">
                           <table cellpadding="0" cellspacing="0" width="100%">
                             <tr>
                               <td style="vertical-align: top; width: 36px; padding-right: 10px;">
-                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #059669, #10b981); border-radius: 50%; text-align: center; line-height: 36px; color: #ffffff; font-size: 16px;">✨</div>
+                                <div style="width: 36px; height: 36px; background-color: #10b981; border-radius: 50%; text-align: center; line-height: 36px; color: #ffffff; font-size: 16px;">✨</div>
                               </td>
                               <td style="vertical-align: top;">
                                 <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px;">✨ AI Insight</div>
@@ -188,34 +183,32 @@ export default async function handler(req, res) {
               </tr>
 
               <!-- ═══════════════════════════════════════════════════════════ -->
-              <!-- 3. METRIC CARDS ROW                                        -->
+              <!-- 3. TOP 5 METRIC CARDS ROW                                  -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
                 <td style="padding: 0 24px 20px 24px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <!-- Card 1: Budget Used (Horizontal layout: gauge left, text right) -->
-                      <td width="36%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 12px; vertical-align: middle;">
+                      <!-- Card 1: Budget Used (Horizontal donut layout) -->
+                      <td width="34%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 10px; vertical-align: middle;">
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
-                            <td style="vertical-align: middle; text-align: left;" colspan="2">
-                              <div style="font-size: 11px; font-weight: 800; color: #334155; margin-bottom: 10px;">Budget Used</div>
-                            </td>
+                            <td colspan="2" style="font-size: 11px; font-weight: 800; color: #334155; padding-bottom: 8px;">Budget Used</td>
                           </tr>
                           <tr>
-                            <!-- Donut gauge -->
-                            <td width="70" style="vertical-align: middle;">
-                              <div style="width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(#10b981 0% ${budgetUsed}%, #e2e8f0 ${budgetUsed}% 100%); text-align: center;">
-                                <div style="width: 48px; height: 48px; background-color: #ffffff; border-radius: 50%; line-height: 48px; text-align: center; font-size: 15px; font-weight: 800; color: #047857; margin: 8px auto; display: inline-block;">
+                            <!-- Donut ring graphic -->
+                            <td width="56" style="vertical-align: middle;">
+                              <div style="width: 54px; height: 54px; border-radius: 50%; background: conic-gradient(#10b981 0% ${budgetUsed}%, #e2e8f0 ${budgetUsed}% 100%); text-align: center;">
+                                <div style="width: 40px; height: 40px; background-color: #ffffff; border-radius: 50%; line-height: 40px; text-align: center; font-size: 14px; font-weight: 800; color: #047857; margin: 7px auto; display: inline-block;">
                                   ${budgetUsed}%
                                 </div>
                               </div>
                             </td>
                             <!-- Right text -->
-                            <td style="vertical-align: middle; padding-left: 8px;">
-                              <div style="font-size: 12px; font-weight: 800; color: #10b981; margin-bottom: 2px;">Excellent!</div>
-                              <div style="font-size: 9.5px; color: #94a3b8; line-height: 1.35;">You're well within your budget.</div>
-                              <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin-top: 4px;">✓</div>
+                            <td style="vertical-align: middle; padding-left: 6px;">
+                              <div style="font-size: 11.5px; font-weight: 800; color: #10b981; margin-bottom: 2px;">Excellent!</div>
+                              <div style="font-size: 9px; color: #94a3b8; line-height: 1.3;">You're well within your budget.</div>
+                              <div style="width: 16px; height: 16px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 10px; line-height: 16px; text-align: center; margin-top: 4px;">✓</div>
                             </td>
                           </tr>
                         </table>
@@ -224,40 +217,40 @@ export default async function handler(req, res) {
                       <td width="1.5%"></td>
 
                       <!-- Card 2: Total Spent -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 32px; font-size: 15px;">💰</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Total Spent</div>
-                        <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.3px;">${spentFormatted}</div>
-                        <div style="font-size: 8.5px; color: #10b981; font-weight: 700; line-height: 1.3;">↓ 12% lower<br>than last month</div>
+                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
+                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">💰</div>
+                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Total Spent</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${spentFormatted}</div>
+                        <div style="font-size: 8.5px; color: #10b981; font-weight: 700; line-height: 1.25;">↓ 12% lower<br>than last month</div>
                       </td>
 
                       <td width="1.5%"></td>
 
                       <!-- Card 3: Budget Limit -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 32px; font-size: 15px;">🎯</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Budget Limit</div>
-                        <div style="font-size: 15px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px;">${budgetFormatted}</div>
+                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
+                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">🎯</div>
+                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Budget Limit</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px;">${budgetFormatted}</div>
                       </td>
 
                       <td width="1.5%"></td>
 
                       <!-- Card 4: Remaining -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 32px; font-size: 15px;">💵</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Remaining</div>
-                        <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${remainingFormatted}</div>
+                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
+                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">💵</div>
+                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Remaining</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${remainingFormatted}</div>
                         <div style="font-size: 9px; color: #10b981; font-weight: 700;">Great job!</div>
                       </td>
 
                       <td width="1.5%"></td>
 
                       <!-- Card 5: Status -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 32px; font-size: 15px;">📊</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Status</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #059669; line-height: 1.25; margin-bottom: 4px;">Within<br>Budget</div>
-                        <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin: 0 auto;">✓</div>
+                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
+                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">📊</div>
+                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Status</div>
+                        <div style="font-size: 13px; font-weight: 800; color: #059669; line-height: 1.25; margin-bottom: 4px;">Within<br>Budget</div>
+                        <div style="width: 16px; height: 16px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 10px; line-height: 16px; text-align: center; margin: 0 auto;">✓</div>
                       </td>
                     </tr>
                   </table>
@@ -265,7 +258,7 @@ export default async function handler(req, res) {
               </tr>
 
               <!-- ═══════════════════════════════════════════════════════════ -->
-              <!-- 4. SPENDING BREAKDOWN + AI SAVINGS                         -->
+              <!-- 4. MIDDLE ROW: SPENDING BREAKDOWN & AI SAVINGS             -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
                 <td style="padding: 0 24px 20px 24px;">
@@ -279,15 +272,15 @@ export default async function handler(req, res) {
                           ${breakdownRows || `<tr><td style="font-size: 12px; color: #94a3b8; padding: 8px 0;">No spending recorded.</td></tr>`}
                         </table>
 
-                        <div style="margin-top: 10px; text-align: left;">
+                        <div style="margin-top: 8px; text-align: left;">
                           <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="font-size: 11.5px; font-weight: 700; color: #10b981; text-decoration: none;">View all categories →</a>
                         </div>
                       </td>
 
                       <td width="4%"></td>
 
-                      <!-- Right: AI Savings Card -->
-                      <td width="48%" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
+                      <!-- Right: AI Savings Card (Piggy Bank) -->
+                      <td width="48%" style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
                           <tr>
                             <td style="vertical-align: top;">
@@ -295,13 +288,13 @@ export default async function handler(req, res) {
                               <div style="font-size: 28px; font-weight: 800; color: #047857; letter-spacing: -0.8px; line-height: 1.1;">৳1,800</div>
                               <div style="font-size: 11.5px; color: #166534; font-weight: 600; margin-top: 4px;">by optimizing these areas:</div>
                             </td>
-                            <td style="vertical-align: top; text-align: right;" width="60">
-                              <div style="font-size: 40px; line-height: 1;">🐷</div>
+                            <td style="vertical-align: top; text-align: right;" width="50">
+                              <div style="font-size: 38px; line-height: 1;">🐷</div>
                             </td>
                           </tr>
                         </table>
 
-                        <!-- Savings items -->
+                        <!-- Savings items in green circles -->
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
                           <tr>
                             <td width="28" style="vertical-align: middle;">
@@ -350,72 +343,44 @@ export default async function handler(req, res) {
                 <td style="padding: 0 24px 24px 24px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <!-- Left: Spending Trend -->
+                      <!-- Left: Email-Safe Spending Trend Chart -->
                       <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
                           <tr>
                             <td style="font-size: 13px; font-weight: 800; color: #0f172a;">Spending Trend <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">(Last 6 Months)</span></td>
                             <td style="text-align: right;" width="20"><span style="font-size: 14px; color: #10b981;">↗</span></td>
                           </tr>
                         </table>
 
-                        <!-- Chart with Y-axis labels -->
-                        <table cellpadding="0" cellspacing="0" width="100%">
+                        <!-- Email-safe Bar/Trend Chart using HTML/CSS Table -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="height: 90px; border-bottom: 1px solid #e2e8f0;">
                           <tr>
-                            <!-- Y-axis labels -->
-                            <td width="30" style="vertical-align: top; padding-right: 4px;">
-                              <table cellpadding="0" cellspacing="0" width="100%" style="height: 80px;">
-                                <tr><td style="font-size: 8px; color: #94a3b8; font-weight: 600; vertical-align: top; height: 20px;">৳15K</td></tr>
-                                <tr><td style="font-size: 8px; color: #94a3b8; font-weight: 600; vertical-align: middle; height: 20px;">৳10K</td></tr>
-                                <tr><td style="font-size: 8px; color: #94a3b8; font-weight: 600; vertical-align: middle; height: 20px;">৳5K</td></tr>
-                                <tr><td style="font-size: 8px; color: #94a3b8; font-weight: 600; vertical-align: bottom; height: 20px;">৳0</td></tr>
-                              </table>
+                            <td width="28" style="vertical-align: top; padding-right: 4px;">
+                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600;">৳15K</div>
+                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; margin-top: 14px;">৳10K</div>
+                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; margin-top: 14px;">৳5K</div>
+                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; margin-top: 14px;">৳0</div>
                             </td>
-                            <!-- Chart area -->
-                            <td style="vertical-align: top;">
-                              <svg width="100%" height="80" viewBox="0 0 180 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Grid lines -->
-                                <line x1="0" y1="0" x2="180" y2="0" stroke="#f1f5f9" stroke-width="0.5"/>
-                                <line x1="0" y1="20" x2="180" y2="20" stroke="#f1f5f9" stroke-width="0.5"/>
-                                <line x1="0" y1="40" x2="180" y2="40" stroke="#f1f5f9" stroke-width="0.5"/>
-                                <line x1="0" y1="60" x2="180" y2="60" stroke="#f1f5f9" stroke-width="0.5"/>
-                                <!-- Area fill -->
-                                <path d="M6 52 L36 44 L72 30 L108 50 L144 40 L174 34 L174 78 L6 78 Z" fill="url(#trendGradV2)" opacity="0.35"/>
-                                <!-- Line -->
-                                <path d="M6 52 L36 44 L72 30 L108 50 L144 40 L174 34" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <!-- Dots -->
-                                <circle cx="6" cy="52" r="3.5" fill="#10b981"/>
-                                <circle cx="36" cy="44" r="3.5" fill="#10b981"/>
-                                <circle cx="72" cy="30" r="3.5" fill="#10b981"/>
-                                <circle cx="108" cy="50" r="3.5" fill="#10b981"/>
-                                <circle cx="144" cy="40" r="3.5" fill="#10b981"/>
-                                <circle cx="174" cy="34" r="5" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
-                                <defs>
-                                  <linearGradient id="trendGradV2" x1="0" y1="0" x2="0" y2="78" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#10b981"/>
-                                    <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-                                  </linearGradient>
-                                </defs>
-                              </svg>
-                            </td>
+                            <!-- 6 Month Bars with Green Tops -->
+                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 35px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
+                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 48px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
+                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 28px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
+                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 55px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
+                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 62px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
+                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #059669 0%, rgba(5,150,105,0.25) 100%); height: 52px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0; border-top: 3px solid #10b981;"></div></td>
                           </tr>
                         </table>
-                        <!-- X-axis labels -->
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 2px;">
+
+                        <!-- X-axis Labels -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 4px; font-size: 9px; color: #94a3b8; text-align: center;">
                           <tr>
-                            <td width="30"></td>
-                            <td>
-                              <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 9px; color: #94a3b8; text-align: center;">
-                                <tr>
-                                  <td width="16%">Mar</td>
-                                  <td width="16%">Apr</td>
-                                  <td width="18%">May</td>
-                                  <td width="18%">Jun</td>
-                                  <td width="16%">Jul</td>
-                                  <td width="16%" style="font-weight: 800; color: #10b981;">Aug</td>
-                                </tr>
-                              </table>
-                            </td>
+                            <td width="28"></td>
+                            <td width="14%">Mar</td>
+                            <td width="14%">Apr</td>
+                            <td width="14%">May</td>
+                            <td width="14%">Jun</td>
+                            <td width="14%">Jul</td>
+                            <td width="16%" style="font-weight: 800; color: #10b981;">Aug</td>
                           </tr>
                         </table>
                       </td>
@@ -425,19 +390,19 @@ export default async function handler(req, res) {
                       <!-- Right: Ask AI Anything -->
                       <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
                         <h4 style="margin: 0 0 3px 0; font-size: 14px; font-weight: 800; color: #0f172a;">Ask AI Anything</h4>
-                        <p style="margin: 0 0 14px 0; font-size: 11px; color: #94a3b8;">Get instant answers about your money.</p>
+                        <p style="margin: 0 0 12px 0; font-size: 11px; color: #94a3b8;">Get instant answers about your money.</p>
 
                         <!-- Prompt 1 -->
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
-                            <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 10px 12px;">
+                            <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 9px 10px;">
                               <table width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                   <td width="24" style="vertical-align: middle;">
-                                    <div style="width: 22px; height: 22px; background-color: #e0f2fe; border-radius: 6px; text-align: center; line-height: 22px; font-size: 11px;">💬</div>
+                                    <div style="width: 22px; height: 22px; background-color: #10b981; border-radius: 6px; text-align: center; line-height: 22px; font-size: 11px; color: #ffffff;">💬</div>
                                   </td>
-                                  <td style="padding-left: 8px; font-size: 11.5px; color: #334155; font-weight: 600; vertical-align: middle;">Where did my money go?</td>
-                                  <td style="text-align: right; font-size: 14px; color: #cbd5e1; vertical-align: middle;" width="16">›</td>
+                                  <td style="padding-left: 8px; font-size: 11px; color: #334155; font-weight: 700; vertical-align: middle;">Where did my money go?</td>
+                                  <td style="text-align: right; font-size: 12px; color: #cbd5e1; vertical-align: middle;" width="14">›</td>
                                 </tr>
                               </table>
                             </td>
@@ -447,14 +412,14 @@ export default async function handler(req, res) {
                         <!-- Prompt 2 -->
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
-                            <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 10px 12px;">
+                            <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 9px 10px;">
                               <table width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                   <td width="24" style="vertical-align: middle;">
-                                    <div style="width: 22px; height: 22px; background-color: #fef3c7; border-radius: 6px; text-align: center; line-height: 22px; font-size: 11px;">🏦</div>
+                                    <div style="width: 22px; height: 22px; background-color: #2563eb; border-radius: 6px; text-align: center; line-height: 22px; font-size: 11px; color: #ffffff;">🏦</div>
                                   </td>
-                                  <td style="padding-left: 8px; font-size: 11.5px; color: #334155; font-weight: 600; vertical-align: middle;">How can I save more?</td>
-                                  <td style="text-align: right; font-size: 14px; color: #cbd5e1; vertical-align: middle;" width="16">›</td>
+                                  <td style="padding-left: 8px; font-size: 11px; color: #334155; font-weight: 700; vertical-align: middle;">How can I save more?</td>
+                                  <td style="text-align: right; font-size: 12px; color: #cbd5e1; vertical-align: middle;" width="14">›</td>
                                 </tr>
                               </table>
                             </td>
@@ -464,14 +429,14 @@ export default async function handler(req, res) {
                         <!-- Prompt 3 -->
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
-                            <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 10px 12px;">
+                            <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 9px 10px;">
                               <table width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                   <td width="24" style="vertical-align: middle;">
-                                    <div style="width: 22px; height: 22px; background-color: #ede9fe; border-radius: 6px; text-align: center; line-height: 22px; font-size: 11px;">📊</div>
+                                    <div style="width: 22px; height: 22px; background-color: #8b5cf6; border-radius: 6px; text-align: center; line-height: 22px; font-size: 11px; color: #ffffff;">📊</div>
                                   </td>
-                                  <td style="padding-left: 8px; font-size: 11.5px; color: #334155; font-weight: 600; vertical-align: middle;">What should my budget be next month?</td>
-                                  <td style="text-align: right; font-size: 14px; color: #cbd5e1; vertical-align: middle;" width="16">›</td>
+                                  <td style="padding-left: 8px; font-size: 11px; color: #334155; font-weight: 700; vertical-align: middle;">What should my budget be next month?</td>
+                                  <td style="text-align: right; font-size: 12px; color: #cbd5e1; vertical-align: middle;" width="14">›</td>
                                 </tr>
                               </table>
                             </td>
@@ -488,11 +453,11 @@ export default async function handler(req, res) {
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
                 <td style="padding: 0 24px 24px 24px;">
-                  <div style="background: linear-gradient(135deg, #051829 0%, #0a2e3d 45%, #0d3832 100%); border-radius: 18px; padding: 0; overflow: hidden;">
+                  <div style="background: linear-gradient(135deg, #030712 0%, #062422 50%, #059669 100%); border-radius: 18px; padding: 0; overflow: hidden;">
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
-                        <!-- Left: Phone Mockup -->
-                        <td width="25%" style="vertical-align: bottom; padding: 16px 0 0 16px;">
+                        <!-- Left: Mini Phone Mockup -->
+                        <td width="28%" style="vertical-align: bottom; padding: 16px 0 0 16px;">
                           <div style="background: #0f172a; border: 1px solid #1e3a5f; border-radius: 10px 10px 0 0; padding: 8px 6px 0 6px; width: 110px;">
                             <div style="font-size: 7px; font-weight: 700; color: #94a3b8; margin-bottom: 3px;">Dashboard</div>
                             <div style="font-size: 6px; color: #64748b; margin-bottom: 2px;">Total Balance</div>
@@ -529,7 +494,7 @@ export default async function handler(req, res) {
                         <table cellpadding="0" cellspacing="0">
                           <tr>
                             <td style="vertical-align: middle; padding-right: 6px;">
-                              <div style="width: 24px; height: 24px; background-color: #f1f5f9; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px;">🔒</div>
+                              <div style="width: 24px; height: 24px; background-color: #10b981; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; color: #ffffff;">🔒</div>
                             </td>
                             <td style="vertical-align: middle;">
                               <div style="font-size: 11px; font-weight: 800; color: #0f172a;">Private &amp; Secure</div>
