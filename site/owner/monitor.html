@@ -213,24 +213,26 @@
 
             <!-- COLUMN 2: MIDDLEWARE & CORE ENGINES -->
             <div style="display: grid; gap: 12px;">
-              <!-- Node 3: MCP Server -->
-              <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b98166; border-radius: 10px; padding: 12px;">
+              <!-- Node 3: MCPize Remote MCP Server -->
+              <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b98188; border-radius: 10px; padding: 12px; box-shadow: 0 0 12px rgba(16,185,129,0.1);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🔌 MCP Server &amp; Plugin</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Operational</span>
+                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🔌 MCPize Remote MCP Server</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
                 </div>
-                <div style="font-size: 10.5px; color: #cbd5e1;">Tool Registry · Expense &amp; Budget Tools</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #a7f3d0; font-family: monospace;">Endpoint: /api/mcp-plugin</div>
+                <div style="font-size: 10.5px; color: #a7f3d0;">Tool Definitions &amp; Remote MCP Execution</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #6ee7b7; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  https://expense-tracker-mcp.mcpize.run/mcp
+                </div>
               </div>
 
               <!-- Node 4: Chat Agent Engine -->
-              <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f666; border-radius: 10px; padding: 12px;">
+              <div style="background: rgba(59, 130, 246, 0.12); border: 1px solid #3b82f688; border-radius: 10px; padding: 12px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                   <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🧠 Chat Agent Engine</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Active</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
                 </div>
-                <div style="font-size: 10.5px; color: #cbd5e1;">NLP Intent Parser · Function Dispatcher</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #93c5fd; font-family: monospace;">Engine: Copilot AI Logic</div>
+                <div style="font-size: 10.5px; color: #cbd5e1;">Calls MCPize Tools via OAuth Session Tokens</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #93c5fd; font-family: monospace;">Endpoint: /api/ai-chat</div>
               </div>
             </div>
 
