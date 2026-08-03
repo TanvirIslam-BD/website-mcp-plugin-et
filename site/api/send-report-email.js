@@ -57,21 +57,21 @@ export default async function handler(req, res) {
 
     return `
     <tr>
-      <td style="padding: 6px 0; vertical-align: middle;" width="28">
-        <div style="width: 28px; height: 28px; background-color: ${meta.bg}; border-radius: 50%; text-align: center; line-height: 28px; font-size: 13px;">${meta.icon}</div>
+      <td style="padding: 4px 0; vertical-align: middle;" width="26">
+        <div style="width: 24px; height: 24px; background-color: ${meta.bg}; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px;">${meta.icon}</div>
       </td>
-      <td style="padding: 6px 8px; vertical-align: middle;">
-        <div style="font-size: 13px; font-weight: 700; color: #1e293b;">${nameFormatted}</div>
+      <td style="padding: 4px 6px; vertical-align: middle;">
+        <div style="font-size: 12.5px; font-weight: 700; color: #1e293b;">${nameFormatted}</div>
       </td>
-      <td style="padding: 6px 0; vertical-align: middle; text-align: right; white-space: nowrap;">
-        <div style="font-size: 13px; font-weight: 800; color: #0f172a;">${amountDisp}</div>
-        <div style="font-size: 11px; font-weight: 700; color: ${meta.color}; margin-top: 1px;">${percent}%</div>
+      <td style="padding: 4px 0; vertical-align: middle; text-align: right; white-space: nowrap;">
+        <div style="font-size: 12.5px; font-weight: 800; color: #0f172a;">${amountDisp}</div>
+        <div style="font-size: 10.5px; font-weight: 700; color: ${meta.color}; margin-top: 1px;">${percent}%</div>
       </td>
     </tr>
     <tr>
       <td></td>
-      <td colspan="2" style="padding: 0 0 10px 0;">
-        <div style="width: 100%; height: 7px; background-color: #f1f5f9; border-radius: 99px; overflow: hidden;">
+      <td colspan="2" style="padding: 0 0 6px 0;">
+        <div style="width: 100%; height: 5px; background-color: #f1f5f9; border-radius: 99px; overflow: hidden;">
           <div style="width: ${percent}%; height: 100%; background-color: ${meta.color}; border-radius: 99px;"></div>
         </div>
       </td>
@@ -257,68 +257,68 @@ export default async function handler(req, res) {
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <!-- Left: Spending Breakdown -->
-                      <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
-                        <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 800; color: #0f172a;">Spending Breakdown</h4>
+                      <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 14px; vertical-align: top;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 13.5px; font-weight: 800; color: #0f172a;">Spending Breakdown</h4>
                         
                         <table width="100%" cellpadding="0" cellspacing="0">
-                          ${breakdownRows || `<tr><td style="font-size: 12px; color: #94a3b8; padding: 8px 0;">No spending recorded.</td></tr>`}
+                          ${breakdownRows || `<tr><td style="font-size: 12px; color: #94a3b8; padding: 6px 0;">No spending recorded.</td></tr>`}
                         </table>
 
-                        <div style="margin-top: 8px; text-align: left;">
-                          <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="font-size: 11.5px; font-weight: 700; color: #10b981; text-decoration: none;">View all categories →</a>
+                        <div style="margin-top: 4px; text-align: left;">
+                          <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="font-size: 11px; font-weight: 700; color: #10b981; text-decoration: none;">View all categories →</a>
                         </div>
                       </td>
 
                       <td width="4%"></td>
 
                       <!-- Right: AI Savings Card (Piggy Bank) -->
-                      <td width="48%" style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                      <td width="48%" style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 16px; padding: 14px 14px; vertical-align: top;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
                             <td style="vertical-align: top;">
-                              <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px;">💡 AI thinks you can save</div>
-                              <div style="font-size: 28px; font-weight: 800; color: #047857; letter-spacing: -0.8px; line-height: 1.1;">৳1,800</div>
-                              <div style="font-size: 11.5px; color: #166534; font-weight: 600; margin-top: 4px;">by optimizing these areas:</div>
+                              <div style="font-size: 11px; font-weight: 800; color: #047857; margin-bottom: 2px;">💡 AI thinks you can save</div>
+                              <div style="font-size: 24px; font-weight: 800; color: #047857; letter-spacing: -0.8px; line-height: 1.1;">৳1,800</div>
+                              <div style="font-size: 10.5px; color: #166534; font-weight: 600; margin-top: 2px;">by optimizing these areas:</div>
                             </td>
-                            <td style="vertical-align: top; text-align: right;" width="50">
-                              <div style="font-size: 38px; line-height: 1;">🐷</div>
+                            <td style="vertical-align: top; text-align: right;" width="42">
+                              <div style="font-size: 32px; line-height: 1;">🐷</div>
                             </td>
                           </tr>
                         </table>
 
                         <!-- Savings items in green circles -->
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 6px;">
                           <tr>
-                            <td width="28" style="vertical-align: middle;">
-                              <div style="width: 26px; height: 26px; background-color: #d1fae5; border-radius: 50%; text-align: center; line-height: 26px; font-size: 12px;">🍔</div>
+                            <td width="26" style="vertical-align: middle;">
+                              <div style="width: 24px; height: 24px; background-color: #d1fae5; border-radius: 50%; text-align: center; line-height: 24px; font-size: 11px;">🍔</div>
                             </td>
-                            <td style="vertical-align: middle; padding-left: 8px;">
-                              <div style="font-size: 11.5px; font-weight: 700; color: #0f172a;">Ordering food less often</div>
-                              <div style="font-size: 10px; color: #059669; font-weight: 600;">Save up to ৳900</div>
+                            <td style="vertical-align: middle; padding-left: 6px;">
+                              <div style="font-size: 11px; font-weight: 700; color: #0f172a;">Ordering food less often</div>
+                              <div style="font-size: 9.5px; color: #059669; font-weight: 600;">Save up to ৳900</div>
                             </td>
                           </tr>
                         </table>
 
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 6px;">
                           <tr>
-                            <td width="28" style="vertical-align: middle;">
-                              <div style="width: 26px; height: 26px; background-color: #d1fae5; border-radius: 50%; text-align: center; line-height: 26px; font-size: 12px;">❤️</div>
+                            <td width="26" style="vertical-align: middle;">
+                              <div style="width: 24px; height: 24px; background-color: #d1fae5; border-radius: 50%; text-align: center; line-height: 24px; font-size: 11px;">❤️</div>
                             </td>
-                            <td style="vertical-align: middle; padding-left: 8px;">
-                              <div style="font-size: 11.5px; font-weight: 700; color: #0f172a;">Setting a monthly health budget</div>
-                              <div style="font-size: 10px; color: #059669; font-weight: 600;">Save up to ৳600</div>
+                            <td style="vertical-align: middle; padding-left: 6px;">
+                              <div style="font-size: 11px; font-weight: 700; color: #0f172a;">Setting a monthly health budget</div>
+                              <div style="font-size: 9.5px; color: #059669; font-weight: 600;">Save up to ৳600</div>
                             </td>
                           </tr>
                         </table>
 
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
-                            <td width="28" style="vertical-align: middle;">
-                              <div style="width: 26px; height: 26px; background-color: #d1fae5; border-radius: 50%; text-align: center; line-height: 26px; font-size: 12px;">🛒</div>
+                            <td width="26" style="vertical-align: middle;">
+                              <div style="width: 24px; height: 24px; background-color: #d1fae5; border-radius: 50%; text-align: center; line-height: 24px; font-size: 11px;">🛒</div>
                             </td>
-                            <td style="vertical-align: middle; padding-left: 8px;">
-                              <div style="font-size: 11.5px; font-weight: 700; color: #0f172a;">Tracking groceries weekly</div>
-                              <div style="font-size: 10px; color: #059669; font-weight: 600;">Save up to ৳300</div>
+                            <td style="vertical-align: middle; padding-left: 6px;">
+                              <div style="font-size: 11px; font-weight: 700; color: #0f172a;">Tracking groceries weekly</div>
+                              <div style="font-size: 9.5px; color: #059669; font-weight: 600;">Save up to ৳300</div>
                             </td>
                           </tr>
                         </table>
