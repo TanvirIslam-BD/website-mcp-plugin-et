@@ -1067,14 +1067,7 @@ function renderVisualData(data) {
   if (!data) return "";
   let html = '<div class="ai-visual-panel">';
 
-  if (data.metrics?.length) {
-    html += '<div class="ai-metric-row">';
-    for (const m of data.metrics) {
-      const displayValue = m.currency ? fmtVisualAmount(m.value, m.currency) : m.value;
-      html += `<div class="ai-metric-card" style="--accent:${esc(m.color || "#019a56")}"><span class="ai-metric-value">${esc(displayValue)}</span><span class="ai-metric-label">${esc(m.label)}</span></div>`;
-    }
-    html += '</div>';
-  }
+
 
   if (data.progress) {
     const p = data.progress;
