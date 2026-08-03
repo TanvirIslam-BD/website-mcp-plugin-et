@@ -876,7 +876,7 @@ function renderAiAssistantRail(model) {
       <div class="assistant-rail-header">
         <div class="assistant-heading">
           <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI Assistant</span>
-          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
+          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
       </div>
@@ -912,7 +912,7 @@ function renderEmptyAssistantRail() {
       <div class="assistant-rail-header">
         <div class="assistant-heading">
           <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI Assistant</span>
-          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
+          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
       </div>
       <div class="empty-copilot-body" data-ai-chat>
@@ -1258,7 +1258,7 @@ function setAiSubmitLoading(button, isLoading) {
 function openEmptyAiChat(prefill = "") {
   openModal("Money Copilot", "Build your first financial picture with guided, private help.", `
     <div class="copilot-modal-status empty-copilot-status">
-      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
         <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
       </a>
       <span class="assistant-online"><i></i>Online</span>
@@ -1307,7 +1307,7 @@ function openAiChat(prefill = "") {
 
   openModal("Money Copilot", "Get verified answers from your private expense data.", `
     <div class="copilot-modal-status">
-      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
         <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
       </a>
       <span class="assistant-online"><i></i>Online</span>
