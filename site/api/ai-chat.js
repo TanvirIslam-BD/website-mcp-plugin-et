@@ -156,7 +156,14 @@ async function mcpToolDefinitions(accessToken) {
 
 async function runMcpTool(accessToken, name, input) {
   const result = await callMcp(accessToken, "tools/call", { name, arguments: input });
-  return result?.structuredContent || result?.content || result;
+  let data = result?.structuredContent || result?.content || result;
+  if (Array.isArray(data)) {
+    const textPart = data.find((item) => item?.type === "text" && item?.text);
+    if (textPart) {
+      try { data = JSON.parse(textPart.text); } catch {}
+    }
+  }
+  return data;
 }
 
 function applyDisplayCurrency(name, input, tools, displayCurrency) {
@@ -546,12 +553,17 @@ function buildVisualData(toolName, toolResult, currency) {
   if (toolName === "get_budget_status") {
     const r = toolResult;
     const cur = r.currency || currency || "USD";
+    const spentVal = r.spent !== undefined ? r.spent : r.totalSpent !== undefined ? r.totalSpent : r.spentAmount;
+    const budgetVal = r.budget !== undefined ? r.budget : r.overallBudget !== undefined ? r.overallBudget : r.totalBudget;
+    const remainingVal = r.remaining !== undefined ? r.remaining : (budgetVal !== null && budgetVal !== undefined && spentVal !== undefined) ? (budgetVal - spentVal) : null;
+    const percentVal = r.usedPercent !== undefined ? r.usedPercent : (budgetVal && spentVal !== undefined) ? Math.round((spentVal / budgetVal) * 100) : 0;
+
     const metrics = [
-      { label: "Spent", value: fmt(r.spent), currency: cur, color: "#ff4548" },
-      { label: "Budget", value: r.budget !== null ? fmt(r.budget) : null, currency: cur, color: "#2563ff" },
-      { label: "Remaining", value: r.remaining !== null ? fmt(r.remaining) : null, currency: cur, color: r.remaining < 0 ? "#ff4548" : "#18b96f" },
+      { label: "Spent", value: fmt(spentVal), currency: cur, color: "#ff4548" },
+      { label: "Budget", value: budgetVal !== null && budgetVal !== undefined ? fmt(budgetVal) : null, currency: cur, color: "#2563ff" },
+      { label: "Remaining", value: remainingVal !== null && remainingVal !== undefined ? fmt(remainingVal) : null, currency: cur, color: Number(remainingVal || 0) < 0 ? "#ff4548" : "#18b96f" },
     ].filter((m) => m.value !== null);
-    const progress = r.budget ? { value: r.spent, max: r.budget, percent: r.usedPercent || 0, label: "Budget Used" } : null;
+    const progress = budgetVal ? { value: spentVal, max: budgetVal, percent: percentVal || 0, label: "Budget Used" } : null;
     const categories = (r.categoryLimits || []).slice(0, 6).map((c) => ({ name: c.category, limit: c.amount, currency: c.currency }));
     return { type: "budget_status", metrics, progress, categories: categories.length ? categories : null };
   }
