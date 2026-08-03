@@ -10085,3 +10085,86 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   background: #1b4d3a!important;
   color: #ffffff!important;
 }
+
+/* Boot screen dark theme polish */
+:root[data-theme="dark"] .boot-screen {
+  background: radial-gradient(circle at 50% 42%, rgba(16, 185, 129, .15), transparent 32rem), linear-gradient(145deg, #070f1a, #0b1728 58%, #081424)!important;
+}
+
+:root[data-theme="dark"] .boot-panel {
+  background: rgba(11, 23, 40, .96)!important;
+  border-color: #1e324a!important;
+  color: #e4edf8!important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .6), inset 0 1px rgba(255, 255, 255, .06)!important;
+}
+
+:root[data-theme="dark"] .boot-logo {
+  background: #091726!important;
+  border-color: #1e3654!important;
+  box-shadow: 0 17px 38px rgba(0, 0, 0, .4), 0 0 0 8px rgba(11, 23, 40, .96)!important;
+}
+
+:root[data-theme="dark"] .boot-eyebrow {
+  background: rgba(37, 99, 255, .15)!important;
+  border: 1px solid rgba(59, 130, 246, .3)!important;
+  color: #60a5fa!important;
+}
+
+:root[data-theme="dark"] .boot-live {
+  background: rgba(16, 185, 129, .15)!important;
+  border-color: rgba(16, 185, 129, .3)!important;
+  color: #34d399!important;
+}
+
+:root[data-theme="dark"] .boot-copy p {
+  color: #94a3b8!important;
+}
+
+:root[data-theme="dark"] .boot-steps > span {
+  background: rgba(15, 29, 48, .9)!important;
+  border-color: #1e324a!important;
+  color: #94a3b8!important;
+}
+
+:root[data-theme="dark"] .boot-steps > span > i {
+  border-color: #2a4365!important;
+}
+
+:root[data-theme="dark"] .boot-steps .is-complete {
+  background: rgba(16, 185, 129, .15)!important;
+  border-color: rgba(16, 185, 129, .35)!important;
+  color: #34d399!important;
+}
+
+:root[data-theme="dark"] .boot-steps .is-complete i {
+  background: #10b981!important;
+  border-color: #10b981!important;
+  color: #ffffff!important;
+}
+
+:root[data-theme="dark"] .boot-steps .is-active {
+  background: rgba(37, 99, 255, .18)!important;
+  border-color: rgba(59, 130, 246, .4)!important;
+  color: #60a5fa!important;
+}
+
+:root[data-theme="dark"] .boot-steps .is-active i {
+  background: #3b82f6!important;
+  border-color: #1d4ed8!important;
+}
+
+:root[data-theme="dark"] .boot-progress {
+  background: #16263b!important;
+}
+
+:root[data-theme="dark"] .boot-status {
+  color: #94a3b8!important;
+}
+
+:root[data-theme="dark"] .boot-status span:first-child {
+  color: #34d399!important;
+}
+
+:root[data-theme="dark"] .boot-privacy {
+  color: #64748b!important;
+}

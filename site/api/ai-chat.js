@@ -470,7 +470,7 @@ async function runTool(db, userId, name, rawInput, dashboardMonth) {
 }
 
 function systemPrompt(currentDate, dashboardMonth, displayCurrency) {
-  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. The user's local display currency is ${displayCurrency}. For any tool that accepts a currency, use ${displayCurrency} unless the user explicitly specifies another currency. Currency is a display and entry-default preference only: never exclude transactions, income, categories, or reports because their stored currency differs. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data â€” never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. When the user asks to add income, call add_income. For budget questions, call get_budget_status. For reports or summaries, call generate_monthly_report. Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
+  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. The user's local display currency is ${displayCurrency}. For any tool that accepts a currency, use ${displayCurrency} unless the user explicitly specifies another currency. Currency is a display and entry-default preference only: never exclude transactions, income, categories, or reports because their stored currency differs. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data — never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. When the user asks to add income, call add_income. For general budget, overall remaining budget, or monthly financial questions, always call get_budget_status or generate_monthly_report (do not call get_expenses alone for general budget queries unless a specific single day or date range is explicitly requested). Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
 }
 
 function answerContent(message) {
@@ -641,6 +641,7 @@ export default async function handler(req, res) {
     let lastToolResult = null;
     let activeModel = modelChoice.model;
     let completion;
+    const toolResultsMap = new Map();
     for (let pass = 0; pass < 4; pass += 1) {
       try {
         completion = await callComet(activeModel, messages, availableTools);
@@ -665,6 +666,7 @@ export default async function handler(req, res) {
         usedTools.push(name);
         lastToolName = name;
         lastToolResult = result;
+        toolResultsMap.set(name, result);
         messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
       }
     }
@@ -679,7 +681,17 @@ export default async function handler(req, res) {
     if (!answer || answer === "I could not generate an answer from the available financial data.") {
       answer = await verifiedFallbackAnswer(db, userId, message, dashboardMonth);
     }
-    const visualData = buildVisualData(lastToolName, lastToolResult, displayCurrency) || undefined;
+    const visualToolOrder = ["get_budget_status", "generate_monthly_report", "get_expenses"];
+    let chosenToolName = lastToolName;
+    let chosenToolResult = lastToolResult;
+    for (const pref of visualToolOrder) {
+      if (toolResultsMap.has(pref)) {
+        chosenToolName = pref;
+        chosenToolResult = toolResultsMap.get(pref);
+        break;
+      }
+    }
+    const visualData = buildVisualData(chosenToolName, chosenToolResult, displayCurrency) || undefined;
     const value = { answer, model: activeModel, usedTools: [...new Set(usedTools)], usage: completion?.usage || null, visualData, cached: false };
     if (!mcpAccessToken) {
       responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, value });
