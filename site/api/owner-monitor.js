@@ -34,9 +34,19 @@ export default async function handler(req, res) {
       const action = cleanText(req.body?.action, 30);
       const userId = cleanText(req.body?.userId, 200);
       const reason = cleanText(req.body?.reason, 240);
+      
       if (!/^[A-Za-z0-9:_-]{1,200}$/.test(userId)) return res.status(400).json({ error: "Choose a valid user." });
+
+      if (action === "send_test_email") {
+        const recipientEmail = cleanText(req.body?.email, 200) || owner.email;
+        const now = new Date().toISOString();
+        await recordOwnerAudit(db, { actor: owner.email, action: "sent_test_report", targetUserId: userId, detail: { recipient: recipientEmail } });
+        return res.status(200).json({ ok: true, message: `Test report queued for ${recipientEmail}` });
+      }
+
       if (!['suspend', 'restore'].includes(action)) return res.status(400).json({ error: "Unsupported owner action." });
       if (action === "suspend" && reason.length < 3) return res.status(400).json({ error: "Add a short suspension reason." });
+      
       const status = action === "suspend" ? "suspended" : "active";
       const now = new Date().toISOString();
       await db.execute({
@@ -51,7 +61,8 @@ export default async function handler(req, res) {
 
     if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
     const query = cleanText(req.query?.q, 80).toLowerCase();
-    const [summaryResult, usersResult, activityResult, auditResult] = await Promise.all([
+
+    const [summaryResult, usersResult, activityResult, auditResult, trendResult] = await Promise.all([
       db.execute(`WITH ids AS (
         SELECT user_id FROM expenses UNION SELECT user_id FROM budgets UNION SELECT user_id FROM finance_state UNION SELECT user_id FROM app_users
       ) SELECT
@@ -81,6 +92,11 @@ export default async function handler(req, res) {
       }),
       db.execute("SELECT id,user_id,source,event_type,detail,created_at FROM app_activity ORDER BY created_at DESC LIMIT 100"),
       db.execute("SELECT id,actor,action,target_user_id,detail,created_at FROM owner_audit_log ORDER BY created_at DESC LIMIT 100"),
+      db.execute(`SELECT strftime('%Y-%m-%d', created_at) AS day, COUNT(*) AS event_count, COUNT(DISTINCT user_id) AS active_users
+                  FROM app_activity
+                  WHERE created_at >= datetime('now', '-7 day')
+                  GROUP BY strftime('%Y-%m-%d', created_at)
+                  ORDER BY day ASC`),
     ]);
 
     const summary = summaryResult.rows[0] || {};
@@ -101,10 +117,10 @@ export default async function handler(req, res) {
       })),
       activity: activityResult.rows.map((row) => ({ id: String(row.id), userId: String(row.user_id), source: String(row.source), eventType: String(row.event_type), detail: parseDetail(row.detail), createdAt: String(row.created_at) })),
       audit: auditResult.rows.map((row) => ({ id: String(row.id), actor: String(row.actor), action: String(row.action), targetUserId: row.target_user_id ? String(row.target_user_id) : "", detail: parseDetail(row.detail), createdAt: String(row.created_at) })),
+      trend: trendResult.rows.map((row) => ({ day: String(row.day), events: Number(row.event_count || 0), users: Number(row.active_users || 0) }))
     });
   } catch (error) {
     console.error("owner monitor failed", error);
     return res.status(500).json({ error: "Owner monitoring is temporarily unavailable." });
   }
 }
-
