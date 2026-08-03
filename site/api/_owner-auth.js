@@ -26,7 +26,16 @@ export function ownerConfig() {
 
 export function ownerAuthConfigured() {
   const config = ownerConfig();
-  return Boolean(config.email && config.passwordHash && config.sessionSecret.length >= 32);
+  return Boolean(config.email && (config.passwordHash || process.env.TURSO_DATABASE_URL) && config.sessionSecret.length >= 32);
+}
+
+export function generateOwnerPasswordHash(password) {
+  if (typeof password !== "string" || password.length < 8) {
+    throw new Error("Password must be at least 8 characters long.");
+  }
+  const salt = randomBytes(16).toString("base64url");
+  const hash = scryptSync(password, Buffer.from(salt, "base64url"), 64).toString("base64url");
+  return `scrypt$${salt}$${hash}`;
 }
 
 export function verifyOwnerPassword(password, encodedHash) {
@@ -41,9 +50,10 @@ export function verifyOwnerPassword(password, encodedHash) {
   }
 }
 
-export function verifyOwnerCredentials(email, password) {
+export function verifyOwnerCredentials(email, password, storedHash = null) {
   const config = ownerConfig();
-  return safeEqual(cleanEmail(email), config.email) && verifyOwnerPassword(password, config.passwordHash);
+  const targetHash = storedHash || config.passwordHash;
+  return safeEqual(cleanEmail(email), config.email) && verifyOwnerPassword(password, targetHash);
 }
 
 export function createOwnerSession(email) {

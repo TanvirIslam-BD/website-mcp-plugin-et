@@ -41,6 +41,7 @@
           <div class="subtle">Privacy-conscious account health, platform telemetry, and security access controls.</div>
         </div>
         <div class="top-actions">
+          <button id="change-pwd-btn" class="secondary-btn" title="Change Owner Password">🔑 Change Password</button>
           <button id="export-users" class="secondary-btn" title="Export User List to CSV">📥 Export Users</button>
           <button id="refresh" class="secondary-btn">🔄 Refresh Data</button>
           <button id="logout" class="danger-btn">Sign Out</button>
@@ -149,6 +150,32 @@
       </div>
       <div id="modal-body-content" class="modal-body"></div>
       <div id="modal-foot-actions" class="modal-foot"></div>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div id="pwd-modal-backdrop" class="modal-backdrop">
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(420px, 92vw); background: #ffffff; border-radius: 18px; padding: 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); z-index: 1000; border: 1px solid #e2e8f0;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+        <h3 style="margin: 0; font-size: 17.5px; font-weight: 800; color: #0f172a;">🔑 Change Owner Password</h3>
+        <button id="close-pwd-modal" class="secondary-btn" style="padding: 4px 10px; font-size: 14px;">✕</button>
+      </div>
+      <form id="pwd-form" style="display: grid; gap: 14px;">
+        <label class="field">
+          <span>Current Password</span>
+          <input id="pwd-current" type="password" required autocomplete="current-password">
+        </label>
+        <label class="field">
+          <span>New Password (min 8 characters)</span>
+          <input id="pwd-new" type="password" minlength="8" required autocomplete="new-password">
+        </label>
+        <label class="field">
+          <span>Confirm New Password</span>
+          <input id="pwd-confirm" type="password" minlength="8" required autocomplete="new-password">
+        </label>
+        <p id="pwd-error" style="margin: 0; color: #ef4444; font-size: 12px; font-weight: 700; min-height: 16px;"></p>
+        <button id="pwd-submit" type="submit" class="primary-btn" style="width: 100%; height: 42px; font-size: 13.5px;">Update Password</button>
+      </form>
     </div>
   </div>
 

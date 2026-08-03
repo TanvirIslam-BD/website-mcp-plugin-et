@@ -439,6 +439,56 @@ $('#user-modal-backdrop').addEventListener('click', (e) => {
   if (e.target === $('#user-modal-backdrop')) $('#user-modal-backdrop').classList.remove('active');
 });
 
+/* CHANGE PASSWORD MODAL LISTENERS */
+const pwdModal = $('#pwd-modal-backdrop');
+const pwdBtn = $('#change-pwd-btn');
+const pwdClose = $('#close-pwd-modal');
+const pwdForm = $('#pwd-form');
+const pwdErr = $('#pwd-error');
+const pwdSubmit = $('#pwd-submit');
+
+if (pwdBtn && pwdModal) {
+  pwdBtn.addEventListener('click', () => {
+    if (pwdForm) pwdForm.reset();
+    if (pwdErr) pwdErr.textContent = '';
+    pwdModal.classList.add('active');
+  });
+
+  pwdClose.addEventListener('click', () => pwdModal.classList.remove('active'));
+
+  pwdForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    pwdErr.textContent = '';
+    const currentPassword = $('#pwd-current').value;
+    const newPassword = $('#pwd-new').value;
+    const confirmPassword = $('#pwd-confirm').value;
+
+    if (newPassword !== confirmPassword) {
+      pwdErr.textContent = 'New passwords do not match.';
+      return;
+    }
+
+    pwdSubmit.disabled = true;
+    pwdSubmit.textContent = 'Updating...';
+
+    try {
+      const res = await request('/api/owner-auth', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+
+      toast(res.message || 'Password changed successfully!');
+      pwdModal.classList.remove('active');
+    } catch (err) {
+      pwdErr.textContent = err.message || 'Failed to change password.';
+    } finally {
+      pwdSubmit.disabled = false;
+      pwdSubmit.textContent = 'Update Password';
+    }
+  });
+}
+
 const actFilter = $('#activity-user-filter');
 if (actFilter) {
   actFilter.addEventListener('change', (e) => {
