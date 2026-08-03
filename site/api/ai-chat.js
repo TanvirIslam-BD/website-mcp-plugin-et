@@ -513,7 +513,7 @@ async function callComet(model, messages, tools) {
 
 function fallbackMoney(amount, currency) {
   const value = Number(amount || 0);
-  const prefix = currency === "BDT" ? "à§³" : currency === "USD" ? "$" : `${currency} `;
+  const prefix = currency === "BDT" ? "৳" : currency === "USD" ? "$" : `${currency} `;
   return `${value < 0 ? "-" : ""}${prefix}${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
