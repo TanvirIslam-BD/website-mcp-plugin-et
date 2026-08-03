@@ -167,70 +167,82 @@ export default async function handler(req, res) {
               </tr>
 
               <!-- ═══════════════════════════════════════════════════════════ -->
-              <!-- 3. TOP 5 METRIC CARDS ROW                                  -->
+              <!-- 3. TOP METRIC CARDS: SPACIOUS 2-ROW BALANCED LAYOUT        -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
                 <td style="padding: 0 24px 20px 24px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                  <!-- Row 1: Budget Used (50%) & Total Spent (50%) -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
                     <tr>
-                      <!-- Card 1: Budget Used (Horizontal donut layout matching UI mockup) -->
-                      <td width="34%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 10px; vertical-align: middle;">
+                      <!-- Card 1: Budget Used (Horizontal layout) -->
+                      <td width="48.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 14px; vertical-align: middle;">
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
-                            <td colspan="2" style="font-size: 11px; font-weight: 800; color: #334155; padding-bottom: 8px;">Budget Used</td>
+                            <td colspan="2" style="font-size: 11.5px; font-weight: 800; color: #334155; padding-bottom: 10px;">Budget Used</td>
                           </tr>
                           <tr>
-                            <!-- Donut ring image asset -->
-                            <td width="56" style="vertical-align: middle;">
-                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/budget-gauge-20.svg" width="54" height="54" alt="20% Donut Gauge" style="display: block; border: 0;">
+                            <!-- Donut ring graphic -->
+                            <td width="58" style="vertical-align: middle;">
+                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/budget-gauge-20.svg" width="56" height="56" alt="20% Donut Gauge" style="display: block; border: 0;">
                             </td>
                             <!-- Right text -->
-                            <td style="vertical-align: middle; padding-left: 6px;">
-                              <div style="font-size: 11.5px; font-weight: 800; color: #10b981; margin-bottom: 2px;">Excellent!</div>
-                              <div style="font-size: 9px; color: #94a3b8; line-height: 1.3;">You're well within your budget.</div>
-                              <div style="width: 16px; height: 16px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 10px; line-height: 16px; text-align: center; margin-top: 4px;">✓</div>
+                            <td style="vertical-align: middle; padding-left: 10px;">
+                              <div style="font-size: 13px; font-weight: 800; color: #10b981; margin-bottom: 2px;">Excellent!</div>
+                              <div style="font-size: 10px; color: #64748b; line-height: 1.35;">You're well within your budget.</div>
+                              <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin-top: 6px;">✓</div>
                             </td>
                           </tr>
                         </table>
                       </td>
 
-                      <td width="1.5%"></td>
+                      <td width="3%"></td>
 
                       <!-- Card 2: Total Spent -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">💰</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Total Spent</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${spentFormatted}</div>
-                        <div style="font-size: 8.5px; color: #10b981; font-weight: 700; line-height: 1.25;">↓ 12% lower<br>than last month</div>
+                      <td width="48.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 14px; vertical-align: middle;">
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td width="40" style="vertical-align: middle;">
+                              <div style="width: 36px; height: 36px; background-color: #ecfdf5; border-radius: 50%; text-align: center; line-height: 36px; font-size: 17px;">💰</div>
+                            </td>
+                            <td style="vertical-align: middle; padding-left: 8px;">
+                              <div style="font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 2px;">Total Spent</div>
+                              <div style="font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px;">${spentFormatted}</div>
+                              <div style="font-size: 9.5px; color: #10b981; font-weight: 700; margin-top: 2px;">↓ 12% lower than last month</div>
+                            </td>
+                          </tr>
+                        </table>
                       </td>
+                    </tr>
+                  </table>
 
-                      <td width="1.5%"></td>
-
+                  <!-- Row 2: Budget Limit (33%), Remaining (33%), Status (33%) -->
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
                       <!-- Card 3: Budget Limit -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">🎯</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Budget Limit</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px;">${budgetFormatted}</div>
+                      <td width="31.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; text-align: center; vertical-align: top;">
+                        <div style="width: 34px; height: 34px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 34px; font-size: 16px;">🎯</div>
+                        <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Budget Limit</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px;">${budgetFormatted}</div>
                       </td>
 
-                      <td width="1.5%"></td>
+                      <td width="2.7%"></td>
 
                       <!-- Card 4: Remaining -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">💵</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Remaining</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${cleanRemaining}</div>
-                        <div style="font-size: 9px; color: #10b981; font-weight: 700;">Great job!</div>
+                      <td width="31.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; text-align: center; vertical-align: top;">
+                        <div style="width: 34px; height: 34px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 34px; font-size: 16px;">💵</div>
+                        <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Remaining</div>
+                        <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 3px; letter-spacing: -0.4px;">${cleanRemaining}</div>
+                        <div style="font-size: 9.5px; color: #10b981; font-weight: 700;">Great job!</div>
                       </td>
 
-                      <td width="1.5%"></td>
+                      <td width="2.7%"></td>
 
                       <!-- Card 5: Status -->
-                      <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
-                        <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">📊</div>
-                        <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Status</div>
-                        <div style="font-size: 13px; font-weight: 800; color: #059669; line-height: 1.25; margin-bottom: 4px;">Within<br>Budget</div>
-                        <div style="width: 16px; height: 16px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 10px; line-height: 16px; text-align: center; margin: 0 auto;">✓</div>
+                      <td width="31.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; text-align: center; vertical-align: top;">
+                        <div style="width: 34px; height: 34px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 34px; font-size: 16px;">📊</div>
+                        <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Status</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #059669; margin-bottom: 3px;">Within Budget</div>
+                        <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin: 0 auto;">✓</div>
                       </td>
                     </tr>
                   </table>
