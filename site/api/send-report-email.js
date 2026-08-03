@@ -436,8 +436,13 @@ export default async function handler(req, res) {
                           
                           <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="display: inline-block; padding: 11px 24px; background: #10b981; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 13px; border-radius: 99px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);">Open Money Copilot AI →</a>
                           
-                          <div style="margin-top: 12px; font-size: 10.5px; color: #94a3b8;">
-                            Works with &nbsp;<span style="color: #34d399; font-weight: 700;">🤖 ChatGPT</span>&nbsp;&nbsp;<span style="color: #34d399; font-weight: 700;">✳️ Claude</span>
+                          <div style="margin-top: 12px; font-size: 10.5px; color: #94a3b8; vertical-align: middle;">
+                            Works with &nbsp;
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/chatgpt.png" width="15" height="15" alt="ChatGPT" style="vertical-align: middle; display: inline-block; margin-right: 3px;">
+                            <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">ChatGPT</span>
+                            &nbsp;&nbsp;&nbsp;
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/claude.png" width="15" height="15" alt="Claude" style="vertical-align: middle; display: inline-block; margin-right: 3px;">
+                            <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">Claude</span>
                           </div>
                         </td>
                       </tr>
