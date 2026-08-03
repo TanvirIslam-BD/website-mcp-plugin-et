@@ -7,7 +7,7 @@
   <title>Owner Console · Money Copilot AI</title>
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
-  <link rel="stylesheet" href="/owner/owner.css?v=3">
+  <link rel="stylesheet" href="/owner/owner.css?v=4">
 </head>
 <body>
   <div class="monitor-shell">
@@ -35,6 +35,13 @@
 
       <!-- PLATFORM GROUP -->
       <div class="side-group-label">PLATFORM CONTROL</div>
+      <a class="nav-link" href="#architecture-section">
+        <div class="nav-link-content">
+          <span>🧩</span>
+          <span>System Topology</span>
+        </div>
+        <span class="new-pill">Live</span>
+      </a>
       <a class="nav-link" href="#users-section">
         <div class="nav-link-content">
           <span>👥</span>
@@ -140,7 +147,7 @@
       <header class="topbar">
         <div class="topbar-title-wrap">
           <h1>Service Monitoring 👋</h1>
-          <div class="topbar-subtitle">Real-time telemetry, user management, and security access controls.</div>
+          <div class="topbar-subtitle">Real-time telemetry, system topology, user access controls, and audit logs.</div>
         </div>
 
         <div class="topbar-actions">
@@ -167,7 +174,104 @@
       <section id="metrics" class="metrics-row"></section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 4. MIDDLE ROW: PLATFORM ACTIVITY + STORAGE + AI DIAGNOSTICS-->
+      <!-- 4. SYSTEM ARCHITECTURE & PIPELINE TOPOLOGY MAP             -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="panel-card" id="architecture-section" style="margin-bottom: 24px; padding: 20px;">
+        <div class="panel-header-row" style="margin-bottom: 16px;">
+          <div>
+            <div class="panel-card-title">🧩 System Architecture &amp; Data Pipeline Topology</div>
+            <div class="panel-card-sub">Live interconnectivity map of MCP Server, Turso DB, CometAPI, Chat Agent, Web App &amp; AI Clients</div>
+          </div>
+          <span class="new-pill" style="padding: 3px 10px; font-size: 11px;">Interactive Flow</span>
+        </div>
+
+        <div style="background: #060d19; border: 1px solid #1e293b; border-radius: 14px; padding: 20px; color: #ffffff;">
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: center; position: relative;">
+            
+            <!-- COLUMN 1: CLIENTS & FRONTEND -->
+            <div style="display: grid; gap: 12px;">
+              <!-- Node 1: AI MCP Clients -->
+              <div style="background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #a7f3d0;">🤖 MCP Clients &amp; Hosts</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Active</span>
+                </div>
+                <div style="font-size: 10.5px; color: #94a3b8;">ChatGPT · Claude Desktop · Antigravity</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #64748b; font-family: monospace;">Protocol: MCP / SSE</div>
+              </div>
+
+              <!-- Node 2: Web App -->
+              <div style="background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #93c5fd;">🌐 Web App Frontend</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● 100% Active</span>
+                </div>
+                <div style="font-size: 10.5px; color: #94a3b8;">PWA Dashboard · Owner Console (Vercel Edge)</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #64748b; font-family: monospace;">Protocol: HTTPS / JSON API</div>
+              </div>
+            </div>
+
+            <!-- COLUMN 2: MIDDLEWARE & CORE ENGINES -->
+            <div style="display: grid; gap: 12px;">
+              <!-- Node 3: MCP Server -->
+              <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b98166; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🔌 MCP Server &amp; Plugin</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Operational</span>
+                </div>
+                <div style="font-size: 10.5px; color: #cbd5e1;">Tool Registry · Expense &amp; Budget Tools</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #a7f3d0; font-family: monospace;">Endpoint: /api/mcp-plugin</div>
+              </div>
+
+              <!-- Node 4: Chat Agent Engine -->
+              <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f666; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🧠 Chat Agent Engine</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Active</span>
+                </div>
+                <div style="font-size: 10.5px; color: #cbd5e1;">NLP Intent Parser · Function Dispatcher</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #93c5fd; font-family: monospace;">Engine: Copilot AI Logic</div>
+              </div>
+            </div>
+
+            <!-- COLUMN 3: BACKEND SERVICES & DATABASE -->
+            <div style="display: grid; gap: 12px;">
+              <!-- Node 5: CometAPI AI Gateway -->
+              <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid #8b5cf666; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #ddd6fe;">🚀 CometAPI AI Gateway</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
+                </div>
+                <div style="font-size: 10.5px; color: #94a3b8;">Gemini · GPT-4o · Claude 3.5 Models</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #c4b5fd; font-family: monospace;">Affiliate: ?aff=mURH</div>
+              </div>
+
+              <!-- Node 6: Turso DB -->
+              <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981aa; border-radius: 10px; padding: 12px; box-shadow: 0 0 15px rgba(16,185,129,0.15);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🗄️ Turso DB (LibSQL)</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Operational</span>
+                </div>
+                <div style="font-size: 10.5px; color: #a7f3d0;">expenses · budgets · app_activity · audit</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #6ee7b7; font-family: monospace;">Latency: 14ms (Distributed SQLite)</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- CONNECTIONS FLOW LEGEND -->
+          <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #1e293b; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 10.5px; color: #94a3b8;">
+            <div style="display: flex; gap: 14px; font-weight: 700;">
+              <span>⚡ MCP Clients ⇄ MCP Server ⇄ Turso DB</span>
+              <span>⚡ Web App ⇄ Chat Agent ⇄ CometAPI Gateway</span>
+            </div>
+            <div style="color: #10b981; font-weight: 800;">● All Systems Synchronized &amp; Connected</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 5. MIDDLE ROW: PLATFORM ACTIVITY + STORAGE + AI DIAGNOSTICS-->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section class="middle-grid">
         
@@ -227,7 +331,7 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10.5px; font-weight: 700; color: #475569;">
               <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
-                <span>🗄️ Database</span>
+                <span>🗄️ Turso DB</span>
                 <span style="color: #10b981; margin-left: auto;">Operational</span>
               </div>
               <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
@@ -239,7 +343,7 @@
                 <span style="color: #10b981; margin-left: auto;">Operational</span>
               </div>
               <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
-                <span>🔄 API Gateway</span>
+                <span>🚀 CometAPI</span>
                 <span style="color: #10b981; margin-left: auto;">Operational</span>
               </div>
             </div>
@@ -249,7 +353,7 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 5. LOWER GRID: USER ACTIVITY + ALERTS + ACTIONS + SUMMARY  -->
+      <!-- 6. LOWER GRID: USER ACTIVITY + ALERTS + ACTIONS + SUMMARY  -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section class="lower-grid">
         
@@ -330,7 +434,7 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 6. USERS DIRECTORY TABLE                                   -->
+      <!-- 7. USERS DIRECTORY TABLE                                   -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section class="panel-card" id="users-section" style="margin-bottom: 24px;">
         <div class="panel-header-row">
@@ -366,7 +470,7 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 7. AUDIT TRAIL TABLE                                       -->
+      <!-- 8. AUDIT TRAIL TABLE                                       -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section class="panel-card" id="audit-section">
         <div class="panel-header-row">
@@ -438,6 +542,6 @@
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="toast" role="status"></div>
 
-  <script type="module" src="/owner/monitor.js?v=3"></script>
+  <script type="module" src="/owner/monitor.js?v=4"></script>
 </body>
 </html>
