@@ -125,8 +125,8 @@
       <div class="sidebar-owner-card" style="margin-top: auto;">
         <div class="sidebar-owner-avatar">TI</div>
         <div style="flex:1;min-width:0;">
-          <div class="sidebar-owner-name">Tanvirul Islam</div>
-          <div id="owner-email" class="sidebar-owner-email">owner@moneycopilot.ai</div>
+          <div class="sidebar-owner-name">Owner Session</div>
+          <div id="owner-email" class="sidebar-owner-email">Loading...</div>
         </div>
       </div>
     </aside>
@@ -139,20 +139,15 @@
       <!-- TOP BAR -->
       <header class="topbar">
         <div class="topbar-title-wrap">
-          <h1>Welcome back, Tanvirul! 👋</h1>
-          <div class="topbar-subtitle">Here's what's happening with your Money Copilot platform today.</div>
+          <h1>Service Monitoring 👋</h1>
+          <div class="topbar-subtitle">Real-time telemetry, user management, and security access controls.</div>
         </div>
 
         <div class="topbar-actions">
           <button id="top-search-btn" class="icon-action-btn" title="Search">🔍</button>
           <button id="change-pwd-btn" class="icon-action-btn" title="Change Password">🔑</button>
-          <button class="date-range-btn">📅 May 12 – Jun 12, 2026 <span>∨</span></button>
-          <button id="export-users" class="secondary-btn" style="height:36px;font-size:12px;" title="Export Data">📥 Export</button>
+          <button id="export-users" class="secondary-btn" style="height:36px;font-size:12px;" title="Export Data">📥 Export Users</button>
           <button id="refresh" class="refresh-emerald-btn">🔄 Refresh Data</button>
-          <button class="icon-action-btn" title="Notifications">
-            🔔
-            <span class="notification-badge">7</span>
-          </button>
           <button id="logout" class="danger-btn" style="height:36px;padding:0 12px;font-size:12px;">Sign Out</button>
         </div>
       </header>
@@ -162,17 +157,17 @@
         <div class="status-item"><span class="status-dot-green"></span> Turso DB: Operational</div>
         <div class="status-item"><span class="status-dot-green"></span> Resend Gateway: Connected</div>
         <div class="status-item"><span class="status-dot-green"></span> AI Engine: Operational</div>
-        <div class="status-item"><span class="status-dot-green"></span> MCP Plugin: 100% Active</div>
-        <div class="status-item"><span class="status-dot-green"></span> Vercel Edge: 100% Active</div>
+        <div class="status-item"><span class="status-dot-green"></span> MCP Plugin: Operational</div>
+        <div class="status-item"><span class="status-dot-green"></span> Vercel Edge: Active</div>
       </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 3. TOP METRICS ROW (6 CARDS)                               -->
+      <!-- 3. TOP METRICS ROW                                         -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section id="metrics" class="metrics-row"></section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 4. MIDDLE ROW: PLATFORM ACTIVITY + STORAGE + AI INSIGHT    -->
+      <!-- 4. MIDDLE ROW: PLATFORM ACTIVITY + STORAGE + AI DIAGNOSTICS-->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section class="middle-grid">
         
@@ -181,13 +176,7 @@
           <div class="panel-header-row">
             <div>
               <div class="panel-card-title">Platform Activity Overview</div>
-              <div class="panel-card-sub">Daily telemetry &amp; unique active users</div>
-            </div>
-            <div>
-              <select class="search-input" style="width: 85px; height: 30px; font-size: 11px; font-weight: 700; padding: 0 6px;">
-                <option>7 Days</option>
-                <option>30 Days</option>
-              </select>
+              <div class="panel-card-sub">Daily telemetry &amp; active users</div>
             </div>
           </div>
 
@@ -199,92 +188,41 @@
           <div id="activity-chart-wrap" style="height: 165px; width: 100%;"></div>
         </article>
 
-        <!-- Middle: Platform Storage & Database Telemetry -->
+        <!-- Middle: Database & Storage Telemetry -->
         <article class="panel-card" id="storage-section">
           <div class="panel-header-row">
             <div>
               <div class="panel-card-title">Database &amp; Storage Telemetry</div>
-              <div class="panel-card-sub">Turso DB &amp; System Health</div>
-            </div>
-            <button class="secondary-btn" style="height: 26px; padding: 0 8px; font-size: 10.5px;">View Logs</button>
-          </div>
-
-          <div style="display: grid; gap: 10px;">
-            <!-- Metric 1 -->
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>🗄️ Stored Expense Records</span>
-                <span>18,721 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(42.5%)</span></span>
-              </div>
-              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 42.5%; height: 100%; background: #10b981; border-radius: 99px;"></div>
-              </div>
-            </div>
-
-            <!-- Metric 2 -->
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>🎯 Budget Configurations</span>
-                <span>932 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(21.1%)</span></span>
-              </div>
-              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 21.1%; height: 100%; background: #10b981; border-radius: 99px;"></div>
-              </div>
-            </div>
-
-            <!-- Metric 3 -->
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>📈 Telemetry Activity Log</span>
-                <span>12,450 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(28.2%)</span></span>
-              </div>
-              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 28.2%; height: 100%; background: #3b82f6; border-radius: 99px;"></div>
-              </div>
-            </div>
-
-            <!-- Metric 4 -->
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>🛡️ Security Audit Logs</span>
-                <span>3,620 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(8.2%)</span></span>
-              </div>
-              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 8.2%; height: 100%; background: #8b5cf6; border-radius: 99px;"></div>
-              </div>
+              <div class="panel-card-sub">Live records breakdown from Turso DB</div>
             </div>
           </div>
+
+          <div id="storage-metrics-wrap" style="display: grid; gap: 10px;"></div>
         </article>
 
-        <!-- Right: AI Insight + System Health -->
+        <!-- Right: System AI Diagnostics + Health -->
         <article class="panel-card" id="ai-insight-section">
           <!-- Top Box: AI Insight -->
           <div class="ai-insight-box">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
               <div style="font-size: 12.5px; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
                 <span>✨ System AI Diagnostics</span>
-                <span class="new-pill">Active</span>
+                <span class="new-pill">Live</span>
               </div>
-              <span style="font-size: 10px; color: #94a3b8; cursor: pointer;">✕</span>
             </div>
 
-            <div style="font-size: 11.5px; color: #166534; line-height: 1.4; margin-bottom: 8px; padding-right: 50px;">
-              Platform activity increased <strong>+18.7%</strong> this week.<br>
-              Database latency remains optimal at <strong style="color: #047857; font-size: 13px;">14ms</strong>.
+            <div id="ai-diagnostics-text" style="font-size: 11.5px; color: #166534; line-height: 1.4; margin-bottom: 8px;">
+              Analyzing database telemetry...
             </div>
-
-            <button class="secondary-btn" style="height: 28px; padding: 0 10px; font-size: 11px; background: #ffffff; color: #047857; border-color: #a7f3d0;">View System Report</button>
-            <span style="font-size: 32px; position: absolute; right: 12px; bottom: 12px;">🤖</span>
           </div>
 
           <!-- Bottom Box: System Health -->
           <div>
             <div class="panel-header-row" style="margin-bottom: 8px;">
               <div>
-                <div style="font-size: 13px; font-weight: 800; color: #0f172a;">System Health</div>
-                <div style="font-size: 10.5px; color: #64748b;">All systems operational</div>
+                <div style="font-size: 13px; font-weight: 800; color: #0f172a;">System Services Status</div>
+                <div style="font-size: 10.5px; color: #64748b;">All core components active</div>
               </div>
-              <button class="secondary-btn" style="height: 24px; padding: 0 6px; font-size: 10px;">View Details</button>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10.5px; font-weight: 700; color: #475569;">
@@ -301,7 +239,7 @@
                 <span style="color: #10b981; margin-left: auto;">Operational</span>
               </div>
               <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
-                <span>🔄 API Services</span>
+                <span>🔄 API Gateway</span>
                 <span style="color: #10b981; margin-left: auto;">Operational</span>
               </div>
             </div>
@@ -320,7 +258,7 @@
           <div class="panel-header-row">
             <div>
               <div class="panel-card-title">Recent User Activity</div>
-              <div class="panel-card-sub">Latest actions across the platform</div>
+              <div class="panel-card-sub">Live telemetry feed</div>
             </div>
             <div>
               <select id="activity-user-filter" class="search-input" style="width: 90px; height: 26px; font-size: 10px; font-weight: 700; padding: 0 4px;">
@@ -330,63 +268,18 @@
           </div>
 
           <div id="activity" class="feed" style="max-height: 250px;"></div>
-
-          <div style="margin-top: 10px; text-align: center;">
-            <button class="secondary-btn" style="height: 28px; width: 100%; font-size: 11px;">View All Activity</button>
-          </div>
         </article>
 
         <!-- Col 2: Recent Alerts -->
         <article class="panel-card" id="alerts-section">
           <div class="panel-header-row">
             <div>
-              <div class="panel-card-title">Recent System Alerts</div>
-              <div class="panel-card-sub">Security &amp; system notifications</div>
-            </div>
-            <button class="secondary-btn" style="height: 24px; padding: 0 6px; font-size: 10px;">View All</button>
-          </div>
-
-          <div style="display: grid; gap: 10px;">
-            <!-- Alert 1 -->
-            <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
-              <div style="width: 26px; height: 26px; border-radius: 7px; background: #fff7ed; color: #f97316; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚠️</div>
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">High activity spike detected</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">+35% events in last 2 hours</div>
-              </div>
-              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">5m ago</span>
-            </div>
-
-            <!-- Alert 2 -->
-            <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
-              <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚠️</div>
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Budget limit reached</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">2 users exceeded threshold</div>
-              </div>
-              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">28m ago</span>
-            </div>
-
-            <!-- Alert 3 -->
-            <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
-              <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">❌</div>
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Rate limit warning</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">API requests within normal bounds</div>
-              </div>
-              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">1h ago</span>
-            </div>
-
-            <!-- Alert 4 -->
-            <div style="display: flex; gap: 10px; align-items: flex-start;">
-              <div style="width: 26px; height: 26px; border-radius: 7px; background: #ecfdf5; color: #10b981; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">👤</div>
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">New user registrations</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">24 new users joined today</div>
-              </div>
-              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">2h ago</span>
+              <div class="panel-card-title">System &amp; Security Alerts</div>
+              <div class="panel-card-sub">Real-time status updates</div>
             </div>
           </div>
+
+          <div id="system-alerts-wrap" style="display: grid; gap: 10px;"></div>
         </article>
 
         <!-- Col 3: Quick Administrative Actions -->
@@ -408,13 +301,13 @@
               <div class="quick-action-desc">Download accounts</div>
             </div>
 
-            <div class="quick-action-card" onclick="document.getElementById('export-audit').click()">
+            <div class="quick-action-card" id="btn-export-audit">
               <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🛡️</div>
               <div class="quick-action-title">Export Audit Log</div>
               <div class="quick-action-desc">Security records</div>
             </div>
 
-            <div class="quick-action-card" onclick="document.getElementById('refresh').click()">
+            <div class="quick-action-card" id="btn-quick-refresh">
               <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🔄</div>
               <div class="quick-action-title">Refresh Telemetry</div>
               <div class="quick-action-desc">Live metrics sync</div>
@@ -426,33 +319,12 @@
         <article class="panel-card" id="summary-section">
           <div class="panel-header-row" style="margin-bottom: 8px;">
             <div>
-              <div class="panel-card-title">Platform Summary</div>
-              <div class="panel-card-sub">Key metrics at a glance</div>
+              <div class="panel-card-title">Platform Live Summary</div>
+              <div class="panel-card-sub">Database statistics</div>
             </div>
           </div>
 
-          <div style="display: grid; gap: 8px; font-size: 11.5px; font-weight: 700; color: #475569;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
-              <span>Total Platform Users</span>
-              <span>2,548 <span style="color:#10b981;font-size:9.5px;">+12.4%</span></span>
-            </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
-              <span>24-Hour Active Users</span>
-              <span>1,243 <span style="color:#10b981;font-size:9.5px;">+18.7%</span></span>
-            </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
-              <span>Suspended Accounts</span>
-              <span>0 <span style="color:#10b981;font-size:9.5px;">0%</span></span>
-            </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
-              <span>Total Expense Records</span>
-              <span>18,721 <span style="color:#10b981;font-size:9.5px;">+15.2%</span></span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span>Database Status</span>
-              <span style="color:#10b981;">Operational</span>
-            </div>
-          </div>
+          <div id="platform-summary-wrap" style="display: grid; gap: 8px; font-size: 11.5px; font-weight: 700; color: #475569;"></div>
         </article>
 
       </section>
@@ -499,12 +371,11 @@
       <section class="panel-card" id="audit-section">
         <div class="panel-header-row">
           <div>
-            <div class="panel-card-title">Audit Trail <span style="font-size:11px;color:#94a3b8;font-weight:600;">(Latest 20 Actions)</span></div>
-            <div class="panel-card-sub">Immutable log of critical actions</div>
+            <div class="panel-card-title">Owner Security Audit Trail</div>
+            <div class="panel-card-sub">Immutable log of critical access control events</div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button class="secondary-btn" style="height: 30px; font-size: 11px;">View Full Audit Log</button>
-            <button id="export-audit" class="secondary-btn" style="height: 30px; font-size: 11px;">Export CSV</button>
+            <button id="export-audit" class="secondary-btn" style="height: 30px; font-size: 11px;">Export Audit CSV</button>
           </div>
         </div>
 
@@ -516,18 +387,9 @@
                 <th>USER</th>
                 <th>ACTION</th>
                 <th>DETAILS</th>
-                <th>IP ADDRESS</th>
               </tr>
             </thead>
-            <tbody id="audit-rows">
-              <tr>
-                <td style="white-space:nowrap;font-size:11px;color:#64748b;">Jun 12, 2026 10:24 AM</td>
-                <td style="font-weight:700;color:#0f172a;">Tanvirul Islam (Owner)</td>
-                <td><span style="font-weight:700;color:#059669;background:#ecfdf5;padding:2px 6px;border-radius:4px;font-size:10.5px;">Updated system settings</span></td>
-                <td style="font-size:11.5px;">Changed AI model to GPT-4o</td>
-                <td style="font-family:monospace;font-size:11px;color:#94a3b8;">103.125.***.45</td>
-              </tr>
-            </tbody>
+            <tbody id="audit-rows"></tbody>
           </table>
         </div>
       </section>

@@ -69,6 +69,8 @@ export default async function handler(req, res) {
         (SELECT COUNT(*) FROM owner_user_controls WHERE status='suspended') AS suspended_users,
         (SELECT COUNT(DISTINCT user_id) FROM app_activity WHERE created_at >= datetime('now','-1 day')) AS active_24h,
         (SELECT COUNT(*) FROM expenses) AS total_expenses,
+        (SELECT COUNT(*) FROM budgets) AS total_budgets,
+        (SELECT COUNT(*) FROM app_activity) AS total_activity_logs,
         (SELECT COUNT(*) FROM app_activity WHERE created_at >= datetime('now','-1 day')) AS events_24h`),
       db.execute({
         sql: `WITH ids AS (
@@ -94,10 +96,10 @@ export default async function handler(req, res) {
                   LEFT JOIN app_users u ON u.user_id=a.user_id
                   ORDER BY a.created_at DESC LIMIT 300`),
       db.execute("SELECT id,actor,action,target_user_id,detail,created_at FROM owner_audit_log ORDER BY created_at DESC LIMIT 100"),
-      db.execute(`SELECT strftime('%Y-%m-%d', created_at) AS day, COUNT(*) AS event_count, COUNT(DISTINCT user_id) AS active_users
+      db.execute(`SELECT strftime('%m-%d', created_at) AS day, COUNT(*) AS event_count, COUNT(DISTINCT user_id) AS active_users
                   FROM app_activity
                   WHERE created_at >= datetime('now', '-7 day')
-                  GROUP BY strftime('%Y-%m-%d', created_at)
+                  GROUP BY strftime('%m-%d', created_at)
                   ORDER BY day ASC`),
     ]);
 
@@ -110,6 +112,8 @@ export default async function handler(req, res) {
         suspendedUsers: Number(summary.suspended_users || 0),
         active24h: Number(summary.active_24h || 0),
         totalExpenses: Number(summary.total_expenses || 0),
+        totalBudgets: Number(summary.total_budgets || 0),
+        totalActivityLogs: Number(summary.total_activity_logs || 0),
         events24h: Number(summary.events_24h || 0),
       },
       users: usersResult.rows.map((row) => ({

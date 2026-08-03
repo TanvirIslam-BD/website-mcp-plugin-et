@@ -15,6 +15,7 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character
 
 function toast(message, error = false) {
   const node = $('#toast');
+  if (!node) return;
   node.textContent = message;
   node.className = `toast show${error ? ' error' : ''}`;
   clearTimeout(toast.timer);
@@ -24,7 +25,7 @@ function toast(message, error = false) {
 function timeAgo(value) {
   if (!value) return 'Never';
   const date = new Date(value);
-  if (Number.isNaN(date.valueOf())) return 'Unknown';
+  if (Number.isNaN(date.valueOf())) return 'Never';
   const diffSec = Math.floor((new Date() - date) / 1000);
   if (diffSec < 60) return 'Just now';
   if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
@@ -32,25 +33,16 @@ function timeAgo(value) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
 }
 
-function mockSparklineSVG(color = '#10b981') {
-  return `
-    <svg width="60" height="18" viewBox="0 0 60 18" fill="none">
-      <path d="M2 14 Q 12 4, 22 10 T 42 6 T 58 2" stroke="${color}" stroke-width="2" stroke-linecap="round" fill="none"/>
-    </svg>
-  `;
-}
-
-function metricCardMockup(label, value, icon, badgeText, color = '#10b981', iconBg = '#ecfdf5') {
+function metricCard(label, value, icon, subtext, color = '#10b981', iconBg = '#ecfdf5') {
   return `
     <article class="mock-metric-card">
       <div class="mock-metric-head">
         <span class="mock-metric-label">${escapeHtml(label)}</span>
         <div class="mock-metric-icon" style="background-color: ${iconBg};">${icon}</div>
       </div>
-      <strong class="mock-metric-val">${value}</strong>
+      <strong class="mock-metric-val">${typeof value === 'number' ? value.toLocaleString() : escapeHtml(value)}</strong>
       <div class="mock-metric-footer">
-        <span class="mock-metric-badge" style="color: ${color};">↑ ${badgeText}</span>
-        ${mockSparklineSVG(color)}
+        <span class="mock-metric-badge" style="color: ${color};">${escapeHtml(subtext)}</span>
       </div>
     </article>
   `;
@@ -60,18 +52,23 @@ function renderTrendChart(trendData = []) {
   const wrap = $('#activity-chart-wrap');
   if (!wrap) return;
   
+  if (!trendData || trendData.length === 0) {
+    wrap.innerHTML = `<div style="height:100%;display:grid;place-items:center;color:#94a3b8;font-size:12px;">No activity telemetry recorded in the last 7 days.</div>`;
+    return;
+  }
+
   const width = wrap.clientWidth || 450;
   const height = 150;
-  const padding = 20;
+  const padding = 24;
 
-  // Render smooth dual line chart matching mockup
-  const dates = ['May 6', 'May 13', 'May 20', 'May 27', 'Jun 3', 'Jun 10'];
-  const userPts = [1200, 1500, 1600, 1750, 1650, 1800];
-  const eventPts = [2100, 2400, 2900, 2800, 3100, 3400];
-  const maxVal = 3600;
+  const dates = trendData.map(d => d.day);
+  const userPtsValues = trendData.map(d => d.users || 0);
+  const eventPtsValues = trendData.map(d => d.events || 0);
+  const maxVal = Math.max(...eventPtsValues, ...userPtsValues, 5);
 
-  const ptsUser = userPts.map((v, i) => `${padding + (i / 5) * (width - padding * 2)},${height - padding - (v / maxVal) * (height - padding * 2)}`).join(' ');
-  const ptsEvt = eventPts.map((v, i) => `${padding + (i / 5) * (width - padding * 2)},${height - padding - (v / maxVal) * (height - padding * 2)}`).join(' ');
+  const len = trendData.length;
+  const ptsUser = userPtsValues.map((v, i) => `${padding + (i / Math.max(len - 1, 1)) * (width - padding * 2)},${height - padding - (v / maxVal) * (height - padding * 2)}`).join(' ');
+  const ptsEvt = eventPtsValues.map((v, i) => `${padding + (i / Math.max(len - 1, 1)) * (width - padding * 2)},${height - padding - (v / maxVal) * (height - padding * 2)}`).join(' ');
 
   const svg = `
     <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" style="overflow: visible;">
@@ -81,19 +78,16 @@ function renderTrendChart(trendData = []) {
           <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
         </linearGradient>
       </defs>
-      <!-- Grid lines -->
       <line x1="0" y1="${height - padding}" x2="${width}" y2="${height - padding}" stroke="#e2e8f0" stroke-dasharray="3"/>
       <line x1="0" y1="${height / 2}" x2="${width}" y2="${height / 2}" stroke="#f1f5f9" stroke-dasharray="3"/>
       
-      <!-- Area Green -->
       <polygon points="${padding},${height - padding} ${ptsUser} ${width - padding},${height - padding}" fill="url(#areaGradGreen)"/>
 
-      <!-- Lines -->
       <polyline points="${ptsEvt}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
       <polyline points="${ptsUser}" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
 
-      ${userPts.map((v, i) => {
-        const x = padding + (i / 5) * (width - padding * 2);
+      ${userPtsValues.map((v, i) => {
+        const x = padding + (i / Math.max(len - 1, 1)) * (width - padding * 2);
         const y = height - padding - (v / maxVal) * (height - padding * 2);
         return `<circle cx="${x}" cy="${y}" r="3.5" fill="#10b981" stroke="#ffffff" stroke-width="2"><title>${dates[i]}: ${v} users</title></circle>`;
       }).join('')}
@@ -123,21 +117,146 @@ function render() {
   const data = state.data;
   if (!data) return;
 
-  $('#owner-email').textContent = data.owner.email;
+  if ($('#owner-email')) $('#owner-email').textContent = data.owner.email;
 
-  // Render 6 Metric Cards matching mockup
-  const totalUsers = data.summary.totalUsers ? data.summary.totalUsers.toLocaleString() : '2,548';
-  const active24h = data.summary.active24h ? data.summary.active24h.toLocaleString() : '1,243';
-  const totalExpenses = data.summary.totalExpenses ? data.summary.totalExpenses.toLocaleString() : '18,721';
+  // Render REAL Metric Cards from DB Summary
+  const summary = data.summary || {};
+  const totalUsers = summary.totalUsers || 0;
+  const active24h = summary.active24h || 0;
+  const suspendedUsers = summary.suspendedUsers || 0;
+  const totalExpenses = summary.totalExpenses || 0;
+  const totalBudgets = summary.totalBudgets || 0;
+  const totalLogs = summary.totalActivityLogs || 0;
 
   $('#metrics').innerHTML = [
-    metricCardMockup('Total Users', totalUsers, '👥', '+12.4% vs last 30 days', '#10b981', '#ecfdf5'),
-    metricCardMockup('Active Users (24H)', active24h, '⚡', '+18.7% vs yesterday', '#10b981', '#fff7ed'),
-    metricCardMockup('Total Expenses', '৳1,245,890', '💳', '+8.3% vs last 30 days', '#10b981', '#ecfdf5'),
-    metricCardMockup('Expense Records', totalExpenses, '📄', '+15.2% vs last 30 days', '#3b82f6', '#eff6ff'),
-    metricCardMockup('Budgets Created', '932', '🎯', '+9.1% vs last 30 days', '#10b981', '#ecfdf5'),
-    metricCardMockup('AI Savings Found', '৳285,430', '✨', '+14.6% vs last 30 days', '#8b5cf6', '#f5f3ff')
+    metricCard('Total Users', totalUsers, '👥', 'Registered accounts', '#10b981', '#ecfdf5'),
+    metricCard('Active 24H', active24h, '⚡', 'Active in last 24h', '#10b981', '#fff7ed'),
+    metricCard('Suspended Accounts', suspendedUsers, '🛑', suspendedUsers > 0 ? 'Action required' : 'All accounts clean', suspendedUsers > 0 ? '#ef4444' : '#10b981', suspendedUsers > 0 ? '#fef2f2' : '#ecfdf5'),
+    metricCard('Expense Records', totalExpenses, '📄', 'Total stored entries', '#3b82f6', '#eff6ff'),
+    metricCard('Budgets Created', totalBudgets, '🎯', 'Active budget configs', '#10b981', '#ecfdf5'),
+    metricCard('Activity Logs', totalLogs, '📈', 'Telemetry events count', '#8b5cf6', '#f5f3ff')
   ].join('');
+
+  // Render Real Database & Storage Telemetry
+  const grandTotalRecords = totalExpenses + totalBudgets + totalLogs + (data.audit || []).length;
+  const safeTotal = grandTotalRecords || 1;
+
+  const pctExpenses = ((totalExpenses / safeTotal) * 100).toFixed(1);
+  const pctBudgets = ((totalBudgets / safeTotal) * 100).toFixed(1);
+  const pctLogs = ((totalLogs / safeTotal) * 100).toFixed(1);
+  const pctAudit = (((data.audit || []).length / safeTotal) * 100).toFixed(1);
+
+  if ($('#storage-metrics-wrap')) {
+    $('#storage-metrics-wrap').innerHTML = `
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+          <span>🗄️ Expense Records</span>
+          <span>${totalExpenses.toLocaleString()} <span style="font-size: 10px; color: #64748b; font-weight: 600;">(${pctExpenses}%)</span></span>
+        </div>
+        <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+          <div style="width: ${pctExpenses}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+          <span>🎯 Budget Configurations</span>
+          <span>${totalBudgets.toLocaleString()} <span style="font-size: 10px; color: #64748b; font-weight: 600;">(${pctBudgets}%)</span></span>
+        </div>
+        <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+          <div style="width: ${pctBudgets}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+          <span>📈 Activity Telemetry Log</span>
+          <span>${totalLogs.toLocaleString()} <span style="font-size: 10px; color: #64748b; font-weight: 600;">(${pctLogs}%)</span></span>
+        </div>
+        <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+          <div style="width: ${pctLogs}%; height: 100%; background: #3b82f6; border-radius: 99px;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+          <span>🛡️ Security Audit Logs</span>
+          <span>${(data.audit || []).length.toLocaleString()} <span style="font-size: 10px; color: #64748b; font-weight: 600;">(${pctAudit}%)</span></span>
+        </div>
+        <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+          <div style="width: ${pctAudit}%; height: 100%; background: #8b5cf6; border-radius: 99px;"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Render Real System AI Diagnostics Text
+  if ($('#ai-diagnostics-text')) {
+    $('#ai-diagnostics-text').innerHTML = `
+      Platform registered <strong>${active24h.toLocaleString()} active users</strong> in the last 24h.<br>
+      Total activity telemetry logged: <strong>${totalLogs.toLocaleString()} events</strong> across ${totalUsers.toLocaleString()} accounts.
+    `;
+  }
+
+  // Render Real System Alerts derived from real DB status
+  if ($('#system-alerts-wrap')) {
+    const alerts = [];
+    if (suspendedUsers > 0) {
+      alerts.push(`
+        <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+          <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">🛑</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Suspended User Accounts</div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 1px;">${suspendedUsers} account(s) currently suspended</div>
+          </div>
+        </div>
+      `);
+    }
+    if (summary.events24h > 0) {
+      alerts.push(`
+        <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+          <div style="width: 26px; height: 26px; border-radius: 7px; background: #ecfdf5; color: #10b981; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚡</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">24H Telemetry Events</div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 1px;">${summary.events24h.toLocaleString()} actions recorded today</div>
+          </div>
+        </div>
+      `);
+    }
+    alerts.push(`
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        <div style="width: 26px; height: 26px; border-radius: 7px; background: #ecfdf5; color: #10b981; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">👤</div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Total Registered Users</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 1px;">${totalUsers.toLocaleString()} total accounts in database</div>
+        </div>
+      </div>
+    `);
+    $('#system-alerts-wrap').innerHTML = alerts.join('');
+  }
+
+  // Render Real Platform Live Summary
+  if ($('#platform-summary-wrap')) {
+    $('#platform-summary-wrap').innerHTML = `
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+        <span>Total Platform Users</span>
+        <span>${totalUsers.toLocaleString()}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+        <span>24-Hour Active Users</span>
+        <span>${active24h.toLocaleString()}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+        <span>Suspended Accounts</span>
+        <span style="color:${suspendedUsers > 0 ? '#ef4444' : '#10b981'};">${suspendedUsers}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+        <span>Total Expense Records</span>
+        <span>${totalExpenses.toLocaleString()}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>Database Status</span>
+        <span style="color:#10b981;">Operational</span>
+      </div>
+    `;
+  }
 
   // Render Trend Chart
   renderTrendChart(data.trend || []);
@@ -207,12 +326,14 @@ function render() {
 
   renderActivityFeed('#activity', activityItems);
 
-  // Render Audit Trail Table
+  // Render Real Audit Trail Table
   renderAuditRows('#audit-rows', data.audit || []);
 }
 
 function renderActivityFeed(selector, items) {
-  $(selector).innerHTML = items.length ? items.map(item => {
+  const container = $(selector);
+  if (!container) return;
+  container.innerHTML = items.length ? items.map(item => {
     const displayName = item.displayName || 'Unnamed User';
     const initial = (displayName[0] || 'U').toUpperCase();
     const eventName = item.eventType.replaceAll('_', ' ');
@@ -242,22 +363,18 @@ function renderActivityFeed(selector, items) {
 }
 
 function renderAuditRows(selector, items) {
-  if (!$(selector)) return;
-  $(selector).innerHTML = items.length ? items.slice(0, 20).map(item => `
+  const container = $(selector);
+  if (!container) return;
+  container.innerHTML = items.length ? items.slice(0, 50).map(item => `
     <tr>
       <td style="white-space:nowrap;font-size:11px;color:#64748b;">${escapeHtml(timeAgo(item.createdAt))}</td>
       <td style="font-weight:700;color:#0f172a;">${escapeHtml(item.actor)}</td>
       <td><span style="font-weight:700;color:#059669;background:#ecfdf5;padding:2px 6px;border-radius:4px;font-size:10.5px;">${escapeHtml(item.action.replaceAll('_', ' '))}</span></td>
       <td style="font-size:11.5px;">Target: ${escapeHtml(item.targetUserId || 'system')}</td>
-      <td style="font-family:monospace;font-size:11px;color:#94a3b8;">103.125.***.45</td>
     </tr>
   `).join('') : `
     <tr>
-      <td style="white-space:nowrap;font-size:11px;color:#64748b;">Jun 12, 2026 10:24 AM</td>
-      <td style="font-weight:700;color:#0f172a;">Tanvirul Islam (Owner)</td>
-      <td><span style="font-weight:700;color:#059669;background:#ecfdf5;padding:2px 6px;border-radius:4px;font-size:10.5px;">Updated system settings</span></td>
-      <td style="font-size:11.5px;">Changed AI model to GPT-4o</td>
-      <td style="font-family:monospace;font-size:11px;color:#94a3b8;">103.125.***.45</td>
+      <td colspan="4" style="padding:20px;text-align:center;color:#94a3b8;font-size:11.5px;">No audit log records found.</td>
     </tr>
   `;
 }
@@ -449,12 +566,16 @@ function exportCSV(filename, rows) {
 }
 
 /* EVENT LISTENERS */
-$('#close-modal').addEventListener('click', () => $('#user-modal-backdrop').classList.remove('active'));
-$('#user-modal-backdrop').addEventListener('click', (e) => {
-  if (e.target === $('#user-modal-backdrop')) $('#user-modal-backdrop').classList.remove('active');
-});
+const closeBtn = $('#close-modal');
+if (closeBtn) closeBtn.addEventListener('click', () => $('#user-modal-backdrop').classList.remove('active'));
 
-/* QUICK ACTIONS BUTTON BINDINGS */
+const backdropEl = $('#user-modal-backdrop');
+if (backdropEl) {
+  backdropEl.addEventListener('click', (e) => {
+    if (e.target === backdropEl) backdropEl.classList.remove('active');
+  });
+}
+
 const btnQuickExport = $('#btn-quick-export');
 if (btnQuickExport) {
   btnQuickExport.addEventListener('click', () => {
@@ -462,10 +583,24 @@ if (btnQuickExport) {
   });
 }
 
+const btnExportAudit = $('#btn-export-audit');
+if (btnExportAudit) {
+  btnExportAudit.addEventListener('click', () => {
+    $('#export-audit').click();
+  });
+}
+
 const btnQuickPwd = $('#btn-quick-pwd');
 if (btnQuickPwd) {
   btnQuickPwd.addEventListener('click', () => {
     $('#change-pwd-btn').click();
+  });
+}
+
+const btnQuickRefresh = $('#btn-quick-refresh');
+if (btnQuickRefresh) {
+  btnQuickRefresh.addEventListener('click', () => {
+    $('#refresh').click();
   });
 }
 
@@ -544,49 +679,66 @@ $$('.tab-btn').forEach(btn => {
   });
 });
 
-$('#export-users').addEventListener('click', () => {
-  if (!state.data) return;
-  const rows = state.data.users.map(u => ({
-    user_id: u.userId,
-    display_name: u.displayName,
-    status: u.status,
-    expense_count: u.expenseCount,
-    budget_count: u.budgetCount,
-    activity_count: u.activityCount,
-    last_active: u.lastActiveAt
-  }));
-  exportCSV(`users_export_${new Date().toISOString().slice(0, 10)}.csv`, rows);
-});
+const exportUsersBtn = $('#export-users');
+if (exportUsersBtn) {
+  exportUsersBtn.addEventListener('click', () => {
+    if (!state.data) return;
+    const rows = state.data.users.map(u => ({
+      user_id: u.userId,
+      display_name: u.displayName,
+      status: u.status,
+      expense_count: u.expenseCount,
+      budget_count: u.budgetCount,
+      activity_count: u.activityCount,
+      last_active: u.lastActiveAt
+    }));
+    exportCSV(`users_export_${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  });
+}
 
-$('#export-audit').addEventListener('click', () => {
-  if (!state.data) return;
-  const rows = state.data.audit.map(a => ({
-    id: a.id,
-    actor: a.actor,
-    action: a.action,
-    target_user: a.targetUserId,
-    created_at: a.createdAt
-  }));
-  exportCSV(`audit_log_export_${new Date().toISOString().slice(0, 10)}.csv`, rows);
-});
+const exportAuditBtn = $('#export-audit');
+if (exportAuditBtn) {
+  exportAuditBtn.addEventListener('click', () => {
+    if (!state.data) return;
+    const rows = state.data.audit.map(a => ({
+      id: a.id,
+      actor: a.actor,
+      action: a.action,
+      target_user: a.targetUserId,
+      created_at: a.createdAt
+    }));
+    exportCSV(`audit_log_export_${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  });
+}
 
-$('#users').addEventListener('click', async (event) => {
-  const button = event.target.closest('button[data-action]');
-  if (!button) return;
-  const action = button.dataset.action;
-  const userId = button.dataset.user;
-  window.handleSuspendAction(userId, action === 'suspend' ? 'active' : 'suspended');
-});
+const usersTable = $('#users');
+if (usersTable) {
+  usersTable.addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const action = button.dataset.action;
+    const userId = button.dataset.user;
+    window.handleSuspendAction(userId, action === 'suspend' ? 'active' : 'suspended');
+  });
+}
 
-$('#search').addEventListener('input', (e) => {
-  state.query = e.target.value.trim();
-  render();
-});
+const searchInput = $('#search');
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    state.query = e.target.value.trim();
+    render();
+  });
+}
 
-$('#refresh').addEventListener('click', load);
-$('#logout').addEventListener('click', async () => {
-  await fetch('/api/owner-auth', { method: 'DELETE', credentials: 'same-origin' });
-  location.replace('/owner/login');
-});
+const refreshBtn = $('#refresh');
+if (refreshBtn) refreshBtn.addEventListener('click', load);
+
+const logoutBtn = $('#logout');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/owner-auth', { method: 'DELETE', credentials: 'same-origin' });
+    location.replace('/owner/login');
+  });
+}
 
 load();
