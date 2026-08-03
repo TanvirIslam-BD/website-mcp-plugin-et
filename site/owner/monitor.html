@@ -174,103 +174,6 @@
       <section id="metrics" class="metrics-row"></section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 4. SYSTEM ARCHITECTURE & PIPELINE TOPOLOGY MAP             -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <section class="panel-card" id="architecture-section" style="margin-bottom: 24px; padding: 20px;">
-        <div class="panel-header-row" style="margin-bottom: 16px;">
-          <div>
-            <div class="panel-card-title">🧩 System Architecture &amp; Data Pipeline Topology</div>
-            <div class="panel-card-sub">Live interconnectivity map of MCP Server, Turso DB, CometAPI, Chat Agent, Web App &amp; AI Clients</div>
-          </div>
-          <span class="new-pill" style="padding: 3px 10px; font-size: 11px;">Interactive Flow</span>
-        </div>
-
-        <div style="background: #060d19; border: 1px solid #1e293b; border-radius: 14px; padding: 20px; color: #ffffff;">
-          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: center; position: relative;">
-            
-            <!-- COLUMN 1: CLIENTS & FRONTEND -->
-            <div style="display: grid; gap: 12px;">
-              <!-- Node 1: AI MCP Clients -->
-              <div style="background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 10px; padding: 12px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #a7f3d0;">🤖 MCP Clients &amp; Hosts</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Active</span>
-                </div>
-                <div style="font-size: 10.5px; color: #94a3b8;">ChatGPT · Claude Desktop · Antigravity</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #64748b; font-family: monospace;">Protocol: MCP / SSE</div>
-              </div>
-
-              <!-- Node 2: Web App -->
-              <div style="background: rgba(255,255,255,0.05); border: 1px solid #334155; border-radius: 10px; padding: 12px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #93c5fd;">🌐 Web App Frontend</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● 100% Active</span>
-                </div>
-                <div style="font-size: 10.5px; color: #94a3b8;">PWA Dashboard · Owner Console (Vercel Edge)</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #64748b; font-family: monospace;">Protocol: HTTPS / JSON API</div>
-              </div>
-            </div>
-
-            <!-- COLUMN 2: MIDDLEWARE & CORE ENGINES -->
-            <div style="display: grid; gap: 12px;">
-              <!-- Node 3: MCPize Remote MCP Server -->
-              <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b98188; border-radius: 10px; padding: 12px; box-shadow: 0 0 12px rgba(16,185,129,0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🔌 MCPize Remote MCP Server</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
-                </div>
-                <div style="font-size: 10.5px; color: #a7f3d0;">Tool Definitions &amp; Remote MCP Execution</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #6ee7b7; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                  https://expense-tracker-mcp.mcpize.run/mcp
-                </div>
-              </div>
-
-              <!-- Node 4: Chat Agent Engine -->
-              <div style="background: rgba(59, 130, 246, 0.12); border: 1px solid #3b82f688; border-radius: 10px; padding: 12px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🧠 Chat Agent Engine</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
-                </div>
-                <div style="font-size: 10.5px; color: #cbd5e1;">Calls MCPize Tools via OAuth Session Tokens</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #93c5fd; font-family: monospace;">Endpoint: /api/ai-chat</div>
-              </div>
-            </div>
-
-            <!-- COLUMN 3: BACKEND SERVICES & DATABASE -->
-            <div style="display: grid; gap: 12px;">
-              <!-- Node 5: CometAPI AI Gateway -->
-              <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid #8b5cf666; border-radius: 10px; padding: 12px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #ddd6fe;">🚀 CometAPI AI Gateway</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
-                </div>
-                <div style="font-size: 10.5px; color: #94a3b8;">Gemini · GPT-4o · Claude 3.5 Models</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #c4b5fd; font-family: monospace;">Affiliate: ?aff=mURH</div>
-              </div>
-
-              <!-- Node 6: Turso DB -->
-              <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981aa; border-radius: 10px; padding: 12px; box-shadow: 0 0 15px rgba(16,185,129,0.15);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                  <span style="font-size: 12.5px; font-weight: 800; color: #ffffff;">🗄️ Turso DB (LibSQL)</span>
-                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Operational</span>
-                </div>
-                <div style="font-size: 10.5px; color: #a7f3d0;">expenses · budgets · app_activity · audit</div>
-                <div style="margin-top: 6px; font-size: 9.5px; color: #6ee7b7; font-family: monospace;">Latency: 14ms (Distributed SQLite)</div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- CONNECTIONS FLOW LEGEND -->
-          <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #1e293b; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 10.5px; color: #94a3b8;">
-            <div style="display: flex; gap: 14px; font-weight: 700;">
-              <span>⚡ MCP Clients ⇄ MCP Server ⇄ Turso DB</span>
-              <span>⚡ Web App ⇄ Chat Agent ⇄ CometAPI Gateway</span>
-            </div>
-            <div style="color: #10b981; font-weight: 800;">● All Systems Synchronized &amp; Connected</div>
-          </div>
-        </div>
-      </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- 5. MIDDLE ROW: PLATFORM ACTIVITY + STORAGE + AI DIAGNOSTICS-->
@@ -497,6 +400,103 @@
             </thead>
             <tbody id="audit-rows"></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 9. SYSTEM ARCHITECTURE & PIPELINE TOPOLOGY MAP (LIGHT)     -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="panel-card" id="architecture-section" style="margin-bottom: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0;">
+        <div class="panel-header-row" style="margin-bottom: 16px;">
+          <div>
+            <div class="panel-card-title" style="color:#0f172a;">🧩 System Architecture &amp; Data Pipeline Topology</div>
+            <div class="panel-card-sub">Live interconnectivity map of MCP Server, Turso DB, CometAPI, Chat Agent, Web App &amp; AI Clients</div>
+          </div>
+          <span class="new-pill" style="padding: 3px 10px; font-size: 11px;">Interactive Flow</span>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start;">
+
+            <!-- COLUMN 1: CLIENTS & FRONTEND -->
+            <div style="display: grid; gap: 12px;">
+              <!-- Node 1: AI MCP Clients -->
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #047857;">🤖 MCP Clients &amp; Hosts</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Active</span>
+                </div>
+                <div style="font-size: 10.5px; color: #475569;">ChatGPT · Claude Desktop · Antigravity</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #64748b; font-family: monospace;">Protocol: MCP / SSE</div>
+              </div>
+
+              <!-- Node 2: Web App -->
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #1d4ed8;">🌐 Web App Frontend</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● 100% Active</span>
+                </div>
+                <div style="font-size: 10.5px; color: #475569;">PWA Dashboard · Owner Console (Vercel Edge)</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #64748b; font-family: monospace;">Protocol: HTTPS / JSON API</div>
+              </div>
+            </div>
+
+            <!-- COLUMN 2: MIDDLEWARE & CORE ENGINES -->
+            <div style="display: grid; gap: 12px;">
+              <!-- Node 3: MCPize Remote MCP Server -->
+              <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 10px; padding: 12px; box-shadow: 0 0 0 2px rgba(16,185,129,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #065f46;">🔌 MCPize Remote MCP Server</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
+                </div>
+                <div style="font-size: 10.5px; color: #047857;">Tool Definitions &amp; Remote MCP Execution</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #059669; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">https://expense-tracker-mcp.mcpize.run/mcp</div>
+              </div>
+
+              <!-- Node 4: Chat Agent Engine -->
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #1e40af;">🧠 Chat Agent Engine</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
+                </div>
+                <div style="font-size: 10.5px; color: #475569;">Calls MCPize Tools via OAuth Session Tokens</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #3b82f6; font-family: monospace;">Endpoint: /api/ai-chat</div>
+              </div>
+            </div>
+
+            <!-- COLUMN 3: BACKEND SERVICES & DATABASE -->
+            <div style="display: grid; gap: 12px;">
+              <!-- Node 5: CometAPI AI Gateway -->
+              <div style="background: #faf5ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #6d28d9;">🚀 CometAPI AI Gateway</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Connected</span>
+                </div>
+                <div style="font-size: 10.5px; color: #475569;">Gemini · GPT-4o · Claude 3.5 Models</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #7c3aed; font-family: monospace;">Affiliate: ?aff=mURH</div>
+              </div>
+
+              <!-- Node 6: Turso DB -->
+              <div style="background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 10px; padding: 12px; box-shadow: 0 0 0 2px rgba(16,185,129,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 12.5px; font-weight: 800; color: #065f46;">🗄️ Turso DB (LibSQL)</span>
+                  <span style="font-size: 9.5px; color: #10b981; font-weight: 800;">● Operational</span>
+                </div>
+                <div style="font-size: 10.5px; color: #047857;">expenses · budgets · app_activity · audit</div>
+                <div style="margin-top: 6px; font-size: 9.5px; color: #059669; font-family: monospace;">Latency: 14ms (Distributed SQLite)</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- CONNECTIONS FLOW LEGEND -->
+          <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 10.5px; color: #64748b;">
+            <div style="display: flex; gap: 14px; font-weight: 700;">
+              <span>⚡ MCP Clients ⇄ MCPize Server ⇄ Turso DB</span>
+              <span>⚡ Web App ⇄ Chat Agent ⇄ CometAPI Gateway</span>
+            </div>
+            <div style="color: #10b981; font-weight: 800;">● All Systems Synchronized &amp; Connected</div>
+          </div>
         </div>
       </section>
 
