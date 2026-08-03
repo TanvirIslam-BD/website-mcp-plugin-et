@@ -1,0 +1,45 @@
+<svg width="240" height="110" viewBox="0 0 240 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Horizontal Grid Lines -->
+  <line x1="32" y1="12" x2="230" y2="12" stroke="#f1f5f9" stroke-width="1"/>
+  <line x1="32" y1="36" x2="230" y2="36" stroke="#f1f5f9" stroke-width="1"/>
+  <line x1="32" y1="60" x2="230" y2="60" stroke="#f1f5f9" stroke-width="1"/>
+  <line x1="32" y1="84" x2="230" y2="84" stroke="#f1f5f9" stroke-width="1"/>
+
+  <!-- Y-Axis Text Labels -->
+  <text x="26" y="15" fill="#94a3b8" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="end">৳15K</text>
+  <text x="26" y="39" fill="#94a3b8" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="end">৳10K</text>
+  <text x="26" y="63" fill="#94a3b8" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="end">৳5K</text>
+  <text x="26" y="87" fill="#94a3b8" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="end">৳0</text>
+
+  <!-- Area Fill Gradient -->
+  <path d="M44 64 Q60 58 78 48 T116 68 T154 52 T192 46 T222 50 L222 84 L44 84 Z" fill="url(#areaGrad)" opacity="0.4"/>
+
+  <!-- Smooth Line Path -->
+  <!-- Data Points: Mar(44,64) Apr(78,48) May(116,68) Jun(154,52) Jul(192,46) Aug(222,50) -->
+  <path d="M44 64 L78 48 L116 68 L154 52 L192 46 L222 50" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Data Point Circles -->
+  <circle cx="44" cy="64" r="3.5" fill="#10b981"/>
+  <circle cx="78" cy="48" r="3.5" fill="#10b981"/>
+  <circle cx="116" cy="68" r="3.5" fill="#10b981"/>
+  <circle cx="154" cy="52" r="3.5" fill="#10b981"/>
+  <circle cx="192" cy="46" r="3.5" fill="#10b981"/>
+  
+  <!-- Current Month Highlight (Aug) -->
+  <circle cx="222" cy="50" r="5" fill="#047857" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- X-Axis Labels -->
+  <text x="44" y="102" fill="#64748b" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Mar</text>
+  <text x="78" y="102" fill="#64748b" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Apr</text>
+  <text x="116" y="102" fill="#64748b" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">May</text>
+  <text x="154" y="102" fill="#64748b" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Jun</text>
+  <text x="192" y="102" fill="#64748b" font-size="9" font-weight="600" font-family="system-ui, sans-serif" text-anchor="middle">Jul</text>
+  <text x="222" y="102" fill="#047857" font-size="9" font-weight="800" font-family="system-ui, sans-serif" text-anchor="middle">Aug</text>
+
+  <defs>
+    <linearGradient id="areaGrad" x1="0" y1="40" x2="0" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10b981"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+</svg>

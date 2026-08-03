@@ -1,0 +1,8 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Ring -->
+  <circle cx="30" cy="30" r="24" stroke="#e2e8f0" stroke-width="6" fill="none"/>
+  <!-- 20% Arc Progress (150.8 circumference) -->
+  <circle cx="30" cy="30" r="24" stroke="#10b981" stroke-width="6" fill="none" stroke-dasharray="30.16 120.64" stroke-dashoffset="37.7" stroke-linecap="round"/>
+  <!-- Center Text -->
+  <text x="30" y="35" fill="#047857" font-size="14" font-weight="800" font-family="system-ui, sans-serif" text-anchor="middle">20%</text>
+</svg>

@@ -23,6 +23,9 @@ export default async function handler(req, res) {
 
   const emailSubject = `📊 Money Copilot Report - ${month}`;
 
+  // Clean remaining formatted value to prevent duplicate "remaining" text
+  const cleanRemaining = (remainingFormatted || "").replace(/\s*remaining\s*/i, "").trim() || remainingFormatted;
+
   // Helper to strictly parse numeric amounts from number or formatted string
   const getNumericAmount = (cat) => {
     if (typeof cat.amount === "number" && !isNaN(cat.amount)) return cat.amount;
@@ -102,7 +105,7 @@ export default async function handler(req, res) {
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <!-- Left: Logo & Titles -->
-                      <td style="vertical-align: top;" width="64%">
+                      <td style="vertical-align: top;" width="60%">
                         <table cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
                           <tr>
                             <td style="padding-right: 10px; vertical-align: middle;">
@@ -118,28 +121,9 @@ export default async function handler(req, res) {
                         <div style="font-size: 16px; font-weight: 800; color: #34d399; margin-bottom: 8px;">${month}</div>
                         <p style="margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">AI analyzed your spending and found opportunities to save more.</p>
                       </td>
-                      <!-- Right: Email-safe Dashboard Card Window -->
-                      <td style="vertical-align: top; text-align: right;" width="36%">
-                        <div style="display: inline-block; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 14px; padding: 10px 12px; width: 140px; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                          <div style="margin-bottom: 8px;">
-                            <span style="display: inline-block; width: 6px; height: 6px; background-color: #ef4444; border-radius: 50%; margin-right: 3px;"></span>
-                            <span style="display: inline-block; width: 6px; height: 6px; background-color: #f59e0b; border-radius: 50%; margin-right: 3px;"></span>
-                            <span style="display: inline-block; width: 6px; height: 6px; background-color: #10b981; border-radius: 50%;"></span>
-                          </div>
-                          <!-- Mini Bar Chart -->
-                          <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 8px;">
-                            <tr>
-                              <td style="vertical-align: bottom; height: 36px; padding-right: 3px;"><div style="background-color: #10b981; height: 18px; border-radius: 2px; opacity: 0.6;"></div></td>
-                              <td style="vertical-align: bottom; height: 36px; padding-right: 3px;"><div style="background-color: #10b981; height: 26px; border-radius: 2px; opacity: 0.8;"></div></td>
-                              <td style="vertical-align: bottom; height: 36px; padding-right: 3px;"><div style="background-color: #10b981; height: 36px; border-radius: 2px;"></div></td>
-                              <td style="vertical-align: bottom; height: 36px;"><div style="background-color: #34d399; height: 22px; border-radius: 2px; opacity: 0.7;"></div></td>
-                            </tr>
-                          </table>
-                          <!-- Donut Ring & Status -->
-                          <div style="background-color: rgba(16, 185, 129, 0.15); border-radius: 6px; padding: 4px 6px; text-align: center;">
-                            <span style="font-size: 9px; font-weight: 800; color: #34d399;">Budget: 20%</span>
-                          </div>
-                        </div>
+                      <!-- Right: High-Tech Dashboard Graphic Image -->
+                      <td style="vertical-align: top; text-align: right;" width="40%">
+                        <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/header-dashboard.svg" width="180" height="120" alt="Dashboard Graphic" style="display: block; border: 0; outline: none; margin: 0 0 0 auto;">
                       </td>
                     </tr>
                   </table>
@@ -189,20 +173,16 @@ export default async function handler(req, res) {
                 <td style="padding: 0 24px 20px 24px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <!-- Card 1: Budget Used (Horizontal donut layout) -->
+                      <!-- Card 1: Budget Used (Horizontal donut layout matching UI mockup) -->
                       <td width="34%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 10px; vertical-align: middle;">
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
                             <td colspan="2" style="font-size: 11px; font-weight: 800; color: #334155; padding-bottom: 8px;">Budget Used</td>
                           </tr>
                           <tr>
-                            <!-- Donut ring graphic -->
+                            <!-- Donut ring image asset -->
                             <td width="56" style="vertical-align: middle;">
-                              <div style="width: 54px; height: 54px; border-radius: 50%; background: conic-gradient(#10b981 0% ${budgetUsed}%, #e2e8f0 ${budgetUsed}% 100%); text-align: center;">
-                                <div style="width: 40px; height: 40px; background-color: #ffffff; border-radius: 50%; line-height: 40px; text-align: center; font-size: 14px; font-weight: 800; color: #047857; margin: 7px auto; display: inline-block;">
-                                  ${budgetUsed}%
-                                </div>
-                              </div>
+                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/budget-gauge-20.svg" width="54" height="54" alt="20% Donut Gauge" style="display: block; border: 0;">
                             </td>
                             <!-- Right text -->
                             <td style="vertical-align: middle; padding-left: 6px;">
@@ -239,7 +219,7 @@ export default async function handler(req, res) {
                       <td width="15%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 6px; text-align: center; vertical-align: top;">
                         <div style="width: 32px; height: 32px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 6px auto; text-align: center; line-height: 32px; font-size: 15px;">💵</div>
                         <div style="font-size: 9.5px; font-weight: 700; color: #64748b; margin-bottom: 3px;">Remaining</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${remainingFormatted}</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; letter-spacing: -0.3px;">${cleanRemaining}</div>
                         <div style="font-size: 9px; color: #10b981; font-weight: 700;">Great job!</div>
                       </td>
 
@@ -343,46 +323,17 @@ export default async function handler(req, res) {
                 <td style="padding: 0 24px 24px 24px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <!-- Left: Email-Safe Spending Trend Chart -->
+                      <!-- Left: Spending Trend Line Chart Image -->
                       <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
                             <td style="font-size: 13px; font-weight: 800; color: #0f172a;">Spending Trend <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">(Last 6 Months)</span></td>
                             <td style="text-align: right;" width="20"><span style="font-size: 14px; color: #10b981;">↗</span></td>
                           </tr>
                         </table>
 
-                        <!-- Email-safe Bar/Trend Chart using HTML/CSS Table -->
-                        <table cellpadding="0" cellspacing="0" width="100%" style="height: 90px; border-bottom: 1px solid #e2e8f0;">
-                          <tr>
-                            <td width="28" style="vertical-align: top; padding-right: 4px;">
-                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600;">৳15K</div>
-                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; margin-top: 14px;">৳10K</div>
-                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; margin-top: 14px;">৳5K</div>
-                              <div style="font-size: 8px; color: #94a3b8; font-weight: 600; margin-top: 14px;">৳0</div>
-                            </td>
-                            <!-- 6 Month Bars with Green Tops -->
-                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 35px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
-                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 48px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
-                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 28px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
-                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 55px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
-                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #10b981 0%, rgba(16,185,129,0.1) 100%); height: 62px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0;"></div></td>
-                            <td style="vertical-align: bottom; height: 90px; text-align: center;"><div style="background: linear-gradient(180deg, #059669 0%, rgba(5,150,105,0.25) 100%); height: 52px; width: 14px; margin: 0 auto; border-radius: 4px 4px 0 0; border-top: 3px solid #10b981;"></div></td>
-                          </tr>
-                        </table>
-
-                        <!-- X-axis Labels -->
-                        <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 4px; font-size: 9px; color: #94a3b8; text-align: center;">
-                          <tr>
-                            <td width="28"></td>
-                            <td width="14%">Mar</td>
-                            <td width="14%">Apr</td>
-                            <td width="14%">May</td>
-                            <td width="14%">Jun</td>
-                            <td width="14%">Jul</td>
-                            <td width="16%" style="font-weight: 800; color: #10b981;">Aug</td>
-                          </tr>
-                        </table>
+                        <!-- Vector Line Chart matching UI Mockup -->
+                        <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/spending-trend.svg" width="100%" height="auto" alt="Spending Trend Line Chart" style="display: block; border: 0; outline: none;">
                       </td>
 
                       <td width="4%"></td>
