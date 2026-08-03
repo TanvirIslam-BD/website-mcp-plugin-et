@@ -85,64 +85,73 @@ export default async function handler(req, res) {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <title>${emailSubject}</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body, td, th, p, div, span, a, h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; }
+        body, td, th, p, div, span, a, h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; }
         
+        /* Mobile Responsive Hybrid Override */
         @media only screen and (max-width: 540px) {
-          .mobile-wrapper { padding: 10px 4px !important; }
-          .mobile-container { border-radius: 14px !important; width: 100% !important; }
-          .mobile-padding { padding: 18px 16px !important; }
-          .mobile-header-padding { padding: 22px 18px !important; }
-          .mobile-block { display: block !important; width: 100% !important; box-sizing: border-box !important; }
-          .mobile-spacer { display: none !important; width: 0 !important; height: 0 !important; }
+          .email-wrapper { padding: 8px 4px !important; }
+          .email-card-container { border-radius: 14px !important; width: 100% !important; }
+          .email-section-padding { padding: 18px 14px !important; }
+          .mobile-full-width { display: block !important; width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; margin-left: 0 !important; margin-right: 0 !important; }
           .mobile-gap-bottom { margin-bottom: 12px !important; }
           .mobile-text-center { text-align: center !important; }
-          .mobile-img-center { margin: 14px auto 0 auto !important; float: none !important; }
-          .mobile-cta-left { padding: 16px 16px 0 16px !important; text-align: center !important; }
-          .mobile-cta-right { padding: 16px !important; text-align: center !important; }
-          .mobile-footer-col { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 14px !important; }
+          .mobile-center-img { margin: 12px auto 0 auto !important; float: none !important; }
+          .mobile-cta-pad { padding: 18px 14px !important; text-align: center !important; }
+          .mobile-footer-col { display: block !important; width: 100% !important; max-width: 100% !important; text-align: center !important; margin-bottom: 14px !important; }
           .mobile-footer-table { margin: 0 auto !important; }
         }
       </style>
     </head>
     <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; color: #0f172a;">
-      <table width="100%" cellpadding="0" cellspacing="0" class="mobile-wrapper" style="background-color: #f1f5f9; padding: 24px 10px;">
+      <table width="100%" cellpadding="0" cellspacing="0" class="email-wrapper" style="background-color: #f1f5f9; padding: 24px 10px;">
         <tr>
           <td align="center">
-            <table width="100%" cellpadding="0" cellspacing="0" class="mobile-container" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.07); border: 1px solid #e2e8f0;">
+            <table width="100%" cellpadding="0" cellspacing="0" class="email-card-container" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.07); border: 1px solid #e2e8f0;">
               
               <!-- ═══════════════════════════════════════════════════════════ -->
-              <!-- 1. HEADER: Dark Navy Banner + Dashboard Illustration       -->
+              <!-- 1. HEADER BANNER                                           -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-header-padding" style="background: linear-gradient(145deg, #030712 0%, #061325 55%, #082436 100%); padding: 28px 28px 24px 28px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td class="email-section-padding" style="background: linear-gradient(145deg, #030712 0%, #061325 55%, #082436 100%); padding: 28px 28px 24px 28px;">
+                  <div style="font-size: 0; text-align: left;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <!-- Left: Logo & Titles -->
-                      <td class="mobile-block" style="vertical-align: top;" width="60%">
-                        <table cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
-                          <tr>
-                            <td style="padding-right: 10px; vertical-align: middle;">
-                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="36" height="36" alt="Money Copilot AI" style="display: block;">
-                            </td>
-                            <td style="vertical-align: middle;">
-                              <h1 style="margin: 0; font-size: 17px; font-weight: 800; color: #ffffff; line-height: 1.2; letter-spacing: -0.3px;">Money Copilot AI</h1>
-                              <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #34d399; font-weight: 600; line-height: 1.3;">Know where your money goes.<br>Control where it goes next.</p>
-                            </td>
-                          </tr>
-                        </table>
-                        <h2 style="margin: 0 0 6px 0; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.6px; line-height: 1.15;">Your Monthly Money Report</h2>
-                        <div style="font-size: 15px; font-weight: 700; color: #34d399; margin-bottom: 8px;">${month}</div>
-                        <p style="margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">AI analyzed your spending and found opportunities to save more.</p>
-                      </td>
-                      <!-- Right: High-Tech Dashboard Graphic Image -->
-                      <td class="mobile-block mobile-text-center" style="vertical-align: top; text-align: right;" width="40%">
-                        <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/header-dashboard.svg" width="180" height="120" alt="Dashboard Graphic" class="mobile-img-center" style="display: block; border: 0; outline: none; margin: 0 0 0 auto;">
-                      </td>
+                    <td width="330" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width" style="display: inline-block; width: 100%; max-width: 326px; vertical-align: top; text-align: left;">
+                      <table cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
+                        <tr>
+                          <td style="padding-right: 10px; vertical-align: middle;">
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="36" height="36" alt="Money Copilot AI" style="display: block;">
+                          </td>
+                          <td style="vertical-align: middle;">
+                            <h1 style="margin: 0; font-size: 17px; font-weight: 800; color: #ffffff; line-height: 1.2; letter-spacing: -0.3px;">Money Copilot AI</h1>
+                            <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #34d399; font-weight: 600; line-height: 1.3;">Know where your money goes.<br>Control where it goes next.</p>
+                          </td>
+                        </tr>
+                      </table>
+                      <h2 style="margin: 0 0 6px 0; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.6px; line-height: 1.15;">Your Monthly Money Report</h2>
+                      <div style="font-size: 15px; font-weight: 700; color: #34d399; margin-bottom: 8px;">${month}</div>
+                      <p style="margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">AI analyzed your spending and found opportunities to save more.</p>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="214" valign="top" align="right">
+                    <![endif]-->
+                    <div class="mobile-full-width mobile-text-center" style="display: inline-block; width: 100%; max-width: 218px; vertical-align: top; text-align: right;">
+                      <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/header-dashboard.svg" width="180" height="120" alt="Dashboard Graphic" class="mobile-center-img" style="display: block; border: 0; outline: none; margin: 0 0 0 auto;">
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
                 </td>
               </tr>
 
@@ -150,118 +159,154 @@ export default async function handler(req, res) {
               <!-- 2. GREETING + AI INSIGHT CARD                              -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-padding" style="padding: 24px 24px 18px 24px; background-color: #ffffff;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td class="email-section-padding" style="padding: 24px 24px 18px 24px; background-color: #ffffff;">
+                  <div style="font-size: 0; text-align: left;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <td class="mobile-block mobile-gap-bottom" style="vertical-align: top; padding-right: 16px;" width="42%">
-                        <h3 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2;">Hi ${displayName}! 👋</h3>
-                        <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #64748b;">
-                          Here's your AI-powered financial summary for ${month}.
-                        </p>
-                      </td>
-                      <td class="mobile-block" width="58%" style="vertical-align: top;">
-                        <div style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 14px; padding: 14px 16px;">
-                          <table cellpadding="0" cellspacing="0" width="100%">
-                            <tr>
-                              <td style="vertical-align: top; width: 36px; padding-right: 10px;">
-                                <div style="width: 36px; height: 36px; background-color: #10b981; border-radius: 50%; text-align: center; line-height: 36px; color: #ffffff; font-size: 16px;">✨</div>
-                              </td>
-                              <td style="vertical-align: top;">
-                                <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px;">✨ AI Insight</div>
-                                <div style="font-size: 11.5px; line-height: 1.5; color: #166534;">
-                                  You spent <strong>38% more on Health</strong> this month than usual.<br>
-                                  Reducing health-related expenses by just 10% could save approximately <strong>৳500</strong> next month.
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-                        </div>
-                      </td>
+                    <td width="230" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width mobile-gap-bottom" style="display: inline-block; width: 100%; max-width: 230px; vertical-align: top; text-align: left;">
+                      <h3 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2;">Hi ${displayName}! 👋</h3>
+                      <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #64748b;">
+                        Here's your AI-powered financial summary for ${month}.
+                      </p>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="14" valign="top"></td>
+                    <td width="308" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width" style="display: inline-block; width: 100%; max-width: 308px; vertical-align: top; text-align: left; margin-left: 10px;">
+                      <div style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 14px; padding: 14px 16px;">
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                          <tr>
+                            <td style="vertical-align: top; width: 36px; padding-right: 10px;">
+                              <div style="width: 36px; height: 36px; background-color: #10b981; border-radius: 50%; text-align: center; line-height: 36px; color: #ffffff; font-size: 16px;">✨</div>
+                            </td>
+                            <td style="vertical-align: top;">
+                              <div style="font-size: 12px; font-weight: 800; color: #047857; margin-bottom: 4px;">✨ AI Insight</div>
+                              <div style="font-size: 11.5px; line-height: 1.5; color: #166534;">
+                                You spent <strong>38% more on Health</strong> this month than usual.<br>
+                                Reducing health-related expenses by just 10% could save approximately <strong>৳500</strong> next month.
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
                 </td>
               </tr>
 
               <!-- ═══════════════════════════════════════════════════════════ -->
-              <!-- 3. TOP METRIC CARDS: SPACIOUS 2-ROW BALANCED LAYOUT        -->
+              <!-- 3. TOP METRIC CARDS                                        -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-padding" style="padding: 0 24px 20px 24px;">
-                  <!-- Row 1: Budget Used (50%) & Total Spent (50%) -->
-                  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                <td class="email-section-padding" style="padding: 0 24px 20px 24px;">
+                  
+                  <!-- ROW 1: Budget Used (50%) & Total Spent (50%) -->
+                  <div style="font-size: 0; text-align: left; margin-bottom: 12px;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <!-- Card 1: Budget Used -->
-                      <td class="mobile-block mobile-gap-bottom" width="48.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 14px; vertical-align: middle;">
-                        <table width="100%" cellpadding="0" cellspacing="0">
-                          <tr>
-                            <td colspan="2" style="font-size: 11.5px; font-weight: 800; color: #334155; padding-bottom: 10px;">Budget Used</td>
-                          </tr>
-                          <tr>
-                            <!-- Donut ring graphic -->
-                            <td width="58" style="vertical-align: middle;">
-                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/budget-gauge-20.svg" width="56" height="56" alt="20% Donut Gauge" style="display: block; border: 0;">
-                            </td>
-                            <!-- Right text -->
-                            <td style="vertical-align: middle; padding-left: 10px;">
-                              <div style="font-size: 13px; font-weight: 800; color: #10b981; margin-bottom: 2px;">Excellent!</div>
-                              <div style="font-size: 10px; color: #64748b; line-height: 1.35;">You're well within your budget.</div>
-                              <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin-top: 6px;">✓</div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-
-                      <td class="mobile-spacer" width="3%"></td>
-
-                      <!-- Card 2: Total Spent -->
-                      <td class="mobile-block" width="48.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 14px; vertical-align: middle;">
-                        <table width="100%" cellpadding="0" cellspacing="0">
-                          <tr>
-                            <td width="40" style="vertical-align: middle;">
-                              <div style="width: 36px; height: 36px; background-color: #ecfdf5; border-radius: 50%; text-align: center; line-height: 36px; font-size: 17px;">💰</div>
-                            </td>
-                            <td style="vertical-align: middle; padding-left: 8px;">
-                              <div style="font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 2px;">Total Spent</div>
-                              <div style="font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px;">${spentFormatted}</div>
-                              <div style="font-size: 9.5px; color: #10b981; font-weight: 700; margin-top: 2px;">↓ 12% lower than last month</div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
+                    <td width="268" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width mobile-gap-bottom" style="display: inline-block; width: 100%; max-width: 268px; vertical-align: top; text-align: left;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 14px; box-sizing: border-box;">
+                        <tr>
+                          <td colspan="2" style="font-size: 11.5px; font-weight: 800; color: #334155; padding-bottom: 10px;">Budget Used</td>
+                        </tr>
+                        <tr>
+                          <td width="58" style="vertical-align: middle;">
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/budget-gauge-20.svg" width="56" height="56" alt="20% Donut Gauge" style="display: block; border: 0;">
+                          </td>
+                          <td style="vertical-align: middle; padding-left: 10px;">
+                            <div style="font-size: 13px; font-weight: 800; color: #10b981; margin-bottom: 2px;">Excellent!</div>
+                            <div style="font-size: 10px; color: #64748b; line-height: 1.35;">You're well within your budget.</div>
+                            <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin-top: 6px;">✓</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="16" valign="top"></td>
+                    <td width="268" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width" style="display: inline-block; width: 100%; max-width: 268px; vertical-align: top; text-align: left; margin-left: 10px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 14px; box-sizing: border-box;">
+                        <tr>
+                          <td width="40" style="vertical-align: middle;">
+                            <div style="width: 36px; height: 36px; background-color: #ecfdf5; border-radius: 50%; text-align: center; line-height: 36px; font-size: 17px;">💰</div>
+                          </td>
+                          <td style="vertical-align: middle; padding-left: 8px;">
+                            <div style="font-size: 10.5px; font-weight: 700; color: #64748b; margin-bottom: 2px;">Total Spent</div>
+                            <div style="font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px;">${spentFormatted}</div>
+                            <div style="font-size: 9.5px; color: #10b981; font-weight: 700; margin-top: 2px;">↓ 12% lower than last month</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
 
-                  <!-- Row 2: Budget Limit (33%), Remaining (33%), Status (33%) -->
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                  <!-- ROW 2: Budget Limit (33%), Remaining (33%), Status (33%) -->
+                  <div style="font-size: 0; text-align: left;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <!-- Card 3: Budget Limit -->
-                      <td class="mobile-block mobile-gap-bottom" width="31.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; text-align: center; vertical-align: top;">
+                    <td width="176" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width mobile-gap-bottom" style="display: inline-block; width: 100%; max-width: 174px; vertical-align: top; text-align: center;">
+                      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; box-sizing: border-box;">
                         <div style="width: 34px; height: 34px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 34px; font-size: 16px;">🎯</div>
                         <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Budget Limit</div>
-                        <div style="font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px;">${budgetFormatted}</div>
-                      </td>
-
-                      <td class="mobile-spacer" width="2.7%"></td>
-
-                      <!-- Card 4: Remaining -->
-                      <td class="mobile-block mobile-gap-bottom" width="31.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; text-align: center; vertical-align: top;">
+                        <div style="font-size: 15px; font-weight: 800; color: #0f172a; letter-spacing: -0.4px;">${budgetFormatted}</div>
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="12" valign="top"></td>
+                    <td width="176" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width mobile-gap-bottom" style="display: inline-block; width: 100%; max-width: 174px; vertical-align: top; text-align: center; margin-left: 8px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; box-sizing: border-box;">
                         <div style="width: 34px; height: 34px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 34px; font-size: 16px;">💵</div>
                         <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Remaining</div>
-                        <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 3px; letter-spacing: -0.4px;">${cleanRemaining}</div>
+                        <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 3px; letter-spacing: -0.4px;">${cleanRemaining}</div>
                         <div style="font-size: 9.5px; color: #10b981; font-weight: 700;">Great job!</div>
-                      </td>
-
-                      <td class="mobile-spacer" width="2.7%"></td>
-
-                      <!-- Card 5: Status -->
-                      <td class="mobile-block" width="31.5%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 12px; text-align: center; vertical-align: top;">
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="12" valign="top"></td>
+                    <td width="176" valign="top">
+                    <![endif]-->
+                    <div class="mobile-full-width" style="display: inline-block; width: 100%; max-width: 174px; vertical-align: top; text-align: center; margin-left: 8px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; box-sizing: border-box;">
                         <div style="width: 34px; height: 34px; background-color: #ecfdf5; border-radius: 50%; margin: 0 auto 8px auto; text-align: center; line-height: 34px; font-size: 16px;">📊</div>
                         <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Status</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #059669; margin-bottom: 3px;">Within Budget</div>
+                        <div style="font-size: 13.5px; font-weight: 800; color: #059669; margin-bottom: 3px;">Within Budget</div>
                         <div style="width: 18px; height: 18px; background-color: #10b981; border-radius: 50%; color: #ffffff; font-size: 11px; line-height: 18px; text-align: center; margin: 0 auto;">✓</div>
-                      </td>
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
+
                 </td>
               </tr>
 
@@ -269,26 +314,33 @@ export default async function handler(req, res) {
               <!-- 4. MIDDLE ROW: SPENDING BREAKDOWN & AI SAVINGS             -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-padding" style="padding: 0 24px 20px 24px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td class="email-section-padding" style="padding: 0 24px 20px 24px;">
+                  <div style="font-size: 0; text-align: left;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <!-- Left: Spending Breakdown -->
-                      <td class="mobile-block mobile-gap-bottom" width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 14px; vertical-align: top;">
+                    <td width="268" valign="top">
+                    <![endif]-->
+                    <!-- Left: Spending Breakdown -->
+                    <div class="mobile-full-width mobile-gap-bottom" style="display: inline-block; width: 100%; max-width: 268px; vertical-align: top; text-align: left;">
+                      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 14px; box-sizing: border-box; min-height: 200px;">
                         <h4 style="margin: 0 0 8px 0; font-size: 13.5px; font-weight: 800; color: #0f172a;">Spending Breakdown</h4>
-                        
                         <table width="100%" cellpadding="0" cellspacing="0">
                           ${breakdownRows || `<tr><td style="font-size: 12px; color: #94a3b8; padding: 6px 0;">No spending recorded.</td></tr>`}
                         </table>
-
                         <div style="margin-top: 4px; text-align: left;">
                           <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="font-size: 11px; font-weight: 700; color: #10b981; text-decoration: none;">View all categories →</a>
                         </div>
-                      </td>
-
-                      <td class="mobile-spacer" width="4%"></td>
-
-                      <!-- Right: AI Savings Card (Piggy Bank) -->
-                      <td class="mobile-block" width="48%" style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 16px; padding: 14px 14px; vertical-align: top;">
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="16" valign="top"></td>
+                    <td width="268" valign="top">
+                    <![endif]-->
+                    <!-- Right: AI Savings Card (Piggy Bank) -->
+                    <div class="mobile-full-width" style="display: inline-block; width: 100%; max-width: 268px; vertical-align: top; text-align: left; margin-left: 10px;">
+                      <div style="background-color: #e6f7ef; border: 1px solid #a7f3d0; border-radius: 16px; padding: 14px 14px; box-sizing: border-box; min-height: 200px;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
                             <td style="vertical-align: top;">
@@ -302,7 +354,6 @@ export default async function handler(req, res) {
                           </tr>
                         </table>
 
-                        <!-- Savings items in green circles -->
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 6px;">
                           <tr>
                             <td width="26" style="vertical-align: middle;">
@@ -338,9 +389,14 @@ export default async function handler(req, res) {
                             </td>
                           </tr>
                         </table>
-                      </td>
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
                 </td>
               </tr>
 
@@ -348,26 +404,33 @@ export default async function handler(req, res) {
               <!-- 5. SPENDING TREND + ASK AI ANYTHING                        -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-padding" style="padding: 0 24px 24px 24px;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td class="email-section-padding" style="padding: 0 24px 24px 24px;">
+                  <div style="font-size: 0; text-align: left;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <!-- Left: Spending Trend Line Chart Image -->
-                      <td class="mobile-block mobile-gap-bottom" width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
+                    <td width="268" valign="top">
+                    <![endif]-->
+                    <!-- Left: Spending Trend Line Chart Image -->
+                    <div class="mobile-full-width mobile-gap-bottom" style="display: inline-block; width: 100%; max-width: 268px; vertical-align: top; text-align: left;">
+                      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; box-sizing: border-box; min-height: 215px;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
                             <td style="font-size: 13.5px; font-weight: 800; color: #0f172a;">Spending Trend <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">(Last 6 Months)</span></td>
                             <td style="text-align: right;" width="20"><span style="font-size: 14px; color: #10b981;">↗</span></td>
                           </tr>
                         </table>
-
-                        <!-- Vector Line Chart matching UI Mockup -->
                         <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/spending-trend.svg" width="100%" height="auto" alt="Spending Trend Line Chart" style="display: block; border: 0; outline: none;">
-                      </td>
-
-                      <td class="mobile-spacer" width="4%"></td>
-
-                      <!-- Right: Ask AI Anything -->
-                      <td class="mobile-block" width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="16" valign="top"></td>
+                    <td width="268" valign="top">
+                    <![endif]-->
+                    <!-- Right: Ask AI Anything -->
+                    <div class="mobile-full-width" style="display: inline-block; width: 100%; max-width: 268px; vertical-align: top; text-align: left; margin-left: 10px;">
+                      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; box-sizing: border-box; min-height: 215px;">
                         <h4 style="margin: 0 0 3px 0; font-size: 13.5px; font-weight: 800; color: #0f172a;">Ask AI Anything</h4>
                         <p style="margin: 0 0 12px 0; font-size: 11px; color: #94a3b8;">Get instant answers about your money.</p>
 
@@ -421,9 +484,14 @@ export default async function handler(req, res) {
                             </td>
                           </tr>
                         </table>
-                      </td>
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
                 </td>
               </tr>
 
@@ -431,38 +499,50 @@ export default async function handler(req, res) {
               <!-- 6. CTA BANNER (Phone mockup + Button)                      -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-padding" style="padding: 0 24px 24px 24px;">
+                <td class="email-section-padding" style="padding: 0 24px 24px 24px;">
                   <div style="background: linear-gradient(135deg, #030712 0%, #062422 50%, #059669 100%); border-radius: 18px; padding: 0; overflow: hidden;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
+                    <div style="font-size: 0; text-align: left;">
+                      <!--[if mso]>
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <!-- Left: Mini Phone Mockup -->
-                        <td class="mobile-block mobile-cta-left" width="28%" style="vertical-align: bottom; padding: 16px 0 0 16px;">
-                          <div style="background: #0f172a; border: 1px solid #1e3a5f; border-radius: 10px 10px 0 0; padding: 8px 6px 0 6px; width: 110px; margin: 0 auto;">
-                            <div style="font-size: 7px; font-weight: 700; color: #94a3b8; margin-bottom: 3px;">Dashboard</div>
-                            <div style="font-size: 6px; color: #64748b; margin-bottom: 2px;">Total Balance</div>
-                            <div style="font-size: 10px; font-weight: 800; color: #ffffff; margin-bottom: 1px;">৳40,100.00 <span style="font-size: 6px; color: #10b981;">↑12%</span></div>
-                            <div style="font-size: 6px; color: #64748b;">Remaining</div>
-                            <div style="height: 3px; background: linear-gradient(90deg, #10b981 60%, #1e3a5f 60%); border-radius: 2px; margin: 4px 0 6px 0;"></div>
-                          </div>
-                        </td>
-                        <!-- Right: CTA Content -->
-                        <td class="mobile-block mobile-cta-right" style="vertical-align: middle; padding: 22px 20px 22px 10px;">
-                          <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; line-height: 1.25;">Take control of your finances today!<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; font-size:0px;">&nbsp;${Date.now()}</span></h3>
-                          <p style="margin: 0 0 14px 0; font-size: 11.5px; color: #cbd5e1; line-height: 1.45;">Open Money Copilot AI and make smarter decisions with AI.</p>
-                          
-                          <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="display: inline-block; padding: 11px 24px; background: #10b981; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 13px; border-radius: 99px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);">Open Money Copilot AI →</a>
-                          
-                          <div style="margin-top: 12px; font-size: 10.5px; color: #94a3b8; vertical-align: middle;">
-                            Works with &nbsp;
-                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/chatgpt.png" width="15" height="15" alt="ChatGPT" style="vertical-align: middle; display: inline-block; margin-right: 3px;">
-                            <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">ChatGPT</span>
-                            &nbsp;&nbsp;&nbsp;
-                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/claude.png" width="15" height="15" alt="Claude" style="vertical-align: middle; display: inline-block; margin-right: 3px;">
-                            <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">Claude</span>
-                          </div>
-                        </td>
+                      <td width="150" valign="bottom">
+                      <![endif]-->
+                      <!-- Left: Mini Phone Mockup -->
+                      <div class="mobile-full-width mobile-cta-pad" style="display: inline-block; width: 100%; max-width: 140px; vertical-align: bottom; padding: 16px 0 0 16px; box-sizing: border-box;">
+                        <div style="background: #0f172a; border: 1px solid #1e3a5f; border-radius: 10px 10px 0 0; padding: 8px 6px 0 6px; width: 110px; margin: 0 auto;">
+                          <div style="font-size: 7px; font-weight: 700; color: #94a3b8; margin-bottom: 3px;">Dashboard</div>
+                          <div style="font-size: 6px; color: #64748b; margin-bottom: 2px;">Total Balance</div>
+                          <div style="font-size: 10px; font-weight: 800; color: #ffffff; margin-bottom: 1px;">৳40,100.00 <span style="font-size: 6px; color: #10b981;">↑12%</span></div>
+                          <div style="font-size: 6px; color: #64748b;">Remaining</div>
+                          <div style="height: 3px; background: linear-gradient(90deg, #10b981 60%, #1e3a5f 60%); border-radius: 2px; margin: 4px 0 6px 0;"></div>
+                        </div>
+                      </div>
+                      <!--[if mso]>
+                      </td>
+                      <td width="402" valign="middle">
+                      <![endif]-->
+                      <!-- Right: CTA Content -->
+                      <div class="mobile-full-width mobile-cta-pad" style="display: inline-block; width: 100%; max-width: 400px; vertical-align: middle; padding: 22px 20px 22px 10px; box-sizing: border-box;">
+                        <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; line-height: 1.25;">Take control of your finances today!<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; font-size:0px;">&nbsp;${Date.now()}</span></h3>
+                        <p style="margin: 0 0 14px 0; font-size: 11.5px; color: #cbd5e1; line-height: 1.45;">Open Money Copilot AI and make smarter decisions with AI.</p>
+                        
+                        <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="display: inline-block; padding: 11px 24px; background: #10b981; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 13px; border-radius: 99px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);">Open Money Copilot AI →</a>
+                        
+                        <div style="margin-top: 12px; font-size: 10.5px; color: #94a3b8; vertical-align: middle;">
+                          Works with &nbsp;
+                          <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/chatgpt.png" width="15" height="15" alt="ChatGPT" style="vertical-align: middle; display: inline-block; margin-right: 3px;">
+                          <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">ChatGPT</span>
+                          &nbsp;&nbsp;&nbsp;
+                          <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/claude.png" width="15" height="15" alt="Claude" style="vertical-align: middle; display: inline-block; margin-right: 3px;">
+                          <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">Claude</span>
+                        </div>
+                      </div>
+                      <!--[if mso]>
+                      </td>
                       </tr>
-                    </table>
+                      </table>
+                      <![endif]-->
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -471,45 +551,61 @@ export default async function handler(req, res) {
               <!-- 7. FOOTER                                                  -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td class="mobile-padding" style="padding: 20px 24px; background-color: #f8fafc; border-top: 1px solid #f1f5f9;">
-                  <table width="100%" cellpadding="0" cellspacing="0">
+                <td class="email-section-padding" style="padding: 20px 24px; background-color: #f8fafc; border-top: 1px solid #f1f5f9;">
+                  <div style="font-size: 0; text-align: left;">
+                    <!--[if mso]>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                      <!-- Left Column: Private & Secure Badge -->
-                      <td class="mobile-footer-col" width="38%" style="vertical-align: middle;">
-                        <table cellpadding="0" cellspacing="0" class="mobile-footer-table">
-                          <tr>
-                            <td width="36" style="vertical-align: middle; padding-right: 8px;">
-                              <div style="width: 32px; height: 32px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50%; text-align: center; line-height: 32px; font-size: 15px;">🔒</div>
-                            </td>
-                            <td style="vertical-align: middle; text-align: left;">
-                              <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2;">Private &amp; Secure</div>
-                              <div style="font-size: 9px; color: #64748b; line-height: 1.3; margin-top: 2px;">Your financial data is encrypted<br>and only visible to you.</div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-
-                      <!-- Middle Column: Brand Logo & Tagline -->
-                      <td class="mobile-footer-col" width="38%" style="vertical-align: middle; text-align: center;">
-                        <table cellpadding="0" cellspacing="0" class="mobile-footer-table" style="margin: 0 auto;">
-                          <tr>
-                            <td width="34" style="padding-right: 8px; vertical-align: middle;">
-                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="28" height="28" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto;">
-                            </td>
-                            <td style="vertical-align: middle; text-align: left;">
-                              <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2; white-space: nowrap;">Money Copilot AI</div>
-                              <div style="font-size: 8.5px; color: #10b981; font-weight: 700; line-height: 1.3; margin-top: 2px; white-space: nowrap;">Know where your money goes.<br>Control where it goes next.</div>
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-
-                      <!-- Right Column: Copyright -->
-                      <td class="mobile-footer-col" width="24%" style="vertical-align: middle; text-align: center; font-size: 9.5px; color: #94a3b8; line-height: 1.4;">
+                    <td width="200" valign="middle">
+                    <![endif]-->
+                    <!-- Left Column: Private & Secure Badge -->
+                    <div class="mobile-footer-col" style="display: inline-block; width: 100%; max-width: 195px; vertical-align: middle; text-align: left;">
+                      <table cellpadding="0" cellspacing="0" class="mobile-footer-table">
+                        <tr>
+                          <td width="36" style="vertical-align: middle; padding-right: 8px;">
+                            <div style="width: 32px; height: 32px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50%; text-align: center; line-height: 32px; font-size: 15px;">🔒</div>
+                          </td>
+                          <td style="vertical-align: middle; text-align: left;">
+                            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2;">Private &amp; Secure</div>
+                            <div style="font-size: 9px; color: #64748b; line-height: 1.3; margin-top: 2px;">Your financial data is encrypted<br>and only visible to you.</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="200" valign="middle" align="center">
+                    <![endif]-->
+                    <!-- Middle Column: Brand Logo & Tagline -->
+                    <div class="mobile-footer-col" style="display: inline-block; width: 100%; max-width: 200px; vertical-align: middle; text-align: center;">
+                      <table cellpadding="0" cellspacing="0" class="mobile-footer-table" style="margin: 0 auto;">
+                        <tr>
+                          <td width="34" style="padding-right: 8px; vertical-align: middle;">
+                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="28" height="28" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto;">
+                          </td>
+                          <td style="vertical-align: middle; text-align: left;">
+                            <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2; white-space: nowrap;">Money Copilot AI</div>
+                            <div style="font-size: 8.5px; color: #10b981; font-weight: 700; line-height: 1.3; margin-top: 2px; white-space: nowrap;">Know where your money goes.<br>Control where it goes next.</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <!--[if mso]>
+                    </td>
+                    <td width="152" valign="middle" align="right">
+                    <![endif]-->
+                    <!-- Right Column: Copyright -->
+                    <div class="mobile-footer-col" style="display: inline-block; width: 100%; max-width: 150px; vertical-align: middle; text-align: right;">
+                      <div style="font-size: 9.5px; color: #94a3b8; line-height: 1.4;">
                         © 2026 Money Copilot AI.<br>All rights reserved.
-                      </td>
+                      </div>
+                    </div>
+                    <!--[if mso]>
+                    </td>
                     </tr>
-                  </table>
+                    </table>
+                    <![endif]-->
+                  </div>
                 </td>
               </tr>
 
