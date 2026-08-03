@@ -90,7 +90,7 @@ export default async function handler(req, res) {
         LIMIT 200`,
         args: [query, `%${query}%`, `%${query}%`],
       }),
-      db.execute("SELECT id,user_id,source,event_type,detail,created_at FROM app_activity ORDER BY created_at DESC LIMIT 100"),
+      db.execute("SELECT id,user_id,source,event_type,detail,created_at FROM app_activity ORDER BY created_at DESC LIMIT 300"),
       db.execute("SELECT id,actor,action,target_user_id,detail,created_at FROM owner_audit_log ORDER BY created_at DESC LIMIT 100"),
       db.execute(`SELECT strftime('%Y-%m-%d', created_at) AS day, COUNT(*) AS event_count, COUNT(DISTINCT user_id) AS active_users
                   FROM app_activity

@@ -2,6 +2,7 @@ const state = {
   data: null,
   query: '',
   filterStatus: 'all',
+  selectedActivityUser: 'all',
   selectedUserId: null
 };
 
@@ -78,19 +79,11 @@ function renderTrendChart(trendData = []) {
           <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
         </linearGradient>
       </defs>
-      <!-- Grid lines -->
       <line x1="0" y1="${height - padding}" x2="${width}" y2="${height - padding}" stroke="#e2e8f0" stroke-dasharray="4"/>
       <line x1="0" y1="${padding}" x2="${width}" y2="${padding}" stroke="#f1f5f9" stroke-dasharray="4"/>
-      
-      <!-- Area Fill -->
       <polygon points="${padding},${height - padding} ${pointsUsers} ${width - padding},${height - padding}" fill="url(#chartGrad)"/>
-      
-      <!-- Events Line -->
       <polyline points="${pointsEvents}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
-      
-      <!-- Active Users Line -->
       <polyline points="${pointsUsers}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
-      
       ${trendData.map((d, i) => {
         const x = padding + (i / Math.max(trendData.length - 1, 1)) * (width - padding * 2);
         const yU = height - padding - (d.users / maxVal) * (height - padding * 2);
@@ -100,6 +93,22 @@ function renderTrendChart(trendData = []) {
   `;
 
   wrap.innerHTML = svg;
+}
+
+function updateActivityUserFilterOptions() {
+  const select = $('#activity-user-filter');
+  if (!select || !state.data) return;
+
+  const currentVal = select.value || 'all';
+  const options = ['<option value="all">All Users</option>'];
+
+  (state.data.users || []).forEach(u => {
+    const label = u.displayName ? `${u.displayName} (${u.userId.substring(0, 8)}...)` : u.userId.substring(0, 16);
+    options.push(`<option value="${escapeHtml(u.userId)}">${escapeHtml(label)}</option>`);
+  });
+
+  select.innerHTML = options.join('');
+  select.value = currentVal;
 }
 
 function render() {
@@ -119,6 +128,9 @@ function render() {
 
   // Render Trend Chart
   renderTrendChart(data.trend || []);
+
+  // Update Activity Filter Options
+  updateActivityUserFilterOptions();
 
   // Filter Users
   let filteredUsers = data.users || [];
@@ -157,7 +169,11 @@ function render() {
         ${user.statusReason ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px;">${escapeHtml(user.statusReason)}</div>` : ''}
       </td>
       <td><strong>${user.expenseCount.toLocaleString()}</strong></td>
-      <td>${user.activityCount.toLocaleString()}</td>
+      <td>
+        <button class="action-btn-sm" style="font-size:11px;padding:3px 8px;" onclick="window.filterActivityByUser('${escapeHtml(user.userId)}')">
+          ⚡ ${user.activityCount.toLocaleString()}
+        </button>
+      </td>
       <td><span style="font-size:12px;font-weight:600;color:#475569;">${escapeHtml(timeAgo(user.lastActiveAt || user.lastDataAt))}</span></td>
       <td>
         <div style="display:flex;gap:6px;">
@@ -170,8 +186,13 @@ function render() {
     </tr>
   `).join('') : `<tr><td colspan="6" style="padding:40px;text-align:center;color:#94a3b8;">No users match your criteria.</td></tr>`;
 
-  // Render Activity Feed
-  renderFeed('#activity', data.activity, 
+  // Render Activity Feed (Filtered by user if selected)
+  let activityItems = data.activity || [];
+  if (state.selectedActivityUser && state.selectedActivityUser !== 'all') {
+    activityItems = activityItems.filter(a => a.userId === state.selectedActivityUser);
+  }
+
+  renderFeed('#activity', activityItems, 
     item => `${item.eventType.replaceAll('_', ' ')} · <span style="font-family:monospace;font-size:10.5px;color:#3b82f6;">${item.userId.substring(0, 14)}...</span>`,
     item => `${item.source} · ${timeAgo(item.createdAt)}`
   );
@@ -192,8 +213,16 @@ function renderFeed(selector, items, title, detail) {
         <div class="event-meta">${detail(item)}</div>
       </div>
     </div>
-  `).join('') : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;">No activity recorded yet.</div>';
+  `).join('') : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;">No activity recorded for this selection.</div>';
 }
+
+window.filterActivityByUser = function (userId) {
+  state.selectedActivityUser = userId;
+  const select = $('#activity-user-filter');
+  if (select) select.value = userId;
+  render();
+  toast(`Filtered activity feed for user`);
+};
 
 async function request(url, options) {
   const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin', ...options });
@@ -216,7 +245,7 @@ async function load() {
   }
 }
 
-/* USER DETAIL MODAL DRAWER */
+/* USER DETAIL MODAL DRAWER WITH PER-USER ACTIVITY TIMELINE */
 window.openUserModal = function (userId) {
   if (!state.data) return;
   const user = state.data.users.find(u => u.userId === userId);
@@ -226,6 +255,9 @@ window.openUserModal = function (userId) {
   const backdrop = $('#user-modal-backdrop');
   const body = $('#modal-body-content');
   const foot = $('#modal-foot-actions');
+
+  // Find all activity events for this user
+  const userActivities = (state.data.activity || []).filter(a => a.userId === userId);
 
   body.innerHTML = `
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e2e8f0;">
@@ -266,6 +298,27 @@ window.openUserModal = function (userId) {
       </div>
     ` : ''}
 
+    <!-- PER-USER ACTIVITY TIMELINE SECTION -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <h5 style="margin:0;font-size:14px;font-weight:800;color:#0f172a;">⚡ Activity History Timeline (${userActivities.length})</h5>
+        <button id="modal-export-user-act" class="secondary-btn" style="height:28px;padding:0 8px;font-size:11px;">📥 Export Log</button>
+      </div>
+
+      <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;max-height:220px;overflow-y:auto;padding:8px 14px;">
+        ${userActivities.length ? userActivities.map(act => `
+          <div style="padding:8px 0;border-bottom:1px solid #f1f5f9;display:flex;gap:10px;align-items:flex-start;">
+            <div style="width:6px;height:6px;border-radius:50%;background:#10b981;margin-top:6px;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#0f172a;">${escapeHtml(act.eventType.replaceAll('_', ' '))}</div>
+              <div style="font-size:10.5px;color:#64748b;margin-top:1px;">${escapeHtml(act.source)} · ${escapeHtml(timeAgo(act.createdAt))}</div>
+            </div>
+          </div>
+        `).join('') : '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:11.5px;">No activity events recorded for this user yet.</div>'}
+      </div>
+    </div>
+
+    <!-- TEST REPORT DISPATCH -->
     <div style="background:#ecfdf5;border:1px solid #a7f3d0;padding:14px;border-radius:12px;">
       <div style="font-size:12px;font-weight:800;color:#047857;">✉️ Send Test AI Report Email</div>
       <div style="font-size:11px;color:#166534;margin-top:2px;margin-bottom:10px;">Dispatch an AI monthly report preview to test system email delivery.</div>
@@ -294,6 +347,20 @@ window.openUserModal = function (userId) {
       toast(err.message, true);
     }
   });
+
+  const exportUserActBtn = $('#modal-export-user-act');
+  if (exportUserActBtn) {
+    exportUserActBtn.addEventListener('click', () => {
+      const rows = userActivities.map(a => ({
+        id: a.id,
+        user_id: a.userId,
+        event_type: a.eventType,
+        source: a.source,
+        created_at: a.createdAt
+      }));
+      exportCSV(`activity_user_${userId.substring(0, 10)}.csv`, rows);
+    });
+  }
 };
 
 window.handleSuspendAction = async function (userId, currentStatus) {
@@ -343,6 +410,14 @@ $('#close-modal').addEventListener('click', () => $('#user-modal-backdrop').clas
 $('#user-modal-backdrop').addEventListener('click', (e) => {
   if (e.target === $('#user-modal-backdrop')) $('#user-modal-backdrop').classList.remove('active');
 });
+
+const actFilter = $('#activity-user-filter');
+if (actFilter) {
+  actFilter.addEventListener('change', (e) => {
+    state.selectedActivityUser = e.target.value;
+    render();
+  });
+}
 
 $$('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
