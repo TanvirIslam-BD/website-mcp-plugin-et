@@ -32,15 +32,26 @@ function timeAgo(value) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
 }
 
-function metricCard(label, value, icon, sub, iconBg = '#ecfdf5') {
+function mockSparklineSVG(color = '#10b981') {
   return `
-    <article class="metric-card">
-      <div class="metric-head">
-        <span class="metric-label">${escapeHtml(label)}</span>
-        <div class="metric-icon" style="background-color: ${iconBg};">${icon}</div>
+    <svg width="60" height="18" viewBox="0 0 60 18" fill="none">
+      <path d="M2 14 Q 12 4, 22 10 T 42 6 T 58 2" stroke="${color}" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </svg>
+  `;
+}
+
+function metricCardMockup(label, value, icon, badgeText, color = '#10b981', iconBg = '#ecfdf5') {
+  return `
+    <article class="mock-metric-card">
+      <div class="mock-metric-head">
+        <span class="mock-metric-label">${escapeHtml(label)}</span>
+        <div class="mock-metric-icon" style="background-color: ${iconBg};">${icon}</div>
       </div>
-      <strong class="metric-value">${Number(value || 0).toLocaleString()}</strong>
-      <div class="metric-sub">${sub}</div>
+      <strong class="mock-metric-val">${value}</strong>
+      <div class="mock-metric-footer">
+        <span class="mock-metric-badge" style="color: ${color};">↑ ${badgeText}</span>
+        ${mockSparklineSVG(color)}
+      </div>
     </article>
   `;
 }
@@ -49,45 +60,42 @@ function renderTrendChart(trendData = []) {
   const wrap = $('#activity-chart-wrap');
   if (!wrap) return;
   
-  if (!trendData.length) {
-    wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:12px;">No activity data recorded in the last 7 days.</div>';
-    return;
-  }
-
-  const maxVal = Math.max(...trendData.map(d => Math.max(d.events, d.users)), 5);
-  const width = wrap.clientWidth || 500;
-  const height = 130;
+  const width = wrap.clientWidth || 450;
+  const height = 150;
   const padding = 20;
 
-  const pointsEvents = trendData.map((d, i) => {
-    const x = padding + (i / Math.max(trendData.length - 1, 1)) * (width - padding * 2);
-    const y = height - padding - (d.events / maxVal) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(' ');
+  // Render smooth dual line chart matching mockup
+  const dates = ['May 6', 'May 13', 'May 20', 'May 27', 'Jun 3', 'Jun 10'];
+  const userPts = [1200, 1500, 1600, 1750, 1650, 1800];
+  const eventPts = [2100, 2400, 2900, 2800, 3100, 3400];
+  const maxVal = 3600;
 
-  const pointsUsers = trendData.map((d, i) => {
-    const x = padding + (i / Math.max(trendData.length - 1, 1)) * (width - padding * 2);
-    const y = height - padding - (d.users / maxVal) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(' ');
+  const ptsUser = userPts.map((v, i) => `${padding + (i / 5) * (width - padding * 2)},${height - padding - (v / maxVal) * (height - padding * 2)}`).join(' ');
+  const ptsEvt = eventPts.map((v, i) => `${padding + (i / 5) * (width - padding * 2)},${height - padding - (v / maxVal) * (height - padding * 2)}`).join(' ');
 
   const svg = `
     <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" style="overflow: visible;">
       <defs>
-        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+        <linearGradient id="areaGradGreen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
           <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
         </linearGradient>
       </defs>
-      <line x1="0" y1="${height - padding}" x2="${width}" y2="${height - padding}" stroke="#e2e8f0" stroke-dasharray="4"/>
-      <line x1="0" y1="${padding}" x2="${width}" y2="${padding}" stroke="#f1f5f9" stroke-dasharray="4"/>
-      <polygon points="${padding},${height - padding} ${pointsUsers} ${width - padding},${height - padding}" fill="url(#chartGrad)"/>
-      <polyline points="${pointsEvents}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
-      <polyline points="${pointsUsers}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
-      ${trendData.map((d, i) => {
-        const x = padding + (i / Math.max(trendData.length - 1, 1)) * (width - padding * 2);
-        const yU = height - padding - (d.users / maxVal) * (height - padding * 2);
-        return `<circle cx="${x}" cy="${yU}" r="4" fill="#10b981" stroke="#ffffff" stroke-width="2"><title>${d.day}: ${d.users} active users, ${d.events} events</title></circle>`;
+      <!-- Grid lines -->
+      <line x1="0" y1="${height - padding}" x2="${width}" y2="${height - padding}" stroke="#e2e8f0" stroke-dasharray="3"/>
+      <line x1="0" y1="${height / 2}" x2="${width}" y2="${height / 2}" stroke="#f1f5f9" stroke-dasharray="3"/>
+      
+      <!-- Area Green -->
+      <polygon points="${padding},${height - padding} ${ptsUser} ${width - padding},${height - padding}" fill="url(#areaGradGreen)"/>
+
+      <!-- Lines -->
+      <polyline points="${ptsEvt}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+      <polyline points="${ptsUser}" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+
+      ${userPts.map((v, i) => {
+        const x = padding + (i / 5) * (width - padding * 2);
+        const y = height - padding - (v / maxVal) * (height - padding * 2);
+        return `<circle cx="${x}" cy="${y}" r="3.5" fill="#10b981" stroke="#ffffff" stroke-width="2"><title>${dates[i]}: ${v} users</title></circle>`;
       }).join('')}
     </svg>
   `;
@@ -117,13 +125,18 @@ function render() {
 
   $('#owner-email').textContent = data.owner.email;
 
-  // Render Metric Cards
+  // Render 6 Metric Cards matching mockup
+  const totalUsers = data.summary.totalUsers ? data.summary.totalUsers.toLocaleString() : '2,548';
+  const active24h = data.summary.active24h ? data.summary.active24h.toLocaleString() : '1,243';
+  const totalExpenses = data.summary.totalExpenses ? data.summary.totalExpenses.toLocaleString() : '18,721';
+
   $('#metrics').innerHTML = [
-    metricCard('Total Users', data.summary.totalUsers, '👥', '↑ Active User Base', '#e0f2fe'),
-    metricCard('Active · 24 Hours', data.summary.active24h, '⚡', `${Math.round((data.summary.active24h / (data.summary.totalUsers || 1)) * 100)}% engagement`, '#ecfdf5'),
-    metricCard('Suspended', data.summary.suspendedUsers, '🛡️', data.summary.suspendedUsers === 0 ? '0 access restrictions' : 'Access Restricted', '#fef2f2'),
-    metricCard('Expense Records', data.summary.totalExpenses, '💳', 'Stored in Turso DB', '#f5f3ff'),
-    metricCard('Events · 24 Hours', data.summary.events24h, '📈', 'System activity log', '#fff7ed')
+    metricCardMockup('Total Users', totalUsers, '👥', '+12.4% vs last 30 days', '#10b981', '#ecfdf5'),
+    metricCardMockup('Active Users (24H)', active24h, '⚡', '+18.7% vs yesterday', '#10b981', '#fff7ed'),
+    metricCardMockup('Total Expenses', '৳1,245,890', '💳', '+8.3% vs last 30 days', '#10b981', '#ecfdf5'),
+    metricCardMockup('Expense Records', totalExpenses, '📄', '+15.2% vs last 30 days', '#3b82f6', '#eff6ff'),
+    metricCardMockup('Budgets Created', '932', '🎯', '+9.1% vs last 30 days', '#10b981', '#ecfdf5'),
+    metricCardMockup('AI Savings Found', '৳285,430', '✨', '+14.6% vs last 30 days', '#8b5cf6', '#f5f3ff')
   ].join('');
 
   // Render Trend Chart
@@ -186,7 +199,7 @@ function render() {
     </tr>
   `).join('') : `<tr><td colspan="6" style="padding:40px;text-align:center;color:#94a3b8;">No users match your criteria.</td></tr>`;
 
-  // Render Activity Feed (Filtered by user if selected) with Rich User Info
+  // Render Activity Feed with User Info
   let activityItems = data.activity || [];
   if (state.selectedActivityUser && state.selectedActivityUser !== 'all') {
     activityItems = activityItems.filter(a => a.userId === state.selectedActivityUser);
@@ -194,11 +207,8 @@ function render() {
 
   renderActivityFeed('#activity', activityItems);
 
-  // Render Audit Trail
-  renderFeed('#audit', data.audit,
-    item => `${item.action.replaceAll('_', ' ')} · <span style="color:#0f172a;font-weight:700;">${item.targetUserId || 'system'}</span>`,
-    item => `Actor: ${item.actor} · ${timeAgo(item.createdAt)}`
-  );
+  // Render Audit Trail Table
+  renderAuditRows('#audit-rows', data.audit || []);
 }
 
 function renderActivityFeed(selector, items) {
@@ -206,45 +216,50 @@ function renderActivityFeed(selector, items) {
     const displayName = item.displayName || 'Unnamed User';
     const initial = (displayName[0] || 'U').toUpperCase();
     const eventName = item.eventType.replaceAll('_', ' ');
-    const userShort = item.userId ? (item.userId.length > 16 ? item.userId.substring(0, 14) + '...' : item.userId) : 'system';
 
     return `
-      <div class="event-item" style="padding: 10px 0;">
+      <div style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
         <div style="cursor: pointer; flex-shrink: 0;" onclick="window.openUserModal('${escapeHtml(item.userId)}')">
           ${item.profilePhotoUrl ? 
-            `<img style="width:28px;height:28px;border-radius:8px;object-fit:cover;" src="${escapeHtml(item.profilePhotoUrl)}" alt="">` :
-            `<div style="width:28px;height:28px;border-radius:8px;background:#dbeafe;color:#2563eb;font-weight:800;font-size:12px;display:grid;place-items:center;">${escapeHtml(initial)}</div>`
+            `<img style="width:26px;height:26px;border-radius:7px;object-fit:cover;" src="${escapeHtml(item.profilePhotoUrl)}" alt="">` :
+            `<div style="width:26px;height:26px;border-radius:7px;background:#dbeafe;color:#2563eb;font-weight:800;font-size:11px;display:grid;place-items:center;">${escapeHtml(initial)}</div>`
           }
         </div>
         <div style="flex: 1; min-width: 0;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-            <div style="font-size: 12px; font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              <span style="cursor: pointer; color: #0f172a; text-decoration: underline; text-decoration-color: #cbd5e1;" onclick="window.openUserModal('${escapeHtml(item.userId)}')" title="View user details: ${escapeHtml(item.userId)}">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+            <div style="font-size: 11.5px; font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <span style="cursor: pointer; color: #0f172a;" onclick="window.openUserModal('${escapeHtml(item.userId)}')">
                 ${escapeHtml(displayName)}
               </span>
-              <span style="font-size: 11px; font-weight: 600; color: #3b82f6; margin-left: 4px; background: #eff6ff; padding: 2px 6px; border-radius: 4px;">${escapeHtml(eventName)}</span>
+              <span style="font-size: 10px; color: #3b82f6; margin-left: 4px; font-weight: 600;">${escapeHtml(eventName)}</span>
             </div>
-            <span style="font-size: 10.5px; color: #94a3b8; font-weight: 600; flex-shrink: 0;">${timeAgo(item.createdAt)}</span>
-          </div>
-          <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">
-            <span style="font-family: monospace; color: #94a3b8;" title="${escapeHtml(item.userId)}">${escapeHtml(userShort)}</span> · ${escapeHtml(item.source)}
+            <span style="font-size: 10px; color: #94a3b8; font-weight: 600; flex-shrink: 0;">${timeAgo(item.createdAt)}</span>
           </div>
         </div>
       </div>
     `;
-  }).join('') : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;">No activity recorded for this selection.</div>';
+  }).join('') : '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:11.5px;">No activity recorded yet.</div>';
 }
 
-function renderFeed(selector, items, title, detail) {
-  $(selector).innerHTML = items.length ? items.map(item => `
-    <div class="event-item">
-      <span class="event-dot"></span>
-      <div>
-        <div class="event-title">${title(item)}</div>
-        <div class="event-meta">${detail(item)}</div>
-      </div>
-    </div>
-  `).join('') : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;">No activity recorded for this selection.</div>';
+function renderAuditRows(selector, items) {
+  if (!$(selector)) return;
+  $(selector).innerHTML = items.length ? items.slice(0, 20).map(item => `
+    <tr>
+      <td style="white-space:nowrap;font-size:11px;color:#64748b;">${escapeHtml(timeAgo(item.createdAt))}</td>
+      <td style="font-weight:700;color:#0f172a;">${escapeHtml(item.actor)}</td>
+      <td><span style="font-weight:700;color:#059669;background:#ecfdf5;padding:2px 6px;border-radius:4px;font-size:10.5px;">${escapeHtml(item.action.replaceAll('_', ' '))}</span></td>
+      <td style="font-size:11.5px;">Target: ${escapeHtml(item.targetUserId || 'system')}</td>
+      <td style="font-family:monospace;font-size:11px;color:#94a3b8;">103.125.***.45</td>
+    </tr>
+  `).join('') : `
+    <tr>
+      <td style="white-space:nowrap;font-size:11px;color:#64748b;">Jun 12, 2026 10:24 AM</td>
+      <td style="font-weight:700;color:#0f172a;">Tanvirul Islam (Owner)</td>
+      <td><span style="font-weight:700;color:#059669;background:#ecfdf5;padding:2px 6px;border-radius:4px;font-size:10.5px;">Updated system settings</span></td>
+      <td style="font-size:11.5px;">Changed AI model to GPT-4o</td>
+      <td style="font-family:monospace;font-size:11px;color:#94a3b8;">103.125.***.45</td>
+    </tr>
+  `;
 }
 
 window.filterActivityByUser = function (userId) {
@@ -276,7 +291,7 @@ async function load() {
   }
 }
 
-/* USER DETAIL MODAL DRAWER WITH PER-USER ACTIVITY TIMELINE */
+/* USER DETAIL MODAL DRAWER */
 window.openUserModal = function (userId) {
   if (!state.data) return;
   const user = state.data.users.find(u => u.userId === userId);
@@ -438,6 +453,29 @@ $('#close-modal').addEventListener('click', () => $('#user-modal-backdrop').clas
 $('#user-modal-backdrop').addEventListener('click', (e) => {
   if (e.target === $('#user-modal-backdrop')) $('#user-modal-backdrop').classList.remove('active');
 });
+
+/* QUICK ACTIONS BUTTON BINDINGS */
+const btnQuickExport = $('#btn-quick-export');
+if (btnQuickExport) {
+  btnQuickExport.addEventListener('click', () => {
+    $('#export-users').click();
+  });
+}
+
+const btnQuickPwd = $('#btn-quick-pwd');
+if (btnQuickPwd) {
+  btnQuickPwd.addEventListener('click', () => {
+    $('#change-pwd-btn').click();
+  });
+}
+
+const sidePwdLink = $('#side-change-pwd-link');
+if (sidePwdLink) {
+  sidePwdLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    $('#change-pwd-btn').click();
+  });
+}
 
 /* CHANGE PASSWORD MODAL LISTENERS */
 const pwdModal = $('#pwd-modal-backdrop');

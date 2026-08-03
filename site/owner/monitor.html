@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Owner Console · Expense Tracker AI</title>
+  <title>Owner Console · Money Copilot AI</title>
   <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
   <script defer src="/_vercel/insights/script.js"></script>
   <link rel="stylesheet" href="/owner/owner.css">
@@ -12,130 +12,590 @@
 <body>
   <div class="monitor-shell">
     
-    <!-- SIDEBAR NAVIGATION -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 1. LEFT SIDEBAR NAVIGATION                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <aside class="sidebar">
-      <div class="brand">
-        <span class="brand-mark">ET</span>
-        <span>Owner Console</span>
+      <!-- Brand Header -->
+      <div class="brand-header">
+        <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" class="brand-logo-img" alt="Money Copilot AI">
+        <div>
+          <div class="brand-title">Money Copilot <span class="brand-badge">AI</span></div>
+          <div class="brand-sub">Owner Console</div>
+        </div>
       </div>
-      
-      <div class="side-label">Operations</div>
-      <a class="nav-item active" href="/owner/monitor">
-        <span>📊</span>
-        <span>Overview &amp; Access</span>
+
+      <!-- Overview -->
+      <a class="nav-link active" href="/owner/monitor">
+        <div class="nav-link-content">
+          <span>🏠</span>
+          <span>Overview</span>
+        </div>
       </a>
-      
-      <div class="owner-card">
-        <strong>Owner Session</strong>
-        <div id="owner-email" class="owner-email">Verifying…</div>
+
+      <!-- PLATFORM GROUP -->
+      <div class="side-group-label">PLATFORM</div>
+      <a class="nav-link" href="#users-section">
+        <div class="nav-link-content">
+          <span>👥</span>
+          <span>Users &amp; Accounts</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#activity-section">
+        <div class="nav-link-content">
+          <span>💳</span>
+          <span>Transactions</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#metrics-section">
+        <div class="nav-link-content">
+          <span>📊</span>
+          <span>Expenses</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#metrics-section">
+        <div class="nav-link-content">
+          <span>🎯</span>
+          <span>Budgets</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#categories-section">
+        <div class="nav-link-content">
+          <span>🏷️</span>
+          <span>Categories</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#trend-section">
+        <div class="nav-link-content">
+          <span>📈</span>
+          <span>Reports &amp; Analytics</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#audit-section">
+        <div class="nav-link-content">
+          <span>🛡️</span>
+          <span>Audit Logs</span>
+        </div>
+      </a>
+
+      <!-- AUTOMATION & AI GROUP -->
+      <div class="side-group-label">AUTOMATION &amp; AI</div>
+      <a class="nav-link" href="#ai-insight-section">
+        <div class="nav-link-content">
+          <span>✨</span>
+          <span>AI Insights</span>
+        </div>
+        <span class="new-pill">New</span>
+      </a>
+      <a class="nav-link" href="#alerts-section">
+        <div class="nav-link-content">
+          <span>🚨</span>
+          <span>Anomaly Detection</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#alerts-section">
+        <div class="nav-link-content">
+          <span>🔔</span>
+          <span>Smart Alerts</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#recommendations-section">
+        <div class="nav-link-content">
+          <span>💡</span>
+          <span>Recommendations</span>
+        </div>
+      </a>
+
+      <!-- SYSTEM & SETTINGS GROUP -->
+      <div class="side-group-label">SYSTEM &amp; SETTINGS</div>
+      <a class="nav-link" href="#status-section">
+        <div class="nav-link-content">
+          <span>🔌</span>
+          <span>Integrations</span>
+        </div>
+      </a>
+      <a class="nav-link" id="side-change-pwd-link" href="#">
+        <div class="nav-link-content">
+          <span>🔐</span>
+          <span>Security &amp; Access</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#quick-actions-section">
+        <div class="nav-link-content">
+          <span>⚙️</span>
+          <span>Settings</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#summary-section">
+        <div class="nav-link-content">
+          <span>💳</span>
+          <span>Billing &amp; Plans</span>
+        </div>
+      </a>
+      <a class="nav-link" href="#status-section">
+        <div class="nav-link-content">
+          <span>🖥️</span>
+          <span>System Health</span>
+        </div>
+      </a>
+
+      <!-- SIDEBAR FOOTER: UPGRADE TO PRO -->
+      <div class="sidebar-pro-card">
+        <div class="sidebar-pro-title">Upgrade to Pro</div>
+        <div class="sidebar-pro-desc">Unlock advanced analytics, custom roles and more.</div>
+        <button class="upgrade-pro-btn">Upgrade Now</button>
+      </div>
+
+      <!-- SIDEBAR FOOTER: OWNER ACCOUNT -->
+      <div class="sidebar-owner-card">
+        <div class="sidebar-owner-avatar">TI</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sidebar-owner-name">Tanvirul Islam</div>
+          <div id="owner-email" class="sidebar-owner-email">owner@moneycopilot.ai</div>
+        </div>
       </div>
     </aside>
 
-    <!-- MAIN DASHBOARD CONTENT -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 2. MAIN CONTENT AREA                                           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <main class="main">
       
       <!-- TOP BAR -->
       <header class="topbar">
-        <div>
-          <h1>Service Monitoring</h1>
-          <div class="subtle">Privacy-conscious account health, platform telemetry, and security access controls.</div>
+        <div class="topbar-title-wrap">
+          <h1>Welcome back, Tanvirul! 👋</h1>
+          <div class="topbar-subtitle">Here's what's happening with your Money Copilot platform today.</div>
         </div>
-        <div class="top-actions">
-          <button id="change-pwd-btn" class="secondary-btn" title="Change Owner Password">🔑 Change Password</button>
-          <button id="export-users" class="secondary-btn" title="Export User List to CSV">📥 Export Users</button>
-          <button id="refresh" class="secondary-btn">🔄 Refresh Data</button>
-          <button id="logout" class="danger-btn">Sign Out</button>
+
+        <div class="topbar-actions">
+          <button id="top-search-btn" class="icon-action-btn" title="Search">🔍</button>
+          <button id="change-pwd-btn" class="icon-action-btn" title="Change Password">🔑</button>
+          <button class="date-range-btn">📅 May 12 – Jun 12, 2026 <span>∨</span></button>
+          <button id="export-users" class="secondary-btn" style="height:36px;font-size:12px;" title="Export Data">📥 Export</button>
+          <button id="refresh" class="refresh-emerald-btn">🔄 Refresh Data</button>
+          <button class="icon-action-btn" title="Notifications">
+            🔔
+            <span class="notification-badge">7</span>
+          </button>
+          <button id="logout" class="danger-btn" style="height:36px;padding:0 12px;font-size:12px;">Sign Out</button>
         </div>
       </header>
 
-      <!-- SYSTEM STATUS HEALTH BAR -->
-      <section class="status-bar">
-        <div class="status-chip"><span class="status-dot"></span> Turso DB: Operational</div>
-        <div class="status-chip"><span class="status-dot"></span> Resend Gateway: Connected</div>
-        <div class="status-chip"><span class="status-dot"></span> AI Engine: Operational</div>
-        <div class="status-chip"><span class="status-dot"></span> Vercel Edge: 100% Active</div>
+      <!-- SYSTEM HEALTH STATUS BAR -->
+      <section id="status-section" class="system-status-bar">
+        <div class="status-item"><span class="status-dot-green"></span> Turso DB: Operational</div>
+        <div class="status-item"><span class="status-dot-green"></span> Resend Gateway: Connected</div>
+        <div class="status-item"><span class="status-dot-green"></span> AI Engine: Operational</div>
+        <div class="status-item"><span class="status-dot-green"></span> Vercel Edge: 100% Active</div>
       </section>
 
-      <!-- METRICS GRID -->
-      <section id="metrics" class="metrics"></section>
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 3. TOP METRICS ROW (6 CARDS MATCHING MOCKUP)               -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section id="metrics" class="metrics-row"></section>
 
-      <!-- 7-DAY ACTIVITY TREND CHART -->
-      <section class="panel" style="margin-bottom: 24px; padding: 20px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-          <div>
-            <div class="panel-title">7-Day Platform Activity Trend</div>
-            <div class="panel-meta">Daily telemetry and unique active users</div>
-          </div>
-          <div id="chart-legend" style="font-size: 11.5px; font-weight: 700; color: #10b981;">● Active Users Telemetry</div>
-        </div>
-        <div id="activity-chart-wrap" style="height: 140px; width: 100%;"></div>
-      </section>
-
-      <!-- MAIN DASHBOARD GRID (Users Table + Recent Activity Feed) -->
-      <section class="dashboard-grid">
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 4. MIDDLE ROW: PLATFORM ACTIVITY + TOP CATEGORIES + AI WIDGET-->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="middle-grid">
         
-        <!-- USERS CONTROL PANEL -->
-        <article class="panel">
-          <header class="panel-head">
+        <!-- Left: Platform Activity Overview -->
+        <article class="panel-card" id="trend-section">
+          <div class="panel-header-row">
             <div>
-              <div class="panel-title">User Accounts Directory</div>
-              <div id="user-count" class="panel-meta">Loading accounts…</div>
+              <div class="panel-card-title">Platform Activity Overview</div>
+              <div class="panel-card-sub">Daily telemetry &amp; unique active users</div>
             </div>
-            <div class="filters-row">
-              <div style="display: flex; gap: 4px; background: #e2e8f0; padding: 3px; border-radius: 8px;">
-                <button class="tab-btn active" data-filter="all">All</button>
-                <button class="tab-btn" data-filter="active">Active</button>
-                <button class="tab-btn" data-filter="suspended">Suspended</button>
-              </div>
-              <input id="search" class="search-input" type="search" placeholder="Search name or ID" style="width: 170px; height: 34px;">
+            <div>
+              <select class="search-input" style="width: 85px; height: 30px; font-size: 11px; font-weight: 700; padding: 0 6px;">
+                <option>7 Days</option>
+                <option>30 Days</option>
+              </select>
             </div>
-          </header>
+          </div>
 
-          <div class="table-wrap">
-            <table class="users-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Status</th>
-                  <th>Expenses</th>
-                  <th>Activity</th>
-                  <th>Last Active</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="users"></tbody>
-            </table>
+          <div style="display: flex; gap: 16px; font-size: 11px; font-weight: 700; margin-bottom: 10px;">
+            <span style="color: #10b981;">● Active Users</span>
+            <span style="color: #3b82f6;">● Activity Events</span>
+          </div>
+
+          <div id="activity-chart-wrap" style="height: 165px; width: 100%;"></div>
+        </article>
+
+        <!-- Middle: Top Expense Categories -->
+        <article class="panel-card" id="categories-section">
+          <div class="panel-header-row">
+            <div>
+              <div class="panel-card-title">Top Expense Categories</div>
+              <div class="panel-card-sub">By total amount</div>
+            </div>
+            <button class="secondary-btn" style="height: 26px; padding: 0 8px; font-size: 10.5px;">View All</button>
+          </div>
+
+          <div style="display: grid; gap: 10px;">
+            <!-- Category 1 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+                <span>🍴 Food &amp; Dining</span>
+                <span>৳345,670 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(27.7%)</span></span>
+              </div>
+              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                <div style="width: 27.7%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
+
+            <!-- Category 2 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+                <span>🛍️ Shopping</span>
+                <span>৳287,450 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(23.1%)</span></span>
+              </div>
+              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                <div style="width: 23.1%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
+
+            <!-- Category 3 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+                <span>🚗 Transport</span>
+                <span>৳186,230 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(14.9%)</span></span>
+              </div>
+              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                <div style="width: 14.9%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
+
+            <!-- Category 4 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+                <span>⚡ Bills &amp; Utilities</span>
+                <span>৳154,890 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(12.4%)</span></span>
+              </div>
+              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                <div style="width: 12.4%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
+
+            <!-- Category 5 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+                <span>❤️ Health &amp; Fitness</span>
+                <span>৳98,760 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(7.9%)</span></span>
+              </div>
+              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                <div style="width: 7.9%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
+
+            <!-- Category 6 -->
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
+                <span>📦 Others</span>
+                <span>৳172,890 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(13.9%)</span></span>
+              </div>
+              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                <div style="width: 13.9%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
           </div>
         </article>
 
-        <!-- RECENT ACTIVITY FEED -->
-        <article class="panel">
-          <header class="panel-head">
+        <!-- Right: AI Insight + System Health -->
+        <article class="panel-card" id="ai-insight-section">
+          <!-- Top Box: AI Insight -->
+          <div class="ai-insight-box">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <div style="font-size: 12.5px; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
+                <span>✨ AI Insight</span>
+                <span class="new-pill">New</span>
+              </div>
+              <span style="font-size: 10px; color: #94a3b8; cursor: pointer;">✕</span>
+            </div>
+
+            <div style="font-size: 11.5px; color: #166534; line-height: 1.4; margin-bottom: 8px; padding-right: 50px;">
+              Users are spending <strong>23% more on Food &amp; Dining</strong> compared to last month.<br>
+              Potential savings if reduced by 15%: <strong style="color: #047857; font-size: 13px;">৳52,340</strong>
+            </div>
+
+            <button class="secondary-btn" style="height: 28px; padding: 0 10px; font-size: 11px; background: #ffffff; color: #047857; border-color: #a7f3d0;">View Insight Report</button>
+            <span style="font-size: 32px; position: absolute; right: 12px; bottom: 12px;">🤖</span>
+          </div>
+
+          <!-- Bottom Box: System Health -->
+          <div>
+            <div class="panel-header-row" style="margin-bottom: 8px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 800; color: #0f172a;">System Health</div>
+                <div style="font-size: 10.5px; color: #64748b;">All systems operational</div>
+              </div>
+              <button class="secondary-btn" style="height: 24px; padding: 0 6px; font-size: 10px;">View Details</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10.5px; font-weight: 700; color: #475569;">
+              <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>🗄️ Database</span>
+                <span style="color: #10b981; margin-left: auto;">Operational</span>
+              </div>
+              <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>🧠 AI Engine</span>
+                <span style="color: #10b981; margin-left: auto;">Operational</span>
+              </div>
+              <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>🔄 API Services</span>
+                <span style="color: #10b981; margin-left: auto;">Operational</span>
+              </div>
+              <div style="background: #f8fafc; padding: 6px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>💾 Storage</span>
+                <span style="color: #10b981; margin-left: auto;">Operational</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 5. LOWER GRID: USER ACTIVITY + ALERTS + ACTIONS + SUMMARY  -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="lower-grid">
+        
+        <!-- Col 1: Recent User Activity -->
+        <article class="panel-card" id="activity-section">
+          <div class="panel-header-row">
             <div>
-              <div class="panel-title">Recent Activity Telemetry</div>
-              <div class="panel-meta">Metadata only — zero raw finance content</div>
+              <div class="panel-card-title">Recent User Activity</div>
+              <div class="panel-card-sub">Latest actions across the platform</div>
             </div>
             <div>
-              <select id="activity-user-filter" class="search-input" style="width: 140px; height: 32px; font-size: 11.5px; font-weight: 700; padding: 0 8px;">
+              <select id="activity-user-filter" class="search-input" style="width: 90px; height: 26px; font-size: 10px; font-weight: 700; padding: 0 4px;">
                 <option value="all">All Users</option>
               </select>
             </div>
-          </header>
-          <div id="activity" class="feed"></div>
+          </div>
+
+          <div id="activity" class="feed" style="max-height: 250px;"></div>
+
+          <div style="margin-top: 10px; text-align: center;">
+            <button class="secondary-btn" style="height: 28px; width: 100%; font-size: 11px;">View All Activity</button>
+          </div>
+        </article>
+
+        <!-- Col 2: Recent Alerts -->
+        <article class="panel-card" id="alerts-section">
+          <div class="panel-header-row">
+            <div>
+              <div class="panel-card-title">Recent Alerts</div>
+              <div class="panel-card-sub">Important alerts and notifications</div>
+            </div>
+            <button class="secondary-btn" style="height: 24px; padding: 0 6px; font-size: 10px;">View All</button>
+          </div>
+
+          <div style="display: grid; gap: 10px;">
+            <!-- Alert 1 -->
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+              <div style="width: 26px; height: 26px; border-radius: 7px; background: #fff7ed; color: #f97316; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚠️</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Unusual spending detected</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">3 transactions above ৳10,000</div>
+              </div>
+              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">5m ago</span>
+            </div>
+
+            <!-- Alert 2 -->
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+              <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚠️</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Budget limit exceeded</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">2 users exceeded their budget</div>
+              </div>
+              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">28m ago</span>
+            </div>
+
+            <!-- Alert 3 -->
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+              <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">❌</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Failed transactions</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">12 transactions failed today</div>
+              </div>
+              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">1h ago</span>
+            </div>
+
+            <!-- Alert 4 -->
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <div style="width: 26px; height: 26px; border-radius: 7px; background: #ecfdf5; color: #10b981; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">👤</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">New user registrations</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">24 new users joined today</div>
+              </div>
+              <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">2h ago</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Col 3: Quick Actions -->
+        <article class="panel-card" id="quick-actions-section">
+          <div class="panel-header-row" style="margin-bottom: 10px;">
+            <div class="panel-card-title">Quick Actions</div>
+          </div>
+
+          <div class="quick-action-grid">
+            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
+              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">👤</div>
+              <div class="quick-action-title">Add User</div>
+              <div class="quick-action-desc">Invite new user</div>
+            </div>
+
+            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
+              <div class="quick-action-icon" style="background:#eff6ff;color:#3b82f6;">🎯</div>
+              <div class="quick-action-title">Create Budget</div>
+              <div class="quick-action-desc">Set new budget</div>
+            </div>
+
+            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
+              <div class="quick-action-icon" style="background:#fff7ed;color:#f97316;">🔔</div>
+              <div class="quick-action-title">Send Alert</div>
+              <div class="quick-action-desc">Notify users</div>
+            </div>
+
+            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
+              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">📊</div>
+              <div class="quick-action-title">Generate Report</div>
+              <div class="quick-action-desc">Custom analytics</div>
+            </div>
+
+            <div class="quick-action-card" id="btn-quick-export">
+              <div class="quick-action-icon" style="background:#eff6ff;color:#3b82f6;">📥</div>
+              <div class="quick-action-title">Export Data</div>
+              <div class="quick-action-desc">Download data</div>
+            </div>
+
+            <div class="quick-action-card" id="btn-quick-pwd">
+              <div class="quick-action-icon" style="background:#f5f3ff;color:#8b5cf6;">⚙️</div>
+              <div class="quick-action-title">System Settings</div>
+              <div class="quick-action-desc">Configure system</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Col 4: Platform Summary & Rocket Banner -->
+        <article class="panel-card" id="summary-section">
+          <div class="panel-header-row" style="margin-bottom: 8px;">
+            <div>
+              <div class="panel-card-title">Platform Summary</div>
+              <div class="panel-card-sub">Key statistics at a glance</div>
+            </div>
+          </div>
+
+          <div style="display: grid; gap: 6px; font-size: 11px; font-weight: 700; color: #475569;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+              <span>Total Revenue (Est.)</span>
+              <span>৳742,500 <span style="color:#10b981;font-size:9.5px;">+11.2%</span></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+              <span>Active Subscriptions</span>
+              <span>1,876 <span style="color:#10b981;font-size:9.5px;">+9.4%</span></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+              <span>Free Users</span>
+              <span>672 <span style="color:#ef4444;font-size:9.5px;">-2.1%</span></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+              <span>Premium Users</span>
+              <span>1,204 <span style="color:#10b981;font-size:9.5px;">+8.7%</span></span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Churn Rate</span>
+              <span>2.48% <span style="color:#10b981;font-size:9.5px;">-0.6%</span></span>
+            </div>
+          </div>
+
+          <!-- Rocket Banner -->
+          <div class="rocket-pro-banner">
+            <div style="font-size: 12px; font-weight: 800; margin-bottom: 4px; padding-right: 40px;">Unlock More Power</div>
+            <div style="font-size: 10px; color: #cbd5e1; line-height: 1.3; margin-bottom: 10px; padding-right: 40px;">Upgrade to Pro for advanced analytics, custom roles and priority support.</div>
+            <button class="upgrade-pro-btn" style="height: 28px; width: auto; padding: 0 14px; font-size: 11px;">Upgrade to Pro</button>
+            <span style="font-size: 36px; position: absolute; right: 8px; bottom: 8px;">🚀</span>
+          </div>
         </article>
 
       </section>
 
-      <!-- SECURITY AUDIT TRAIL -->
-      <section class="panel" style="margin-top: 24px;">
-        <header class="panel-head">
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 6. USERS DIRECTORY TABLE                                   -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="panel-card" id="users-section" style="margin-bottom: 24px;">
+        <div class="panel-header-row">
           <div>
-            <div class="panel-title">Owner Security Audit Trail</div>
-            <div class="panel-meta">Immutable log of access control and owner actions</div>
+            <div class="panel-card-title">User Accounts Directory</div>
+            <div id="user-count" class="panel-card-sub">Loading accounts…</div>
           </div>
-          <button id="export-audit" class="secondary-btn" style="height: 32px; font-size: 11.5px;">📥 Export Audit CSV</button>
-        </header>
-        <div id="audit" class="feed" style="max-height: 260px;"></div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="display: flex; gap: 4px; background: #e2e8f0; padding: 3px; border-radius: 8px;">
+              <button class="tab-btn active" data-filter="all">All</button>
+              <button class="tab-btn" data-filter="active">Active</button>
+              <button class="tab-btn" data-filter="suspended">Suspended</button>
+            </div>
+            <input id="search" class="search-input" type="search" placeholder="Search name or ID" style="width: 170px; height: 32px; font-size: 12px;">
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Status</th>
+                <th>Expenses</th>
+                <th>Activity</th>
+                <th>Last Active</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="users"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 7. AUDIT TRAIL TABLE                                       -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="panel-card" id="audit-section">
+        <div class="panel-header-row">
+          <div>
+            <div class="panel-card-title">Audit Trail <span style="font-size:11px;color:#94a3b8;font-weight:600;">(Latest 20 Actions)</span></div>
+            <div class="panel-card-sub">Immutable log of critical actions</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="secondary-btn" style="height: 30px; font-size: 11px;">View Full Audit Log</button>
+            <button id="export-audit" class="secondary-btn" style="height: 30px; font-size: 11px;">Export CSV</button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>TIME</th>
+                <th>USER</th>
+                <th>ACTION</th>
+                <th>DETAILS</th>
+                <th>IP ADDRESS</th>
+              </tr>
+            </thead>
+            <tbody id="audit-rows">
+              <tr>
+                <td style="white-space:nowrap;font-size:11px;color:#64748b;">Jun 12, 2026 10:24 AM</td>
+                <td style="font-weight:700;color:#0f172a;">Tanvirul Islam (Owner)</td>
+                <td><span style="font-weight:700;color:#059669;background:#ecfdf5;padding:2px 6px;border-radius:4px;font-size:10.5px;">Updated system settings</span></td>
+                <td style="font-size:11.5px;">Changed AI model to GPT-4o</td>
+                <td style="font-family:monospace;font-size:11px;color:#94a3b8;">103.125.***.45</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
     </main>
