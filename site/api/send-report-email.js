@@ -455,36 +455,41 @@ export default async function handler(req, res) {
               <!-- 7. FOOTER                                                  -->
               <!-- ═══════════════════════════════════════════════════════════ -->
               <tr>
-                <td style="padding: 18px 24px; background-color: #f8fafc; border-top: 1px solid #f1f5f9;">
+                <td style="padding: 20px 24px; background-color: #f8fafc; border-top: 1px solid #f1f5f9;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td width="35%" style="vertical-align: middle;">
+                      <!-- Left Column: Private & Secure Badge -->
+                      <td width="38%" style="vertical-align: middle;">
                         <table cellpadding="0" cellspacing="0">
                           <tr>
-                            <td style="vertical-align: middle; padding-right: 6px;">
-                              <div style="width: 24px; height: 24px; background-color: #10b981; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; color: #ffffff;">🔒</div>
+                            <td width="36" style="vertical-align: middle; padding-right: 8px;">
+                              <div style="width: 32px; height: 32px; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 50%; text-align: center; line-height: 32px; font-size: 15px;">🔒</div>
                             </td>
                             <td style="vertical-align: middle;">
-                              <div style="font-size: 11px; font-weight: 800; color: #0f172a;">Private &amp; Secure</div>
-                              <div style="font-size: 9px; color: #64748b; line-height: 1.3;">Your financial data is encrypted<br>and only visible to you.</div>
+                              <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2;">Private &amp; Secure</div>
+                              <div style="font-size: 9px; color: #64748b; line-height: 1.3; margin-top: 2px;">Your financial data is encrypted<br>and only visible to you.</div>
                             </td>
                           </tr>
                         </table>
                       </td>
-                      <td width="35%" style="vertical-align: middle; text-align: center;">
+
+                      <!-- Middle Column: Brand Logo & Tagline -->
+                      <td width="38%" style="vertical-align: middle; text-align: center;">
                         <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                           <tr>
-                            <td style="padding-right: 6px; vertical-align: middle;">
-                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="22" height="22" alt="" style="display: block;">
+                            <td width="34" style="padding-right: 8px; vertical-align: middle;">
+                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="28" height="28" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto;">
                             </td>
-                            <td style="vertical-align: middle;">
-                              <div style="font-size: 11px; font-weight: 800; color: #0f172a;">Money Copilot AI</div>
-                              <div style="font-size: 8.5px; color: #10b981; font-weight: 600;">Know where your money goes.<br>Control where it goes next.</div>
+                            <td style="vertical-align: middle; text-align: left;">
+                              <div style="font-size: 11.5px; font-weight: 800; color: #0f172a; line-height: 1.2; white-space: nowrap;">Money Copilot AI</div>
+                              <div style="font-size: 8.5px; color: #10b981; font-weight: 700; line-height: 1.3; margin-top: 2px; white-space: nowrap;">Know where your money goes.<br>Control where it goes next.</div>
                             </td>
                           </tr>
                         </table>
                       </td>
-                      <td width="30%" style="vertical-align: middle; text-align: right; font-size: 9.5px; color: #94a3b8; line-height: 1.4;">
+
+                      <!-- Right Column: Copyright -->
+                      <td width="24%" style="vertical-align: middle; text-align: right; font-size: 9.5px; color: #94a3b8; line-height: 1.4;">
                         © 2026 Money Copilot AI.<br>All rights reserved.
                       </td>
                     </tr>
