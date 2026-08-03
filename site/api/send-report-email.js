@@ -118,7 +118,7 @@ export default async function handler(req, res) {
                           </tr>
                         </table>
                         <h2 style="margin: 0 0 6px 0; font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.6px; line-height: 1.15;">Your Monthly Money Report</h2>
-                        <div style="font-size: 16px; font-weight: 800; color: #34d399; margin-bottom: 8px;">${month}</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #34d399; margin-bottom: 8px;">${month}</div>
                         <p style="margin: 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">AI analyzed your spending and found opportunities to save more.</p>
                       </td>
                       <!-- Right: High-Tech Dashboard Graphic Image -->
@@ -339,7 +339,7 @@ export default async function handler(req, res) {
                       <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
                         <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
-                            <td style="font-size: 13px; font-weight: 800; color: #0f172a;">Spending Trend <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">(Last 6 Months)</span></td>
+                            <td style="font-size: 13.5px; font-weight: 800; color: #0f172a;">Spending Trend <span style="font-size: 10px; color: #94a3b8; font-weight: 500;">(Last 6 Months)</span></td>
                             <td style="text-align: right;" width="20"><span style="font-size: 14px; color: #10b981;">↗</span></td>
                           </tr>
                         </table>
@@ -352,7 +352,7 @@ export default async function handler(req, res) {
 
                       <!-- Right: Ask AI Anything -->
                       <td width="48%" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 16px; vertical-align: top;">
-                        <h4 style="margin: 0 0 3px 0; font-size: 14px; font-weight: 800; color: #0f172a;">Ask AI Anything</h4>
+                        <h4 style="margin: 0 0 3px 0; font-size: 13.5px; font-weight: 800; color: #0f172a;">Ask AI Anything</h4>
                         <p style="margin: 0 0 12px 0; font-size: 11px; color: #94a3b8;">Get instant answers about your money.</p>
 
                         <!-- Prompt 1 -->
