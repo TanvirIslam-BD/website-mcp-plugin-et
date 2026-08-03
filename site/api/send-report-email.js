@@ -431,7 +431,7 @@ export default async function handler(req, res) {
                         </td>
                         <!-- Right: CTA Content -->
                         <td style="vertical-align: middle; padding: 22px 20px 22px 10px;">
-                          <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; line-height: 1.25;">Take control of your finances today!</h3>
+                          <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; line-height: 1.25;">Take control of your finances today!<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; font-size:0px;">&nbsp;${Date.now()}</span></h3>
                           <p style="margin: 0 0 14px 0; font-size: 11.5px; color: #cbd5e1; line-height: 1.45;">Open Money Copilot AI and make smarter decisions with AI.</p>
                           
                           <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="display: inline-block; padding: 11px 24px; background: #10b981; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 13px; border-radius: 99px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45);">Open Money Copilot AI →</a>
@@ -501,6 +501,10 @@ export default async function handler(req, res) {
           </td>
         </tr>
       </table>
+      <!-- Gmail Anti-Trim Dynamic Token (Prevents Gmail from collapsing content into [...] button) -->
+      <div style="display:none !important; visibility:hidden; opacity:0; color:transparent; height:0; width:0; font-size:0px; line-height:0px; max-height:0px; max-width:0px; overflow:hidden;">
+        Ref-${Date.now()}-${Math.random().toString(36).substring(2, 9)}
+      </div>
     </body>
     </html>
   `;
