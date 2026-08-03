@@ -34,7 +34,7 @@
       </a>
 
       <!-- PLATFORM GROUP -->
-      <div class="side-group-label">PLATFORM</div>
+      <div class="side-group-label">PLATFORM CONTROL</div>
       <a class="nav-link" href="#users-section">
         <div class="nav-link-content">
           <span>👥</span>
@@ -43,32 +43,26 @@
       </a>
       <a class="nav-link" href="#activity-section">
         <div class="nav-link-content">
-          <span>💳</span>
-          <span>Transactions</span>
+          <span>⚡</span>
+          <span>Activity Telemetry</span>
         </div>
       </a>
       <a class="nav-link" href="#metrics-section">
         <div class="nav-link-content">
-          <span>📊</span>
-          <span>Expenses</span>
+          <span>💳</span>
+          <span>Expense Metrics</span>
         </div>
       </a>
       <a class="nav-link" href="#metrics-section">
         <div class="nav-link-content">
           <span>🎯</span>
-          <span>Budgets</span>
-        </div>
-      </a>
-      <a class="nav-link" href="#categories-section">
-        <div class="nav-link-content">
-          <span>🏷️</span>
-          <span>Categories</span>
+          <span>Budgets Control</span>
         </div>
       </a>
       <a class="nav-link" href="#trend-section">
         <div class="nav-link-content">
           <span>📈</span>
-          <span>Reports &amp; Analytics</span>
+          <span>System Analytics</span>
         </div>
       </a>
       <a class="nav-link" href="#audit-section">
@@ -85,7 +79,7 @@
           <span>✨</span>
           <span>AI Insights</span>
         </div>
-        <span class="new-pill">New</span>
+        <span class="new-pill">Active</span>
       </a>
       <a class="nav-link" href="#alerts-section">
         <div class="nav-link-content">
@@ -99,15 +93,9 @@
           <span>Smart Alerts</span>
         </div>
       </a>
-      <a class="nav-link" href="#recommendations-section">
-        <div class="nav-link-content">
-          <span>💡</span>
-          <span>Recommendations</span>
-        </div>
-      </a>
 
       <!-- SYSTEM & SETTINGS GROUP -->
-      <div class="side-group-label">SYSTEM &amp; SETTINGS</div>
+      <div class="side-group-label">SYSTEM &amp; SECURITY</div>
       <a class="nav-link" href="#status-section">
         <div class="nav-link-content">
           <span>🔌</span>
@@ -126,12 +114,6 @@
           <span>Settings</span>
         </div>
       </a>
-      <a class="nav-link" href="#summary-section">
-        <div class="nav-link-content">
-          <span>💳</span>
-          <span>Billing &amp; Plans</span>
-        </div>
-      </a>
       <a class="nav-link" href="#status-section">
         <div class="nav-link-content">
           <span>🖥️</span>
@@ -139,15 +121,8 @@
         </div>
       </a>
 
-      <!-- SIDEBAR FOOTER: UPGRADE TO PRO -->
-      <div class="sidebar-pro-card">
-        <div class="sidebar-pro-title">Upgrade to Pro</div>
-        <div class="sidebar-pro-desc">Unlock advanced analytics, custom roles and more.</div>
-        <button class="upgrade-pro-btn">Upgrade Now</button>
-      </div>
-
       <!-- SIDEBAR FOOTER: OWNER ACCOUNT -->
-      <div class="sidebar-owner-card">
+      <div class="sidebar-owner-card" style="margin-top: auto;">
         <div class="sidebar-owner-avatar">TI</div>
         <div style="flex:1;min-width:0;">
           <div class="sidebar-owner-name">Tanvirul Islam</div>
@@ -191,12 +166,12 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 3. TOP METRICS ROW (6 CARDS MATCHING MOCKUP)               -->
+      <!-- 3. TOP METRICS ROW (6 CARDS)                               -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section id="metrics" class="metrics-row"></section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 4. MIDDLE ROW: PLATFORM ACTIVITY + TOP CATEGORIES + AI WIDGET-->
+      <!-- 4. MIDDLE ROW: PLATFORM ACTIVITY + STORAGE + AI INSIGHT    -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <section class="middle-grid">
         
@@ -223,80 +198,58 @@
           <div id="activity-chart-wrap" style="height: 165px; width: 100%;"></div>
         </article>
 
-        <!-- Middle: Top Expense Categories -->
-        <article class="panel-card" id="categories-section">
+        <!-- Middle: Platform Storage & Database Telemetry -->
+        <article class="panel-card" id="storage-section">
           <div class="panel-header-row">
             <div>
-              <div class="panel-card-title">Top Expense Categories</div>
-              <div class="panel-card-sub">By total amount</div>
+              <div class="panel-card-title">Database &amp; Storage Telemetry</div>
+              <div class="panel-card-sub">Turso DB &amp; System Health</div>
             </div>
-            <button class="secondary-btn" style="height: 26px; padding: 0 8px; font-size: 10.5px;">View All</button>
+            <button class="secondary-btn" style="height: 26px; padding: 0 8px; font-size: 10.5px;">View Logs</button>
           </div>
 
           <div style="display: grid; gap: 10px;">
-            <!-- Category 1 -->
+            <!-- Metric 1 -->
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>🍴 Food &amp; Dining</span>
-                <span>৳345,670 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(27.7%)</span></span>
+                <span>🗄️ Stored Expense Records</span>
+                <span>18,721 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(42.5%)</span></span>
               </div>
               <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 27.7%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+                <div style="width: 42.5%; height: 100%; background: #10b981; border-radius: 99px;"></div>
               </div>
             </div>
 
-            <!-- Category 2 -->
+            <!-- Metric 2 -->
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>🛍️ Shopping</span>
-                <span>৳287,450 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(23.1%)</span></span>
+                <span>🎯 Budget Configurations</span>
+                <span>932 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(21.1%)</span></span>
               </div>
               <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 23.1%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+                <div style="width: 21.1%; height: 100%; background: #10b981; border-radius: 99px;"></div>
               </div>
             </div>
 
-            <!-- Category 3 -->
+            <!-- Metric 3 -->
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>🚗 Transport</span>
-                <span>৳186,230 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(14.9%)</span></span>
+                <span>📈 Telemetry Activity Log</span>
+                <span>12,450 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(28.2%)</span></span>
               </div>
               <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 14.9%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+                <div style="width: 28.2%; height: 100%; background: #3b82f6; border-radius: 99px;"></div>
               </div>
             </div>
 
-            <!-- Category 4 -->
+            <!-- Metric 4 -->
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>⚡ Bills &amp; Utilities</span>
-                <span>৳154,890 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(12.4%)</span></span>
+                <span>🛡️ Security Audit Logs</span>
+                <span>3,620 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(8.2%)</span></span>
               </div>
               <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 12.4%; height: 100%; background: #10b981; border-radius: 99px;"></div>
-              </div>
-            </div>
-
-            <!-- Category 5 -->
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>❤️ Health &amp; Fitness</span>
-                <span>৳98,760 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(7.9%)</span></span>
-              </div>
-              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 7.9%; height: 100%; background: #10b981; border-radius: 99px;"></div>
-              </div>
-            </div>
-
-            <!-- Category 6 -->
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 3px;">
-                <span>📦 Others</span>
-                <span>৳172,890 <span style="font-size: 10px; color: #64748b; font-weight: 600;">(13.9%)</span></span>
-              </div>
-              <div style="width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
-                <div style="width: 13.9%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+                <div style="width: 8.2%; height: 100%; background: #8b5cf6; border-radius: 99px;"></div>
               </div>
             </div>
           </div>
@@ -308,18 +261,18 @@
           <div class="ai-insight-box">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
               <div style="font-size: 12.5px; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 4px;">
-                <span>✨ AI Insight</span>
-                <span class="new-pill">New</span>
+                <span>✨ System AI Diagnostics</span>
+                <span class="new-pill">Active</span>
               </div>
               <span style="font-size: 10px; color: #94a3b8; cursor: pointer;">✕</span>
             </div>
 
             <div style="font-size: 11.5px; color: #166534; line-height: 1.4; margin-bottom: 8px; padding-right: 50px;">
-              Users are spending <strong>23% more on Food &amp; Dining</strong> compared to last month.<br>
-              Potential savings if reduced by 15%: <strong style="color: #047857; font-size: 13px;">৳52,340</strong>
+              Platform activity increased <strong>+18.7%</strong> this week.<br>
+              Database latency remains optimal at <strong style="color: #047857; font-size: 13px;">14ms</strong>.
             </div>
 
-            <button class="secondary-btn" style="height: 28px; padding: 0 10px; font-size: 11px; background: #ffffff; color: #047857; border-color: #a7f3d0;">View Insight Report</button>
+            <button class="secondary-btn" style="height: 28px; padding: 0 10px; font-size: 11px; background: #ffffff; color: #047857; border-color: #a7f3d0;">View System Report</button>
             <span style="font-size: 32px; position: absolute; right: 12px; bottom: 12px;">🤖</span>
           </div>
 
@@ -386,8 +339,8 @@
         <article class="panel-card" id="alerts-section">
           <div class="panel-header-row">
             <div>
-              <div class="panel-card-title">Recent Alerts</div>
-              <div class="panel-card-sub">Important alerts and notifications</div>
+              <div class="panel-card-title">Recent System Alerts</div>
+              <div class="panel-card-sub">Security &amp; system notifications</div>
             </div>
             <button class="secondary-btn" style="height: 24px; padding: 0 6px; font-size: 10px;">View All</button>
           </div>
@@ -397,8 +350,8 @@
             <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
               <div style="width: 26px; height: 26px; border-radius: 7px; background: #fff7ed; color: #f97316; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚠️</div>
               <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Unusual spending detected</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">3 transactions above ৳10,000</div>
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">High activity spike detected</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">+35% events in last 2 hours</div>
               </div>
               <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">5m ago</span>
             </div>
@@ -407,8 +360,8 @@
             <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
               <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">⚠️</div>
               <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Budget limit exceeded</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">2 users exceeded their budget</div>
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Budget limit reached</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">2 users exceeded threshold</div>
               </div>
               <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">28m ago</span>
             </div>
@@ -417,8 +370,8 @@
             <div style="display: flex; gap: 10px; align-items: flex-start; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
               <div style="width: 26px; height: 26px; border-radius: 7px; background: #fef2f2; color: #ef4444; display: grid; place-items: center; font-size: 12px; flex-shrink: 0;">❌</div>
               <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Failed transactions</div>
-                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">12 transactions failed today</div>
+                <div style="font-size: 11.5px; font-weight: 800; color: #0f172a;">Rate limit warning</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 1px;">API requests within normal bounds</div>
               </div>
               <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">1h ago</span>
             </div>
@@ -435,89 +388,69 @@
           </div>
         </article>
 
-        <!-- Col 3: Quick Actions -->
+        <!-- Col 3: Quick Administrative Actions -->
         <article class="panel-card" id="quick-actions-section">
           <div class="panel-header-row" style="margin-bottom: 10px;">
-            <div class="panel-card-title">Quick Actions</div>
+            <div class="panel-card-title">Owner Quick Actions</div>
           </div>
 
           <div class="quick-action-grid">
-            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
-              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">👤</div>
-              <div class="quick-action-title">Add User</div>
-              <div class="quick-action-desc">Invite new user</div>
-            </div>
-
-            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
-              <div class="quick-action-icon" style="background:#eff6ff;color:#3b82f6;">🎯</div>
-              <div class="quick-action-title">Create Budget</div>
-              <div class="quick-action-desc">Set new budget</div>
-            </div>
-
-            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
-              <div class="quick-action-icon" style="background:#fff7ed;color:#f97316;">🔔</div>
-              <div class="quick-action-title">Send Alert</div>
-              <div class="quick-action-desc">Notify users</div>
-            </div>
-
-            <div class="quick-action-card" onclick="alert('Feature available in Pro dashboard')">
-              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">📊</div>
-              <div class="quick-action-title">Generate Report</div>
-              <div class="quick-action-desc">Custom analytics</div>
+            <div class="quick-action-card" id="btn-quick-pwd">
+              <div class="quick-action-icon" style="background:#f5f3ff;color:#8b5cf6;">🔑</div>
+              <div class="quick-action-title">Change Password</div>
+              <div class="quick-action-desc">Update owner key</div>
             </div>
 
             <div class="quick-action-card" id="btn-quick-export">
               <div class="quick-action-icon" style="background:#eff6ff;color:#3b82f6;">📥</div>
-              <div class="quick-action-title">Export Data</div>
-              <div class="quick-action-desc">Download data</div>
+              <div class="quick-action-title">Export Users CSV</div>
+              <div class="quick-action-desc">Download accounts</div>
             </div>
 
-            <div class="quick-action-card" id="btn-quick-pwd">
-              <div class="quick-action-icon" style="background:#f5f3ff;color:#8b5cf6;">⚙️</div>
-              <div class="quick-action-title">System Settings</div>
-              <div class="quick-action-desc">Configure system</div>
+            <div class="quick-action-card" onclick="document.getElementById('export-audit').click()">
+              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🛡️</div>
+              <div class="quick-action-title">Export Audit Log</div>
+              <div class="quick-action-desc">Security records</div>
+            </div>
+
+            <div class="quick-action-card" onclick="document.getElementById('refresh').click()">
+              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🔄</div>
+              <div class="quick-action-title">Refresh Telemetry</div>
+              <div class="quick-action-desc">Live metrics sync</div>
             </div>
           </div>
         </article>
 
-        <!-- Col 4: Platform Summary & Rocket Banner -->
+        <!-- Col 4: Platform Summary -->
         <article class="panel-card" id="summary-section">
           <div class="panel-header-row" style="margin-bottom: 8px;">
             <div>
               <div class="panel-card-title">Platform Summary</div>
-              <div class="panel-card-sub">Key statistics at a glance</div>
+              <div class="panel-card-sub">Key metrics at a glance</div>
             </div>
           </div>
 
-          <div style="display: grid; gap: 6px; font-size: 11px; font-weight: 700; color: #475569;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
-              <span>Total Revenue (Est.)</span>
-              <span>৳742,500 <span style="color:#10b981;font-size:9.5px;">+11.2%</span></span>
+          <div style="display: grid; gap: 8px; font-size: 11.5px; font-weight: 700; color: #475569;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+              <span>Total Platform Users</span>
+              <span>2,548 <span style="color:#10b981;font-size:9.5px;">+12.4%</span></span>
             </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
-              <span>Active Subscriptions</span>
-              <span>1,876 <span style="color:#10b981;font-size:9.5px;">+9.4%</span></span>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+              <span>24-Hour Active Users</span>
+              <span>1,243 <span style="color:#10b981;font-size:9.5px;">+18.7%</span></span>
             </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
-              <span>Free Users</span>
-              <span>672 <span style="color:#ef4444;font-size:9.5px;">-2.1%</span></span>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+              <span>Suspended Accounts</span>
+              <span>0 <span style="color:#10b981;font-size:9.5px;">0%</span></span>
             </div>
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
-              <span>Premium Users</span>
-              <span>1,204 <span style="color:#10b981;font-size:9.5px;">+8.7%</span></span>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+              <span>Total Expense Records</span>
+              <span>18,721 <span style="color:#10b981;font-size:9.5px;">+15.2%</span></span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-              <span>Churn Rate</span>
-              <span>2.48% <span style="color:#10b981;font-size:9.5px;">-0.6%</span></span>
+              <span>Database Status</span>
+              <span style="color:#10b981;">Operational</span>
             </div>
-          </div>
-
-          <!-- Rocket Banner -->
-          <div class="rocket-pro-banner">
-            <div style="font-size: 12px; font-weight: 800; margin-bottom: 4px; padding-right: 40px;">Unlock More Power</div>
-            <div style="font-size: 10px; color: #cbd5e1; line-height: 1.3; margin-bottom: 10px; padding-right: 40px;">Upgrade to Pro for advanced analytics, custom roles and priority support.</div>
-            <button class="upgrade-pro-btn" style="height: 28px; width: auto; padding: 0 14px; font-size: 11px;">Upgrade to Pro</button>
-            <span style="font-size: 36px; position: absolute; right: 8px; bottom: 8px;">🚀</span>
           </div>
         </article>
 
