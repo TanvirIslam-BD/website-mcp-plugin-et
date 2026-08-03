@@ -39,7 +39,6 @@ export default async function handler(req, res) {
 
       if (action === "send_test_email") {
         const recipientEmail = cleanText(req.body?.email, 200) || owner.email;
-        const now = new Date().toISOString();
         await recordOwnerAudit(db, { actor: owner.email, action: "sent_test_report", targetUserId: userId, detail: { recipient: recipientEmail } });
         return res.status(200).json({ ok: true, message: `Test report queued for ${recipientEmail}` });
       }
@@ -90,7 +89,10 @@ export default async function handler(req, res) {
         LIMIT 200`,
         args: [query, `%${query}%`, `%${query}%`],
       }),
-      db.execute("SELECT id,user_id,source,event_type,detail,created_at FROM app_activity ORDER BY created_at DESC LIMIT 300"),
+      db.execute(`SELECT a.id, a.user_id, COALESCE(u.display_name,'') AS display_name, COALESCE(u.profile_photo_url,'') AS profile_photo_url, a.source, a.event_type, a.detail, a.created_at
+                  FROM app_activity a
+                  LEFT JOIN app_users u ON u.user_id=a.user_id
+                  ORDER BY a.created_at DESC LIMIT 300`),
       db.execute("SELECT id,actor,action,target_user_id,detail,created_at FROM owner_audit_log ORDER BY created_at DESC LIMIT 100"),
       db.execute(`SELECT strftime('%Y-%m-%d', created_at) AS day, COUNT(*) AS event_count, COUNT(DISTINCT user_id) AS active_users
                   FROM app_activity
@@ -115,7 +117,10 @@ export default async function handler(req, res) {
         status: String(row.status || "active"), statusReason: String(row.status_reason || ""), expenseCount: Number(row.expense_count || 0),
         budgetCount: Number(row.budget_count || 0), activityCount: Number(row.activity_count || 0), lastActiveAt: String(row.last_active_at || ""), lastDataAt: String(row.last_data_at || ""),
       })),
-      activity: activityResult.rows.map((row) => ({ id: String(row.id), userId: String(row.user_id), source: String(row.source), eventType: String(row.event_type), detail: parseDetail(row.detail), createdAt: String(row.created_at) })),
+      activity: activityResult.rows.map((row) => ({
+        id: String(row.id), userId: String(row.user_id), displayName: String(row.display_name || ""), profilePhotoUrl: String(row.profile_photo_url || ""),
+        source: String(row.source), eventType: String(row.event_type), detail: parseDetail(row.detail), createdAt: String(row.created_at)
+      })),
       audit: auditResult.rows.map((row) => ({ id: String(row.id), actor: String(row.actor), action: String(row.action), targetUserId: row.target_user_id ? String(row.target_user_id) : "", detail: parseDetail(row.detail), createdAt: String(row.created_at) })),
       trend: trendResult.rows.map((row) => ({ day: String(row.day), events: Number(row.event_count || 0), users: Number(row.active_users || 0) }))
     });

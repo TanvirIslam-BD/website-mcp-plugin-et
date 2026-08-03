@@ -186,22 +186,53 @@ function render() {
     </tr>
   `).join('') : `<tr><td colspan="6" style="padding:40px;text-align:center;color:#94a3b8;">No users match your criteria.</td></tr>`;
 
-  // Render Activity Feed (Filtered by user if selected)
+  // Render Activity Feed (Filtered by user if selected) with Rich User Info
   let activityItems = data.activity || [];
   if (state.selectedActivityUser && state.selectedActivityUser !== 'all') {
     activityItems = activityItems.filter(a => a.userId === state.selectedActivityUser);
   }
 
-  renderFeed('#activity', activityItems, 
-    item => `${item.eventType.replaceAll('_', ' ')} · <span style="font-family:monospace;font-size:10.5px;color:#3b82f6;">${item.userId.substring(0, 14)}...</span>`,
-    item => `${item.source} · ${timeAgo(item.createdAt)}`
-  );
+  renderActivityFeed('#activity', activityItems);
 
   // Render Audit Trail
   renderFeed('#audit', data.audit,
     item => `${item.action.replaceAll('_', ' ')} · <span style="color:#0f172a;font-weight:700;">${item.targetUserId || 'system'}</span>`,
     item => `Actor: ${item.actor} · ${timeAgo(item.createdAt)}`
   );
+}
+
+function renderActivityFeed(selector, items) {
+  $(selector).innerHTML = items.length ? items.map(item => {
+    const displayName = item.displayName || 'Unnamed User';
+    const initial = (displayName[0] || 'U').toUpperCase();
+    const eventName = item.eventType.replaceAll('_', ' ');
+    const userShort = item.userId ? (item.userId.length > 16 ? item.userId.substring(0, 14) + '...' : item.userId) : 'system';
+
+    return `
+      <div class="event-item" style="padding: 10px 0;">
+        <div style="cursor: pointer; flex-shrink: 0;" onclick="window.openUserModal('${escapeHtml(item.userId)}')">
+          ${item.profilePhotoUrl ? 
+            `<img style="width:28px;height:28px;border-radius:8px;object-fit:cover;" src="${escapeHtml(item.profilePhotoUrl)}" alt="">` :
+            `<div style="width:28px;height:28px;border-radius:8px;background:#dbeafe;color:#2563eb;font-weight:800;font-size:12px;display:grid;place-items:center;">${escapeHtml(initial)}</div>`
+          }
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div style="font-size: 12px; font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <span style="cursor: pointer; color: #0f172a; text-decoration: underline; text-decoration-color: #cbd5e1;" onclick="window.openUserModal('${escapeHtml(item.userId)}')" title="View user details: ${escapeHtml(item.userId)}">
+                ${escapeHtml(displayName)}
+              </span>
+              <span style="font-size: 11px; font-weight: 600; color: #3b82f6; margin-left: 4px; background: #eff6ff; padding: 2px 6px; border-radius: 4px;">${escapeHtml(eventName)}</span>
+            </div>
+            <span style="font-size: 10.5px; color: #94a3b8; font-weight: 600; flex-shrink: 0;">${timeAgo(item.createdAt)}</span>
+          </div>
+          <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">
+            <span style="font-family: monospace; color: #94a3b8;" title="${escapeHtml(item.userId)}">${escapeHtml(userShort)}</span> · ${escapeHtml(item.source)}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') : '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;">No activity recorded for this selection.</div>';
 }
 
 function renderFeed(selector, items, title, detail) {
@@ -256,7 +287,6 @@ window.openUserModal = function (userId) {
   const body = $('#modal-body-content');
   const foot = $('#modal-foot-actions');
 
-  // Find all activity events for this user
   const userActivities = (state.data.activity || []).filter(a => a.userId === userId);
 
   body.innerHTML = `
@@ -298,7 +328,6 @@ window.openUserModal = function (userId) {
       </div>
     ` : ''}
 
-    <!-- PER-USER ACTIVITY TIMELINE SECTION -->
     <div style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <h5 style="margin:0;font-size:14px;font-weight:800;color:#0f172a;">⚡ Activity History Timeline (${userActivities.length})</h5>
@@ -318,7 +347,6 @@ window.openUserModal = function (userId) {
       </div>
     </div>
 
-    <!-- TEST REPORT DISPATCH -->
     <div style="background:#ecfdf5;border:1px solid #a7f3d0;padding:14px;border-radius:12px;">
       <div style="font-size:12px;font-weight:800;color:#047857;">✉️ Send Test AI Report Email</div>
       <div style="font-size:11px;color:#166534;margin-top:2px;margin-bottom:10px;">Dispatch an AI monthly report preview to test system email delivery.</div>
