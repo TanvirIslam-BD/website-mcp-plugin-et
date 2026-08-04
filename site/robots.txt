@@ -3,4 +3,9 @@ Allow: /
 Disallow: /api/
 Disallow: /authorize
 
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /authorize
+
 Sitemap: https://www.copilotai.live/sitemap.xml
