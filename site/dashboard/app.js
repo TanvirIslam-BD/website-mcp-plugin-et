@@ -1732,15 +1732,17 @@ async function submitEntry(form) {
   await postDashboard(payload, form);
 }
 
-function showSyncMask() {
+function showSyncMask(message = "Saving changes…") {
   let mask = document.getElementById("sync-mask");
   if (!mask) {
     mask = document.createElement("div");
     mask.id = "sync-mask";
     mask.className = "sync-mask";
-    mask.innerHTML = '<div class="sync-spinner"></div>';
+    mask.innerHTML = '<div class="sync-status-card" role="status" aria-live="polite"><div class="sync-spinner" aria-hidden="true"></div><div><strong data-sync-label></strong><small>Please wait a moment</small></div></div>';
     document.body.appendChild(mask);
   }
+  const label = mask.querySelector("[data-sync-label]");
+  if (label) label.textContent = message;
   mask.offsetHeight;
   mask.classList.add("active");
 }
@@ -1753,7 +1755,7 @@ function hideSyncMask() {
 }
 
 async function refreshDashboard() {
-  showSyncMask();
+  showSyncMask("Updating your dashboard…");
   try {
     const savedChats = [];
     document.querySelectorAll("[data-ai-messages]").forEach((list, index) => {
@@ -1787,6 +1789,7 @@ async function refreshDashboard() {
 async function postDashboard(payload, form) {
   const error = form?.querySelector("[data-error]");
   if (error) error.textContent = "";
+  showSyncMask("Saving changes…");
   try {
     const response = await fetch("/api/dashboard", {
       method: "POST",
@@ -1801,10 +1804,12 @@ async function postDashboard(payload, form) {
     await refreshDashboard();
   } catch (err) {
     if (err.code === "AUTH_REQUIRED") {
+      hideSyncMask();
       redirectToMcpizeAuth();
       return;
     }
     if (error) error.textContent = err.message;
+    hideSyncMask();
   }
 }
 
