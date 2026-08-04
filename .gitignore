@@ -6,3 +6,4 @@ node_modules
 # Public 10-second setup demonstrations served by the landing page.
 !site/assets/connect-chatgpt-demo.mp4
 !site/assets/connect-claude-demo.mp4
+!site/assets/money-copilot-demo.mp4
