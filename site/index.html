@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="Money Copilot AI" />
 <meta name="twitter:description" content="Your AI-powered expense tracker, budget planner, and financial assistant." />
 <meta name="twitter:image" content="https://www.copilotai.live/assets/dashboard/money-copilot-ai-promo-light.png" />
-<meta name="theme-color" id="themeColor" content="#050810" />
+<meta name="theme-color" id="themeColor" content="#ffffff" />
 <link rel="icon" type="image/png" sizes="256x256" href="assets/logo/money-copilot-app-logo.png?v=20260804" />
 <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/money-copilot-app-logo.png?v=20260804" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,8 +53,7 @@
   (()=>{
     let saved=null;
     try{saved=localStorage.getItem('money-copilot-theme');}catch{}
-    const preferred=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
-    document.documentElement.dataset.theme=saved||preferred;
+    document.documentElement.dataset.theme=saved||'light';
   })();
 </script>
 <style>
@@ -2329,7 +2328,7 @@
   document.querySelectorAll('[data-theme-toggle]').forEach(btn=>btn.addEventListener('click',()=>{
     applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
   }));
-  applyTheme(document.documentElement.dataset.theme||'dark',{persist:false});
+  applyTheme(document.documentElement.dataset.theme||'light',{persist:false});
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     let saved=null;
     try{saved=localStorage.getItem('money-copilot-theme');}catch{}
