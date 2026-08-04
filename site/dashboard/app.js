@@ -824,7 +824,7 @@ function renderMobileDashboardHeader(model) {
 function renderMobileCopilotComposer() {
   return `
     <section class="mobile-finance-composer" aria-label="Money Copilot quick actions">
-      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></button>
+      <button class="mobile-composer-bot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
       <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
       <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Money Copilot">${icon("send")}</button>
       <button class="mobile-composer-action" type="button" data-entry="expense" aria-label="Scan a receipt">${icon("camera")}</button>
@@ -877,7 +877,7 @@ function renderAiAssistantRail(model) {
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI Assistant</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span> Money Copilot AI Assistant</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -913,15 +913,15 @@ function renderEmptyAssistantRail() {
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
         <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI Assistant</span>
+          <span class="assistant-title"><span class="copilot-logo" aria-hidden="true"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span> Money Copilot AI Assistant</span>
           <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
         </div>
       </div>
       <div class="empty-copilot-body" data-ai-chat>
-        <img src="/assets/logo/money-copilot-app-logo.png" alt="Money Copilot">
+        <img src="/assets/logo/money-copilot-bot-mascot.png" alt="Money Copilot">
         <h2>Hi, I’m your Money Copilot</h2>
         <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
-        <div class="empty-copilot-greeting"><span><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-copilot-greeting"><span><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span>What would you like to do first?</div>
         <div class="empty-divider"><span>Suggested questions</span></div>
         <div class="empty-questions">
           <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
@@ -1012,7 +1012,7 @@ function renderDashboard(model) {
       </section>
     </section>
     ${renderAiAssistantRail(model)}
-    <button class="floating-ai" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></button>
+    <button class="floating-ai" data-open-ai-chat aria-label="Open Money Copilot"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
     ${renderMobileCopilotComposer()}
     ${renderMobileBottomNav()}
   `;
@@ -1204,7 +1204,7 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message ${role}" id="${msgId}">
       <div class="ai-message-header">
-        <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span> Money Copilot AI`}</div>
+        <div class="ai-message-label">${role === "user" ? "You" : `<span class="ai-bot-avatar"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span> Money Copilot AI`}</div>
         ${meta ? `<small class="ai-meta-tag" title="${esc(meta)}">${esc(meta)}</small>` : ""}
       </div>
       <div class="ai-message-body">${visualHtml}${role === "user" ? esc(content) : aiAnswerHtml(content)}</div>
@@ -1286,10 +1286,10 @@ function openEmptyAiChat(prefill = "") {
     </div>
     <div class="empty-mobile-copilot" data-ai-chat>
       <div class="empty-mobile-copilot-intro">
-        <img src="/assets/logo/money-copilot-app-logo.png" alt="Money Copilot">
+        <img src="/assets/logo/money-copilot-bot-mascot.png" alt="Money Copilot">
         <h2>Hi, I’m your Money Copilot</h2>
         <p>I can help you organize expenses, build budgets, and find smarter ways to save.</p>
-        <div class="empty-copilot-greeting"><span><img src="/assets/logo/money-copilot-app-logo.png" alt=""></span>What would you like to do first?</div>
+        <div class="empty-copilot-greeting"><span><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span>What would you like to do first?</div>
       </div>
       <div class="empty-divider"><span>Suggested questions</span></div>
       <div class="empty-questions">
