@@ -174,6 +174,7 @@ function icon(name) {
     bell: "<path d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9'/><path d='M10 21h4'/>",
     plus: "<path d='M12 5v14M5 12h14'/>",
     close: "<path d='M6 6l12 12M18 6 6 18'/>",
+    trash: "<path d='M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6'/>",
     card: "<rect x='3' y='5' width='18' height='14' rx='2'/><path d='M3 10h18'/>",
     lock: "<rect x='5' y='10' width='14' height='11' rx='2'/><path d='M8 10V7a4 4 0 0 1 8 0v3'/>",
     attachment: "<path d='m20.5 11.5-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 1 1-2.8-2.8l8.9-8.9'/>",
@@ -721,8 +722,9 @@ function renderTransactions(model) {
         <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button></td>
         <td><span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span></td>
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
+        <td style="text-align: center;"><button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button></td>
       </tr>`;
-  }).join("") || `<tr><td colspan="5"><div class="empty-state">No transactions recorded for this month.</div></td></tr>`;
+  }).join("") || `<tr><td colspan="6"><div class="empty-state">No transactions recorded for this month.</div></td></tr>`;
   return `
     <article class="panel transactions-panel" id="transactions">
       <div class="panel-head">
@@ -731,7 +733,7 @@ function renderTransactions(model) {
       </div>
       <div class="transactions-wrap">
         <table class="transactions">
-          <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Method</th><th class="amount">Amount</th></tr></thead>
+          <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Method</th><th class="amount">Amount</th><th style="width: 44px;"></th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -1767,7 +1769,13 @@ function openPanel(kind) {
         const cat = expense.category || "uncategorized";
         const [catTone, catBg] = toneFor(cat, index);
         const merchant = meta.merchant || expense.description || "Expense";
-        return `<div class="plain-row"><span><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button> - ${esc(meta.paymentMethod || "Expense")}</small></span><strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong></div>`;
+        return `<div class="plain-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <span style="flex: 1; min-width: 0;"><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button> - ${esc(meta.paymentMethod || "Expense")}</small></span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong>
+            <button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button>
+          </div>
+        </div>`;
       });
     };
 
@@ -2328,6 +2336,14 @@ function bindEvents() {
   }, { once: true });
 
   document.addEventListener("click", (event) => {
+    const deleteBtn = event.target.closest("[data-delete-expense-id]");
+    if (deleteBtn) {
+      const id = deleteBtn.dataset.deleteExpenseId;
+      if (window.confirm("Are you sure you want to remove this expense?")) {
+        postDashboard({ kind: "delete_expense", id }, deleteBtn);
+      }
+      return;
+    }
     const categoryBtn = event.target.closest(".interactive-category-btn");
     if (categoryBtn) {
       const id = categoryBtn.dataset.expenseId;

@@ -272,6 +272,24 @@ export default async function handler(req, res) {
         return res.status(201).json({ ok: true });
       }
 
+      if (kind === "delete_expense") {
+        const id = cleanText(body.id, 80);
+        if (!id) return res.status(400).json({ error: "Missing transaction ID." });
+        await db.execute({
+          sql: "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+          args: [id, userId],
+        });
+        const finance = await readFinance(db, userId);
+        if (Array.isArray(finance.expenses)) {
+          finance.expenses = finance.expenses.filter(exp => exp.id !== id);
+        }
+        if (finance.expenseMetadata && typeof finance.expenseMetadata === "object") {
+          delete finance.expenseMetadata[id];
+        }
+        await writeFinance(db, userId, finance);
+        return res.status(200).json({ ok: true });
+      }
+
       if (kind === "update_expense_category") {
         const id = cleanText(body.id, 80);
         const newCategory = cleanText(body.category, 60).toLowerCase();
