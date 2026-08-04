@@ -876,9 +876,12 @@ function renderAiAssistantRail(model) {
     <aside class="assistant-rail" id="finance-copilot-panel" aria-label="AI Finance Assistant">
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
-        <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo bot-mascot" aria-hidden="true"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span> Money Copilot AI Assistant</span>
-          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
+        <div class="assistant-heading" style="display: flex; align-items: center; gap: 10px;">
+          <span class="copilot-logo bot-mascot" aria-hidden="true" style="width: 44px; height: 44px; display: block; flex: 0 0 auto;"><img src="/assets/logo/money-copilot-bot-mascot.png" alt="" style="width: 100%; height: auto;"></span>
+          <div class="assistant-header-content" style="display: flex; flex-direction: column; gap: 3px;">
+            <span class="assistant-title" style="font-size: 15px; font-weight: 700; color: #070c16; line-height: 1.2; display: block;">Money Copilot AI Assistant</span>
+            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
+          </div>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
       </div>
@@ -912,9 +915,12 @@ function renderEmptyAssistantRail() {
     <aside class="assistant-rail empty-assistant-rail" id="finance-copilot-panel" aria-label="Money Copilot onboarding">
       <div class="assistant-resizer" data-ai-rail-resizer role="separator" aria-controls="finance-copilot-panel" aria-orientation="vertical" aria-label="Resize Money Copilot panel" aria-valuemin="280" aria-valuemax="560" aria-valuenow="300" tabindex="0" title="Drag to resize. Use arrow keys for precision."><span aria-hidden="true"></span></div>
       <div class="assistant-rail-header">
-        <div class="assistant-heading">
-          <span class="assistant-title"><span class="copilot-logo bot-mascot" aria-hidden="true"><img src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span> Money Copilot AI Assistant</span>
-          <span class="assistant-status-row"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online"><i></i>Online</span></span>
+        <div class="assistant-heading" style="display: flex; align-items: center; gap: 10px;">
+          <span class="copilot-logo bot-mascot" aria-hidden="true" style="width: 44px; height: 44px; display: block; flex: 0 0 auto;"><img src="/assets/logo/money-copilot-bot-mascot.png" alt="" style="width: 100%; height: auto;"></span>
+          <div class="assistant-header-content" style="display: flex; flex-direction: column; gap: 3px;">
+            <span class="assistant-title" style="font-size: 15px; font-weight: 700; color: #070c16; line-height: 1.2; display: block;">Money Copilot AI Assistant</span>
+            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
+          </div>
         </div>
       </div>
       <div class="empty-copilot-body" data-ai-chat>
