@@ -3299,3 +3299,54 @@ img[src$="money-copilot-app-logo.png"] {
 .assistant-integration-cta nav button img { width:18px;height:18px;flex:0 0 18px;object-fit:contain; }
 :root[data-theme="dark"] .assistant-integration-cta nav button { color:#e5f3ec;border-color:#234536;background:#081811; }
 :root[data-theme="dark"] .assistant-integration-cta nav button:hover { color:#74edab;border-color:#347151;background:#0d281b; }
+
+/* The first mobile navigation slot is a month/date selector, keeping the
+   reporting period one tap away without taking space from the quick actions. */
+.mobile-date-nav {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-date-nav .month-picker { width: 100%; }
+.mobile-date-nav .month-picker-trigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 3px;
+  border: 0;
+  border-radius: 10px;
+  color: #0a8054;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+.mobile-date-nav .month-picker-trigger svg { width: 16px; height: 16px; }
+.mobile-date-nav .month-picker-trigger:hover,
+.mobile-date-nav .month-picker.open .month-picker-trigger,
+.mobile-date-nav .month-picker-trigger:focus-visible {
+  color: #067344;
+  background: #edf9f2;
+  outline: 0;
+}
+.mobile-date-nav .month-picker-popover {
+  right: auto;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  width: min(250px, calc(100vw - 24px));
+  transform: translateX(-50%);
+}
+:root[data-theme="dark"] .mobile-date-nav .month-picker-trigger { color:#65e9aa; }
+:root[data-theme="dark"] .mobile-date-nav .month-picker-trigger:hover,
+:root[data-theme="dark"] .mobile-date-nav .month-picker.open .month-picker-trigger,
+:root[data-theme="dark"] .mobile-date-nav .month-picker-trigger:focus-visible {
+  color:#8af6c0;
+  background:#102a20;
+}

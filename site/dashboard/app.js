@@ -856,7 +856,7 @@ function renderMobileBottomNav() {
   const darkTheme = document.documentElement.dataset.theme === "dark";
   return `
     <nav class="mobile-bottom-nav" aria-label="Mobile dashboard navigation">
-      <button class="active" type="button" data-nav="dashboard">${icon("dashboard")}<span>Dashboard</span></button>
+      <div class="mobile-date-nav">${renderMonthPicker(selectedMonth)}</div>
       <button type="button" data-nav="transactions">${icon("transactions")}<span>Transactions</span></button>
       <button class="mobile-add-button" type="button" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
       <button type="button" data-nav="budget">${icon("budget")}<span>Budget</span></button>
