@@ -8,6 +8,7 @@
     { "source": "/owner/monitor", "destination": "/site/owner/monitor.html" },
     { "source": "/owner/(.*)", "destination": "/site/owner/$1" },
     { "source": "/authorize", "destination": "/api/dashboard-authorize" },
+    { "source": "/login", "destination": "/site/login.html" },
     { "source": "/privacy", "destination": "/site/privacy.html" },
     { "source": "/terms", "destination": "/site/terms.html" },
     { "source": "/support", "destination": "/site/support.html" },
