@@ -125,7 +125,7 @@ export default async function handler(req, res) {
                         <table cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
                           <tr>
                             <td style="padding-right: 8px; vertical-align: middle;">
-                              <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="30" height="30" alt="Money Copilot AI" style="display: block; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                              <img src="https://www.copilotai.live/assets/logo/money-copilot-app-logo.png" width="30" height="30" alt="Money Copilot AI" style="display: block; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
                             </td>
                             <td style="vertical-align: middle;">
                               <h1 style="margin: 0; font-size: 15px; font-weight: 800; color: #ffffff; line-height: 1.15; letter-spacing: -0.3px;">Money Copilot AI</h1>
@@ -139,7 +139,7 @@ export default async function handler(req, res) {
                       </td>
                       <!-- Right: Dashboard Graphic Image -->
                       <td style="vertical-align: top; text-align: right;" width="37%">
-                        <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/header-dashboard.svg" width="135" height="90" alt="Dashboard Graphic" class="header-graphic" style="display: block; border: 0; outline: none; margin: 0 0 0 auto;">
+                        <img src="https://www.copilotai.live/assets/email/header-dashboard.svg" width="135" height="90" alt="Dashboard Graphic" class="header-graphic" style="display: block; border: 0; outline: none; margin: 0 0 0 auto;">
                       </td>
                     </tr>
                   </table>
@@ -215,7 +215,7 @@ export default async function handler(req, res) {
                         </tr>
                         <tr>
                           <td width="52" style="vertical-align: middle;">
-                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/email/budget-gauge-20.svg" width="48" height="48" alt="20% Donut Gauge" style="display: block; border: 0;">
+                            <img src="https://www.copilotai.live/assets/email/budget-gauge-20.svg" width="48" height="48" alt="20% Donut Gauge" style="display: block; border: 0;">
                           </td>
                           <td style="vertical-align: middle; padding-left: 8px;">
                             <div style="font-size: 12.5px; font-weight: 800; color: #10b981; margin-bottom: 1px;">Excellent!</div>
@@ -372,7 +372,7 @@ export default async function handler(req, res) {
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 5px;">
                       <tr>
                         <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 5px 8px;">
-                          <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="text-decoration: none; display: block;">
+                          <a href="https://www.copilotai.live/dashboard" style="text-decoration: none; display: block;">
                             <table width="100%" cellpadding="0" cellspacing="0">
                               <tr>
                                 <td width="22" style="vertical-align: middle;">
@@ -391,7 +391,7 @@ export default async function handler(req, res) {
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 5px;">
                       <tr>
                         <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 5px 8px;">
-                          <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="text-decoration: none; display: block;">
+                          <a href="https://www.copilotai.live/dashboard" style="text-decoration: none; display: block;">
                             <table width="100%" cellpadding="0" cellspacing="0">
                               <tr>
                                 <td width="22" style="vertical-align: middle;">
@@ -410,7 +410,7 @@ export default async function handler(req, res) {
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 5px 8px;">
-                          <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="text-decoration: none; display: block;">
+                          <a href="https://www.copilotai.live/dashboard" style="text-decoration: none; display: block;">
                             <table width="100%" cellpadding="0" cellspacing="0">
                               <tr>
                                 <td width="22" style="vertical-align: middle;">
@@ -459,14 +459,14 @@ export default async function handler(req, res) {
                         <h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: -0.3px; line-height: 1.2;">Take control of your finances today!<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; font-size:0px;">&nbsp;${Date.now()}</span></h3>
                         <p style="margin: 0 0 10px 0; font-size: 11px; color: #cbd5e1; line-height: 1.4;">Open Money Copilot AI and make smarter decisions with AI.</p>
                         
-                        <a href="https://expense-chat-ai-sandy.vercel.app/dashboard" style="display: inline-block; padding: 9px 20px; background: #10b981; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 12px; border-radius: 99px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">Open Money Copilot AI →</a>
+                        <a href="https://www.copilotai.live/dashboard" style="display: inline-block; padding: 9px 20px; background: #10b981; color: #ffffff; text-decoration: none; font-weight: 800; font-size: 12px; border-radius: 99px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">Open Money Copilot AI →</a>
                         
                         <div style="margin-top: 10px; font-size: 10px; color: #94a3b8; vertical-align: middle;">
                           Works with &nbsp;
-                          <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/chatgpt.png" width="14" height="14" alt="ChatGPT" style="vertical-align: middle; display: inline-block; margin-right: 2px;">
+                          <img src="https://www.copilotai.live/assets/brands/chatgpt.png" width="14" height="14" alt="ChatGPT" style="vertical-align: middle; display: inline-block; margin-right: 2px;">
                           <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">ChatGPT</span>
                           &nbsp;&nbsp;&nbsp;
-                          <img src="https://expense-chat-ai-sandy.vercel.app/assets/brands/claude.png" width="14" height="14" alt="Claude" style="vertical-align: middle; display: inline-block; margin-right: 2px;">
+                          <img src="https://www.copilotai.live/assets/brands/claude.png" width="14" height="14" alt="Claude" style="vertical-align: middle; display: inline-block; margin-right: 2px;">
                           <span style="color: #ffffff; font-weight: 700; vertical-align: middle;">Claude</span>
                         </div>
                       </div>
@@ -514,7 +514,7 @@ export default async function handler(req, res) {
                       <table cellpadding="0" cellspacing="0" class="mobile-footer-table" style="margin: 0 auto;">
                         <tr>
                           <td width="30" style="padding-right: 6px; vertical-align: middle;">
-                            <img src="https://expense-chat-ai-sandy.vercel.app/assets/logo/money-copilot-app-logo.png" width="24" height="24" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto; border-radius: 6px; overflow: hidden;">
+                            <img src="https://www.copilotai.live/assets/logo/money-copilot-app-logo.png" width="24" height="24" alt="Money Copilot" style="display: block; border: 0; outline: none; margin: 0 auto; border-radius: 6px; overflow: hidden;">
                           </td>
                           <td style="vertical-align: middle; text-align: left;">
                             <div style="font-size: 11px; font-weight: 800; color: #0f172a; line-height: 1.2; white-space: nowrap;">Money Copilot AI</div>

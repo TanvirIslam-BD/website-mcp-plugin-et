@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const STATE_COOKIE = "expense_tracker_oauth";
-const DASHBOARD_ORIGIN = "https://expense-chat-ai-sandy.vercel.app";
+const DASHBOARD_ORIGIN = "https://www.copilotai.live";
 const MCP_AUTHORIZATION_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/oauth/authorize?server_id=15e6303c-b2e1-4aca-a40f-244ee4fba030";
 
 function encode(value) {

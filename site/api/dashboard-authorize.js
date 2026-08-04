@@ -3,7 +3,7 @@ import { cleanDisplayName, cleanProfilePhoto, readMcpizeProfile } from "./_mcpiz
 
 const STATE_COOKIE = "expense_tracker_oauth";
 const DASHBOARD_COOKIE = "expense_tracker_dashboard";
-const DASHBOARD_ORIGIN = "https://expense-chat-ai-sandy.vercel.app";
+const DASHBOARD_ORIGIN = "https://www.copilotai.live";
 const MCP_TOKEN_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/oauth/token";
 const MCP_SESSION_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/dashboard/session";
 
