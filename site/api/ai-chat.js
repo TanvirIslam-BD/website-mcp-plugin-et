@@ -17,6 +17,26 @@ const MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
 const rateLimits = new Map();
 const responseCache = new Map();
 const mcpCatalogCache = new Map();
+const CATEGORY_NAMES = {
+  food: "Food",
+  groceries: "Groceries",
+  shopping: "Shopping",
+  travel: "Travel",
+  transport: "Transport",
+  utilities: "Utilities",
+  bills: "Bills & Utilities",
+  "bills & utilities": "Bills & Utilities",
+  health: "Health",
+};
+const SUBCATEGORY_ALIASES = {
+  cloth: "Clothing",
+  clothes: "Clothing",
+  clothing: "Clothing",
+  apparel: "Clothing",
+  fashion: "Clothing",
+  "fast-food": "Fast food",
+  fastfood: "Fast food",
+};
 
 function verifyDashboardToken(token) {
   const secret = process.env.DASHBOARD_SESSION_SECRET;
@@ -104,7 +124,7 @@ function toolDefinitions() {
   return [
     { type: "function", function: { name: "get_latest_expense", description: "Retrieve the authenticated user's single most recent expense across all dates. Always use this for latest expense, last expense, or most recent transaction questions.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
     { type: "function", function: { name: "get_expenses", description: "Retrieve the authenticated user's expenses for a date range and optional category. If the user gives no date, use the dashboard month supplied in the system context.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" }, category: { type: "string" } }, additionalProperties: false } } },
-    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, save, or spent an expense (e.g., 'Add 500 bus rent expense', 'spent 50 on coffee').", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount e.g. 500" }, category: { type: "string", description: "Expense category e.g. Travel, Food, Transport, Rent" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount"], additionalProperties: false } } },
+    { type: "function", function: { name: "add_expense", description: "Record a new expense transaction for the user. Use whenever user asks to add, record, save, or spent an expense (e.g., 'Add 500 bus rent expense', 'spent 50 on coffee'). When the item type is known, also provide subcategory (for example Shopping + Clothing, Food + Fast food, or Transport + Ride share).", parameters: { type: "object", properties: { amount: { type: "number", description: "Expense amount e.g. 500" }, category: { type: "string", description: "Expense category e.g. Travel, Food, Transport, Rent" }, subcategory: { type: "string", description: "Specific item type under the main category, e.g. Clothing, Fast food, Fruit, Pharmacy" }, date: { type: "string", description: "YYYY-MM-DD" }, merchant: { type: "string" }, description: { type: "string" }, paymentMethod: { type: "string" }, currency: { type: "string" } }, required: ["amount"], additionalProperties: false } } },
     { type: "function", function: { name: "get_incomes", description: "Retrieve recorded income entries for a date range.", parameters: { type: "object", properties: { startDate: { type: "string", description: "YYYY-MM-DD" }, endDate: { type: "string", description: "YYYY-MM-DD" } }, additionalProperties: false } } },
     { type: "function", function: { name: "add_income", description: "Record a new income entry for the user. Use whenever user asks to add or record income.", parameters: { type: "object", properties: { amount: { type: "number", description: "Income amount" }, source: { type: "string", description: "Source of income e.g. Salary, Freelance" }, date: { type: "string", description: "YYYY-MM-DD" }, description: { type: "string" }, currency: { type: "string" } }, required: ["amount", "source"], additionalProperties: false } } },
     { type: "function", function: { name: "get_budget_status", description: "Retrieve the authenticated user's overall budget, spending, remaining amount, and category limits for the dashboard month.", parameters: { type: "object", properties: {}, additionalProperties: false } } },
@@ -267,9 +287,18 @@ async function addExpense(db, userId, input, dashboardMonth) {
     const text = `${description} ${input.merchant || ""}`.toLowerCase();
     if (/\b(bus|train|taxi|uber|rent|fare|flight|travel|ride|transport|rickshaw)\b/.test(text)) category = "Travel";
     else if (/\b(food|burger|pizza|coffee|lunch|dinner|cafe|restaurant|eat|snack)\b/.test(text)) category = "Food";
-    else if (/\b(shop|cloth|shirt|pants|grocer|buy|bought)\b/.test(text)) category = "Shopping";
+    else if (/\b(shop|cloth|shirt|pants|grocer|buy|bought|khimar)\b|খিমার|কাপড়|কাপড়/.test(text)) category = "Shopping";
     else if (/\b(bill|electricity|water|wifi|net|recharge|phone)\b/.test(text)) category = "Bills & Utilities";
     else category = "General";
+  }
+
+  category = CATEGORY_NAMES[category.toLowerCase()] || category;
+  const expenseText = `${description} ${input.merchant || ""} ${input.subcategory || ""}`.toLowerCase();
+  let subcategory = safeText(input.subcategory, 80);
+  const canonicalSubcategory = SUBCATEGORY_ALIASES[subcategory.toLowerCase()];
+  if (canonicalSubcategory) subcategory = canonicalSubcategory;
+  if (category === "Shopping" && (!subcategory || /\b(cloth|clothes|clothing|shirt|pants|khimar)\b|খিমার|কাপড়|কাপড়/i.test(expenseText))) {
+    if (/\b(cloth|clothes|clothing|shirt|pants|khimar)\b|খিমার|কাপড়|কাপড়/i.test(expenseText)) subcategory = "Clothing";
   }
 
   const merchant = safeText(input.merchant, 100);
@@ -291,13 +320,18 @@ async function addExpense(db, userId, input, dashboardMonth) {
   finance.expenses = finance.expenses || [];
   const entry = { id, date, category, description, merchant, paymentMethod, tags, amountMinor, currency, createdAt: Date.now() };
   finance.expenses.unshift(entry);
+  if (subcategory) {
+    finance.expenseMetadata = finance.expenseMetadata || {};
+    finance.expenseMetadata[id] = { ...(finance.expenseMetadata[id] || {}), subcategory };
+  }
 
   await db.execute({
     sql: "INSERT INTO finance_state (user_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
     args: [userId, JSON.stringify(finance), Date.now()],
   });
 
-  return { success: true, message: `Recorded expense of ${currency} ${amount.toFixed(2)} for ${category} on ${date}`, expense: { id, date, category, description, amount, currency } };
+  const categoryLabel = subcategory ? `${category} › ${subcategory}` : category;
+  return { success: true, message: `Recorded expense of ${currency} ${amount.toFixed(2)} for ${categoryLabel} on ${date}`, expense: { id, date, category, subcategory: subcategory || null, description, amount, currency } };
 }
 
 async function getIncomes(db, userId, input, dashboardMonth) {
@@ -477,7 +511,7 @@ async function runTool(db, userId, name, rawInput, dashboardMonth) {
 }
 
 function systemPrompt(currentDate, dashboardMonth, displayCurrency) {
-  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. The user's local display currency is ${displayCurrency}. For any tool that accepts a currency, use ${displayCurrency} unless the user explicitly specifies another currency. Currency is a display and entry-default preference only: never exclude transactions, income, categories, or reports because their stored currency differs. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data — never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. When the user asks to add income, call add_income. For general budget, overall remaining budget, or monthly financial questions, always call get_budget_status or generate_monthly_report (do not call get_expenses alone for general budget queries unless a specific single day or date range is explicitly requested). Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
+  return `You are Money Copilot, a concise personal-finance assistant. Current date: ${currentDate}. Dashboard month: ${dashboardMonth}. The user's local display currency is ${displayCurrency}. For any tool that accepts a currency, use ${displayCurrency} unless the user explicitly specifies another currency. Currency is a display and entry-default preference only: never exclude transactions, income, categories, or reports because their stored currency differs. Use a date explicitly stated by the user first; otherwise interpret "this month" and date-less monthly questions as ${dashboardMonth}. For "latest" or "last expense", call get_latest_expense. Never invent, assume, or estimate transactions. Always use the provided tools to fetch or modify financial data — never answer financial questions without calling the relevant tool first. When the user asks to add, record, save, or spent an expense, call add_expense immediately with the amount and infer the category from the description. Also set a subcategory whenever the item type is apparent: clothing, cloth, garments, shirts, pants, or খিমার map to Shopping > Clothing; fast food to Food > Fast food; and fruit to Food > Fruit. When the user asks to add income, call add_income. For general budget, overall remaining budget, or monthly financial questions, always call get_budget_status or generate_monthly_report (do not call get_expenses alone for general budget queries unless a specific single day or date range is explicitly requested). Ask a concise follow-up only when required fields are missing or ambiguous. Explain verified insights in plain language, separate facts from recommendations, give practical next actions, and format reports in compact Markdown. Do not give investment, tax, or legal advice. The server enforces the signed user's private data scope; never ask for or expose another user id.`;
 }
 
 function answerContent(message) {
