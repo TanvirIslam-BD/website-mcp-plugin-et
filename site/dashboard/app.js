@@ -1055,6 +1055,32 @@ function closeModal() {
   document.body.classList.remove("finance-copilot-open");
 }
 
+function openConfirmModal(title, message, onConfirm) {
+  closeModal();
+  const html = `
+    <div class="confirm-modal-body" style="padding-top: 8px;">
+      <p style="color: var(--text-muted); font-size: 15px; line-height: 1.5; margin-bottom: 24px;">${esc(message)}</p>
+      <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+        <button type="button" class="action-button secondary" data-confirm-cancel style="background: var(--line); border: 1px solid var(--line2); color: var(--text); padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.15s;">Cancel</button>
+        <button type="button" class="action-button primary" data-confirm-ok style="background: #ea580c; border: 1px solid #ea580c; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">Confirm</button>
+      </div>
+    </div>
+  `;
+  openModal(title, "", html);
+  
+  const modalEl = document.getElementById("dashboard-modal");
+  if (modalEl) {
+    const cancelBtn = modalEl.querySelector("[data-confirm-cancel]");
+    const confirmBtn = modalEl.querySelector("[data-confirm-ok]");
+    
+    cancelBtn?.addEventListener("click", closeModal);
+    confirmBtn?.addEventListener("click", () => {
+      closeModal();
+      onConfirm();
+    });
+  }
+}
+
 function fmtVisualAmount(value, currency) {
   const v = Math.abs(Number(value || 0));
   const sign = Number(value || 0) < 0 ? "-" : "";
@@ -2362,9 +2388,9 @@ function bindEvents() {
     const deleteBtn = event.target.closest("[data-delete-expense-id]");
     if (deleteBtn) {
       const id = deleteBtn.dataset.deleteExpenseId;
-      if (window.confirm("Are you sure you want to remove this expense?")) {
+      openConfirmModal("Delete Expense", "Are you sure you want to remove this expense? This action cannot be undone.", () => {
         postDashboard({ kind: "delete_expense", id }, deleteBtn);
-      }
+      });
       return;
     }
     const categoryBtn = event.target.closest(".interactive-category-btn");
@@ -2635,7 +2661,9 @@ function bindEvents() {
       const warning = all
         ? "Permanently delete ALL financial data for this account? This cannot be undone."
         : `Permanently delete expenses and income for ${monthLabel(window.dashboardModel.month)}? This cannot be undone.`;
-      if (window.confirm(warning)) postDashboard({ kind: all ? "clear_all" : "clear_month", month: window.dashboardModel.month }, clearData.closest(".modal"));
+      openConfirmModal("Clear Data", warning, () => {
+        postDashboard({ kind: all ? "clear_all" : "clear_month", month: window.dashboardModel.month }, clearData.closest(".modal"));
+      });
       return;
     }
     const panel = event.target.closest("[data-panel]");
