@@ -1050,13 +1050,20 @@
 
   /* ---------- connection video demonstrations ---------- */
   .setup-media{max-width:900px;margin:42px auto 0;position:relative;}
-  .setup-video{max-width:none;margin:0;overflow:hidden;border:1px solid var(--line2);border-radius:22px;background:var(--panel);box-shadow:0 24px 54px -34px rgba(4,24,38,.65);}
+  .setup-video{max-width:none;margin:0;overflow:hidden;border:1px solid var(--line2);border-radius:22px;background:var(--panel);box-shadow:none;}
   .setup-video-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 17px;border-bottom:1px solid var(--line);color:var(--ink2);font-size:13px;font-weight:600;}
   .setup-video-head span:first-child{display:inline-flex;align-items:center;gap:8px;color:var(--ink);}
   .setup-video-head i{width:9px;height:9px;border-radius:50%;background:#10a37f;box-shadow:0 0 0 4px rgba(16,163,127,.13);}
   .setup-video.claude .setup-video-head i{background:#d97757;box-shadow:0 0 0 4px rgba(217,119,87,.14);}
   .setup-video-head small{color:var(--muted);font-size:12px;font-weight:500;}
+  .setup-video-media{position:relative;background:#07101d;}
   .setup-video video{display:block;width:100%;aspect-ratio:16/9;background:#07101d;}
+  .setup-video-play{position:absolute;top:50%;left:50%;display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:10px 17px;border:1px solid rgba(255,255,255,.76);border-radius:999px;background:rgba(6,15,26,.68);color:#fff;box-shadow:0 8px 25px -12px rgba(0,0,0,.62);font:700 13px var(--sans);cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transform:translate(-50%,-50%);transition:opacity .18s ease,transform .18s ease,background .18s ease;}
+  .setup-video-play::before{content:"";width:28px;height:28px;border-radius:50%;background:var(--grad);box-shadow:0 4px 12px -5px var(--glow);}
+  .setup-video-play::after{content:"";position:absolute;left:29px;top:50%;margin-top:-5px;border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent;}
+  .setup-video-play:hover{background:rgba(6,15,26,.84);transform:translate(-50%,-50%) scale(1.04);}
+  .setup-video-play:focus-visible{outline:3px solid #fff;outline-offset:4px;}
+  .setup-video-media.is-playing .setup-video-play{opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.94);}
   .setup-video figcaption{padding:13px 17px;color:var(--muted);font-size:13px;line-height:1.5;}
   .setup-progress{display:flex;align-items:center;justify-content:center;gap:10px;margin:17px auto;padding:0 16px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
   .setup-progress i{width:54px;height:1px;background:linear-gradient(90deg,var(--violet2),rgba(59,130,246,.5));position:relative;}
@@ -1070,7 +1077,7 @@
   .setup-image-media{padding:14px;background:linear-gradient(135deg,rgba(20,184,166,.07),transparent 46%,rgba(59,130,246,.07));}
   .setup-image img{display:block;width:100%;height:auto;}
   .setup-image figcaption{padding:13px 17px;color:var(--muted);font-size:13px;line-height:1.5;text-align:center;}
-  @media(max-width:520px){.setup-media{margin-top:30px}.setup-video{border-radius:16px}.setup-video-head{padding:11px 13px;font-size:12px}.setup-video-head small{font-size:11px}.setup-progress{margin:13px auto;font-size:9px}.setup-progress i{width:36px}.setup-image{border-radius:16px}.setup-image-head{padding:11px 13px}.setup-image-head span:first-child{font-size:12px}.setup-image-head small{font-size:9px}.setup-image-media{padding:8px}.setup-video figcaption,.setup-image figcaption{padding:11px 13px;font-size:12px}}
+  @media(max-width:520px){.setup-media{margin-top:30px}.setup-video{border-radius:16px}.setup-video-head{padding:11px 13px;font-size:12px}.setup-video-head small{font-size:11px}.setup-video-play{min-height:46px;padding:8px 14px;font-size:12px}.setup-video-play::before{width:25px;height:25px}.setup-video-play::after{left:25px}.setup-progress{margin:13px auto;font-size:9px}.setup-progress i{width:36px}.setup-image{border-radius:16px}.setup-image-head{padding:11px 13px}.setup-image-head span:first-child{font-size:12px}.setup-image-head small{font-size:9px}.setup-image-media{padding:8px}.setup-video figcaption,.setup-image figcaption{padding:11px 13px;font-size:12px}}
 
   /* ---------- product demo modal ---------- */
   body.demo-modal-open{overflow:hidden;}
@@ -1888,10 +1895,13 @@
       <div class="setup-media">
       <figure class="setup-video reveal" aria-labelledby="chatgpt-demo-caption">
         <div class="setup-video-head"><span><i aria-hidden="true"></i>ChatGPT setup walkthrough</span><small>10 seconds · turn sound on</small></div>
-        <video controls playsinline preload="metadata" poster="assets/connect-chatgpt-demo.jpg" aria-label="Video walkthrough for connecting Money Copilot AI with ChatGPT">
-          <source src="assets/connect-chatgpt-demo.mp4" type="video/mp4">
-          Your browser does not support HTML video. You can download the ChatGPT setup video instead.
-        </video>
+        <div class="setup-video-media">
+          <video controls playsinline preload="metadata" poster="assets/connect-chatgpt-demo.jpg" aria-label="Video walkthrough for connecting Money Copilot AI with ChatGPT">
+            <source src="assets/connect-chatgpt-demo.mp4" type="video/mp4">
+            Your browser does not support HTML video. You can download the ChatGPT setup video instead.
+          </video>
+          <button class="setup-video-play" type="button" aria-label="Play ChatGPT setup walkthrough">Play walkthrough</button>
+        </div>
         <figcaption id="chatgpt-demo-caption">Watch the complete steps to connect Money Copilot AI in ChatGPT.</figcaption>
       </figure>
       <div class="setup-progress reveal" aria-label="Watch the video, then follow the visual setup guide"><span>01 Watch</span><i aria-hidden="true"></i><span>02 Follow</span></div>
@@ -1927,10 +1937,13 @@
       <div class="setup-media">
       <figure class="setup-video claude reveal" aria-labelledby="claude-demo-caption">
         <div class="setup-video-head"><span><i aria-hidden="true"></i>Claude setup walkthrough</span><small>10 seconds · turn sound on</small></div>
-        <video controls playsinline preload="metadata" poster="assets/connect-claude-demo.jpg" aria-label="Video walkthrough for connecting Money Copilot AI with Claude">
-          <source src="assets/connect-claude-demo.mp4" type="video/mp4">
-          Your browser does not support HTML video. You can download the Claude setup video instead.
-        </video>
+        <div class="setup-video-media">
+          <video controls playsinline preload="metadata" poster="assets/connect-claude-demo.jpg" aria-label="Video walkthrough for connecting Money Copilot AI with Claude">
+            <source src="assets/connect-claude-demo.mp4" type="video/mp4">
+            Your browser does not support HTML video. You can download the Claude setup video instead.
+          </video>
+          <button class="setup-video-play" type="button" aria-label="Play Claude setup walkthrough">Play walkthrough</button>
+        </div>
         <figcaption id="claude-demo-caption">Watch the complete steps to connect Money Copilot AI in Claude.</figcaption>
       </figure>
       <div class="setup-progress reveal" aria-label="Watch the video, then follow the visual setup guide"><span>01 Watch</span><i aria-hidden="true"></i><span>02 Follow</span></div>
@@ -2325,6 +2338,17 @@
   const mb=document.getElementById('menuBtn'), mm=document.getElementById('mobileMenu');
   if(mb){mb.addEventListener('click',()=>{const o=mm.classList.toggle('open');mb.classList.toggle('open',o);mb.setAttribute('aria-expanded',o);});
     mm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mm.classList.remove('open');mb.classList.remove('open');mb.setAttribute('aria-expanded','false');}));}
+
+  // Walkthrough thumbnails use a dedicated play overlay before playback begins.
+  document.querySelectorAll('.setup-video-media').forEach(media=>{
+    const video=media.querySelector('video');
+    const play=media.querySelector('.setup-video-play');
+    if(!video||!play) return;
+    play.addEventListener('click',()=>video.play().catch(()=>{}));
+    video.addEventListener('play',()=>media.classList.add('is-playing'));
+    video.addEventListener('pause',()=>{if(!video.ended) media.classList.remove('is-playing');});
+    video.addEventListener('ended',()=>media.classList.remove('is-playing'));
+  });
 
   // Product demo modal: starts playback only after an intentional user action.
   const demoModal=document.getElementById('demoModal');
