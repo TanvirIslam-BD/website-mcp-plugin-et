@@ -150,7 +150,7 @@ function csvCell(value) {
 }
 
 function csvDocument(rows) {
-  const headers = ["type", "date", "description", "category", "amount", "currency", "merchant", "payment_method", "tags"];
+  const headers = ["type", "date", "description", "category", "subcategory", "amount", "currency", "merchant", "payment_method", "tags"];
   return [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
 }
 
@@ -189,9 +189,9 @@ export default async function handler(req, res) {
       const incomes = (finance.incomes || []).filter((income) => all || inMonth(income, month));
       const expenseRows = expenseResult.rows.map((row) => {
         const meta = finance.expenseMetadata?.[row.id] || {};
-        return ["expense", row.date, row.description, row.category, (Number(row.amount_minor || 0) / 100).toFixed(2), row.currency, meta.merchant || "", meta.paymentMethod || "", (meta.tags || []).join("|")];
+        return ["expense", row.date, row.description, row.category, meta.subcategory || "", (Number(row.amount_minor || 0) / 100).toFixed(2), row.currency, meta.merchant || "", meta.paymentMethod || "", (meta.tags || []).join("|")];
       });
-      const incomeRows = incomes.map((income) => ["income", income.date, income.notes || income.source || "Income", income.source || "income", (Number(income.amountMinor || 0) / 100).toFixed(2), income.currency, "", "", ""]);
+      const incomeRows = incomes.map((income) => ["income", income.date, income.notes || income.source || "Income", income.source || "income", "", (Number(income.amountMinor || 0) / 100).toFixed(2), income.currency, "", "", ""]);
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", `attachment; filename="expense-tracker-${all ? "all-data" : month}.csv"`);
       await recordActivity(db, { userId, source: "dashboard", eventType: "data_exported", detail: { scope: all ? "all" : "month", month } });
@@ -293,6 +293,7 @@ export default async function handler(req, res) {
       if (kind === "update_expense_category") {
         const id = cleanText(body.id, 80);
         const newCategory = cleanText(body.category, 60).toLowerCase();
+        const subcategory = cleanText(body.subcategory, 80);
         if (!id || !newCategory) {
           return res.status(400).json({ error: "Expense ID and category are required." });
         }
@@ -301,18 +302,20 @@ export default async function handler(req, res) {
           args: [newCategory, id, userId],
         });
         const finance = await readFinance(db, userId);
-        let updatedJson = false;
         if (Array.isArray(finance.expenses)) {
           for (const exp of finance.expenses) {
             if (exp.id === id) {
               exp.category = newCategory;
-              updatedJson = true;
             }
           }
         }
-        if (updatedJson) {
-          await writeFinance(db, userId, finance);
-        }
+        finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
+        const metadata = { ...(finance.expenseMetadata[id] || {}) };
+        if (subcategory) metadata.subcategory = subcategory;
+        else delete metadata.subcategory;
+        if (Object.keys(metadata).length) finance.expenseMetadata[id] = metadata;
+        else delete finance.expenseMetadata[id];
+        await writeFinance(db, userId, finance);
         return res.status(200).json({ ok: true });
       }
 

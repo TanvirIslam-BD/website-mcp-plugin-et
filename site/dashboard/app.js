@@ -147,7 +147,14 @@ const tagColors = {
 };
 
 const SUB_CATEGORIES = {
-  food: ["Baby food", "Fast food", "Fruit", "Wet market", "Other"],
+  food: ["Baby food", "Fast food", "Fruit", "Restaurant", "Snacks", "Beverages", "Wet market", "Other"],
+  groceries: ["Produce", "Dairy & eggs", "Meat & seafood", "Pantry", "Household supplies", "Other"],
+  shopping: ["Clothing", "Electronics", "Home & furniture", "Personal care", "Other"],
+  travel: ["Flights", "Hotels", "Tours", "Visa & insurance", "Other"],
+  transport: ["Ride share", "Public transit", "Fuel", "Parking", "Vehicle maintenance", "Other"],
+  utilities: ["Electricity", "Gas", "Water", "Internet", "Mobile", "Other"],
+  bills: ["Rent", "Insurance", "Subscriptions", "Loan payment", "Other"],
+  health: ["Pharmacy", "Doctor", "Dental", "Fitness", "Insurance", "Other"],
 };
 
 const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -723,7 +730,7 @@ function renderTransactions(model) {
       ? ` <span class="tag subcategory-tag" style="background: var(--line); border: 1px solid var(--line2); color: var(--text-muted); font-size: 9px; min-height: 18px; padding: 0 6px; border-radius: 4px; display: inline-flex; align-items: center; vertical-align: middle;">${esc(metadata.subcategory)}</span>`
       : "";
     return `
-      <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${payment}`.toLowerCase())}">
+      <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${metadata.subcategory || ""} ${payment}`.toLowerCase())}">
         <td>${esc(expense.date)}</td>
         <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
         <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
@@ -1500,6 +1507,10 @@ function openEditCategoryModal(expenseId, currentCategory) {
         <label>New Category Name</label>
         <input name="manual_category" placeholder="e.g. entertainment, education" style="width: 100%;">
       </div>
+      <div class="field" id="edit-subcategory-field" style="margin-top: 12px;">
+        <label>Sub-category</label>
+        <div id="edit-subcategory-container"></div>
+      </div>
       <p class="form-error" data-error></p>
       <div class="modal-actions" style="margin-top: 20px;">
         <button type="button" class="action-button" data-close>Cancel</button>
@@ -1513,6 +1524,27 @@ function openEditCategoryModal(expenseId, currentCategory) {
     const selectEl = modalEl.querySelector('select[name="category_select"]');
     const manualField = modalEl.querySelector('#edit-category-manual-field');
     const manualInput = modalEl.querySelector('input[name="manual_category"]');
+    const subcategoryField = modalEl.querySelector('#edit-subcategory-field');
+    const subcategoryContainer = modalEl.querySelector('#edit-subcategory-container');
+    const renderSubcategoryField = (category, selected = "") => {
+      const choices = SUB_CATEGORIES[String(category || "").toLowerCase().trim()];
+      if (!subcategoryField || !subcategoryContainer) return;
+      if (category === "custom_new") {
+        subcategoryField.style.display = "block";
+        subcategoryContainer.innerHTML = `<input name="subcategory" value="${esc(selected)}" placeholder="Optional sub-category" style="width: 100%;">`;
+        return;
+      }
+      subcategoryField.style.display = "block";
+      const options = choices && selected && !choices.includes(selected) ? [selected, ...choices] : choices;
+      subcategoryContainer.innerHTML = options
+        ? `<select name="subcategory" style="width: 100%; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid #dce9e2; background: #fff; font-family: inherit; font-size: 13px; color: #102131; box-sizing: border-box; outline: none;">
+            <option value="">None / General</option>
+            ${options.map(choice => `<option value="${esc(choice)}" ${choice === selected ? "selected" : ""}>${esc(choice)}</option>`).join("")}
+          </select>`
+        : `<input name="subcategory" value="${esc(selected)}" placeholder="e.g. Baby food, Fruit (optional)" style="width: 100%;">`;
+    };
+
+    renderSubcategoryField(currentCategory, meta.subcategory || "");
     
     selectEl?.addEventListener("change", () => {
       if (selectEl.value === "custom_new") {
@@ -1524,6 +1556,7 @@ function openEditCategoryModal(expenseId, currentCategory) {
         manualInput.required = false;
         manualInput.value = "";
       }
+      renderSubcategoryField(selectEl.value);
     });
   }
 }
@@ -1846,20 +1879,23 @@ function openPanel(kind) {
   if (kind === "transactions") {
     const expenses = model.expenses || [];
     const categories = Array.from(new Set(expenses.map(e => e.category).filter(Boolean))).sort();
+    const subcategories = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.subcategory).filter(Boolean))).sort();
     const methods = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.paymentMethod).filter(Boolean))).sort();
 
-    const renderList = (filterText = "", selCategory = "", selMethod = "") => {
+    const renderList = (filterText = "", selCategory = "", selSubcategory = "", selMethod = "") => {
       const query = filterText.toLowerCase().trim();
       const filtered = expenses.filter(e => {
         const meta = model.expenseMetadata?.[e.id] || {};
         const merchant = (meta.merchant || e.description || "").toLowerCase();
         const cat = (e.category || "").toLowerCase();
+        const subcategory = (meta.subcategory || "").toLowerCase();
         const desc = (e.description || "").toLowerCase();
         const pMethod = (meta.paymentMethod || "").toLowerCase();
-        const matchesQuery = !query || merchant.includes(query) || cat.includes(query) || desc.includes(query) || pMethod.includes(query);
+        const matchesQuery = !query || merchant.includes(query) || cat.includes(query) || subcategory.includes(query) || desc.includes(query) || pMethod.includes(query);
         const matchesCategory = !selCategory || cat === selCategory.toLowerCase();
+        const matchesSubcategory = !selSubcategory || subcategory === selSubcategory.toLowerCase();
         const matchesMethod = !selMethod || pMethod === selMethod.toLowerCase();
-        return matchesQuery && matchesCategory && matchesMethod;
+        return matchesQuery && matchesCategory && matchesSubcategory && matchesMethod;
       });
 
       return panelRows(filtered, (expense, index) => {
@@ -1883,11 +1919,16 @@ function openPanel(kind) {
 
     const filterControlsHtml = `
       <div class="tx-modal-filter-bar">
-        <label class="tx-modal-search">${icon("search")}<input type="search" placeholder="Filter by merchant, category..." data-tx-filter-search></label>
+        <label class="tx-modal-search">${icon("search")}<input type="search" placeholder="Filter by merchant, category, sub-category..." data-tx-filter-search></label>
         <select class="tx-modal-select" data-tx-filter-category>
           <option value="">All categories</option>
           ${categories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}
         </select>
+        ${subcategories.length ? `
+        <select class="tx-modal-select" data-tx-filter-subcategory>
+          <option value="">All sub-categories</option>
+          ${subcategories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}
+        </select>` : ""}
         ${methods.length ? `
         <select class="tx-modal-select" data-tx-filter-method>
           <option value="">All methods</option>
@@ -1905,17 +1946,19 @@ function openPanel(kind) {
     if (modalEl) {
       const searchInput = modalEl.querySelector("[data-tx-filter-search]");
       const catSelect = modalEl.querySelector("[data-tx-filter-category]");
+      const subcategorySelect = modalEl.querySelector("[data-tx-filter-subcategory]");
       const methodSelect = modalEl.querySelector("[data-tx-filter-method]");
       const resultsContainer = modalEl.querySelector("[data-tx-results]");
 
       const update = () => {
         if (resultsContainer) {
-          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", methodSelect?.value || "");
+          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", subcategorySelect?.value || "", methodSelect?.value || "");
         }
       };
 
       searchInput?.addEventListener("input", update);
       catSelect?.addEventListener("change", update);
+      subcategorySelect?.addEventListener("change", update);
       methodSelect?.addEventListener("change", update);
     }
     return;
@@ -2211,7 +2254,12 @@ function submitPanelForm(form) {
       if (errorEl) errorEl.textContent = "Please select or enter a category.";
       return;
     }
-    return postDashboard({ kind: "update_expense_category", id: expenseId, category: finalCategory }, form);
+    return postDashboard({
+      kind: "update_expense_category",
+      id: expenseId,
+      category: finalCategory,
+      subcategory: String(data.get("subcategory") || "").trim(),
+    }, form);
   }
   if (form.dataset.form === "budget") {
     return postDashboard({ kind: "budget", amount: data.get("amount"), currency: String(data.get("currency") || "").toUpperCase() }, form);
