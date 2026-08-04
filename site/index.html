@@ -416,16 +416,16 @@
   .minibars i{width:7px;border-radius:2px 2px 0 0;background:linear-gradient(180deg,#a78bfa,#3b82f6);}
   .minibars i:nth-child(n+8){background:linear-gradient(180deg,#34d399,#14b8a6);}
 
-  /* ---------- how it works: 4-step ChatGPT install walkthrough ---------- */
-  #how{text-align:center;}
+  /* ---------- how it works: ChatGPT and Claude install walkthroughs ---------- */
+  #how, #how-claude{text-align:center;}
   .how-pill{display:inline-flex;align-items:center;gap:9px;padding:9px 20px;border-radius:999px;
     border:1px solid var(--line2);background:var(--panel);font-size:13px;font-weight:700;
     letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);}
   .how-pill svg{width:15px;height:15px;fill:#fbbf24;}
   .how-pill em{font-style:normal;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  #how h2{margin-top:22px;color:#fff;font-size:clamp(30px,3.6vw,50px);}
-  #how h2 .g{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  #how .sub{color:var(--ink2);font-size:17.5px;margin:16px auto 0;max-width:760px;}
+  #how h2, #how-claude h2{margin-top:22px;color:#fff;font-size:clamp(30px,3.6vw,50px);}
+  #how h2 .g, #how-claude h2 .g{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  #how .sub, #how-claude .sub{color:var(--ink2);font-size:17.5px;margin:16px auto 0;max-width:760px;}
 
   .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:34px;margin-top:52px;}
   .stepcol{position:relative;}
@@ -1256,6 +1256,7 @@
   html[data-theme="light"] .mobile-menu{background:rgba(255,255,255,.97);}
   html[data-theme="light"] .hero h1,
   html[data-theme="light"] #how h2,
+  html[data-theme="light"] #how-claude h2,
   html[data-theme="light"] .feat-top h2,
   html[data-theme="light"] #showcase h2,
   html[data-theme="light"] .finalcta h2{color:var(--ink);}
@@ -1279,7 +1280,8 @@
   html[data-theme="light"] .price,
   html[data-theme="light"] .q,
   html[data-theme="light"] .finalcta{box-shadow:0 18px 45px -34px rgba(25,62,110,.28);}
-  html[data-theme="light"] #how{background:linear-gradient(180deg,#fbfdff 0%,#fff 18%,#fff 82%,#fbfdff 100%);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  html[data-theme="light"] #how,
+  html[data-theme="light"] #how-claude{background:linear-gradient(180deg,#fbfdff 0%,#fff 18%,#fff 82%,#fbfdff 100%);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   html[data-theme="light"] #features,
   html[data-theme="light"] #showcase{background:#fff;}
   html[data-theme="light"] .trust .panel{background:rgba(255,255,255,.86);}
@@ -1664,7 +1666,7 @@
   <div class="wrap">
     
     <!-- ChatGPT Connector -->
-    <div style="margin-bottom: 96px;">
+    <div>
       <span class="how-pill reveal" style="--c:#f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color:#f59e0b; display: inline-flex; align-items: center; padding: 6px 16px; border-radius: 99px; font-weight: 600; font-size: 13px;"><svg viewBox="0 0 24 24" style="fill:#f59e0b; stroke:none; width:13px; height:13px; margin-right:6px;"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>Setup in under <em>1 minute</em></span>
       <h2 class="reveal">Connect Money Copilot AI <span class="g">to ChatGPT</span></h2>
       <p class="sub reveal">Chat about your money the smart way. Keep track of your spending, analyze budgets, and plan ahead directly inside ChatGPT.</p>
@@ -1684,8 +1686,15 @@
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- HOW CLAUDE WORKS -->
+<section class="sec" id="how-claude">
+  <div class="wrap">
+
     <!-- Claude Connector -->
-    <div style="margin-top: 96px; margin-bottom: 96px;">
+    <div>
       <span class="how-pill reveal" style="--c:#ea580c; background: rgba(234,88,12,0.1); border: 1px solid rgba(234,88,12,0.3); color:#ea580c; display: inline-flex; align-items: center; padding: 6px 16px; border-radius: 99px; font-weight: 600; font-size: 13px;"><svg viewBox="0 0 24 24" style="fill:#ea580c; stroke:none; width:13px; height:13px; margin-right:6px;"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>Setup in less than <em>1 minute</em></span>
       <h2 class="reveal">Connect Money Copilot AI <span class="g" style="background: linear-gradient(90deg,#ea580c 0%,#f97316 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">to Claude</span></h2>
       <p class="sub reveal">Your AI Money Assistant in Claude. Ask about your balances, check your spending, and run financial summaries inside Anthropic Claude.</p>
@@ -1723,6 +1732,7 @@
         <div><b>Works Everywhere</b><span>Use in ChatGPT on iOS, Android &amp; Web.</span></div>
       </div>
     </div>
+
   </div>
 </section>
 
