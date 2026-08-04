@@ -331,13 +331,14 @@ export default async function handler(req, res) {
 
         const merchant = cleanText(body.merchant, 80);
         const paymentMethod = cleanText(body.paymentMethod, 40);
+        const subcategory = cleanText(body.subcategory, 80);
         const tags = Array.isArray(body.tags)
           ? body.tags.map((tag) => cleanText(tag, 30)).filter(Boolean).slice(0, 8)
           : cleanText(body.tags, 120).split(",").map((tag) => cleanText(tag, 30)).filter(Boolean).slice(0, 8);
-        if (merchant || paymentMethod || tags.length) {
+        if (merchant || paymentMethod || tags.length || subcategory) {
           const finance = await readFinance(db, userId);
           finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
-          finance.expenseMetadata[expenseId] = { merchant, paymentMethod, tags };
+          finance.expenseMetadata[expenseId] = { merchant, paymentMethod, tags, subcategory };
           await writeFinance(db, userId, finance);
         }
       } else {

@@ -146,6 +146,10 @@ const tagColors = {
   income: ["#019a56", "#e7f6ee"],
 };
 
+const SUB_CATEGORIES = {
+  food: ["Baby food", "Fast food", "Fruit", "Wet market", "Other"],
+};
+
 const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({
   "&": "&amp;",
   "<": "&lt;",
@@ -715,11 +719,14 @@ function renderTransactions(model) {
     const date = String(expense.date || "");
     const dateLabel = index === 0 ? "Today" : index === 1 ? "Yesterday" : date ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)) : "Recent";
     const timeLabel = metadata.time || ["09:30 AM", "07:20 PM", "08:15 PM"][index] || "";
+    const subCatHtml = metadata.subcategory 
+      ? ` <span class="tag subcategory-tag" style="background: var(--line); border: 1px solid var(--line2); color: var(--text-muted); font-size: 9px; min-height: 18px; padding: 0 6px; border-radius: 4px; display: inline-flex; align-items: center; vertical-align: middle;">${esc(metadata.subcategory)}</span>`
+      : "";
     return `
       <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${payment}`.toLowerCase())}">
         <td>${esc(expense.date)}</td>
         <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
-        <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button></td>
+        <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
         <td><span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span></td>
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
         <td style="text-align: center;"><button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button></td>
@@ -1547,6 +1554,12 @@ function openEntry(kind) {
         <div class="field"><label>Amount</label><input name="amount" inputmode="decimal" placeholder="0.00" required></div>
         <div class="field"><label>Date</label><input name="date" type="date" value="${today}" required></div>
         ${categoryFieldHtml}
+        ${isIncome ? "" : `
+          <div class="field" id="subcategory-field-wrap" style="display: none;">
+            <label>Sub-category</label>
+            <div id="subcategory-select-container"></div>
+          </div>
+        `}
         <div class="field"><label>Currency</label><input name="currency" value="${esc(model.currency)}" maxlength="3" required></div>
         ${isIncome ? "" : `<div class="field"><label>Merchant</label><input name="merchant" placeholder="Vendor or shop"></div><div class="field"><label>Payment Method</label><select name="paymentMethod"><option>bKash</option><option>Nagad</option><option>Visa</option><option>Cash</option><option>Bank Transfer</option></select></div>`}
         <div class="field full"><label>${isIncome ? "Notes" : "Description"}</label><input name="description" placeholder="Optional details"></div>
@@ -1566,6 +1579,32 @@ function openEntry(kind) {
     const hiddenInput = modalEl.querySelector('input[name="category"]');
     const manualWrap = modalEl.querySelector('#new-category-input-wrap');
     const manualInput = modalEl.querySelector('input[name="manual_category"]');
+    const subWrap = modalEl.querySelector('#subcategory-field-wrap');
+    const subContainer = modalEl.querySelector('#subcategory-select-container');
+    
+    const updateSubcategoryField = (categoryVal) => {
+      if (!subWrap || !subContainer) return;
+      const catClean = String(categoryVal || "").toLowerCase().trim();
+      const subCats = SUB_CATEGORIES[catClean];
+      
+      if (subCats) {
+        subWrap.style.display = "block";
+        subContainer.innerHTML = `
+          <select name="subcategory" style="width: 100%; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid #dce9e2; background: #fff; font-family: inherit; font-size: 13px; color: #102131; box-sizing: border-box; outline: none;">
+            <option value="" selected>None / General</option>
+            ${subCats.map(sub => `<option value="${esc(sub)}">${esc(sub)}</option>`).join("")}
+          </select>
+        `;
+      } else if (catClean && catClean !== "custom_new") {
+        subWrap.style.display = "block";
+        subContainer.innerHTML = `
+          <input name="subcategory" placeholder="e.g. Baby food, Fruit (optional)" style="width: 100%;">
+        `;
+      } else {
+        subWrap.style.display = "none";
+        subContainer.innerHTML = "";
+      }
+    };
     
     selectEl?.addEventListener("change", () => {
       if (selectEl.value === "custom_new") {
@@ -1573,16 +1612,20 @@ function openEntry(kind) {
         manualInput.required = true;
         hiddenInput.value = "";
         manualInput.focus();
+        updateSubcategoryField("");
       } else {
         manualWrap.style.display = "none";
         manualInput.required = false;
         manualInput.value = "";
         hiddenInput.value = selectEl.value;
+        updateSubcategoryField(selectEl.value);
       }
     });
     
     manualInput?.addEventListener("input", () => {
-      hiddenInput.value = manualInput.value.trim();
+      const cleanVal = manualInput.value.trim();
+      hiddenInput.value = cleanVal;
+      updateSubcategoryField(cleanVal);
     });
   }
 }
@@ -1601,6 +1644,7 @@ async function submitEntry(form) {
     merchant: data.get("merchant"),
     paymentMethod: data.get("paymentMethod"),
     tags: data.get("tags"),
+    subcategory: data.get("subcategory"),
   };
   await postDashboard(payload, form);
 }
@@ -1824,8 +1868,11 @@ function openPanel(kind) {
         const cat = expense.category || "uncategorized";
         const [catTone, catBg] = toneFor(cat, index);
         const merchant = meta.merchant || expense.description || "Expense";
+        const subCatHtml = meta.subcategory 
+          ? ` <span class="tag subcategory-tag" style="background: var(--line); border: 1px solid var(--line2); color: var(--text-muted); font-size: 9px; min-height: 18px; padding: 0 6px; border-radius: 4px; display: inline-flex; align-items: center; vertical-align: middle;">${esc(meta.subcategory)}</span>`
+          : "";
         return `<div class="plain-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-          <span style="flex: 1; min-width: 0;"><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button> - ${esc(meta.paymentMethod || "Expense")}</small></span>
+          <span style="flex: 1; min-width: 0;"><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button>${subCatHtml} - ${esc(meta.paymentMethod || "Expense")}</small></span>
           <div style="display: flex; align-items: center; gap: 8px;">
             <strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong>
             <button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button>
