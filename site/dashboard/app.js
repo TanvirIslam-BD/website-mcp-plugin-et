@@ -2195,7 +2195,7 @@ function openPanel(kind) {
 
     openModal("Dashboard Settings", "Manage workspace preferences, notifications, AI settings, and privacy.", `
       <form data-form="settings" class="settings-form">
-        
+        <section class="settings-hero" aria-label="Settings overview"><span>${icon("sparkles")} Personal workspace</span><div><b>Everything is saved privately.</b><small>Preferences apply to your dashboard, AI assistant, and notifications.</small></div></section>
         <!-- Section 1: Display & Preferences -->
         <div class="settings-section">
           <h4 class="settings-section-title">${icon("sparkles")} Display & Preferences</h4>
@@ -2347,7 +2347,7 @@ function openPanel(kind) {
 
         <p class="form-error" data-error></p>
         
-        <div class="modal-actions" style="margin-top: 10px;">
+        <div class="modal-actions settings-save-bar">
           <button type="submit" class="action-button primary" style="width:100%;">${icon("sparkles")} Save Preferences</button>
         </div>
       </form>

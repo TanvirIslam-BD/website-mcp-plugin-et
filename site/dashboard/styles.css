@@ -8881,34 +8881,80 @@ textarea:focus-visible {
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   margin-top: 6px;
+}
+
+.settings-hero {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 16px;
+  border: 1px solid #cdeee3;
+  border-radius: 13px;
+  background: linear-gradient(105deg, #effbf7, #f0f8ff);
+}
+
+.settings-hero > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  color: #079b72;
+  background: #d9f7eb;
+}
+
+.settings-hero svg {
+  width: 17px;
+  height: 17px;
+}
+
+.settings-hero b,
+.settings-hero small {
+  display: block;
+}
+
+.settings-hero b {
+  color: #123047;
+  font-size: 13px;
+}
+
+.settings-hero small {
+  margin-top: 2px;
+  color: #5c7284;
+  font-size: 11px;
 }
 
 .settings-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  padding: 17px;
+  background: linear-gradient(145deg, #fbfefd, #f6faff);
+  border: 1px solid #dbe8ef;
+  border-radius: 14px;
 }
 
 .settings-section-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0 0 4px;
+  gap: 9px;
+  margin: 0 0 6px;
   font-size: 13px;
   font-weight: 700;
   color: #0f172a;
 }
 
 .settings-section-title svg {
+  box-sizing: content-box;
   width: 16px;
   height: 16px;
-  color: #2563eb;
+  padding: 6px;
+  border-radius: 9px;
+  color: #079b72;
+  background: #e4faf1;
 }
 
 .settings-row {
@@ -8916,8 +8962,9 @@ textarea:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-top: 10px;
-  border-top: 1px solid #e2e8f0;
+  min-height: 58px;
+  padding-top: 12px;
+  border-top: 1px solid #dce8ed;
 }
 
 .settings-row:first-of-type {
@@ -8947,8 +8994,8 @@ textarea:focus-visible {
 .settings-select {
   height: 38px;
   padding: 0 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border: 1px solid #cbdfe2;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
   color: #0f172a;
@@ -8959,8 +9006,8 @@ textarea:focus-visible {
 }
 
 .settings-select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+  border-color: #10ad83;
+  box-shadow: 0 0 0 3px rgba(16, 173, 131, .14);
 }
 
 .settings-pill-group {
@@ -8971,7 +9018,7 @@ textarea:focus-visible {
 .settings-pill {
   height: 36px;
   padding: 0 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #cbdfe2;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
@@ -8982,10 +9029,10 @@ textarea:focus-visible {
 }
 
 .settings-pill.active {
-  background: #2563eb;
+  background: linear-gradient(100deg, #0db985, #168cf0);
   color: #ffffff;
-  border-color: #2563eb;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, .25);
+  border-color: transparent;
+  box-shadow: 0 6px 14px rgba(16, 157, 133, .22);
 }
 
 /* Custom Toggle Switch */
@@ -9025,7 +9072,7 @@ textarea:focus-visible {
 }
 
 .settings-toggle input:checked + .toggle-slider {
-  background-color: #2563eb;
+  background: linear-gradient(100deg, #10b981, #168cf0);
 }
 
 .settings-toggle input:checked + .toggle-slider:before {
@@ -9127,7 +9174,11 @@ textarea:focus-visible {
 .settings-info-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
+  padding: 4px 13px;
+  border: 1px solid #dbe9ed;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .7);
 }
 
 .info-row {
@@ -9135,8 +9186,8 @@ textarea:focus-visible {
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  padding: 6px 0;
-  border-bottom: 1px dashed #e2e8f0;
+  padding: 10px 0;
+  border-bottom: 1px dashed #d9e6eb;
 }
 
 .info-row:last-child {
@@ -9154,9 +9205,28 @@ textarea:focus-visible {
 }
 
 /* Dark mode overrides for Settings Modal */
+:root[data-theme="dark"] .settings-hero {
+  border-color: #1b4c52;
+  background: linear-gradient(105deg, #0d2a2e, #10263d);
+}
+
+:root[data-theme="dark"] .settings-hero > span,
+:root[data-theme="dark"] .settings-section-title svg {
+  color: #66e3c1;
+  background: #123c39;
+}
+
+:root[data-theme="dark"] .settings-hero b {
+  color: #f0f6ff;
+}
+
+:root[data-theme="dark"] .settings-hero small {
+  color: #a8bfd8;
+}
+
 :root[data-theme="dark"] .settings-section {
-  background: #0f172a;
-  border-color: #334155;
+  background: linear-gradient(145deg, #0c192a, #101d31);
+  border-color: #233c51;
 }
 
 :root[data-theme="dark"] .settings-section-title {
@@ -9164,7 +9234,7 @@ textarea:focus-visible {
 }
 
 :root[data-theme="dark"] .settings-row {
-  border-top-color: #1e293b;
+  border-top-color: #1d3348;
 }
 
 :root[data-theme="dark"] .settings-label strong {
@@ -9188,7 +9258,7 @@ textarea:focus-visible {
 }
 
 :root[data-theme="dark"] .settings-pill.active {
-  background: #2563eb;
+  background: linear-gradient(100deg, #079b72, #1678dd);
   color: #ffffff;
 }
 
@@ -9212,7 +9282,7 @@ textarea:focus-visible {
 }
 
 :root[data-theme="dark"] .info-row {
-  border-bottom-color: #1e293b;
+  border-bottom-color: #1d3348;
 }
 
 :root[data-theme="dark"] .info-row span {
@@ -9221,6 +9291,19 @@ textarea:focus-visible {
 
 :root[data-theme="dark"] .info-row strong {
   color: #f8fafc;
+}
+
+:root[data-theme="dark"] .settings-info-card {
+  border-color: #1d3b50;
+  background: rgba(5, 14, 27, .44);
+}
+
+:root[data-theme="dark"] .settings-save-bar {
+  background: linear-gradient(180deg, rgba(7,14,25,0), #0b1626 36%);
+}
+
+:root[data-theme="dark"] .settings-save-bar .action-button.primary {
+  background: linear-gradient(100deg, #079b72, #1678dd);
 }
 
 @media (max-width: 620px) {
@@ -10317,6 +10400,22 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 :root[data-theme="dark"] .tx-modal-date input {
   color: #f0f6ff!important;
   color-scheme: dark;
+}
+
+.settings-save-bar {
+  position: sticky;
+  bottom: -1px;
+  z-index: 2;
+  margin: 0 -2px;
+  padding: 12px 2px 2px;
+  background: linear-gradient(180deg, rgba(255,255,255,0), #fff 36%);
+}
+
+.settings-save-bar .action-button.primary {
+  min-height: 44px;
+  border-radius: 11px;
+  background: linear-gradient(100deg, #0db985, #168cf0);
+  box-shadow: 0 10px 24px -15px rgba(11, 145, 150, .65);
 }
 
 :root[data-theme="dark"] .tx-modal-search input::placeholder {
