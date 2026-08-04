@@ -1,0 +1,58 @@
+/* Shared UI system for the Money Copilot AI legal and support pages. */
+:root{
+  color-scheme:light;
+  --bg:#f8fbff;--bg2:#ffffff;--panel:#ffffff;--panel2:#f3f8fc;
+  --line:#dce7f1;--line2:#cbd9e6;
+  --ink:#0c1830;--ink2:#50627a;--muted:#75869b;
+  --violet:#10b981;--violet2:#14b8a6;--violet-ink:#098d7d;
+  --grad:linear-gradient(90deg,#10b981 0%,#0dbfbc 48%,#168cff 100%);
+  --grad-text:linear-gradient(90deg,#0bbf82 0%,#06b6d4 48%,#168cff 100%);
+  --glow:rgba(14,165,233,.25);
+}
+html{background:var(--bg);}
+body{min-height:100vh;background:var(--bg);color:var(--ink);line-height:1.7;}
+a{color:var(--violet-ink);}
+.wrap{max-width:940px;}
+.wrap.wide{max-width:1400px;}
+header.nav{background:rgba(255,255,255,.82);border-bottom:1px solid var(--line);box-shadow:0 10px 28px -24px rgba(30,64,110,.3);}
+.nav .wrap{height:76px;}
+.mark{box-shadow:0 8px 22px -12px var(--glow);}
+.navright{gap:20px;}
+.legal-nav{display:flex;align-items:center;gap:24px;}
+.legal-nav a{color:var(--ink2);font-size:14px;font-weight:600;transition:color .16s ease;}
+.legal-nav a:hover{color:var(--ink);text-decoration:none;}
+.back{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:9px;color:var(--ink2);font-size:14px;}
+.back:hover{background:var(--panel2);color:var(--ink);}
+.btn{padding:11px 17px;border-radius:11px;font-size:14px;box-shadow:0 10px 24px -13px var(--glow);}
+.pagehead{padding:74px 0 48px;text-align:left;}
+.pagehead::before{top:-170px;left:70%;width:920px;height:530px;background:radial-gradient(closest-side,rgba(20,184,166,.16),transparent 72%);}
+.pagehead .wrap{position:relative;}
+.pill{padding:8px 13px;border-color:rgba(45,212,191,.3);background:rgba(20,184,166,.08);font-size:11px;letter-spacing:.12em;}
+.pagehead h1{max-width:720px;margin-top:18px;color:var(--ink);font-size:clamp(38px,5vw,58px);}
+.updated{display:inline-flex;align-items:center;gap:8px;margin-top:17px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.72);color:var(--muted);font-size:12.5px;}
+.updated::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green,#10b981);box-shadow:0 0 0 4px rgba(16,185,129,.1);}
+main{padding-bottom:96px;}
+.doc{position:relative;padding:46px 50px;border-color:var(--line);border-radius:22px;background:rgba(255,255,255,.86);box-shadow:0 28px 65px -48px rgba(30,64,110,.45);}
+.doc::before{content:"";position:absolute;top:0;left:32px;right:32px;height:3px;border-radius:0 0 4px 4px;background:var(--grad);opacity:.82;}
+.doc>.lead{max-width:790px;margin:0 0 30px;padding:18px 19px;border:1px solid rgba(20,184,166,.18);border-radius:14px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(59,130,246,.05));color:var(--ink2);font-size:17px;line-height:1.7;}
+.doc h2{margin:36px 0 13px;padding-top:6px;color:var(--ink);font-size:22px;}
+.doc h2 .n{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(20,184,166,.1);color:var(--violet-ink);font-size:11px;}
+.doc h3{color:var(--ink);}
+.doc p,.doc li{color:var(--ink2);font-size:15.5px;}
+.doc li{padding-left:3px;}
+.doc li::marker{color:var(--violet);}
+.doc strong{color:var(--ink);}
+.doc hr{border-color:var(--line);}
+.cards{gap:15px;margin:24px 0 34px;}
+.card{min-height:185px;padding:23px;border-color:var(--line);border-radius:16px;background:linear-gradient(145deg,#fff,#f5f9fd);box-shadow:0 16px 30px -30px rgba(30,64,110,.48);transition:transform .18s ease,border-color .18s ease;}
+.card:hover{transform:translateY(-3px);border-color:rgba(20,184,166,.42);}
+.card .ci{width:42px;height:42px;margin-bottom:15px;border-radius:12px;background:rgba(20,184,166,.11);border-color:rgba(20,184,166,.21);}
+.card p{line-height:1.6;}
+footer{padding:52px 0 38px;border-color:var(--line);background:#fff;}
+footer .sub,footer .col h4,.copyright{color:var(--muted);}
+footer .col a{color:var(--ink2);}
+footer .col a:hover{color:var(--violet-ink);}
+footer .brand{color:var(--ink);}
+.copyright{border-color:var(--line);}
+@media(max-width:900px){.legal-nav{display:none;}.navright{gap:10px;}.back{padding:8px;}.back span{display:none;}}
+@media(max-width:620px){.nav .wrap{height:70px;}.pagehead{padding:50px 0 32px;}.doc{padding:32px 20px;border-radius:18px;}.doc::before{left:20px;right:20px;}.doc>.lead{padding:15px;font-size:16px;}.doc h2{font-size:20px;margin-top:31px;}.updated{font-size:11.5px;}.cards{grid-template-columns:1fr;}.card{min-height:0;}footer{padding-top:40px;}}
