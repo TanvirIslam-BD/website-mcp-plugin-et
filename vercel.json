@@ -16,6 +16,7 @@
     { "source": "/assets/(.*)", "destination": "/site/assets/$1" }
   ],
   "redirects": [
+    { "source": "/:path*", "has": [{ "type": "host", "value": "copilotai.live" }], "destination": "https://www.copilotai.live/:path*", "permanent": true },
     { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
     { "source": "/terms.html", "destination": "/terms", "permanent": true },
     { "source": "/support.html", "destination": "/support", "permanent": true }
