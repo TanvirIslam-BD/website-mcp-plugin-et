@@ -1376,7 +1376,7 @@ function openAiChat(prefill = "") {
         <small>▣ Private · Uses only connected financial data</small>
       </form>
     </div>
-  `, { wide: false, className: "ai-modal" });
+  `, { wide: true, className: "ai-modal ai-desktop-modal" });
 }
 
 function openMobileCopilotAndSend(message) {

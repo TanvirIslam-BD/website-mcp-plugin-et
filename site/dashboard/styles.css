@@ -10251,3 +10251,118 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 @keyframes syncSpinnerRotate {
   to { transform: rotate(360deg); }
 }
+
+/* Desktop Money Copilot workspace: keep the familiar chat flow while giving
+   larger screens a focused, spacious conversation canvas. */
+@media (min-width: 721px) {
+  .modal.ai-desktop-modal {
+    width: min(1060px, calc(100vw - 64px));
+    height: min(780px, calc(100vh - 64px));
+    max-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid #dce9e2;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #ffffff, #f7fbf9);
+    box-shadow: 0 34px 90px rgba(11, 48, 35, .24);
+  }
+
+  .ai-desktop-modal .modal-top {
+    flex: 0 0 auto;
+    align-items: center;
+    margin: 0;
+    padding: 19px 24px;
+    border-bottom: 1px solid #e6efe9;
+    background: rgba(255, 255, 255, .82);
+  }
+
+  .ai-desktop-modal .modal-heading {
+    min-width: 0;
+  }
+
+  .ai-desktop-modal .modal-title-row h2 {
+    font-size: 22px;
+  }
+
+  .ai-desktop-modal .copilot-modal-status {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 10px 24px;
+    border-bottom: 1px solid #edf3ef;
+    background: #fbfefd;
+  }
+
+  .ai-desktop-modal .ai-chat {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    padding: 18px 24px 20px;
+  }
+
+  .ai-desktop-modal .ai-chat-scroll {
+    width: min(760px, 100%);
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px 4px 18px;
+  }
+
+  .ai-desktop-modal .assistant-alert {
+    padding: 16px 18px;
+    border-radius: 16px;
+  }
+
+  .ai-desktop-modal .assistant-alert-actions button {
+    min-height: 38px;
+    padding: 7px 12px;
+    font-size: 10px;
+  }
+
+  .ai-desktop-modal .assistant-rail-messages {
+    gap: 13px;
+    padding: 8px 0;
+  }
+
+  .ai-desktop-modal .ai-message {
+    max-width: 78%;
+    padding: 14px 16px;
+    border-radius: 15px 15px 15px 5px;
+  }
+
+  .ai-desktop-modal .ai-message.user {
+    border-radius: 15px 15px 5px 15px;
+  }
+
+  .ai-desktop-modal .ai-message-body,
+  .ai-desktop-modal .copilot-summary .ai-message-body {
+    font-size: 13px;
+    line-height: 1.62;
+  }
+
+  .ai-desktop-modal .assistant-integration-cta,
+  .ai-desktop-modal .assistant-rail-form {
+    width: min(760px, 100%);
+    flex: 0 0 auto;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .ai-desktop-modal .assistant-integration-cta {
+    margin-top: 8px;
+  }
+
+  .ai-desktop-modal .assistant-rail-form {
+    margin-top: 12px;
+  }
+
+  .ai-desktop-modal .copilot-compose {
+    min-height: 58px;
+    padding: 8px 9px 8px 15px;
+    border-radius: 14px;
+  }
+}
