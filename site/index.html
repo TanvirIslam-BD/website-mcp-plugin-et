@@ -1038,26 +1038,49 @@
   .price .btn-outline:hover{color:#fff;}
 
   /* ---------- faq ---------- */
-  #faq .sub-pill{display:block;margin-left:auto;margin-right:auto;}
-  #faq h2{text-align:center;}
-  #faq .wrap{position:relative;}
-  /* only shown once the viewport is wide enough that the icons have room
-     beyond the 1400px content column without overflowing (poke-out 40px +
-     icon 100px = 140px clearance needed on each side -> 1400 + 280 = 1680) */
-  .faq-deco{position:absolute;pointer-events:none;z-index:0;top:230px;display:none;}
-  .faq-deco.left{left:-40px;}
-  .faq-deco.right{right:-40px;top:110px;}
-  .faq-deco svg{width:100px;height:100px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.5));}
-  @media(min-width:1700px){ .faq-deco{display:block;} }
-  .faq{max-width:760px;margin:48px auto 0;position:relative;z-index:1;}
-  .q{border:1px solid var(--line);border-radius:13px;background:var(--panel);margin-bottom:12px;overflow:hidden;transition:.2s;}
-  .q.open{border-color:rgba(45,212,191,.35);}
-  .q button{width:100%;text-align:left;background:none;border:none;color:var(--ink);font-size:16.5px;font-weight:600;
-    padding:20px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:inherit;}
-  .q .plus{color:var(--violet2);font-size:22px;transition:.25s;flex:0 0 auto;}
-  .q.open .plus{transform:rotate(45deg);}
-  .q .ans{max-height:0;overflow:hidden;transition:max-height .3s ease;}
-  .q .ans p{padding:0 22px 20px;color:var(--ink2);font-size:15px;}
+  #faq{padding:118px 0;background:linear-gradient(180deg,transparent 0%,rgba(20,184,166,.035) 48%,transparent 100%);}
+  #faq .wrap{max-width:1160px;position:relative;}
+  .faq-layout{display:grid;grid-template-columns:minmax(260px,.78fr) minmax(0,1.22fr);gap:clamp(42px,7vw,100px);align-items:start;}
+  .faq-copy{position:sticky;top:116px;padding-top:12px;}
+  .faq-copy .sub-pill{display:inline-flex;margin:0 0 17px;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(45,212,191,.3);border-radius:999px;background:rgba(20,184,166,.09);font-size:11px;letter-spacing:.1em;}
+  .faq-copy h2{font-size:clamp(38px,4vw,58px);max-width:420px;}
+  .faq-copy h2 .g{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .faq-intro{max-width:370px;margin-top:19px;color:var(--ink2);font-size:16px;line-height:1.7;}
+  .faq-help{margin-top:30px;max-width:364px;padding:18px 19px;border:1px solid var(--line2);border-radius:18px;background:linear-gradient(140deg,rgba(20,184,166,.13),rgba(59,130,246,.09));}
+  .faq-help i{display:grid;place-items:center;width:34px;height:34px;margin-bottom:13px;border-radius:11px;color:#062a26;background:var(--grad);font-style:normal;font-weight:800;font-size:17px;}
+  .faq-help b{display:block;font-size:14px;letter-spacing:-.01em;}
+  .faq-help p{margin-top:4px;color:var(--ink2);font-size:13.5px;line-height:1.55;}
+  .faq-help a{display:inline-flex;margin-top:12px;color:var(--violet-ink);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;}
+  .faq{margin:0;position:relative;z-index:1;counter-reset:faq;}
+  .q{counter-increment:faq;position:relative;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--panel) 92%,transparent);margin-bottom:12px;overflow:hidden;transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;}
+  .q::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--grad);opacity:0;transition:opacity .2s ease;}
+  .q:hover{transform:translateX(4px);border-color:var(--line2);}
+  .q.open{border-color:rgba(45,212,191,.48);box-shadow:0 18px 38px -30px var(--glow);}
+  .q.open::before{opacity:1;}
+  .q button{width:100%;text-align:left;background:none;border:none;color:var(--ink);font-size:16px;font-weight:650;
+    padding:22px 22px 22px 20px;cursor:pointer;display:flex;align-items:center;gap:16px;font-family:inherit;}
+  .q-index{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:var(--panel2);border:1px solid var(--line2);color:var(--violet-ink);font:700 11px var(--mono);}
+  .q-label{flex:1;line-height:1.35;}
+  .q .plus{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:rgba(20,184,166,.12);color:var(--violet2);font-size:21px;font-weight:400;line-height:1;transition:.25s;}
+  .q.open .plus{transform:rotate(45deg);background:var(--grad);color:#fff;}
+  .q .ans{max-height:0;overflow:hidden;transition:max-height .32s ease;}
+  .q .ans p{padding:0 52px 23px 70px;color:var(--ink2);font-size:15px;line-height:1.7;}
+  @media(max-width:820px){
+    #faq{padding:78px 0;}
+    .faq-layout{grid-template-columns:1fr;gap:34px;}
+    .faq-copy{position:static;padding:0;}
+    .faq-copy h2{max-width:none;}
+    .faq-intro{max-width:620px;}
+    .faq-help{max-width:none;margin-top:22px;}
+    .q:hover{transform:none;}
+  }
+  @media(max-width:500px){
+    .q{border-radius:15px;}
+    .q button{padding:18px 15px;gap:11px;font-size:14.5px;}
+    .q-index{width:29px;height:29px;flex-basis:29px;border-radius:9px;font-size:10px;}
+    .q .plus{width:26px;height:26px;flex-basis:26px;font-size:19px;}
+    .q .ans p{padding:0 18px 19px 55px;font-size:14px;}
+  }
 
   /* ---------- final cta ---------- */
   .finalcta{background:var(--panel);border:1px solid var(--line2);border-radius:24px;padding:0;
@@ -2007,26 +2030,26 @@
 <!-- FAQ -->
 <section class="sec" id="faq">
   <div class="wrap">
-    <span class="faq-deco left reveal" aria-hidden="true">
-      <svg viewBox="0 0 100 100"><path d="M14 22a10 10 0 0 1 10-10h52a10 10 0 0 1 10 10v34a10 10 0 0 1-10 10H46l-16 14 3-14h-9a10 10 0 0 1-10-10z"
-        fill="#171a2b" stroke="#3b3f6b" stroke-width="2"/>
-        <circle cx="38" cy="39" r="3.6" fill="#c9cbe8"/><circle cx="50" cy="39" r="3.6" fill="#c9cbe8"/><circle cx="62" cy="39" r="3.6" fill="#c9cbe8"/></svg>
-    </span>
-    <span class="faq-deco right reveal" aria-hidden="true">
-      <svg viewBox="0 0 100 100"><path d="M50 8l30 11v24c0 22-13 35-30 42-17-7-30-20-30-42V19z" fill="url(#shg)"/>
-        <defs><linearGradient id="shg" x1="20" y1="8" x2="80" y2="85"><stop offset="0" stop-color="#7c6bff"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
-        <rect x="38" y="46" width="24" height="18" rx="4" fill="#0f1424"/><path d="M42 46v-6a8 8 0 0 1 16 0v6" fill="none" stroke="#0f1424" stroke-width="4.5"/>
-        <circle cx="50" cy="54" r="3" fill="#7c6bff"/></svg>
-    </span>
-    <span class="eyebrow reveal sub-pill">FAQ</span>
-    <h2 class="reveal" style="margin-top:14px">Questions, answered</h2>
-    <div class="faq">
-      <div class="q reveal"><button>What is Money Copilot AI?<span class="plus">+</span></button><div class="ans"><p>Money Copilot AI is a conversational expense tracker and budget assistant. It lets you log purchases, review spending, and manage budgets by chatting with supported AI assistants.</p></div></div>
-      <div class="q reveal"><button>How does Money Copilot AI work?<span class="plus">+</span></button><div class="ans"><p>Connect Money Copilot AI to ChatGPT, Claude, or another MCP client. Describe an expense in plain language, and the assistant sends the structured amount, category, and date to your private expense history.</p></div></div>
-      <div class="q reveal"><button>Is Money Copilot AI free?<span class="plus">+</span></button><div class="ans"><p>Yes. The Free plan costs $0 per month and includes natural-language expense logging, category and monthly summaries, limited spending history, and support for MCP clients.</p></div></div>
-      <div class="q reveal"><button>Is my financial data secure?<span class="plus">+</span></button><div class="ans"><p>Each subscriber's data is isolated, and Money Copilot AI stores only the expenses they choose to log. It does not connect to bank accounts, cards, or financial institutions.</p></div></div>
-      <div class="q reveal"><button>Which AI assistants does Money Copilot AI work with?<span class="plus">+</span></button><div class="ans"><p>Money Copilot AI works with ChatGPT, Claude, and other clients that support the Model Context Protocol, including Gemini, Cursor, and VS Code.</p></div></div>
-      <div class="q reveal"><button>Does Money Copilot AI read receipts?<span class="plus">+</span></button><div class="ans"><p>A supported AI assistant uses its vision capability to extract the vendor, amount, and date from a receipt image. Money Copilot AI then stores and organizes those details.</p></div></div>
+    <div class="faq-layout">
+      <div class="faq-copy reveal">
+        <span class="eyebrow sub-pill">FAQ</span>
+        <h2>Questions, <span class="g">answered.</span></h2>
+        <p class="faq-intro">Everything you need to know about tracking your spending with Money Copilot AI, before you connect.</p>
+        <aside class="faq-help">
+          <i aria-hidden="true">?</i>
+          <b>Still need a hand?</b>
+          <p>Our support team can help with setup, access, and account questions.</p>
+          <a href="/support">Visit support centre <span aria-hidden="true">&nbsp;→</span></a>
+        </aside>
+      </div>
+      <div class="faq">
+        <div class="q reveal"><button><span class="q-index">01</span><span class="q-label">What is Money Copilot AI?</span><span class="plus">+</span></button><div class="ans"><p>Money Copilot AI is a conversational expense tracker and budget assistant. It lets you log purchases, review spending, and manage budgets by chatting with supported AI assistants.</p></div></div>
+        <div class="q reveal"><button><span class="q-index">02</span><span class="q-label">How does Money Copilot AI work?</span><span class="plus">+</span></button><div class="ans"><p>Connect Money Copilot AI to ChatGPT, Claude, or another MCP client. Describe an expense in plain language, and the assistant sends the structured amount, category, and date to your private expense history.</p></div></div>
+        <div class="q reveal"><button><span class="q-index">03</span><span class="q-label">Is Money Copilot AI free?</span><span class="plus">+</span></button><div class="ans"><p>Yes. The Free plan costs $0 per month and includes natural-language expense logging, category and monthly summaries, limited spending history, and support for MCP clients.</p></div></div>
+        <div class="q reveal"><button><span class="q-index">04</span><span class="q-label">Is my financial data secure?</span><span class="plus">+</span></button><div class="ans"><p>Each subscriber's data is isolated, and Money Copilot AI stores only the expenses they choose to log. It does not connect to bank accounts, cards, or financial institutions.</p></div></div>
+        <div class="q reveal"><button><span class="q-index">05</span><span class="q-label">Which AI assistants does Money Copilot AI work with?</span><span class="plus">+</span></button><div class="ans"><p>Money Copilot AI works with ChatGPT, Claude, and other clients that support the Model Context Protocol, including Gemini, Cursor, and VS Code.</p></div></div>
+        <div class="q reveal"><button><span class="q-index">06</span><span class="q-label">Does Money Copilot AI read receipts?</span><span class="plus">+</span></button><div class="ans"><p>A supported AI assistant uses its vision capability to extract the vendor, amount, and date from a receipt image. Money Copilot AI then stores and organizes those details.</p></div></div>
+      </div>
     </div>
   </div>
 </section>
