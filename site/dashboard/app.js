@@ -718,7 +718,7 @@ function renderTransactions(model) {
       <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${payment}`.toLowerCase())}">
         <td>${esc(expense.date)}</td>
         <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
-        <td><span class="tag" style="--tone:${tone};--tone-bg:${bg}">${esc(expense.category)}</span></td>
+        <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button></td>
         <td><span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span></td>
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
       </tr>`;
@@ -1417,16 +1417,101 @@ async function submitAiQuestion(form) {
   }
 }
 
+function getAvailableCategories(model) {
+  const standard = ["food", "groceries", "shopping", "travel", "transport", "utilities", "bills", "health"];
+  const existing = (model.expenses || []).map(e => e.category).filter(Boolean);
+  const unique = new Set([...standard, ...existing]);
+  return Array.from(unique).sort();
+}
+
+function openEditCategoryModal(expenseId, currentCategory) {
+  const model = window.dashboardModel;
+  const expense = (model.expenses || []).find(e => e.id === expenseId);
+  const meta = model.expenseMetadata?.[expenseId] || {};
+  const merchant = meta.merchant || expense?.description || "Expense";
+  const date = expense?.date || "";
+  const amountStr = expense ? formatMoney(expense.amountMinor, model.currency) : "";
+
+  const available = getAvailableCategories(model);
+  
+  const optionsHtml = available.map(cat => 
+    `<option value="${esc(cat)}" ${cat.toLowerCase() === currentCategory.toLowerCase() ? "selected" : ""}>${esc(cat)}</option>`
+  ).join("");
+
+  openModal("Update Category", "Change category for this transaction.", `
+    <form data-form="edit-category" data-expense-id="${esc(expenseId)}">
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="font-weight: 600; font-size: 13px; color: #102131;">${esc(merchant)}</span>
+          <span style="font-weight: 700; font-size: 13px; color: #ef4444;">-${esc(amountStr)}</span>
+        </div>
+        <div style="font-size: 11px; color: #64748b;">${esc(date)}</div>
+      </div>
+      <div class="field">
+        <label>Select Category</label>
+        <select name="category_select" required style="width: 100%; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid #dce9e2; background: #fff; font-family: inherit; font-size: 13px; color: #102131; box-sizing: border-box; outline: none;">
+          ${optionsHtml}
+          <option value="custom_new">+ Add new category...</option>
+        </select>
+      </div>
+      <div class="field" id="edit-category-manual-field" style="display: none; margin-top: 12px;">
+        <label>New Category Name</label>
+        <input name="manual_category" placeholder="e.g. entertainment, education" style="width: 100%;">
+      </div>
+      <p class="form-error" data-error></p>
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" class="action-button" data-close>Cancel</button>
+        <button type="submit" class="action-button primary">Update Category</button>
+      </div>
+    </form>
+  `);
+
+  const modalEl = document.getElementById("dashboard-modal");
+  if (modalEl) {
+    const selectEl = modalEl.querySelector('select[name="category_select"]');
+    const manualField = modalEl.querySelector('#edit-category-manual-field');
+    const manualInput = modalEl.querySelector('input[name="manual_category"]');
+    
+    selectEl?.addEventListener("change", () => {
+      if (selectEl.value === "custom_new") {
+        manualField.style.display = "block";
+        manualInput.required = true;
+        manualInput.focus();
+      } else {
+        manualField.style.display = "none";
+        manualInput.required = false;
+        manualInput.value = "";
+      }
+    });
+  }
+}
+
 function openEntry(kind) {
   const model = window.dashboardModel;
   const isIncome = kind === "income";
   const today = new Date().toISOString().slice(0, 10);
+  
+  const categoryFieldHtml = isIncome 
+    ? `<div class="field"><label>Source</label><input name="category" placeholder="Salary, freelance" required></div>` 
+    : `<div class="field">
+        <label>Category</label>
+        <select name="category_select" required style="width: 100%; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid #dce9e2; background: #fff; font-family: inherit; font-size: 13px; color: #102131; box-sizing: border-box; outline: none;">
+          <option value="" disabled selected>Select category</option>
+          ${getAvailableCategories(model).map(cat => `<option value="${esc(cat)}">${esc(cat)}</option>`).join("")}
+          <option value="custom_new">+ Add new category...</option>
+        </select>
+        <input type="hidden" name="category" required>
+        <div id="new-category-input-wrap" style="display: none; margin-top: 8px;">
+          <input name="manual_category" placeholder="Enter new category name" style="width: 100%;">
+        </div>
+       </div>`;
+
   openModal(isIncome ? "Add Income" : "Add Expense", isIncome ? "Record money coming into this private workspace." : "Record a transaction with category and payment details.", `
     <form data-form="${kind}">
       <div class="form-grid">
         <div class="field"><label>Amount</label><input name="amount" inputmode="decimal" placeholder="0.00" required></div>
         <div class="field"><label>Date</label><input name="date" type="date" value="${today}" required></div>
-        <div class="field"><label>${isIncome ? "Source" : "Category"}</label><input name="category" placeholder="${isIncome ? "Salary, freelance" : "Food, travel"}" required></div>
+        ${categoryFieldHtml}
         <div class="field"><label>Currency</label><input name="currency" value="${esc(model.currency)}" maxlength="3" required></div>
         ${isIncome ? "" : `<div class="field"><label>Merchant</label><input name="merchant" placeholder="Vendor or shop"></div><div class="field"><label>Payment Method</label><select name="paymentMethod"><option>bKash</option><option>Nagad</option><option>Visa</option><option>Cash</option><option>Bank Transfer</option></select></div>`}
         <div class="field full"><label>${isIncome ? "Notes" : "Description"}</label><input name="description" placeholder="Optional details"></div>
@@ -1439,6 +1524,32 @@ function openEntry(kind) {
       </div>
     </form>
   `);
+
+  const modalEl = document.getElementById("dashboard-modal");
+  if (modalEl && !isIncome) {
+    const selectEl = modalEl.querySelector('select[name="category_select"]');
+    const hiddenInput = modalEl.querySelector('input[name="category"]');
+    const manualWrap = modalEl.querySelector('#new-category-input-wrap');
+    const manualInput = modalEl.querySelector('input[name="manual_category"]');
+    
+    selectEl?.addEventListener("change", () => {
+      if (selectEl.value === "custom_new") {
+        manualWrap.style.display = "block";
+        manualInput.required = true;
+        hiddenInput.value = "";
+        manualInput.focus();
+      } else {
+        manualWrap.style.display = "none";
+        manualInput.required = false;
+        manualInput.value = "";
+        hiddenInput.value = selectEl.value;
+      }
+    });
+    
+    manualInput?.addEventListener("input", () => {
+      hiddenInput.value = manualInput.value.trim();
+    });
+  }
 }
 
 async function submitEntry(form) {
@@ -1622,7 +1733,10 @@ function openPanel(kind) {
       return panelRows(filtered, (expense, index) => {
         const meta = model.expenseMetadata?.[expense.id] || {};
         const [tone] = toneFor(expense.category, index);
-        return `<div class="plain-row"><span><b><i class="dot" style="--tone:${tone}"></i>${esc(meta.merchant || expense.description || "Expense")}</b><small>${esc(expense.date)} - ${esc(expense.category)} - ${esc(meta.paymentMethod || "Expense")}</small></span><strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong></div>`;
+        const cat = expense.category || "uncategorized";
+        const [catTone, catBg] = toneFor(cat, index);
+        const merchant = meta.merchant || expense.description || "Expense";
+        return `<div class="plain-row"><span><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button> - ${esc(meta.paymentMethod || "Expense")}</small></span><strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong></div>`;
       });
     };
 
@@ -1946,6 +2060,18 @@ function openPanel(kind) {
 
 function submitPanelForm(form) {
   const data = new FormData(form);
+  if (form.dataset.form === "edit-category") {
+    const expenseId = form.dataset.expenseId;
+    const selectVal = form.elements.category_select?.value;
+    const manualVal = form.elements.manual_category?.value?.trim();
+    const finalCategory = selectVal === "custom_new" ? manualVal : selectVal;
+    if (!finalCategory) {
+      const errorEl = form.querySelector("[data-error]");
+      if (errorEl) errorEl.textContent = "Please select or enter a category.";
+      return;
+    }
+    return postDashboard({ kind: "update_expense_category", id: expenseId, category: finalCategory }, form);
+  }
   if (form.dataset.form === "budget") {
     return postDashboard({ kind: "budget", amount: data.get("amount"), currency: String(data.get("currency") || "").toUpperCase() }, form);
   }
@@ -2171,6 +2297,13 @@ function bindEvents() {
   }, { once: true });
 
   document.addEventListener("click", (event) => {
+    const categoryBtn = event.target.closest(".interactive-category-btn");
+    if (categoryBtn) {
+      const id = categoryBtn.dataset.expenseId;
+      const category = categoryBtn.dataset.category;
+      openEditCategoryModal(id, category);
+      return;
+    }
     const copyMcpEndpoint = event.target.closest("[data-copy-mcp-endpoint]");
     if (copyMcpEndpoint) {
       const endpoint = copyMcpEndpoint.dataset.copyMcpEndpoint;

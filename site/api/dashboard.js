@@ -272,6 +272,32 @@ export default async function handler(req, res) {
         return res.status(201).json({ ok: true });
       }
 
+      if (kind === "update_expense_category") {
+        const id = cleanText(body.id, 80);
+        const newCategory = cleanText(body.category, 60).toLowerCase();
+        if (!id || !newCategory) {
+          return res.status(400).json({ error: "Expense ID and category are required." });
+        }
+        await db.execute({
+          sql: "UPDATE expenses SET category = ? WHERE id = ? AND user_id = ?",
+          args: [newCategory, id, userId],
+        });
+        const finance = await readFinance(db, userId);
+        let updatedJson = false;
+        if (Array.isArray(finance.expenses)) {
+          for (const exp of finance.expenses) {
+            if (exp.id === id) {
+              exp.category = newCategory;
+              updatedJson = true;
+            }
+          }
+        }
+        if (updatedJson) {
+          await writeFinance(db, userId, finance);
+        }
+        return res.status(200).json({ ok: true });
+      }
+
       if (!["expense", "income"].includes(kind) || !amount || !validDate(date) || !/^[A-Z]{3}$/.test(currency)) {
         return res.status(400).json({ error: "Enter a positive amount, valid date, and 3-letter currency code." });
       }
