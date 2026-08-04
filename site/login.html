@@ -46,6 +46,16 @@
     </section>
   </main>
   <script>
+    (async () => {
+      try {
+        const response = await fetch('/api/dashboard-session', { credentials: 'same-origin', cache: 'no-store' });
+        if (response.ok) {
+          location.replace('/dashboard');
+          return;
+        }
+      } catch {}
+    })();
+
     document.querySelector('[data-secure-login]')?.addEventListener('click', event => {
       const button = event.currentTarget;
       button.setAttribute('aria-busy', 'true');
