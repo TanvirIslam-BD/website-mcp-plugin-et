@@ -1,7 +1,7 @@
 const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
 const token = params.get("dashboard_token");
-const selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
+let selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 const MONEY_COPILOT_MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
 
@@ -2395,13 +2395,24 @@ function bindEvents() {
     }
     const monthOption = event.target.closest("[data-month-value]");
     if (monthOption) {
-      location.href = `${location.pathname}?month=${encodeURIComponent(monthOption.dataset.monthValue)}`;
+      const newMonth = monthOption.dataset.monthValue;
+      selectedMonth = newMonth;
+      const newParams = new URLSearchParams(location.search);
+      newParams.set("month", newMonth);
+      history.pushState({}, "", `${location.pathname}?${newParams}${location.hash || ""}`);
+      closeMonthPickers();
+      refreshDashboard();
       return;
     }
     const monthToday = event.target.closest("[data-month-today], [data-month-clear]");
     if (monthToday) {
-      const month = new Date().toISOString().slice(0, 7);
-      location.href = `${location.pathname}?month=${encodeURIComponent(month)}`;
+      const newMonth = new Date().toISOString().slice(0, 7);
+      selectedMonth = newMonth;
+      const newParams = new URLSearchParams(location.search);
+      newParams.set("month", newMonth);
+      history.pushState({}, "", `${location.pathname}?${newParams}${location.hash || ""}`);
+      closeMonthPickers();
+      refreshDashboard();
       return;
     }
     if (!event.target.closest("[data-month-picker]")) closeMonthPickers();
@@ -2784,6 +2795,14 @@ loadDashboard()
     app.classList.remove("sidebar-collapsed");
     initializeAssistantRailResize();
     bindEvents();
+    window.addEventListener("popstate", () => {
+      const newParams = new URLSearchParams(location.search);
+      const newMonth = newParams.get("month") || new Date().toISOString().slice(0, 7);
+      if (newMonth !== selectedMonth) {
+        selectedMonth = newMonth;
+        refreshDashboard();
+      }
+    });
     runNotificationPreferences(window.dashboardModel);
     bindIncomeExpenseChart();
   })
