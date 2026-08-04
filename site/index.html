@@ -662,6 +662,14 @@
   @media(max-width:900px){
     .trust .logo{border-right:none;padding:8px 16px;font-size:16px;}
   }
+  .hero-platforms{margin:-24px 0 0 calc(500px + 18px);padding:0;position:relative;z-index:2;}
+  .hero-platforms .panel{max-width:none;padding:15px 17px;border-radius:16px;box-shadow:0 18px 36px -30px rgba(4,24,38,.55);}
+  .hero-platforms .cap{margin-bottom:10px;font-size:11.5px;}
+  .hero-platforms .logo{gap:8px;padding:0 14px;font-size:14px;}
+  .hero-platforms .logo .li{width:24px;height:24px;flex-basis:24px;border-radius:7px;}
+  .hero-platforms .logo .li img{width:14px !important;height:14px !important;}
+  @media(max-width:1120px){.hero-platforms{margin:20px auto 0;max-width:920px;}.hero-platforms .panel{padding:18px;}}
+  @media(max-width:640px){.hero-platforms{margin-top:28px;}.hero-platforms .panel{padding:14px 10px;}.hero-platforms .logo{padding:7px 9px;font-size:13px;}}
 
   /* ---------- how it works ---------- */
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
@@ -1795,23 +1803,21 @@
         </div>
       </div>
     </div>
+    <div class="trust hero-platforms" aria-label="Supported AI platforms">
+      <div class="panel">
+        <div class="cap">Works with your favorite AI platforms</div>
+        <div class="row">
+          <span class="logo"><span class="li" style="background:#10a37f"><img src="assets/brands/chatgpt.svg" alt="ChatGPT" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>ChatGPT</span>
+          <span class="logo"><span class="li" style="background:#d97757"><img src="assets/brands/claude.svg" alt="Claude" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Claude</span>
+          <span class="logo"><span class="li"><img src="assets/brands/gemini.svg" alt="Gemini" style="width:18px;height:18px"></span>Gemini</span>
+          <span class="logo"><span class="li"><img src="assets/brands/grok.svg" alt="Grok" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Grok</span>
+          <span class="logo"><span class="li"><img src="assets/brands/cursor.svg" alt="Cursor" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Cursor</span>
+          <span class="logo"><span class="li"><img src="assets/brands/mcp.svg" alt="MCP" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Any MCP Client</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
-
-<!-- TRUST -->
-<div class="trust">
-  <div class="wrap"><div class="panel">
-    <div class="cap">Works with your favorite AI platforms</div>
-    <div class="row">
-      <span class="logo"><span class="li" style="background:#10a37f"><img src="assets/brands/chatgpt.svg" alt="ChatGPT" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>ChatGPT</span>
-      <span class="logo"><span class="li" style="background:#d97757"><img src="assets/brands/claude.svg" alt="Claude" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Claude</span>
-      <span class="logo"><span class="li"><img src="assets/brands/gemini.svg" alt="Gemini" style="width:18px;height:18px"></span>Gemini</span>
-      <span class="logo"><span class="li"><img src="assets/brands/grok.svg" alt="Grok" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Grok</span>
-      <span class="logo"><span class="li"><img src="assets/brands/cursor.svg" alt="Cursor" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Cursor</span>
-      <span class="logo"><span class="li"><img src="assets/brands/mcp.svg" alt="MCP" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Any MCP Client</span>
-    </div>
-  </div></div>
-</div>
 
 <!-- ANSWER-READY PRODUCT SUMMARY -->
 <section class="sec answers" id="about" aria-labelledby="about-title">
