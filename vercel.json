@@ -11,6 +11,8 @@
     { "source": "/privacy", "destination": "/site/privacy.html" },
     { "source": "/terms", "destination": "/site/terms.html" },
     { "source": "/support", "destination": "/site/support.html" },
+    { "source": "/robots.txt", "destination": "/site/robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/site/sitemap.xml" },
     { "source": "/assets/(.*)", "destination": "/site/assets/$1" }
   ],
   "redirects": [
