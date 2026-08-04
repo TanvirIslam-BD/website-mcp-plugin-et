@@ -1469,8 +1469,58 @@ async function submitAiQuestion(form) {
 function getAvailableCategories(model) {
   const standard = ["food", "groceries", "shopping", "travel", "transport", "utilities", "bills", "health"];
   const existing = (model.expenses || []).map(e => e.category).filter(Boolean);
-  const unique = new Set([...standard, ...existing]);
+  const saved = (model.categoryCatalog || []).map(item => item?.name).filter(Boolean);
+  const unique = new Set([...standard, ...saved, ...existing]);
   return Array.from(unique).sort();
+}
+
+function subcategoriesForCategory(model, category) {
+  const normalized = String(category || "").toLowerCase();
+  const saved = (model.categoryCatalog || []).find(item => item?.name === normalized)?.subcategories || [];
+  const used = (model.expenses || [])
+    .filter(expense => String(expense.category || "").toLowerCase() === normalized)
+    .map(expense => model.expenseMetadata?.[expense.id]?.subcategory)
+    .filter(Boolean);
+  return Array.from(new Set([...saved, ...used])).sort((a, b) => a.localeCompare(b));
+}
+
+function openSubcategoryEditor(category, previousSubcategory = "") {
+  const isNew = !previousSubcategory;
+  openModal(isNew ? "Add Sub-category" : "Edit Sub-category", isNew ? `Add a sub-category under ${category}.` : `Rename ${previousSubcategory} or keep it as-is.`, `
+    <form data-form="subcategory-editor" data-category="${esc(category)}" data-previous-subcategory="${esc(previousSubcategory)}">
+      <div class="field"><label>Category</label><input value="${esc(category)}" disabled></div>
+      <div class="field"><label>Sub-category name</label><input name="subcategory" value="${esc(previousSubcategory)}" placeholder="e.g. Fast food, Clothing, Fruit" required autofocus></div>
+      <p class="form-error" data-error></p>
+      <div class="modal-actions"><button type="button" class="action-button" data-close>Cancel</button>${isNew ? "" : '<button type="button" class="action-button danger" data-delete-subcategory>Delete</button>'}<button type="submit" class="action-button primary">${isNew ? "Add sub-category" : "Save changes"}</button></div>
+    </form>
+  `);
+  const modalEl = document.getElementById("dashboard-modal");
+  modalEl?.querySelector("[data-delete-subcategory]")?.addEventListener("click", () => {
+    openConfirmModal("Delete Sub-category", `Remove ${previousSubcategory} from ${category}? Existing transactions will keep the main category.`, () => {
+      postDashboard({ kind: "delete_subcategory", category, previousSubcategory }, modalEl);
+    });
+  });
+}
+
+function openCategoryEditor(previousCategory = "") {
+  const model = window.dashboardModel;
+  const isNew = !previousCategory;
+  const subcategories = isNew ? [] : subcategoriesForCategory(model, previousCategory);
+  const subcategoryButtons = subcategories.length
+    ? subcategories.map(subcategory => `<button type="button" class="category-subcategory-chip" data-edit-subcategory="${esc(subcategory)}">${esc(subcategory)} <span aria-hidden="true">Edit</span></button>`).join("")
+    : '<p class="category-editor-empty">No sub-categories yet. Add one to keep your spending more organized.</p>';
+  openModal(isNew ? "Add Category" : "Edit Category", isNew ? "Create a reusable category for future expenses." : "Rename the category and manage its sub-categories.", `
+    <form data-form="category-editor" data-previous-category="${esc(previousCategory)}">
+      <div class="field"><label>Category name</label><input name="category" value="${esc(previousCategory)}" placeholder="e.g. education, subscriptions" required autofocus></div>
+      ${isNew ? '<div class="field"><label>First sub-category <small>Optional</small></label><input name="subcategory" placeholder="e.g. Courses, Books"></div>' : `
+        <section class="category-editor-subs" aria-label="Sub-categories"><div><b>Sub-categories</b><button type="button" class="text-action" data-add-subcategory>Add sub-category</button></div><div class="category-subcategory-list">${subcategoryButtons}</div></section>`}
+      <p class="form-error" data-error></p>
+      <div class="modal-actions"><button type="button" class="action-button" data-close>Cancel</button><button type="submit" class="action-button primary">${isNew ? "Add category" : "Save category"}</button></div>
+    </form>
+  `);
+  const modalEl = document.getElementById("dashboard-modal");
+  modalEl?.querySelector("[data-add-subcategory]")?.addEventListener("click", () => openSubcategoryEditor(previousCategory));
+  modalEl?.querySelectorAll("[data-edit-subcategory]").forEach(button => button.addEventListener("click", () => openSubcategoryEditor(previousCategory, button.dataset.editSubcategory || "")));
 }
 
 function openEditCategoryModal(expenseId, currentCategory) {
@@ -1869,11 +1919,19 @@ function openPanel(kind) {
     return;
   }
   if (kind === "categories") {
-    openModal("All Categories", "Category totals for the selected month.", panelRows(model.categories || [], (category, index) => {
-      const pct = Math.round((category.amountMinor / Math.max(model.spentMinor, 1)) * 100);
-      const [tone, bg] = toneFor(category.name, index);
-      return `<div class="plain-row"><span><b><i class="dot" style="--tone:${tone}"></i>${esc(category.name)}</b><small>${pct}% of monthly expenses</small></span><strong>${formatMoney(category.amountMinor, model.currency)}</strong></div>`;
-    }), { wide: true });
+    const categoryTotals = new Map((model.categories || []).map(category => [category.name, category.amountMinor]));
+    const categoryNames = Array.from(new Set([...(model.categories || []).map(category => category.name), ...(model.categoryCatalog || []).map(category => category?.name).filter(Boolean)])).sort();
+    const categoriesHtml = categoryNames.length ? `<div class="category-manager-list">${categoryNames.map((name, index) => {
+      const amountMinor = categoryTotals.get(name) || 0;
+      const pct = amountMinor ? Math.round((amountMinor / Math.max(model.spentMinor, 1)) * 100) : 0;
+      const [tone] = toneFor(name, index);
+      const subcategories = subcategoriesForCategory(model, name);
+      return `<article class="category-manager-row"><div><b><i class="dot" style="--tone:${tone}"></i>${esc(name)}</b><small>${amountMinor ? `${pct}% of monthly expenses · ${formatMoney(amountMinor, model.currency)}` : "Ready to use for future expenses"}</small>${subcategories.length ? `<div class="category-manager-subcategories">${subcategories.map(subcategory => `<span>${esc(subcategory)}</span>`).join("")}</div>` : ""}</div><button type="button" class="tx-modal-action" data-manage-category="${esc(name)}">Manage</button></article>`;
+    }).join("")}</div>` : '<div class="empty-state">Create your first category to organize future expenses.</div>';
+    openModal("All Categories", "Manage reusable categories and sub-categories for your expenses.", `<div class="category-manager-toolbar"><div><b>${categoryNames.length} categories</b><small>Use categories and sub-categories to keep your transactions organized.</small></div><button type="button" class="tx-modal-action primary" data-add-category>Add category</button></div>${categoriesHtml}`, { wide: true });
+    const modalEl = document.getElementById("dashboard-modal");
+    modalEl?.querySelector("[data-add-category]")?.addEventListener("click", () => openCategoryEditor());
+    modalEl?.querySelectorAll("[data-manage-category]").forEach(button => button.addEventListener("click", () => openCategoryEditor(button.dataset.manageCategory || "")));
     return;
   }
   if (kind === "transactions") {
@@ -2320,6 +2378,19 @@ function openPanel(kind) {
 
 function submitPanelForm(form) {
   const data = new FormData(form);
+  if (form.dataset.form === "category-editor") {
+    const previousCategory = form.dataset.previousCategory || "";
+    return postDashboard(previousCategory
+      ? { kind: "rename_category", previousCategory, category: String(data.get("category") || "").trim() }
+      : { kind: "create_category", category: String(data.get("category") || "").trim(), subcategory: String(data.get("subcategory") || "").trim() }, form);
+  }
+  if (form.dataset.form === "subcategory-editor") {
+    const category = form.dataset.category || "";
+    const previousSubcategory = form.dataset.previousSubcategory || "";
+    return postDashboard(previousSubcategory
+      ? { kind: "rename_subcategory", category, previousSubcategory, subcategory: String(data.get("subcategory") || "").trim() }
+      : { kind: "create_subcategory", category, subcategory: String(data.get("subcategory") || "").trim() }, form);
+  }
   if (form.dataset.form === "edit-category") {
     const expenseId = form.dataset.expenseId;
     const selectVal = form.elements.category_select?.value;

@@ -76,6 +76,7 @@ function defaultFinance() {
     budgetRules: [],
     categories: [],
     templates: [],
+    categoryCatalog: [],
     alertThresholds: [50, 80, 100],
     expenseMetadata: {},
     goals: [],
@@ -112,6 +113,21 @@ function safeFinance(value) {
   } catch {
     return defaultFinance();
   }
+}
+
+function categoryCatalog(value) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  return value.reduce((catalog, item) => {
+    const name = cleanText(item?.name ?? item, 60).toLowerCase();
+    if (!name || seen.has(name)) return catalog;
+    seen.add(name);
+    const subcategories = Array.isArray(item?.subcategories)
+      ? [...new Set(item.subcategories.map((sub) => cleanText(sub, 80)).filter(Boolean))]
+      : [];
+    catalog.push({ name, subcategories });
+    return catalog;
+  }, []);
 }
 
 async function readFinance(db, userId) {
@@ -290,6 +306,66 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
+      if (kind === "create_category") {
+        const name = cleanText(body.category, 60).toLowerCase();
+        const subcategory = cleanText(body.subcategory, 80);
+        if (!name) return res.status(400).json({ error: "Enter a category name." });
+        const finance = await readFinance(db, userId);
+        const catalog = categoryCatalog(finance.categoryCatalog);
+        if (catalog.some((item) => item.name === name)) return res.status(400).json({ error: "This category already exists." });
+        catalog.push({ name, subcategories: subcategory ? [subcategory] : [] });
+        finance.categoryCatalog = catalog;
+        await writeFinance(db, userId, finance);
+        return res.status(201).json({ ok: true });
+      }
+
+      if (kind === "rename_category") {
+        const previous = cleanText(body.previousCategory, 60).toLowerCase();
+        const next = cleanText(body.category, 60).toLowerCase();
+        if (!previous || !next) return res.status(400).json({ error: "Enter both category names." });
+        const finance = await readFinance(db, userId);
+        const catalog = categoryCatalog(finance.categoryCatalog);
+        if (previous !== next && catalog.some((item) => item.name === next)) return res.status(400).json({ error: "A category with that name already exists." });
+        await db.execute({ sql: "UPDATE expenses SET category = ? WHERE category = ? AND user_id = ?", args: [next, previous, userId] });
+        if (Array.isArray(finance.expenses)) finance.expenses.forEach((expense) => { if (expense.category === previous) expense.category = next; });
+        const current = catalog.find((item) => item.name === previous);
+        if (current) current.name = next;
+        else catalog.push({ name: next, subcategories: [] });
+        finance.categoryCatalog = categoryCatalog(catalog);
+        await writeFinance(db, userId, finance);
+        return res.status(200).json({ ok: true });
+      }
+
+      if (kind === "create_subcategory" || kind === "rename_subcategory" || kind === "delete_subcategory") {
+        const category = cleanText(body.category, 60).toLowerCase();
+        const previous = cleanText(body.previousSubcategory, 80);
+        const next = cleanText(body.subcategory, 80);
+        if (!category || (kind !== "delete_subcategory" && !next)) return res.status(400).json({ error: "Enter a category and sub-category name." });
+        const finance = await readFinance(db, userId);
+        const catalog = categoryCatalog(finance.categoryCatalog);
+        let group = catalog.find((item) => item.name === category);
+        if (!group) { group = { name: category, subcategories: [] }; catalog.push(group); }
+        if (kind === "create_subcategory") {
+          if (group.subcategories.some((item) => item.toLowerCase() === next.toLowerCase())) return res.status(400).json({ error: "This sub-category already exists." });
+          group.subcategories.push(next);
+        } else {
+          if (!previous) return res.status(400).json({ error: "Select a sub-category first." });
+          group.subcategories = group.subcategories.filter((item) => item !== previous);
+          if (kind === "rename_subcategory") group.subcategories.push(next);
+          finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
+          for (const expense of finance.expenses || []) {
+            if (expense.category !== category) continue;
+            const metadata = finance.expenseMetadata[expense.id];
+            if (metadata?.subcategory !== previous) continue;
+            if (kind === "rename_subcategory") metadata.subcategory = next;
+            else delete metadata.subcategory;
+          }
+        }
+        finance.categoryCatalog = categoryCatalog(catalog);
+        await writeFinance(db, userId, finance);
+        return res.status(200).json({ ok: true });
+      }
+
       if (kind === "update_expense_category") {
         const id = cleanText(body.id, 80);
         const newCategory = cleanText(body.category, 60).toLowerCase();
@@ -462,6 +538,7 @@ export default async function handler(req, res) {
       recurring,
       goals: Array.isArray(finance.goals) ? finance.goals : [],
       expenseMetadata: finance.expenseMetadata || {},
+      categoryCatalog: categoryCatalog(finance.categoryCatalog),
       alertThresholds: Array.isArray(finance.alertThresholds) ? finance.alertThresholds : [50, 80, 100],
       preferences: safeSettings(finance.settings),
       preferencesConfigured: Boolean(finance.settings && Object.keys(finance.settings).length),
