@@ -1882,7 +1882,7 @@ function openPanel(kind) {
     const subcategories = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.subcategory).filter(Boolean))).sort();
     const methods = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.paymentMethod).filter(Boolean))).sort();
 
-    const renderList = (filterText = "", selCategory = "", selSubcategory = "", selMethod = "") => {
+    const renderList = (filterText = "", selCategory = "", selSubcategory = "", selMethod = "", fromDate = "", toDate = "") => {
       const query = filterText.toLowerCase().trim();
       const filtered = expenses.filter(e => {
         const meta = model.expenseMetadata?.[e.id] || {};
@@ -1895,7 +1895,10 @@ function openPanel(kind) {
         const matchesCategory = !selCategory || cat === selCategory.toLowerCase();
         const matchesSubcategory = !selSubcategory || subcategory === selSubcategory.toLowerCase();
         const matchesMethod = !selMethod || pMethod === selMethod.toLowerCase();
-        return matchesQuery && matchesCategory && matchesSubcategory && matchesMethod;
+        const transactionDate = String(e.date || "");
+        const matchesFromDate = !fromDate || transactionDate >= fromDate;
+        const matchesToDate = !toDate || transactionDate <= toDate;
+        return matchesQuery && matchesCategory && matchesSubcategory && matchesMethod && matchesFromDate && matchesToDate;
       });
 
       return panelRows(filtered, (expense, index) => {
@@ -1920,6 +1923,8 @@ function openPanel(kind) {
     const filterControlsHtml = `
       <div class="tx-modal-filter-bar">
         <label class="tx-modal-search">${icon("search")}<input type="search" placeholder="Filter by merchant, category, sub-category..." data-tx-filter-search></label>
+        <label class="tx-modal-date"><span>From</span><input type="date" aria-label="Filter transactions from date" data-tx-filter-from></label>
+        <label class="tx-modal-date"><span>To</span><input type="date" aria-label="Filter transactions to date" data-tx-filter-to></label>
         <select class="tx-modal-select" data-tx-filter-category>
           <option value="">All categories</option>
           ${categories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}
@@ -1948,11 +1953,13 @@ function openPanel(kind) {
       const catSelect = modalEl.querySelector("[data-tx-filter-category]");
       const subcategorySelect = modalEl.querySelector("[data-tx-filter-subcategory]");
       const methodSelect = modalEl.querySelector("[data-tx-filter-method]");
+      const fromDateInput = modalEl.querySelector("[data-tx-filter-from]");
+      const toDateInput = modalEl.querySelector("[data-tx-filter-to]");
       const resultsContainer = modalEl.querySelector("[data-tx-results]");
 
       const update = () => {
         if (resultsContainer) {
-          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", subcategorySelect?.value || "", methodSelect?.value || "");
+          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", subcategorySelect?.value || "", methodSelect?.value || "", fromDateInput?.value || "", toDateInput?.value || "");
         }
       };
 
@@ -1960,6 +1967,8 @@ function openPanel(kind) {
       catSelect?.addEventListener("change", update);
       subcategorySelect?.addEventListener("change", update);
       methodSelect?.addEventListener("change", update);
+      fromDateInput?.addEventListener("change", update);
+      toDateInput?.addEventListener("change", update);
     }
     return;
   }
