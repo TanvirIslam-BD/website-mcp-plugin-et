@@ -593,7 +593,7 @@ function renderBudget(model) {
     <article class="panel budget-panel" id="budget">
       <div class="panel-head">
         <h3>Budget</h3>
-        <button class="panel-menu" data-panel="budget-editor" aria-label="Edit monthly budget">•••</button>
+        <button class="panel-menu" data-panel="budget-editor" aria-label="Configure monthly budget" title="Configure monthly budget"><span aria-hidden="true">•••</span><span class="sr-only">Configure monthly budget</span></button>
       </div>
       <div class="budget-ring" style="--budget:${ring}%">
         <div class="inner"><b>${model.budgetMinor ? `${used}%` : "--"}</b><span>${model.budgetMinor ? "used" : "No budget"}</span></div>

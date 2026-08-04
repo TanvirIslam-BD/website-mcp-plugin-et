@@ -2251,6 +2251,52 @@ button {
   color: #f1f7f5 !important;
 }
 
+/* Compact, discoverable configuration action for the budget panel. */
+.budget-panel .panel-menu {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #d6e8df;
+  border-radius: 11px;
+  color: #0b7f55;
+  background: linear-gradient(145deg, #ffffff, #f0faf5);
+  box-shadow: 0 3px 10px rgba(15, 126, 83, .08);
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1px;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.budget-panel .panel-menu:hover {
+  transform: translateY(-1px);
+  border-color: #16b878;
+  background: linear-gradient(145deg, #f4fffa, #dcf8ea);
+  box-shadow: 0 6px 15px rgba(15, 126, 83, .16);
+}
+
+.budget-panel .panel-menu:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, .28);
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] .budget-panel .panel-menu {
+  border-color: #275344 !important;
+  color: #7cf2bc !important;
+  background: linear-gradient(145deg, #10281f, #0b1d18) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
+}
+
+:root[data-theme="dark"] .budget-panel .panel-menu:hover {
+  border-color: #36d991 !important;
+  background: linear-gradient(145deg, #153a2b, #0d271d) !important;
+  box-shadow: 0 7px 17px rgba(0, 0, 0, .38);
+}
+
 .tx-modal-filter-actions {
   display: inline-flex;
   align-items: center;
