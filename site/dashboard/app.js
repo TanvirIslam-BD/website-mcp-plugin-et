@@ -1573,7 +1573,28 @@ async function submitEntry(form) {
   await postDashboard(payload, form);
 }
 
+function showSyncMask() {
+  let mask = document.getElementById("sync-mask");
+  if (!mask) {
+    mask = document.createElement("div");
+    mask.id = "sync-mask";
+    mask.className = "sync-mask";
+    mask.innerHTML = '<div class="sync-spinner"></div>';
+    document.body.appendChild(mask);
+  }
+  mask.offsetHeight;
+  mask.classList.add("active");
+}
+
+function hideSyncMask() {
+  const mask = document.getElementById("sync-mask");
+  if (mask) {
+    mask.classList.remove("active");
+  }
+}
+
 async function refreshDashboard() {
+  showSyncMask();
   try {
     const savedChats = [];
     document.querySelectorAll("[data-ai-messages]").forEach((list, index) => {
@@ -1599,6 +1620,8 @@ async function refreshDashboard() {
     bindIncomeExpenseChart();
   } catch (error) {
     console.error("Failed to refresh dashboard:", error);
+  } finally {
+    hideSyncMask();
   }
 }
 
