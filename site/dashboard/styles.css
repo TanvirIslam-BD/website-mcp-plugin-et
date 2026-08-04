@@ -2227,6 +2227,30 @@ button {
   flex-wrap: wrap;
 }
 
+/* The mascot is a light illustration.  Unlike the monochrome product marks it
+   must not inherit the dark-theme multiply blend mode, which makes it vanish
+   against the assistant rail. */
+:root[data-theme="dark"] .assistant-rail-header .copilot-logo.bot-mascot,
+:root[data-theme="dark"] .ai-desktop-modal .copilot-logo.bot-mascot {
+  overflow: hidden !important;
+  border: 1px solid rgba(93, 228, 183, .48) !important;
+  background: radial-gradient(circle at 36% 24%, #f8fffc 0%, #d5f8e9 68%, #b8ecd7 100%) !important;
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .32), 0 0 0 3px rgba(47, 211, 151, .10) !important;
+}
+
+:root[data-theme="dark"] .assistant-rail-header .copilot-logo.bot-mascot img,
+:root[data-theme="dark"] .ai-desktop-modal .copilot-logo.bot-mascot img {
+  display: block;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  transform: scale(1.08) !important;
+}
+
+:root[data-theme="dark"] .assistant-rail-header .assistant-title {
+  color: #f1f7f5 !important;
+}
+
 .tx-modal-filter-actions {
   display: inline-flex;
   align-items: center;
