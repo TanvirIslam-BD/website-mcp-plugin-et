@@ -343,6 +343,20 @@ button {
   margin: -2px auto 4px;
 }
 
+.boot-visual::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(24,185,111,0.15) 0%, rgba(53,108,255,0.06) 40%, transparent 70%);
+  content: "";
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  animation: bootVisualPulse 2.4s ease-in-out infinite alternate;
+}
+
 .boot-logo {
   position: absolute;
   top: 50%;
@@ -618,6 +632,11 @@ button {
 
 @keyframes bootShimmer {
   to { transform: translateX(100%); }
+}
+
+@keyframes bootVisualPulse {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
 }
 
 @keyframes bootTyping {
