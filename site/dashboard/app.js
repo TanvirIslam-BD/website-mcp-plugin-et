@@ -1882,7 +1882,7 @@ function openPanel(kind) {
     const subcategories = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.subcategory).filter(Boolean))).sort();
     const methods = Array.from(new Set(expenses.map(e => model.expenseMetadata?.[e.id]?.paymentMethod).filter(Boolean))).sort();
 
-    const renderList = (filterText = "", selCategory = "", selSubcategory = "", selMethod = "", fromDate = "", toDate = "") => {
+    const renderList = (filterText = "", selCategory = "", selSubcategory = "", selMethod = "", fromDate = "", toDate = "", sortOrder = "newest") => {
       const query = filterText.toLowerCase().trim();
       const filtered = expenses.filter(e => {
         const meta = model.expenseMetadata?.[e.id] || {};
@@ -1901,7 +1901,19 @@ function openPanel(kind) {
         return matchesQuery && matchesCategory && matchesSubcategory && matchesMethod && matchesFromDate && matchesToDate;
       });
 
-      return panelRows(filtered, (expense, index) => {
+      filtered.sort((a, b) => {
+        const aMerchant = (model.expenseMetadata?.[a.id]?.merchant || a.description || "").toLowerCase();
+        const bMerchant = (model.expenseMetadata?.[b.id]?.merchant || b.description || "").toLowerCase();
+        if (sortOrder === "highest") return b.amountMinor - a.amountMinor;
+        if (sortOrder === "lowest") return a.amountMinor - b.amountMinor;
+        if (sortOrder === "merchant") return aMerchant.localeCompare(bMerchant);
+        return String(b.date || "").localeCompare(String(a.date || ""));
+      });
+      const totalMinor = filtered.reduce((sum, expense) => sum + Number(expense.amountMinor || 0), 0);
+      const averageMinor = filtered.length ? Math.round(totalMinor / filtered.length) : 0;
+      const summary = `<div class="tx-modal-summary" aria-live="polite"><span><b>${filtered.length}</b> ${filtered.length === 1 ? "transaction" : "transactions"}</span><span>Spent <b>${formatMoney(totalMinor, model.currency)}</b></span><span>Average <b>${formatMoney(averageMinor, model.currency)}</b></span></div>`;
+
+      return summary + panelRows(filtered, (expense, index) => {
         const meta = model.expenseMetadata?.[expense.id] || {};
         const [tone] = toneFor(expense.category, index);
         const cat = expense.category || "uncategorized";
@@ -1939,6 +1951,22 @@ function openPanel(kind) {
           <option value="">All methods</option>
           ${methods.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("")}
         </select>` : ""}
+        <select class="tx-modal-select" data-tx-filter-range aria-label="Quick date range">
+          <option value="">Any date</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="month">This month</option>
+        </select>
+        <select class="tx-modal-select" data-tx-filter-sort aria-label="Sort transactions">
+          <option value="newest">Newest first</option>
+          <option value="highest">Highest amount</option>
+          <option value="lowest">Lowest amount</option>
+          <option value="merchant">Merchant A–Z</option>
+        </select>
+        <div class="tx-modal-filter-actions">
+          <button type="button" class="tx-modal-action" data-tx-clear>Clear filters</button>
+          <button type="button" class="tx-modal-action primary" data-tx-export>Export CSV</button>
+        </div>
       </div>
       <div class="tx-modal-results" data-tx-results>
         ${renderList()}
@@ -1955,12 +1983,28 @@ function openPanel(kind) {
       const methodSelect = modalEl.querySelector("[data-tx-filter-method]");
       const fromDateInput = modalEl.querySelector("[data-tx-filter-from]");
       const toDateInput = modalEl.querySelector("[data-tx-filter-to]");
+      const rangeSelect = modalEl.querySelector("[data-tx-filter-range]");
+      const sortSelect = modalEl.querySelector("[data-tx-filter-sort]");
+      const clearFiltersButton = modalEl.querySelector("[data-tx-clear]");
+      const exportButton = modalEl.querySelector("[data-tx-export]");
       const resultsContainer = modalEl.querySelector("[data-tx-results]");
 
       const update = () => {
         if (resultsContainer) {
-          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", subcategorySelect?.value || "", methodSelect?.value || "", fromDateInput?.value || "", toDateInput?.value || "");
+          resultsContainer.innerHTML = renderList(searchInput?.value || "", catSelect?.value || "", subcategorySelect?.value || "", methodSelect?.value || "", fromDateInput?.value || "", toDateInput?.value || "", sortSelect?.value || "newest");
         }
+      };
+
+      const setQuickRange = (range) => {
+        if (!fromDateInput || !toDateInput) return;
+        if (!range) { fromDateInput.value = ""; toDateInput.value = ""; return; }
+        const now = new Date();
+        const end = now.toISOString().slice(0, 10);
+        const start = new Date(now);
+        if (range === "month") start.setDate(1);
+        else start.setDate(now.getDate() - Number(range) + 1);
+        fromDateInput.value = start.toISOString().slice(0, 10);
+        toDateInput.value = end;
       };
 
       searchInput?.addEventListener("input", update);
@@ -1969,6 +2013,29 @@ function openPanel(kind) {
       methodSelect?.addEventListener("change", update);
       fromDateInput?.addEventListener("change", update);
       toDateInput?.addEventListener("change", update);
+      rangeSelect?.addEventListener("change", () => { setQuickRange(rangeSelect.value); update(); });
+      sortSelect?.addEventListener("change", update);
+      clearFiltersButton?.addEventListener("click", () => {
+        [searchInput, catSelect, subcategorySelect, methodSelect, fromDateInput, toDateInput, rangeSelect, sortSelect].forEach(control => {
+          if (control) control.value = control === sortSelect ? "newest" : "";
+        });
+        update();
+      });
+      exportButton?.addEventListener("click", () => {
+        const header = ["Date", "Merchant", "Category", "Sub-category", "Payment method", "Amount"];
+        const rows = expenses.map(expense => {
+          const meta = model.expenseMetadata?.[expense.id] || {};
+          return [expense.date || "", meta.merchant || expense.description || "Expense", expense.category || "", meta.subcategory || "", meta.paymentMethod || "Expense", (Number(expense.amountMinor || 0) / 100).toFixed(2)];
+        });
+        const csv = [header, ...rows].map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "money-copilot-transactions.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
     }
     return;
   }

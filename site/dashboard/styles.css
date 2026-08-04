@@ -2227,6 +2227,62 @@ button {
   flex-wrap: wrap;
 }
 
+.tx-modal-filter-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+}
+
+.tx-modal-action {
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line, #e2ebe6);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink, #102131);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 720;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.tx-modal-action:hover {
+  border-color: #54b99a;
+  background: #effbf6;
+  transform: translateY(-1px);
+}
+
+.tx-modal-action.primary {
+  border-color: #12a778;
+  color: #fff;
+  background: linear-gradient(100deg, #10b981, #0f8fba);
+}
+
+.tx-modal-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px 16px;
+  margin: -2px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #d9eee5;
+  border-radius: 10px;
+  background: linear-gradient(100deg, #f2fcf7, #f3f9ff);
+  color: var(--muted, #66778a);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.tx-modal-summary span + span {
+  padding-left: 16px;
+  border-left: 1px solid #d9eee5;
+}
+
+.tx-modal-summary b {
+  color: var(--ink, #102131);
+}
+
 .tx-modal-search {
   display: flex;
   align-items: center;
@@ -2288,6 +2344,17 @@ button {
   font-size: 12px;
   font-weight: 500;
   outline: 0;
+}
+
+@media (max-width: 720px) {
+  .tx-modal-filter-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tx-modal-action {
+    flex: 1;
+  }
 }
 
 .modal-close {
@@ -10124,6 +10191,37 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 :root[data-theme="dark"] .tx-modal-select option {
   background: #0d1e30!important;
   color: #f0f6ff!important;
+}
+
+:root[data-theme="dark"] .tx-modal-action {
+  border-color: #1e354e;
+  color: #dce9fb;
+  background: #0d1e30;
+}
+
+:root[data-theme="dark"] .tx-modal-action:hover {
+  border-color: #2b9d86;
+  background: #123247;
+}
+
+:root[data-theme="dark"] .tx-modal-action.primary {
+  border-color: #1fc292;
+  color: #fff;
+  background: linear-gradient(100deg, #079d75, #0d759d);
+}
+
+:root[data-theme="dark"] .tx-modal-summary {
+  border-color: #1d3c4d;
+  background: linear-gradient(100deg, #0b2730, #10263d);
+  color: #a8bfd8;
+}
+
+:root[data-theme="dark"] .tx-modal-summary span + span {
+  border-color: #23465a;
+}
+
+:root[data-theme="dark"] .tx-modal-summary b {
+  color: #f0f6ff;
 }
 
 :root[data-theme="dark"] .data-action-card {
