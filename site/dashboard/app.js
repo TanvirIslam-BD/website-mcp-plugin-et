@@ -1400,6 +1400,7 @@ async function submitAiQuestion(form) {
     if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
     loadingMessage?.remove();
     appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot, body.visualData || null);
+    await refreshDashboard();
   } catch (error) {
     if (error.code === "AUTH_REQUIRED") {
       closeModal();
@@ -1570,6 +1571,35 @@ async function submitEntry(form) {
   await postDashboard(payload, form);
 }
 
+async function refreshDashboard() {
+  try {
+    const savedChats = [];
+    document.querySelectorAll("[data-ai-messages]").forEach((list, index) => {
+      savedChats.push({ index, html: list.innerHTML });
+    });
+
+    const data = await loadDashboard();
+    if (!data.preferencesConfigured) data.preferences = readLocalPreferences(data.preferences || {});
+    applyDashboardPreferences(data.preferences || {});
+    window.dashboardModel = buildModel(data);
+    if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
+    else renderEmptyDashboard(window.dashboardModel);
+    
+    document.querySelectorAll("[data-ai-messages]").forEach((list, index) => {
+      const saved = savedChats.find(c => c.index === index);
+      if (saved && saved.html) {
+        list.innerHTML = saved.html;
+      }
+    });
+
+    syncThemeSwitch();
+    runNotificationPreferences(window.dashboardModel);
+    bindIncomeExpenseChart();
+  } catch (error) {
+    console.error("Failed to refresh dashboard:", error);
+  }
+}
+
 async function postDashboard(payload, form) {
   const error = form?.querySelector("[data-error]");
   if (error) error.textContent = "";
@@ -1583,7 +1613,8 @@ async function postDashboard(payload, form) {
     const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) throw authRequiredError();
     if (!response.ok) throw new Error(body.error || "Could not save changes.");
-    location.reload();
+    closeModal();
+    await refreshDashboard();
   } catch (err) {
     if (err.code === "AUTH_REQUIRED") {
       redirectToMcpizeAuth();
