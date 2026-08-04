@@ -108,6 +108,9 @@
     box-shadow:0 14px 30px -22px rgba(16,163,127,.52);}
   .btn-claude{border-color:rgba(217,119,87,.42);background:rgba(217,119,87,.08);color:#fff;}
   .btn-claude:hover{border-color:#e0a07f;background:rgba(217,119,87,.14);transform:translateY(-2px);}
+  .btn-demo{border-color:rgba(45,212,191,.44);background:linear-gradient(135deg,rgba(20,184,166,.14),rgba(59,130,246,.1));color:var(--ink);box-shadow:0 12px 26px -22px rgba(20,184,166,.55);}
+  .btn-demo .play{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:var(--grad);color:#fff;font-size:9px;line-height:1;box-shadow:0 4px 11px -5px var(--glow);}
+  .btn-demo:hover{transform:translateY(-2px);border-color:var(--violet2);background:linear-gradient(135deg,rgba(20,184,166,.22),rgba(59,130,246,.16));box-shadow:0 16px 30px -20px rgba(20,184,166,.62);}
 
   /* ---------- nav ---------- */
   header.nav{position:sticky;top:0;left:0;right:0;width:100%;z-index:100;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
@@ -1609,6 +1612,7 @@
             <span class="cta-label">Start with Money Copilot</span>
             <span class="cta-arrow" aria-hidden="true">&rarr;</span>
           </a>
+          <button class="btn btn-demo" type="button" data-demo-trigger aria-haspopup="dialog" aria-controls="demoModal"><span class="play" aria-hidden="true">&#9654;</span>Watch product demo</button>
           <span class="cta-spark" aria-hidden="true"><i></i><i></i><i></i></span>
           <a class="btn btn-chatgpt" href="#how">
             <img class="client-ico" src="assets/brands/chatgpt.svg" alt="">
