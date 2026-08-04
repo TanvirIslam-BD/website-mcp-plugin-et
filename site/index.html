@@ -1078,6 +1078,9 @@
   .setup-image-head small{padding:5px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
   .setup-image-media{padding:14px;background:linear-gradient(135deg,rgba(20,184,166,.07),transparent 46%,rgba(59,130,246,.07));}
   .setup-image img{display:block;width:100%;height:auto;}
+  .setup-image .theme-guide-dark{display:none;}
+  html[data-theme="dark"] .setup-image .theme-guide-light{display:none;}
+  html[data-theme="dark"] .setup-image .theme-guide-dark{display:block;}
   .setup-image figcaption{padding:13px 17px;color:var(--muted);font-size:13px;line-height:1.5;text-align:center;}
   @media(max-width:520px){.setup-media{margin-top:30px}.setup-video{border-radius:16px}.setup-video-head{padding:11px 13px;font-size:12px}.setup-video-head small{font-size:11px}.setup-video-thumb{padding:16px}.setup-video-thumb strong{max-width:260px;font-size:16px}.setup-video-play{min-height:46px;padding:8px 14px;font-size:12px}.setup-video-play::before{width:25px;height:25px}.setup-video-play::after{left:25px}.setup-progress{margin:13px auto;font-size:9px}.setup-progress i{width:36px}.setup-image{border-radius:16px}.setup-image-head{padding:11px 13px}.setup-image-head span:first-child{font-size:12px}.setup-image-head small{font-size:9px}.setup-image-media{padding:8px}.setup-video figcaption,.setup-image figcaption{padding:11px 13px;font-size:12px}}
 
@@ -1931,7 +1934,7 @@
       <div class="setup-progress reveal" aria-label="Watch the video, then follow the visual setup guide"><span>01 Watch</span><i aria-hidden="true"></i><span>02 Follow</span></div>
       <figure class="setup-image reveal" aria-labelledby="chatgpt-guide-caption">
         <div class="setup-image-head"><span><i aria-hidden="true">2</i>Visual setup guide</span><small>4 steps</small></div>
-        <div class="setup-image-media"><picture><source type="image/webp" srcset="assets/connect-chatgpt-640.webp 640w, assets/connect-chatgpt-1024.webp 1024w" sizes="(max-width: 720px) calc(100vw - 32px), 672px"><img src="assets/connect-chatgpt.png" alt="Step-by-step visual guide for connecting Money Copilot AI with ChatGPT" width="1024" height="1412" loading="lazy" decoding="async"></picture></div>
+        <div class="setup-image-media"><picture class="theme-guide-light"><source type="image/webp" srcset="assets/connect-chatgpt-640.webp 640w, assets/connect-chatgpt-1024.webp 1024w" sizes="(max-width: 720px) calc(100vw - 32px), 672px"><img src="assets/connect-chatgpt.png" alt="Step-by-step visual guide for connecting Money Copilot AI with ChatGPT" width="1024" height="1412" loading="lazy" decoding="async"></picture><picture class="theme-guide-dark"><source type="image/webp" srcset="assets/connect-chatgpt-dark-640.webp 640w, assets/connect-chatgpt-dark-1024.webp 1024w" sizes="(max-width: 720px) calc(100vw - 32px), 672px"><img src="assets/connect-chatgpt-dark.webp" alt="Dark-mode step-by-step visual guide for connecting Money Copilot AI with ChatGPT" width="1068" height="1472" loading="lazy" decoding="async"></picture></div>
         <figcaption id="chatgpt-guide-caption">Prefer a static guide? Follow the ChatGPT connection steps at your own pace.</figcaption>
       </figure>
       </div>
@@ -1975,7 +1978,7 @@
       <div class="setup-progress reveal" aria-label="Watch the video, then follow the visual setup guide"><span>01 Watch</span><i aria-hidden="true"></i><span>02 Follow</span></div>
       <figure class="setup-image claude reveal" aria-labelledby="claude-guide-caption">
         <div class="setup-image-head"><span><i aria-hidden="true">2</i>Visual setup guide</span><small>4 steps</small></div>
-        <div class="setup-image-media"><picture><source type="image/webp" srcset="assets/connect-claude-640.webp 640w, assets/connect-claude-1024.webp 1024w" sizes="(max-width: 720px) calc(100vw - 32px), 672px"><img src="assets/connect-claude.png" alt="Step-by-step visual guide for connecting Money Copilot AI with Claude" width="1024" height="1412" loading="lazy" decoding="async"></picture></div>
+        <div class="setup-image-media"><picture class="theme-guide-light"><source type="image/webp" srcset="assets/connect-claude-640.webp 640w, assets/connect-claude-1024.webp 1024w" sizes="(max-width: 720px) calc(100vw - 32px), 672px"><img src="assets/connect-claude.png" alt="Step-by-step visual guide for connecting Money Copilot AI with Claude" width="1024" height="1412" loading="lazy" decoding="async"></picture><picture class="theme-guide-dark"><source type="image/webp" srcset="assets/connect-claude-dark-640.webp 640w, assets/connect-claude-dark-1024.webp 1024w" sizes="(max-width: 720px) calc(100vw - 32px), 672px"><img src="assets/connect-claude-dark.webp" alt="Dark-mode step-by-step visual guide for connecting Money Copilot AI with Claude" width="1068" height="1473" loading="lazy" decoding="async"></picture></div>
         <figcaption id="claude-guide-caption">Prefer a static guide? Follow the Claude connection steps at your own pace.</figcaption>
       </figure>
       </div>
