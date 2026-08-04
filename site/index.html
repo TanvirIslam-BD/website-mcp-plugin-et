@@ -118,12 +118,11 @@
     background:rgba(10,10,15,.82);border-bottom:1px solid var(--line);transition:background-color .25s ease,box-shadow .25s ease;}
   .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:84px;}
   .brand{display:flex;align-items:center;gap:13px;font-weight:800;font-size:16px;letter-spacing:-.02em;}
-  .mark{width:44px;height:44px;flex:0 0 44px;border-radius:13px;overflow:hidden;
-    box-shadow:0 8px 22px -8px var(--glow);display:block;}
+  .mark{width:54px;height:54px;flex:0 0 54px;display:block;}
   .mark img{width:100%;height:100%;display:block;}
   .wordmark{display:flex;flex-direction:column;line-height:1.05;font-size:21px;font-weight:800;letter-spacing:-.02em;}
   .wordmark .w2{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .brand-mark{width:44px;height:44px;flex:0 0 44px;border-radius:12px;box-shadow:0 8px 22px -10px var(--glow);}
+  .brand-mark{width:54px;height:54px;flex:0 0 54px;background:transparent;box-shadow:none;}
   .nav nav{display:flex;gap:34px;align-items:center;}
   .nav nav .lnk{color:var(--ink2);font-size:15.5px;font-weight:500;transition:.15s;position:relative;}
   .nav nav .lnk:hover{color:var(--ink);}
@@ -529,6 +528,7 @@
   .aic{border-radius:9px;overflow:hidden;display:block;}
   .aic img{width:100%;height:100%;display:block;border-radius:inherit;}
   .theme-mark{position:relative;overflow:hidden;background:var(--panel2);}
+  .theme-mark.brand-mark{overflow:visible;background:transparent;box-shadow:none;}
   .theme-mark img{position:static;width:100%;max-width:100%;height:100%;object-fit:contain;border-radius:inherit;}
   .theme-mark .theme-mark-light{display:none;}
   html[data-theme="light"] .theme-mark .theme-mark-dark{display:none;}
@@ -1319,10 +1319,10 @@
 
   /* --- nav: keep the two-line wordmark from crowding the burger --- */
   @media(max-width:520px){
-    .nav .wrap{height:72px;}
-    .mark{width:38px;height:38px;flex:0 0 38px;border-radius:11px;}
+    .nav .wrap{height:78px;}
+    .mark{width:54px;height:54px;flex:0 0 54px;}
     .wordmark{font-size:18px;}
-    .brand-mark{width:38px;height:38px;flex-basis:38px;border-radius:10px;}
+    .brand-mark{width:54px;height:54px;flex-basis:54px;}
   }
 
   /* --- trust strip --- */
@@ -1600,7 +1600,7 @@
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top">
-      <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.png" alt="Money Copilot AI Logo"></span>
+      <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.png" alt="Money Copilot AI Logo" width="54" height="54"></span>
       <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
     </a>
     <nav>
@@ -2246,7 +2246,7 @@
   <div class="wrap">
     <div>
       <div class="brand">
-        <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.png" alt="Money Copilot AI Logo"></span>
+        <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.png" alt="Money Copilot AI Logo" width="54" height="54"></span>
         <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
       </div>
       <div class="sub">Track expenses by typing &mdash; made for AI assistants you already use.</div>
