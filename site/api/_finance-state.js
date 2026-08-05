@@ -1,8 +1,6 @@
-import { randomUUID } from "node:crypto";
-
-// v2 moved expenses out of the finance_state JSON blob and into the `expenses`
-// table, and normalized every timestamp to an ISO string.
-export const FINANCE_SCHEMA_VERSION = 2;
+// v3 normalizes every timestamp to an ISO string. (v2 additionally moved expenses
+// out of the JSON document, which was wrong — the MCP server writes there too.)
+export const FINANCE_SCHEMA_VERSION = 3;
 
 // Epoch-millisecond timestamps are all digits; ISO strings always contain "-".
 function numericTimestamp(column) {
@@ -130,47 +128,66 @@ async function normalizeTimestamps(db, userId) {
   }
 }
 
-// Earlier builds appended a second copy of every AI-entered expense to the JSON
-// blob. Move those rows into the expenses table so there is one source of truth.
-async function promoteLegacyExpenses(db, userId, finance) {
-  const legacy = Array.isArray(finance.expenses) ? finance.expenses : [];
-  if (!legacy.length) return;
-  finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
+/**
+ * Reads of a month's expenses must consider BOTH stores.
+ *
+ * The `expenses` table and `finance_state.expenses` are not a table plus a stale
+ * duplicate: the MCP server owns this schema (nothing here creates those tables)
+ * and writes through its own path, so an expense recorded by a connected AI
+ * client can land in the JSON document rather than the table. Reading only the
+ * table made those transactions invisible on the dashboard.
+ *
+ * De-duplication is by id, falling back to a date/amount/category signature for
+ * entries written without one.
+ */
+export function mergeExpenseSources(sqlRows, finance, { startDate, endDate, category } = {}) {
+  const fallbackCurrency = cleanText(finance?.currency, 3).toUpperCase() || "BDT";
+  const wanted = category ? String(category).toLowerCase() : "";
 
-  const statements = [];
-  for (const entry of legacy) {
-    const amountMinor = Number(entry?.amountMinor || 0);
-    const date = cleanText(entry?.date, 10);
-    if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-    const id = cleanText(entry?.id, 80) || randomUUID();
-    const createdAt = typeof entry?.createdAt === "number"
-      ? new Date(entry.createdAt).toISOString()
-      : cleanText(entry?.createdAt, 40) || new Date().toISOString();
-    statements.push({
-      sql: "INSERT OR IGNORE INTO expenses (id,user_id,amount_minor,currency,category,description,date,created_at) VALUES (?,?,?,?,?,?,?,?)",
-      args: [id, userId, amountMinor, cleanText(entry?.currency, 3).toUpperCase() || "USD", cleanText(entry?.category, 60), cleanText(entry?.description, 240) || "Expense", date, createdAt],
-    });
-    const metadata = {
-      ...(finance.expenseMetadata[id] || {}),
-      ...(entry?.merchant ? { merchant: cleanText(entry.merchant, 80) } : {}),
-      ...(entry?.paymentMethod ? { paymentMethod: cleanText(entry.paymentMethod, 40) } : {}),
-    };
-    if (Object.keys(metadata).length) finance.expenseMetadata[id] = metadata;
+  const fromTable = (sqlRows || []).map((row) => ({
+    id: row.id == null ? "" : String(row.id),
+    date: String(row.date || ""),
+    category: String(row.category || ""),
+    description: String(row.description || ""),
+    amountMinor: Number(row.amount_minor || 0),
+    currency: String(row.currency || "") || fallbackCurrency,
+  }));
+
+  const fromDocument = (Array.isArray(finance?.expenses) ? finance.expenses : [])
+    .map((entry) => ({
+      id: entry?.id == null ? "" : String(entry.id),
+      date: String(entry?.date || ""),
+      category: String(entry?.category || ""),
+      description: String(entry?.description || ""),
+      amountMinor: Number(entry?.amountMinor || 0),
+      currency: cleanText(entry?.currency, 3).toUpperCase() || fallbackCurrency,
+    }))
+    .filter((entry) => /^\d{4}-\d{2}-\d{2}$/.test(entry.date) && entry.amountMinor > 0)
+    .filter((entry) => (!startDate || entry.date >= startDate) && (!endDate || entry.date <= endDate))
+    .filter((entry) => !wanted || entry.category.toLowerCase() === wanted);
+
+  const seen = new Map();
+  for (const expense of [...fromTable, ...fromDocument]) {
+    const key = expense.id || `${expense.date}-${expense.amountMinor}-${expense.category.toLowerCase()}`;
+    if (!seen.has(key)) seen.set(key, expense);
   }
-  if (statements.length) await db.batch(statements, "write");
+  return [...seen.values()].sort((a, b) => b.date.localeCompare(a.date));
 }
 
 /**
  * Brings a user's stored data up to FINANCE_SCHEMA_VERSION. Costs nothing once
  * done: the version marker lives in the blob the callers already read.
+ *
+ * Deliberately non-destructive. An earlier version of this migration moved
+ * `finance.expenses` into the table and deleted the array, on the assumption it
+ * was a legacy duplicate. It is not — see mergeExpenseSources — so the migration
+ * now only normalizes timestamps and leaves both stores intact.
  */
 export async function reconcileUserData(db, userId) {
   const { finance } = await readFinanceState(db, userId);
   if (Number(finance.schemaVersion) >= FINANCE_SCHEMA_VERSION) return finance;
   await normalizeTimestamps(db, userId);
-  return mutateFinanceState(db, userId, async (current) => {
-    await promoteLegacyExpenses(db, userId, current);
-    delete current.expenses;
+  return mutateFinanceState(db, userId, (current) => {
     current.schemaVersion = FINANCE_SCHEMA_VERSION;
     return current;
   });

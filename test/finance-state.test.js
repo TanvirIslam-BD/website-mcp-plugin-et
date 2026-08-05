@@ -4,6 +4,7 @@ import {
   FINANCE_SCHEMA_VERSION,
   amountToMinor,
   categoryCatalog,
+  mergeExpenseSources,
   mutateFinanceState,
   readFinanceState,
   reconcileUserData,
@@ -146,57 +147,30 @@ describe("mutateFinanceState", () => {
 });
 
 describe("reconcileUserData", () => {
-  it("moves legacy JSON expenses into the expenses table exactly once", async () => {
+  it("does NOT delete the JSON expense array", async () => {
+    // The regression this guards: an earlier migration moved these rows into the
+    // table and deleted the array, on the assumption it was a stale duplicate. The
+    // MCP server writes there too, so deleting it hid live transactions.
     const db = createFakeDb();
     db.seedFinance("u1", {
-      expenses: [
-        { id: "e1", date: "2026-08-01", category: "Food", description: "Lunch", amountMinor: 1500, currency: "BDT", merchant: "Cafe", paymentMethod: "bKash" },
-        { id: "e2", date: "2026-08-02", category: "Travel", amountMinor: 500, currency: "BDT" },
-      ],
+      expenses: [{ id: "e1", date: "2026-08-01", category: "food", amountMinor: 5000, currency: "BDT" }],
     });
 
     const finance = await reconcileUserData(db, "u1");
 
-    assert.equal(db.state.expenses.size, 2, "both legacy rows should be promoted");
-    assert.equal(finance.expenses, undefined, "the duplicate JSON copy must be removed");
+    assert.equal(Array.isArray(finance.expenses), true, "the JSON array must survive the migration");
+    assert.equal(finance.expenses.length, 1);
+    assert.equal(db.state.expenses.size, 0, "nothing should be copied into the table");
     assert.equal(finance.schemaVersion, FINANCE_SCHEMA_VERSION);
-    // Metadata the expenses table has no column for is preserved where the
-    // dashboard reads it from.
-    assert.equal(finance.expenseMetadata.e1.merchant, "Cafe");
-    assert.equal(finance.expenseMetadata.e1.paymentMethod, "bKash");
   });
 
   it("is a no-op on a second run", async () => {
     const db = createFakeDb();
-    db.seedFinance("u1", { expenses: [{ id: "e1", date: "2026-08-01", amountMinor: 100, currency: "BDT", category: "Food" }] });
+    db.seedFinance("u1", { expenses: [] });
     await reconcileUserData(db, "u1");
-    const countAfterFirst = db.state.statements.length;
+    const after = db.state.statements.length;
     await reconcileUserData(db, "u1");
-    assert.equal(db.state.expenses.size, 1);
-    assert.equal(db.state.statements.length, countAfterFirst + 1, "only the version check should run");
-  });
-
-  it("skips malformed legacy rows rather than writing bad data", async () => {
-    const db = createFakeDb();
-    db.seedFinance("u1", {
-      expenses: [
-        { id: "ok", date: "2026-08-01", amountMinor: 100, currency: "BDT", category: "Food" },
-        { id: "no-date", amountMinor: 100, currency: "BDT" },
-        { id: "bad-amount", date: "2026-08-01", amountMinor: -5 },
-        { id: "bad-date", date: "not-a-date", amountMinor: 100 },
-      ],
-    });
-    await reconcileUserData(db, "u1");
-    assert.deepEqual([...db.state.expenses.keys()], ["ok"]);
-  });
-
-  it("converts epoch-millisecond createdAt values to ISO strings", async () => {
-    const db = createFakeDb();
-    db.seedFinance("u1", {
-      expenses: [{ id: "e1", date: "2026-08-01", amountMinor: 100, currency: "BDT", category: "Food", createdAt: 1785000000000 }],
-    });
-    await reconcileUserData(db, "u1");
-    assert.equal(db.state.expenses.get("e1").createdAt, new Date(1785000000000).toISOString());
+    assert.equal(db.state.statements.length, after + 1, "only the version check should run");
   });
 
   it("leaves a user with no stored data in a valid state", async () => {
@@ -204,5 +178,79 @@ describe("reconcileUserData", () => {
     const finance = await reconcileUserData(db, "new-user");
     assert.equal(finance.schemaVersion, FINANCE_SCHEMA_VERSION);
     assert.deepEqual((await readFinanceState(db, "new-user")).finance.incomes, []);
+  });
+});
+
+describe("mergeExpenseSources", () => {
+  const row = (id, date, category, amountMinor) => ({ id, date, category, amount_minor: amountMinor, description: "", currency: "BDT" });
+  const entry = (id, date, category, amountMinor) => ({ id, date, category, amountMinor, currency: "BDT" });
+
+  it("returns expenses from both stores", () => {
+    const merged = mergeExpenseSources(
+      [row("t1", "2026-08-02", "food", 1000)],
+      { expenses: [entry("j1", "2026-08-03", "transport", 2000)] },
+    );
+    assert.deepEqual(merged.map((e) => e.id), ["j1", "t1"], "newest first, both sources present");
+  });
+
+  it("makes an MCP-written JSON expense visible", () => {
+    // The exact user-visible symptom: "record an expense of 50 BDT for food"
+    // succeeded, but the dashboard total never moved.
+    const merged = mergeExpenseSources([], { expenses: [entry("mcp-1", "2026-08-06", "food", 5000)] });
+    assert.equal(merged.length, 1);
+    assert.equal(merged[0].amountMinor, 5000);
+    assert.equal(merged[0].category, "food");
+  });
+
+  it("counts an expense present in both stores exactly once", () => {
+    const merged = mergeExpenseSources(
+      [row("same", "2026-08-02", "food", 1000)],
+      { expenses: [entry("same", "2026-08-02", "food", 1000)] },
+    );
+    assert.equal(merged.length, 1);
+  });
+
+  it("de-duplicates by date/amount/category when an id is missing", () => {
+    const merged = mergeExpenseSources(
+      [{ id: null, date: "2026-08-02", category: "food", amount_minor: 1000, currency: "BDT", description: "" }],
+      { expenses: [{ date: "2026-08-02", category: "food", amountMinor: 1000, currency: "BDT" }] },
+    );
+    assert.equal(merged.length, 1);
+  });
+
+  it("honours the date range and category filters on the JSON side", () => {
+    const finance = {
+      expenses: [
+        entry("in", "2026-08-15", "food", 1000),
+        entry("early", "2026-07-31", "food", 1000),
+        entry("late", "2026-09-01", "food", 1000),
+        entry("other", "2026-08-16", "transport", 1000),
+      ],
+    };
+    const merged = mergeExpenseSources([], finance, { startDate: "2026-08-01", endDate: "2026-08-31", category: "food" });
+    assert.deepEqual(merged.map((e) => e.id), ["in"]);
+  });
+
+  it("ignores malformed JSON entries", () => {
+    const merged = mergeExpenseSources([], {
+      expenses: [
+        entry("ok", "2026-08-02", "food", 1000),
+        entry("no-date", "", "food", 1000),
+        entry("bad-date", "not-a-date", "food", 1000),
+        entry("zero", "2026-08-02", "food", 0),
+        entry("negative", "2026-08-02", "food", -500),
+      ],
+    });
+    assert.deepEqual(merged.map((e) => e.id), ["ok"]);
+  });
+
+  it("falls back to the document currency when an entry omits one", () => {
+    const merged = mergeExpenseSources([], { currency: "USD", expenses: [{ id: "x", date: "2026-08-02", category: "food", amountMinor: 100 }] });
+    assert.equal(merged[0].currency, "USD");
+  });
+
+  it("copes with absent or empty inputs", () => {
+    assert.deepEqual(mergeExpenseSources([], {}), []);
+    assert.deepEqual(mergeExpenseSources(undefined, undefined), []);
   });
 });
