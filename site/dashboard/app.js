@@ -1,3 +1,10 @@
+if (window.opener && !window.opener.closed) {
+  try {
+    window.opener.location.href = window.location.href;
+    window.close();
+  } catch (e) {}
+}
+
 const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
 const token = params.get("dashboard_token");
