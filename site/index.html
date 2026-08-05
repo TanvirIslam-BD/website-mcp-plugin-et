@@ -2769,7 +2769,6 @@ function loadTranslateScript(callback) {
 }
 
 window.addEventListener('load', () => {
-  setTimeout(() => loadTranslateScript(), 2500);
   document.querySelectorAll('.custom-lang-select').forEach(el => {
     el.addEventListener('focus', () => loadTranslateScript(), { once: true });
     el.addEventListener('click', () => loadTranslateScript(), { once: true });
