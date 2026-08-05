@@ -2422,6 +2422,96 @@ function submitPanelForm(form) {
   }
 }
 
+const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
+const COPILOT_RAIL_DEFAULT_WIDTH = 440;
+const COPILOT_RAIL_MIN_WIDTH = 280;
+const COPILOT_RAIL_MAX_WIDTH = 560;
+
+function copilotRailBounds() {
+  const sidebarWidth = document.querySelector(".sidebar")?.getBoundingClientRect().width || 224;
+  const availableWidth = window.innerWidth - sidebarWidth - 720;
+  return {
+    min: COPILOT_RAIL_MIN_WIDTH,
+    max: Math.max(COPILOT_RAIL_MIN_WIDTH, Math.min(COPILOT_RAIL_MAX_WIDTH, availableWidth)),
+  };
+}
+
+function initializeAssistantRailResize() {
+  const rail = document.querySelector(".assistant-rail");
+  const handle = rail?.querySelector("[data-ai-rail-resizer]");
+  if (!rail || !handle) return;
+
+  let width = COPILOT_RAIL_DEFAULT_WIDTH;
+  try {
+    const savedWidth = Number(localStorage.getItem(COPILOT_RAIL_WIDTH_KEY));
+    if (Number.isFinite(savedWidth) && savedWidth > 0) {
+      width = savedWidth === 380 ? COPILOT_RAIL_DEFAULT_WIDTH : savedWidth;
+    }
+  } catch {}
+
+  const applyWidth = (nextWidth, { persist = false } = {}) => {
+    const bounds = copilotRailBounds();
+    width = Math.round(Math.min(bounds.max, Math.max(bounds.min, Number(nextWidth) || COPILOT_RAIL_DEFAULT_WIDTH)));
+    app.style.setProperty("--assistant-rail-width", `${width}px`);
+    handle.setAttribute("aria-valuemin", String(bounds.min));
+    handle.setAttribute("aria-valuemax", String(bounds.max));
+    handle.setAttribute("aria-valuenow", String(width));
+    handle.setAttribute("aria-valuetext", `${width} pixels wide`);
+    if (persist) {
+      try { localStorage.setItem(COPILOT_RAIL_WIDTH_KEY, String(width)); } catch {}
+    }
+  };
+
+  applyWidth(width);
+
+  let dragStartX = 0;
+  let dragStartWidth = width;
+  let activePointerId = null;
+
+  const finishResize = (event) => {
+    if (activePointerId === null || (event.pointerId !== undefined && event.pointerId !== activePointerId)) return;
+    activePointerId = null;
+    document.body.classList.remove("is-resizing-copilot");
+    handle.classList.remove("is-active");
+    applyWidth(width, { persist: true });
+  };
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    activePointerId = event.pointerId;
+    dragStartX = event.clientX;
+    dragStartWidth = rail.getBoundingClientRect().width || width;
+    handle.setPointerCapture?.(event.pointerId);
+    document.body.classList.add("is-resizing-copilot");
+    handle.classList.add("is-active");
+  });
+
+  handle.addEventListener("pointermove", (event) => {
+    if (activePointerId !== event.pointerId) return;
+    applyWidth(dragStartWidth + dragStartX - event.clientX);
+  });
+
+  handle.addEventListener("pointerup", finishResize);
+  handle.addEventListener("pointercancel", finishResize);
+  handle.addEventListener("lostpointercapture", finishResize);
+
+  handle.addEventListener("keydown", (event) => {
+    const step = event.shiftKey ? 32 : 16;
+    let nextWidth = width;
+    if (event.key === "ArrowLeft") nextWidth += step;
+    else if (event.key === "ArrowRight") nextWidth -= step;
+    else if (event.key === "Home") nextWidth = copilotRailBounds().min;
+    else if (event.key === "End") nextWidth = copilotRailBounds().max;
+    else return;
+    event.preventDefault();
+    applyWidth(nextWidth, { persist: true });
+  });
+
+  handle.addEventListener("dblclick", () => applyWidth(COPILOT_RAIL_DEFAULT_WIDTH, { persist: true }));
+  window.addEventListener("resize", () => applyWidth(width));
+}
+
 function bindEvents() {
   const profilePhoto = document.querySelector("[data-profile-photo]");
   profilePhoto?.addEventListener("error", () => {
