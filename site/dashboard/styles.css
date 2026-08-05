@@ -10860,3 +10860,8 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
     border-radius: 14px;
   }
 }
+
+.sidebar .brand-logo-light,
+.sidebar .brand-logo-dark {
+  filter: none !important;
+}
