@@ -1,0 +1,411 @@
+/*
+ * Owner console sign-in.
+ *
+ * Standalone by design: the page previously loaded owner.css (17KB of monitor
+ * console styles) and yet none of the classes it used — login-shell, login-card,
+ * brand, form-error, security-note, primary — were defined anywhere, so it
+ * rendered as a bare unstyled form.
+ *
+ * The split layout is deliberate. The dark rail marks this as an internal tool
+ * so an operator can never mistake it for the customer sign-in at /login, while
+ * the palette stays in the Money Copilot family.
+ */
+
+:root {
+  --font: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --surface: #f6f9f8;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --ink-muted: #5f7086;
+  --line: #e2e8f0;
+
+  --rail-from: #07231a;
+  --rail-to: #0c3a2a;
+  --rail-ink: #ecfdf5;
+  --rail-ink-soft: #9fd6bf;
+
+  /* Kept for focus rings and the reveal icon's hover state, where a lighter green
+     reads fine against a white surface. The button itself uses darker stops
+     below — #10b981/#059669 under white text fail WCAG AA (2.54:1 / 3.77:1) at
+     this weight and size. */
+  --accent: #10b981;
+  --accent-strong: #059669;
+  --accent-ring: rgba(16, 185, 129, .18);
+  --button-from: #047857;
+  --button-to: #036c4e;
+
+  --danger: #b42318;
+  --danger-bg: #fef3f2;
+  --danger-line: #fecdca;
+  --warn: #8a5a00;
+  --warn-bg: #fffaeb;
+  --warn-line: #fdeabd;
+
+  --radius: 16px;
+  --shadow: 0 24px 60px -18px rgba(6, 40, 28, .28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #07120e;
+    --card: #0f1f19;
+    --ink: #ecf8f2;
+    --ink-soft: #a9c4b8;
+    --ink-muted: #7d9a8d;
+    --line: #1e3a2e;
+    --shadow: 0 24px 60px -18px rgba(0, 0, 0, .6);
+    --danger: #ff9d95;
+    --danger-bg: #2a1512;
+    --danger-line: #5b2620;
+    --warn: #f3c76b;
+    --warn-bg: #2a2010;
+    --warn-line: #574318;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Shell ───────────────────────────────────────────────────────────────── */
+
+.login-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  width: 100%;
+  max-width: 940px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+/* ── Left rail: identity and the guarantees the server actually enforces ─── */
+
+.login-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 40px 36px;
+  background: radial-gradient(120% 90% at 12% 8%, #14513a 0%, var(--rail-to) 42%, var(--rail-from) 100%);
+  color: var(--rail-ink);
+}
+
+.rail-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -.01em;
+}
+
+.rail-brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .08);
+}
+
+.rail-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid rgba(159, 214, 191, .35);
+  border-radius: 999px;
+  color: var(--rail-ink-soft);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.login-rail h1 {
+  margin: 0;
+  font-size: clamp(24px, 2.4vw, 31px);
+  font-weight: 780;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+}
+
+.login-rail h1 span { color: #5ee3ac; }
+
+.rail-lede {
+  margin: -18px 0 0;
+  max-width: 34ch;
+  color: var(--rail-ink-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.rail-facts {
+  display: grid;
+  gap: 14px;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail-facts li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 11px;
+  color: var(--rail-ink-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.rail-facts b {
+  display: block;
+  color: var(--rail-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rail-facts svg {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: #5ee3ac;
+}
+
+/* ── Right panel: the form ───────────────────────────────────────────────── */
+
+.login-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 44px 40px;
+}
+
+.panel-head h2 {
+  margin: 0 0 5px;
+  font-size: 19px;
+  font-weight: 760;
+  letter-spacing: -.015em;
+}
+
+.panel-head p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.login-form {
+  display: grid;
+  gap: 15px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field > span {
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color .14s ease, box-shadow .14s ease;
+}
+
+.field input::placeholder { color: var(--ink-muted); }
+
+.field input:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+  outline: none;
+}
+
+.field input:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Password field with a reveal control that stays out of the text. */
+.field-password { position: relative; }
+.field-password input { padding-right: 46px; }
+
+.reveal {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.reveal:hover { color: var(--ink-soft); }
+.reveal svg { width: 17px; height: 17px; }
+.reveal .icon-hide { display: none; }
+.reveal[aria-pressed="true"] .icon-show { display: none; }
+.reveal[aria-pressed="true"] .icon-hide { display: block; }
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  margin-top: 3px;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--button-from) 0%, var(--button-to) 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+}
+
+.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -8px rgba(5, 150, 105, .55);
+}
+
+.primary:disabled {
+  opacity: .68;
+  cursor: progress;
+  transform: none;
+}
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Messages ────────────────────────────────────────────────────────────── */
+
+.form-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--danger-line);
+  border-radius: 11px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 12.8px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.form-message[data-tone="warn"] {
+  border-color: var(--warn-line);
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.form-message[hidden] { display: none; }
+.form-message svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+
+.caps-hint {
+  margin: -6px 0 0;
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.caps-hint[hidden] { display: none; }
+
+.panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 11.5px;
+}
+
+.panel-foot a {
+  color: var(--ink-soft);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.panel-foot a:hover { color: var(--accent-strong); text-decoration: underline; }
+
+:is(a, button, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  body { padding: 0; align-items: stretch; }
+
+  .login-shell {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: none;
+    min-height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* The rail becomes a compact header: keep the identity, drop the detail. */
+  .login-rail {
+    gap: 16px;
+    padding: 26px 22px 24px;
+  }
+
+  .rail-lede,
+  .rail-facts { display: none; }
+
+  .login-rail h1 { font-size: 22px; }
+
+  .login-panel { padding: 26px 22px 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 1.6s; }
+  .primary { transition: none; }
+  .primary:hover:not(:disabled) { transform: none; }
+}

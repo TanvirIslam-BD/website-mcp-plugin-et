@@ -1,2 +1,87 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Owner sign in · Expense Tracker AI</title><script src="/owner/boot.js"></script><script defer src="/_vercel/insights/script.js"></script><link rel="stylesheet" href="/owner/owner.css"></head><body><main class="login-shell"><section class="login-card"><div class="brand"><span class="brand-mark">ET</span><span>Expense Tracker AI</span></div><h1>Owner control center</h1><p class="subtle">Sign in to monitor service activity and manage account access. This session is separate from customer dashboard authentication.</p><form id="login-form" class="login-form"><label class="field"><span>Owner email</span><input id="email" type="email" autocomplete="username" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" minlength="8" required></label><p id="error" class="form-error" role="alert"></p><button id="submit" class="primary" type="submit">Sign in securely</button></form><div class="security-note"><span>🔒</span><span>Protected by a signed, HTTP-only owner session. Customer sessions cannot access this panel.</span></div></section></main><script type="module" src="/owner/login.js"></script></body></html>
-<script defer src="/_vercel/speed-insights/script.js"></script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="color-scheme" content="light dark">
+  <title>Owner sign in · Money Copilot AI</title>
+  <link rel="icon" type="image/png" sizes="256x256" href="/assets/logo/money-copilot-app-logo-108.webp">
+  <script src="/owner/boot.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+  <link rel="stylesheet" href="/owner/login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <aside class="login-rail">
+      <div class="rail-brand">
+        <img src="/assets/logo/money-copilot-app-logo-108.webp" alt="" width="34" height="34">
+        <span>Money Copilot AI</span>
+      </div>
+      <span class="rail-badge">Internal · Owner console</span>
+      <h1>Service <span>control room</span></h1>
+      <p class="rail-lede">
+        Monitor activity across every account, review the audit trail, and manage
+        access. Separate from customer sign-in.
+      </p>
+
+      <ul class="rail-facts">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span><b>Isolated session</b>A customer dashboard session can never reach this console.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l7 4v6c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/></svg>
+          <span><b>Throttled sign-in</b>Eight attempts per address every 15 minutes, plus a global ceiling.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          <span><b>Revocable</b>Changing the password signs every other session out immediately.</span>
+        </li>
+      </ul>
+    </aside>
+
+    <section class="login-panel">
+      <div class="panel-head">
+        <h2>Sign in</h2>
+        <p>Use the owner credentials. Every action here is written to the audit log.</p>
+      </div>
+
+      <form class="login-form" id="login-form" novalidate>
+        <label class="field">
+          <span>Owner email</span>
+          <input id="email" name="email" type="email" autocomplete="username"
+                 inputmode="email" placeholder="owner@example.com"
+                 required aria-describedby="form-message">
+        </label>
+
+        <label class="field field-password">
+          <span>Password</span>
+          <input id="password" name="password" type="password" autocomplete="current-password"
+                 minlength="8" placeholder="At least 8 characters"
+                 required aria-describedby="form-message caps-hint">
+          <button type="button" class="reveal" id="reveal" aria-pressed="false" aria-label="Show password" title="Show password">
+            <svg class="icon-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.5 10.5 0 0 1 12 19c-6.4 0-10-7-10-7a18 18 0 0 1 4.2-5.2"/><path d="M9.9 5.2A10.5 10.5 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.2 3.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M2 2l20 20"/></svg>
+          </button>
+        </label>
+
+        <p class="caps-hint" id="caps-hint" hidden>Caps Lock appears to be on.</p>
+
+        <p class="form-message" id="form-message" role="alert" aria-live="polite" hidden></p>
+
+        <button class="primary" id="submit" type="submit">Sign in securely</button>
+      </form>
+
+      <div class="panel-foot">
+        <span>Signed, HTTP-only session · 8&nbsp;hours</span>
+        <a href="/">Back to site</a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/owner/login.js"></script>
+</body>
+</html>
