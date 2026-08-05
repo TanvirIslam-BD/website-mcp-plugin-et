@@ -3340,9 +3340,9 @@ img[src$="money-copilot-app-logo.png"] {
   top: auto;
   right: auto;
   bottom: calc(100% + 10px);
-  left: 50%;
-  width: min(250px, calc(100vw - 24px));
-  transform: translateX(-50%);
+  left: 0;
+  width: min(258px, calc(100vw - 32px));
+  transform: none;
 }
 :root[data-theme="dark"] .mobile-date-nav .month-picker-trigger { color:#65e9aa; }
 :root[data-theme="dark"] .mobile-date-nav .month-picker-trigger:hover,
