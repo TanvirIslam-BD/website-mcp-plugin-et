@@ -55,69 +55,7 @@ function applyDashboardPreferences(preferences = {}) {
   document.documentElement.dataset.density = preferences.compactMode ? "compact" : "comfortable";
   try {
     if (preferences.currency) localStorage.setItem("dashboard_display_currency", preferences.currency);
-    if (preferences.copilotModel) localStorage.setItem("copilot_model", preferences.copilotModel);
-    localStorage.setItem("compact_mode", String(Boolean(preferences.compactMode)));
-    localStorage.setItem("auto_suggest", String(preferences.autoSuggest !== false));
-    localStorage.setItem("bill_reminders", String(preferences.billReminders !== false));
-    localStorage.setItem("income_received_notifications", String(preferences.incomeReceived !== false));
-    localStorage.setItem("overdue_alerts", String(preferences.overdueAlerts !== false));
-const app = document.getElementById("app");
-const params = new URLSearchParams(location.search);
-const token = params.get("dashboard_token");
-let selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
-const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
-const MONEY_COPILOT_MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
 
-function localDisplayCurrency(fallbackCurrency = "") {
-  const saved = (() => {
-    try { return localStorage.getItem("dashboard_display_currency"); } catch { return ""; }
-  })();
-  if (/^[A-Z]{3}$/.test(saved || "")) return saved;
-
-  const region = (() => {
-    try { return new Intl.Locale(navigator.language).region || ""; } catch { return ""; }
-  })();
-  const regionalCurrency = { BD: "BDT", IN: "INR", GB: "GBP", CA: "CAD", AU: "AUD", EU: "EUR", DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", PT: "EUR" }[region];
-  return regionalCurrency || (/^[A-Z]{3}$/.test(fallbackCurrency) ? fallbackCurrency : "USD");
-}
-
-function setTheme(mode) {
-  const theme = mode === "dark" ? "dark" : "light";
-  document.documentElement.dataset.theme = theme;
-  try { localStorage.setItem("expenseTrackerTheme", theme); } catch {}
-  syncThemeSwitch();
-}
-
-function readLocalPreferences(fallback = {}) {
-  const readBoolean = (key, defaultValue) => {
-    try {
-      const value = localStorage.getItem(key);
-      return value === null ? defaultValue : value === "true";
-    } catch { return defaultValue; }
-  };
-  let copilotModel = fallback.copilotModel || "gemini-2.5-flash";
-  try { copilotModel = localStorage.getItem("copilot_model") || copilotModel; } catch {}
-  return {
-    ...fallback,
-    currency: localDisplayCurrency(fallback.currency || ""),
-    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
-    compactMode: readBoolean("compact_mode", fallback.compactMode === true),
-    copilotModel,
-    autoSuggest: readBoolean("auto_suggest", fallback.autoSuggest !== false),
-    billReminders: readBoolean("bill_reminders", fallback.billReminders !== false),
-    incomeReceived: readBoolean("income_received_notifications", fallback.incomeReceived !== false),
-    overdueAlerts: readBoolean("overdue_alerts", fallback.overdueAlerts !== false),
-    newsletter: readBoolean("newsletter_notifications", fallback.newsletter !== false),
-    pushNotifications: readBoolean("push_notifications", fallback.pushNotifications === true),
-    emailNotifications: readBoolean("email_notifications", fallback.emailNotifications !== false),
-  };
-}
-
-function applyDashboardPreferences(preferences = {}) {
-  if (preferences.theme === "dark" || preferences.theme === "light") setTheme(preferences.theme);
-  document.documentElement.dataset.density = preferences.compactMode ? "compact" : "comfortable";
-  try {
-    if (preferences.currency) localStorage.setItem("dashboard_display_currency", preferences.currency);
     if (preferences.copilotModel) localStorage.setItem("copilot_model", preferences.copilotModel);
     localStorage.setItem("compact_mode", String(Boolean(preferences.compactMode)));
     localStorage.setItem("auto_suggest", String(preferences.autoSuggest !== false));
