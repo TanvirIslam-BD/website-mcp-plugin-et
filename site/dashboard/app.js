@@ -1455,7 +1455,11 @@ async function submitAiQuestion(form) {
     if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
     loadingMessage?.remove();
     appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot, body.visualData || null);
-    await refreshDashboard();
+    const modifyingTools = ["add_expense", "delete_expense", "update_expense_category", "set_budget", "set_savings_goal", "create_subcategory", "rename_subcategory", "delete_subcategory", "update_settings"];
+    const hasModifications = isQuickExpense || (body.usedTools && body.usedTools.some(tool => modifyingTools.includes(tool)));
+    if (hasModifications) {
+      await refreshDashboard();
+    }
   } catch (error) {
     if (error.code === "AUTH_REQUIRED") {
       closeModal();
