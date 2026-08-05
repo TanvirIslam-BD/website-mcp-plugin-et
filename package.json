@@ -2,6 +2,9 @@
   "name": "expense-tracker-ai-website",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  },
   "dependencies": {
     "@libsql/client": "^0.14.0",
     "@vercel/analytics": "^2.0.1",

@@ -475,7 +475,7 @@ body.is-resizing-copilot * {
 
 .category-line {
   display: grid;
-  grid-template-columns: 20px minmax(52px, 1fr) auto;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
   align-items: center;
   gap: 7px;
   color: #253149;

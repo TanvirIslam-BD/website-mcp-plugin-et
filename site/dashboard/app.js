@@ -7,7 +7,6 @@ if (window.opener && !window.opener.closed) {
 
 const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
-const token = params.get("dashboard_token");
 let selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
 const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
 const MONEY_COPILOT_MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
@@ -39,7 +38,7 @@ function readLocalPreferences(fallback = {}) {
       return value === null ? defaultValue : value === "true";
     } catch { return defaultValue; }
   };
-  let copilotModel = fallback.copilotModel || "gemini-2.5-flash";
+  let copilotModel = fallback.copilotModel || "auto";
   try { copilotModel = localStorage.getItem("copilot_model") || copilotModel; } catch {}
   return {
     ...fallback,
@@ -147,6 +146,20 @@ function authRequiredError() {
 }
 
 const colors = ["#019a56", "#19b9aa", "#83c968", "#087f49", "#9ee4ce", "#4ec9a0", "#5eae77"];
+
+/*
+ * Chart identity colours are kept separate from the decorative category tints
+ * above. These are the fixed slots of a validated categorical palette (see the
+ * data-visualization block in styles.css): assigned in order, never cycled, so
+ * two categories can never end up sharing an identity.
+ */
+const CATEGORY_SLOTS = 8;
+// How many categories the breakdown panel lists before folding the tail into
+// one "other" row. Kept below the slot count so the panel stays compact.
+const CATEGORY_VISIBLE = 6;
+function categoryColor(index) {
+  return `var(--cat-${Math.min(index + 1, CATEGORY_SLOTS)})`;
+}
 const tagColors = {
   food: ["#72bf61", "#edf8e9"],
   "food & dining": ["#72bf61", "#edf8e9"],
@@ -373,13 +386,13 @@ function trendBadge(value, label, mode = "good") {
 }
 
 async function loadDashboard() {
+  // The session travels in an HttpOnly cookie only — never in the URL, where it
+  // would leak into history, referrers, and server logs.
   const urlParams = new URLSearchParams({ month: selectedMonth });
-  if (token) urlParams.set("dashboard_token", token);
   const response = await fetch(`/api/dashboard?${urlParams}`, { credentials: "same-origin" });
   const body = await response.json().catch(() => ({}));
   if (response.status === 401 || response.status === 403) throw authRequiredError();
   if (!response.ok) throw new Error(body.error || "Unable to open dashboard.");
-  if (token) history.replaceState({}, "", `${location.pathname}?month=${selectedMonth}${location.hash || ""}`);
   return body;
 }
 
@@ -436,18 +449,48 @@ function renderMetricCards(model) {
   const incomeSpark = model.incomeDaily.length ? model.incomeDaily : [1, 2, 3, 2, 4, 3, 5];
   const expenseSpark = model.expenseDaily.length ? model.expenseDaily : [1, 3, 4, 3, 2, 5, 4];
   const previousSaved = Number(model.previousIncomeMinor || 0) - Number(model.previousSpentMinor || 0);
+
+  /*
+   * The first card used to be "Balance", computed as income − spent — the exact
+   * same number as "Saved", with the same sparkline and the same trend. Two of
+   * four hero cards showed identical data. It now answers the question a budget
+   * holder actually has: how much is left, and what that allows per day.
+   *
+   * The three remaining cards mirror the cash-flow series colours, so the hero
+   * row doubles as a legend for the chart below it.
+   */
+  const hasBudget = model.budgetMinor !== null && model.budgetMinor > 0;
+  const daysLeft = Math.max(1, daysInMonth(model.month) - todayDay(model.month) + 1);
+  const perDayMinor = hasBudget ? Math.max(0, Math.round(model.remainingMinor / daysLeft)) : 0;
+  const overBudget = hasBudget && model.remainingMinor < 0;
+  const runwayTone = overBudget
+    ? "var(--status-critical)"
+    : hasBudget && model.budgetUsed >= 80 ? "var(--status-warning)" : "var(--status-good)";
+
   const metrics = [
-    {
-      className: `balance ${model.savedMinor < 0 ? "is-negative" : ""}`,
-      label: "Balance",
-      value: Math.abs(model.savedMinor),
-      trend: percentChange(Math.abs(model.savedMinor), Math.abs(previousSaved)),
-      trendDirection: model.savedMinor >= 0 ? 1 : -1,
-      favorable: model.savedMinor >= 0,
-      iconName: "wallet",
-      spark: balanceSpark,
-      sparkTone: model.savedMinor < 0 ? "#ef4444" : "#019a56",
-    },
+    hasBudget
+      ? {
+        className: `balance ${overBudget ? "is-negative" : ""}`,
+        label: overBudget ? "Over budget" : "Left to spend",
+        value: Math.abs(model.remainingMinor),
+        favorable: !overBudget,
+        iconName: "wallet",
+        spark: balanceSpark,
+        sparkTone: runwayTone,
+        caption: overBudget
+          ? `${model.budgetUsed}% of ${formatMoney(model.budgetMinor, model.currency, { compact: true })} budget used`
+          : `${formatMoney(perDayMinor, model.currency, { compact: true })}/day for ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`,
+      }
+      : {
+        className: `balance ${model.savedMinor < 0 ? "is-negative" : ""}`,
+        label: "Net this month",
+        value: Math.abs(model.savedMinor),
+        favorable: model.savedMinor >= 0,
+        iconName: "wallet",
+        spark: balanceSpark,
+        sparkTone: model.savedMinor < 0 ? "var(--status-critical)" : "var(--status-good)",
+        caption: "Set a budget to track what is left",
+      },
     {
       className: "income",
       label: "Income",
@@ -457,7 +500,7 @@ function renderMetricCards(model) {
       favorable: Number(model.incomeMinor || 0) >= Number(model.previousIncomeMinor || 0),
       iconName: "analytics",
       spark: incomeSpark,
-      sparkTone: "#019a56",
+      sparkTone: "var(--series-income)",
     },
     {
       className: "expense",
@@ -468,7 +511,7 @@ function renderMetricCards(model) {
       favorable: Number(model.spentMinor || 0) <= Number(model.previousSpentMinor || 0),
       iconName: "card",
       spark: expenseSpark,
-      sparkTone: "#019a56",
+      sparkTone: "var(--series-expense)",
     },
     {
       className: `saving ${model.savedMinor < 0 ? "is-negative" : ""}`,
@@ -478,8 +521,8 @@ function renderMetricCards(model) {
       trendDirection: model.savedMinor >= 0 ? 1 : -1,
       favorable: model.savedMinor >= 0,
       iconName: "piggy",
-      spark: balanceSpark,
-      sparkTone: model.savedMinor < 0 ? "#ef4444" : "#019a56",
+      spark: model.savingsCum.length ? model.savingsCum : balanceSpark,
+      sparkTone: model.savedMinor < 0 ? "var(--status-critical)" : "var(--series-savings)",
     },
   ];
   return `
@@ -491,13 +534,15 @@ function renderMetricCards(model) {
             <div class="metric-copy">
               <label>${metric.label}</label>
               <h2>${formatMoney(metric.value, model.currency, { compact: true })}</h2>
-              <span class="metric-trend ${metric.favorable ? "positive" : "negative"}">
+              ${metric.caption
+                ? `<span class="metric-caption">${esc(metric.caption)}</span>`
+                : `<span class="metric-trend ${metric.favorable ? "positive" : "negative"}">
                 ${icon(metric.trendDirection >= 0 ? "up" : "down")}
                 <b>${Math.abs(metric.trend).toFixed(1)}%</b>
                 <small>vs last month</small>
-              </span>
+              </span>`}
             </div>
-            <span class="metric-direction ${metric.favorable ? "positive" : "negative"}">${icon(metric.favorable ? "up" : "down")}</span>
+            ${metric.caption ? "" : `<span class="metric-direction ${metric.favorable ? "positive" : "negative"}">${icon(metric.favorable ? "up" : "down")}</span>`}
           </div>
           ${spark(metric.spark, metric.sparkTone)}
         </article>
@@ -545,9 +590,9 @@ function renderIncomeExpense(model) {
         <h3>Cash flow</h3>
         <div class="chart-tools">
           <div class="legend">
-            <span><i style="--tone:#078f50"></i>Income</span>
-            <span><i style="--tone:#019a56"></i>Expenses</span>
-            <span><i style="--tone:#20bfa0"></i>Savings</span>
+            <span><i style="--tone:var(--series-income)"></i>Income</span>
+            <span><i style="--tone:var(--series-expense)"></i>Expenses</span>
+            <span><i style="--tone:var(--series-savings)"></i>Savings</span>
           </div>
           <select class="period-select" aria-label="Chart period" data-chart-mode>
             <option value="month">This Month</option>
@@ -559,8 +604,8 @@ function renderIncomeExpense(model) {
       <div class="income-expense-chart">
         <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="Income expense and savings chart">
           <defs>
-            <linearGradient id="incomeFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#18b96f" stop-opacity=".18"/><stop offset="1" stop-color="#18b96f" stop-opacity="0"/></linearGradient>
-            <linearGradient id="expenseFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff4548" stop-opacity=".14"/><stop offset="1" stop-color="#ff4548" stop-opacity="0"/></linearGradient>
+            <linearGradient id="incomeFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--series-income)" stop-opacity=".16"/><stop offset="1" stop-color="var(--series-income)" stop-opacity="0"/></linearGradient>
+            <linearGradient id="expenseFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--series-expense)" stop-opacity=".14"/><stop offset="1" stop-color="var(--series-expense)" stop-opacity="0"/></linearGradient>
           </defs>
           <line class="grid-line" x1="${padX}" y1="35" x2="${width - 8}" y2="35"/>
           <line class="grid-line" x1="${padX}" y1="72" x2="${width - 8}" y2="72"/>
@@ -572,9 +617,9 @@ function renderIncomeExpense(model) {
           <polyline class="chart-line expense" data-chart-line="expense" points="${expensePoints}"/>
           <polyline class="chart-line saving" data-chart-line="saving" points="${savingPoints}"/>
           <line class="chart-cursor" data-chart-cursor x1="0" x2="0" y1="${padY}" y2="${height - padY}"/>
-          <circle class="chart-point income" data-chart-point="income" r="4" stroke="#078f50"/>
-          <circle class="chart-point expense" data-chart-point="expense" r="4" stroke="#019a56"/>
-          <circle class="chart-point saving" data-chart-point="saving" r="4" stroke="#20bfa0"/>
+          <circle class="chart-point income" data-chart-point="income" r="4.5"/>
+          <circle class="chart-point expense" data-chart-point="expense" r="4.5"/>
+          <circle class="chart-point saving" data-chart-point="saving" r="4.5"/>
           <rect class="chart-hitbox" data-chart-hitbox x="${padX}" y="0" width="${width - padX * 2}" height="${height}" rx="4"/>
         </svg>
         <div class="chart-y-axis" aria-hidden="true">
@@ -590,9 +635,9 @@ function renderIncomeExpense(model) {
         </div>
         <div class="chart-tooltip" data-chart-tooltip>
           <b data-tip-date>${esc(midDay)}</b>
-          <span><label>Income</label><strong data-tip-income style="color:#32df8b">${formatMoney(model.incomeCum[midIndex] || 0, model.currency)}</strong></span>
-          <span><label>Expenses</label><strong data-tip-expense style="color:#ff7073">${formatMoney(model.expenseCum[midIndex] || 0, model.currency)}</strong></span>
-          <span><label>Savings</label><strong data-tip-saving style="color:#66a0ff">${formatMoney(model.savingsCum[midIndex] || 0, model.currency)}</strong></span>
+          <span><i class="tip-swatch" style="background:var(--series-income)"></i><label>Income</label><strong data-tip-income>${formatMoney(model.incomeCum[midIndex] || 0, model.currency)}</strong></span>
+          <span><i class="tip-swatch" style="background:var(--series-expense)"></i><label>Expenses</label><strong data-tip-expense>${formatMoney(model.expenseCum[midIndex] || 0, model.currency)}</strong></span>
+          <span><i class="tip-swatch" style="background:var(--series-savings)"></i><label>Savings</label><strong data-tip-saving>${formatMoney(model.savingsCum[midIndex] || 0, model.currency)}</strong></span>
         </div>
       </div>
     </article>
@@ -621,24 +666,52 @@ function renderBudget(model) {
 
 function renderCategories(model) {
   const total = Math.max(model.spentMinor || 0, 1);
+  const all = model.categories || [];
+  const shown = all.slice(0, CATEGORY_VISIBLE);
+  // Anything past the palette's fixed slots folds into one labelled remainder
+  // rather than cycling hues, which would give two categories the same identity.
+  const restMinor = all.slice(CATEGORY_VISIBLE).reduce((sum, category) => sum + Number(category.amountMinor || 0), 0);
+  const untracked = Math.max(0, total - shown.reduce((sum, c) => sum + Number(c.amountMinor || 0), 0) - restMinor);
+
+  const segments = [
+    ...shown.map((category, index) => ({ color: categoryColor(index), amountMinor: Number(category.amountMinor || 0) })),
+    ...(restMinor > 0 ? [{ color: "var(--cat-other)", amountMinor: restMinor }] : []),
+    ...(untracked > 0 ? [{ color: "var(--viz-track)", amountMinor: untracked }] : []),
+  ];
+
+  // A 2px surface gap between adjacent arcs so segment boundaries read as
+  // separate quantities instead of one continuous band.
+  const GAP = 0.6;
   let stop = 0;
-  const donutStops = (model.categories || []).slice(0, 5).map((category, index) => {
+  const donutStops = [];
+  segments.forEach((segment, index) => {
+    const span = (segment.amountMinor / total) * 100;
     const start = stop;
-    stop += (Number(category.amountMinor || 0) / total) * 100;
-    return `${colors[index % colors.length]} ${start.toFixed(1)}% ${Math.min(stop, 100).toFixed(1)}%`;
+    const end = Math.min(100, start + span);
+    const gapped = index < segments.length - 1 ? Math.max(start, end - GAP) : end;
+    donutStops.push(`${segment.color} ${start.toFixed(2)}% ${gapped.toFixed(2)}%`);
+    if (gapped < end) donutStops.push(`var(--viz-surface) ${gapped.toFixed(2)}% ${end.toFixed(2)}%`);
+    stop = end;
   });
-  if (stop < 100) donutStops.push(`#e8edf4 ${Math.max(stop, 0).toFixed(1)}% 100%`);
-  const rows = (model.categories || []).slice(0, 5).map((category, index) => {
+  if (stop < 100) donutStops.push(`var(--viz-track) ${Math.max(stop, 0).toFixed(2)}% 100%`);
+
+  const legendRows = shown.map((category, index) => {
     const percentage = Math.round((Number(category.amountMinor || 0) / total) * 100);
-    return `<div class="category-line"><i style="--tone:${colors[index % colors.length]}">${icon(["up", "transactions", "card", "bills", "categories"][index] || "categories")}</i><label>${esc(category.name)}</label><b><span class="category-amount">${formatMoney(category.amountMinor, model.currency, { compact: true })}</span> <small><span class="category-paren">(</span>${percentage}%<span class="category-paren">)</span></small></b></div>`;
-  }).join("") || `<div class="empty-state">No category data yet.</div>`;
+    return `<div class="category-line"><i class="category-swatch" style="--tone:${categoryColor(index)}"></i><label>${esc(category.name)}</label><b><span class="category-amount">${formatMoney(category.amountMinor, model.currency, { compact: true })}</span> <small><span class="category-paren">(</span>${percentage}%<span class="category-paren">)</span></small></b></div>`;
+  });
+  if (restMinor > 0) {
+    const percentage = Math.round((restMinor / total) * 100);
+    const count = all.length - shown.length;
+    legendRows.push(`<div class="category-line is-other"><i class="category-swatch" style="--tone:var(--cat-other)"></i><label title="${count} smaller ${count === 1 ? "category" : "categories"}">Other (${count})</label><b><span class="category-amount">${formatMoney(restMinor, model.currency, { compact: true })}</span> <small><span class="category-paren">(</span>${percentage}%<span class="category-paren">)</span></small></b></div>`);
+  }
+  const rows = legendRows.join("") || `<div class="empty-state">No category data yet.</div>`;
   return `
     <article class="panel spending-panel" id="categories">
       <div class="panel-head">
         <h3>Spending breakdown</h3>
       </div>
       <div class="spending-report">
-        <div class="spending-donut" style="--segments:${donutStops.length ? `conic-gradient(${donutStops.join(",")})` : "conic-gradient(#e8edf4 0 100%)"}">
+        <div class="spending-donut" style="--segments:${donutStops.length ? `conic-gradient(${donutStops.join(",")})` : "conic-gradient(var(--viz-track) 0 100%)"}">
           <div><b>${formatMoney(model.spentMinor, model.currency, { compact: true })}</b><span>Total spent</span></div>
         </div>
         <div class="category-legend">${rows}</div>
@@ -1133,9 +1206,15 @@ function renderVisualData(data) {
 
   if (data.progress) {
     const p = data.progress;
-    const overBudget = p.percent > 100;
-    const barColor = overBudget ? "#ff4548" : p.percent > 80 ? "#f59e0b" : "#18b96f";
-    html += `<div class="ai-progress-block"><div class="ai-progress-head"><span>${esc(p.label)}</span><strong style="color:${barColor}">${p.percent}%</strong></div><div class="ai-progress-track"><div class="ai-progress-fill" style="width:${Math.min(100, p.percent)}%;background:${barColor}"></div></div></div>`;
+    // Coerced because a tool result may come from the third-party MCP server and
+    // this value is written into markup.
+    const percent = Number.isFinite(Number(p.percent)) ? Math.max(0, Math.round(Number(p.percent))) : 0;
+    // Reserved status scale, not series colours: under 80% is on track, 80–100%
+    // is a warning, over 100% is over budget.
+    const barColor = percent > 100
+      ? "var(--status-critical)"
+      : percent >= 80 ? "var(--status-warning)" : "var(--status-good)";
+    html += `<div class="ai-progress-block"><div class="ai-progress-head"><span>${esc(p.label)}</span><strong style="color:${barColor}">${percent}%</strong></div><div class="ai-progress-track"><div class="ai-progress-fill" style="width:${Math.min(100, percent)}%;background:${barColor}"></div></div></div>`;
   }
 
   if (data.pieChart?.length) {
@@ -1148,7 +1227,9 @@ function renderVisualData(data) {
       const fraction = slice.value / total;
       const dashLen = fraction * circumference;
       const dashOffset = -cumulative * circumference;
-      arcs += `<circle cx="50" cy="50" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="16" stroke-dasharray="${dashLen} ${circumference - dashLen}" stroke-dashoffset="${dashOffset}" />`;
+      // A 2px surface gap keeps neighbouring arcs from reading as one band.
+      const gap = Math.min(2, dashLen);
+      arcs += `<circle cx="50" cy="50" r="${radius}" fill="none" stroke="${esc(slice.color)}" stroke-width="16" stroke-dasharray="${Math.max(0, dashLen - gap)} ${circumference - dashLen + gap}" stroke-dashoffset="${dashOffset}" />`;
       cumulative += fraction;
     }
     html += '<div class="ai-pie-section">';
@@ -1250,6 +1331,91 @@ function appendAiMessage(role, content, meta = "", chatRoot = document, visualDa
   if (role === "assistant" && message) {
     list.scrollTo({ top: Math.max(0, message.offsetTop - 8), behavior: "smooth" });
   }
+}
+
+/*
+ * Progressive assistant bubble.
+ *
+ * `push` paints raw text the moment it arrives — as textContent, so a partial
+ * markdown fragment can never be interpreted as markup mid-stream. `finalize`
+ * then swaps in the fully rendered answer from the server's authoritative `done`
+ * frame, which is also what makes a late fallback substitution safe.
+ */
+function createStreamingAiMessage(chatRoot = document) {
+  const root = chatRoot === document ? window.activeAiChatRoot || document : chatRoot;
+  const list = root.querySelector("[data-ai-messages]");
+  if (!list) return null;
+
+  // A non-empty initial meta so the tag element exists and can be relabelled
+  // once the `done` frame reports which model and tools were used.
+  appendAiMessage("assistant", "", "Answering…", chatRoot);
+  const element = list.lastElementChild;
+  const body = element?.querySelector(".ai-message-body");
+  const meta = element?.querySelector(".ai-meta-tag");
+  if (!body) return null;
+  body.textContent = "";
+  element.classList.add("is-streaming");
+  let text = "";
+
+  const scroll = () => list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
+
+  return {
+    element,
+    get length() { return text.length; },
+    push(chunk) {
+      text += chunk;
+      body.textContent = text;
+      scroll();
+    },
+    finalize(payload) {
+      element.classList.remove("is-streaming");
+      const visualHtml = renderVisualData(payload.visualData || null);
+      body.innerHTML = `${visualHtml}${aiAnswerHtml(payload.answer || text)}`;
+      const tools = payload.usedTools?.length ? `Verified with ${payload.usedTools.join(", ")}` : "General guidance";
+      const label = `${tools} · ${payload.model}${payload.degraded ? " · degraded" : ""}`;
+      if (meta) {
+        meta.textContent = label;
+        meta.title = label;
+      }
+      scroll();
+    },
+    remove() {
+      element.remove();
+    },
+  };
+}
+
+/**
+ * Reads an SSE body and dispatches each named event. Returns true if the server
+ * actually streamed, so the caller can fall back to JSON when it did not.
+ */
+async function consumeAiStream(response, handlers) {
+  if (!response.body || !String(response.headers.get("content-type") || "").includes("text/event-stream")) return false;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let boundary;
+    while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+      const frame = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 2);
+      let event = "message";
+      const dataLines = [];
+      for (const line of frame.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+      }
+      if (!dataLines.length) continue;
+      try {
+        handlers[event]?.(JSON.parse(dataLines.join("\n")));
+      } catch { /* ignore an unparseable frame rather than abort the stream */ }
+    }
+  }
+  return true;
 }
 
 function appendAiLoading(chatRoot = document, message = "Processing your data...") {
@@ -1432,6 +1598,12 @@ function localDashboardAnswer(message) {
   return `## Monthly spending — ${reportMonth}\n\n- Total spent: **${formatMoney(model.spentMinor, model.currency)}**\n- Income recorded: **${formatMoney(model.incomeMinor, model.currency)}**\n- Net cash flow: **${formatMoney(model.savedMinor, model.currency)}**\n\n### Top categories\n${categories}\n\n${budgetStatus}`;
 }
 
+const MODIFYING_TOOLS = [
+  "add_expense", "add_income", "delete_expense", "update_expense_category", "set_budget",
+  "add_goal", "set_savings_goal", "add_recurring_expense", "create_category", "create_subcategory",
+  "rename_subcategory", "delete_subcategory", "update_settings",
+];
+
 async function submitAiQuestion(form) {
   const textarea = form.querySelector("textarea[name=message]");
   const button = form.querySelector("button[type=submit]");
@@ -1445,25 +1617,69 @@ async function submitAiQuestion(form) {
   textarea.value = "";
   textarea.disabled = true;
   setAiSubmitLoading(button, true);
+
+  let bubble = null;
+  const stopLoading = () => {
+    if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
+    loadingMessage?.remove();
+  };
+
   try {
     const preferredModel = window.dashboardModel?.preferences?.copilotModel || (() => {
-      try { return localStorage.getItem("copilot_model") || "gemini-2.5-flash"; } catch { return "gemini-2.5-flash"; }
+      try { return localStorage.getItem("copilot_model") || "auto"; } catch { return "auto"; }
     })();
     const response = await fetch("/api/ai-chat", {
       method: "POST",
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, month: selectedMonth, currency: localDisplayCurrency(window.dashboardModel?.currency), model: preferredModel }),
+      // Asking for a stream lets the answer paint as it is generated rather than
+      // after the whole completion lands.
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify({
+        message,
+        month: selectedMonth,
+        currency: localDisplayCurrency(window.dashboardModel?.currency),
+        model: preferredModel,
+        stream: true,
+      }),
     });
-    const body = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) throw authRequiredError();
-    if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");
-    const tools = body.usedTools?.length ? `Verified with ${body.usedTools.join(", ")}` : "General guidance";
-    if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
-    loadingMessage?.remove();
-    appendAiMessage("assistant", body.answer, `${tools} · ${body.model}${body.cached ? " · cached" : ""}`, chatRoot, body.visualData || null);
-    const modifyingTools = ["add_expense", "delete_expense", "update_expense_category", "set_budget", "set_savings_goal", "create_subcategory", "rename_subcategory", "delete_subcategory", "update_settings"];
-    const hasModifications = isQuickExpense || (body.usedTools && body.usedTools.some(tool => modifyingTools.includes(tool)));
+
+    let payload = null;
+    let failure = null;
+    const streamed = await consumeAiStream(response, {
+      delta: ({ text }) => {
+        if (!text) return;
+        if (!bubble) {
+          // The first token is the cue to drop the spinner.
+          stopLoading();
+          bubble = createStreamingAiMessage(chatRoot);
+        }
+        bubble?.push(text);
+      },
+      done: (value) => { payload = value; },
+      failed: ({ error }) => { failure = error; },
+    });
+
+    if (failure) throw new Error(failure);
+
+    if (!streamed) {
+      // Server answered as plain JSON (older deployment, or a proxy that strips
+      // event streams). Same rendering, just without the progressive paint.
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "The AI assistant could not answer right now.");
+      payload = body;
+    }
+    if (!payload) throw new Error("The AI assistant could not answer right now.");
+
+    if (bubble) {
+      bubble.finalize(payload);
+    } else {
+      stopLoading();
+      const tools = payload.usedTools?.length ? `Verified with ${payload.usedTools.join(", ")}` : "General guidance";
+      appendAiMessage("assistant", payload.answer, `${tools} · ${payload.model}${payload.degraded ? " · degraded" : ""}`, chatRoot, payload.visualData || null);
+    }
+
+    const hasModifications = isQuickExpense || (payload.usedTools || []).some((tool) => MODIFYING_TOOLS.includes(tool));
     if (hasModifications) {
       await refreshDashboard();
     }
@@ -1473,8 +1689,8 @@ async function submitAiQuestion(form) {
       redirectToMcpizeAuth();
       return;
     }
-    if (loadingMessage?._stepTimer) clearInterval(loadingMessage._stepTimer);
-    loadingMessage?.remove();
+    stopLoading();
+    bubble?.remove();
     appendAiMessage("assistant", localDashboardAnswer(message), "Verified dashboard data · offline response", chatRoot);
   } finally {
     if (window.activeAiChatRoot === chatRoot) window.activeAiChatRoot = null;
@@ -2189,7 +2405,7 @@ function openPanel(kind) {
     let pushNotifications = false;
     let emailNotifications = true;
     try {
-      currentModel = localStorage.getItem("copilot_model") || "gemini-2.5-flash";
+      currentModel = localStorage.getItem("copilot_model") || "auto";
       compactMode = localStorage.getItem("compact_mode") === "true";
       autoSuggest = localStorage.getItem("auto_suggest") !== "false";
       billReminders = localStorage.getItem("bill_reminders") !== "false";
@@ -2271,8 +2487,8 @@ function openPanel(kind) {
               <small>Select the AI model used for real-time chat & insights.</small>
             </div>
             <select name="copilot_model" class="settings-select" data-setting="model">
-              <option value="gemini-2.5-flash" ${currentModel === "gemini-2.5-flash" ? "selected" : ""}>Gemini 2.5 Flash (Ultra Fast)</option>
-              <option value="gemini-2.5-pro" ${currentModel === "gemini-2.5-pro" ? "selected" : ""}>Gemini 2.5 Pro (Deep Analytics)</option>
+              <option value="auto" ${currentModel === "auto" || currentModel === "gemini-2.5-flash" ? "selected" : ""}>Automatic (best model per question)</option>
+              <option value="advanced" ${currentModel === "advanced" || currentModel === "gemini-2.5-pro" ? "selected" : ""}>Deep Analytics (always reason)</option>
             </select>
           </div>
 
@@ -2988,26 +3204,20 @@ function bindEvents() {
       if (errorEl) errorEl.textContent = "";
 
       const model = window.dashboardModel;
-      const payload = {
-        recipientEmail: email,
-        month: monthLabel(model.month),
-        currency: model.currency,
-        spentFormatted: formatMoney(model.spentMinor, model.currency),
-        budgetFormatted: model.budgetMinor ? formatMoney(model.budgetMinor, model.currency) : "No budget set",
-        budgetUsed: model.budgetMinor ? model.budgetUsed : 0,
-        remainingFormatted: model.remainingMinor === null ? "N/A" : model.remainingMinor < 0 ? `${formatMoney(Math.abs(model.remainingMinor), model.currency)} over budget` : `${formatMoney(model.remainingMinor, model.currency)} remaining`,
-        incomeFormatted: formatMoney(model.incomeMinor, model.currency),
-        savedFormatted: formatMoney(model.savedMinor, model.currency),
-        categories: (model.categories || []).map(c => ({ name: c.name, amountFormatted: formatMoney(c.amountMinor, model.currency) })),
-        displayName: model.user?.displayName || "User"
-      };
+      // The server recomputes every figure from stored data, so only the month
+      // and the recipient are sent; numbers in the email cannot be dictated here.
+      const payload = { recipientEmail: email, month: model.month };
 
       fetch("/api/send-report-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify(payload)
       })
-      .then(r => r.json())
+      .then(async r => {
+        if (r.status === 401 || r.status === 403) throw authRequiredError();
+        return r.json().catch(() => ({ error: "The report service is temporarily unavailable." }));
+      })
       .then(res => {
         if (res.error) {
           if (errorEl) errorEl.textContent = res.error;

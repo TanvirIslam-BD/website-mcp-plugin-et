@@ -1,8 +1,12 @@
 const MCPIZE_PROFILE_ENDPOINT = "https://be.mcpize.com/rest/v1/profiles";
 
-// This public, read-only anon key is published by MCPize's own web client.
-// It is used only to resolve the authenticated user's public profile fields.
-const MCPIZE_PUBLIC_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5d3Zhb2NxZ3VoaHZwaGhicXV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMjIzNTksImV4cCI6MjA3NTY5ODM1OX0.x_CISxdW0i3twjkyqFewE8TGucEYRInCFbM_JucpuX8";
+// Read-only anon key published by MCPize's own web client, used solely to
+// resolve the authenticated user's public profile fields. It belongs to a third
+// party, so it is configured rather than committed; profile enrichment is simply
+// skipped when unset.
+function mcpizeAnonKey() {
+  return String(process.env.MCPIZE_ANON_KEY || "");
+}
 
 export function cleanDisplayName(value) {
   if (typeof value !== "string") return "";
@@ -26,8 +30,9 @@ function profileIdFromSubject(value) {
 }
 
 export async function readMcpizeProfile(userId) {
+  const anonKey = mcpizeAnonKey();
   const profileId = profileIdFromSubject(userId);
-  if (!profileId) return { displayName: "", profilePhotoUrl: "" };
+  if (!profileId || !anonKey) return { displayName: "", profilePhotoUrl: "" };
   try {
     const url = new URL(MCPIZE_PROFILE_ENDPOINT);
     // MCP OAuth subjects may be namespaced, while profiles.id is a UUID.
@@ -35,8 +40,8 @@ export async function readMcpizeProfile(userId) {
     url.searchParams.set("select", "full_name,username,avatar_url");
     const response = await fetch(url, {
       headers: {
-        apikey: MCPIZE_PUBLIC_ANON_KEY,
-        Authorization: `Bearer ${MCPIZE_PUBLIC_ANON_KEY}`,
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
         Accept: "application/json",
       },
     });

@@ -1,9 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cleanDisplayName, cleanProfilePhoto, readMcpizeProfile } from "./_mcpize-profile.js";
+import { authorizeRedirectUri, clientMetadataUrl, dashboardOrigin } from "./_config.js";
+import { createDashboardSession, dashboardSessionCookie, signingSecret } from "./_dashboard-session.js";
 
 const STATE_COOKIE = "expense_tracker_oauth";
-const DASHBOARD_COOKIE = "expense_tracker_dashboard";
-const DASHBOARD_ORIGIN = "https://www.copilotai.live";
 const MCP_TOKEN_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/oauth/token";
 const MCP_SESSION_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/dashboard/session";
 
@@ -30,27 +30,27 @@ function clearStateCookie() {
   return `${STATE_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
 }
 
-function dashboardCookie(token) {
-  return `${DASHBOARD_COOKIE}=${token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`;
-}
+const USER_ID_PATTERN = /^[A-Za-z0-9:_-]{1,200}$/;
 
-function createDashboardSession(userId, secret, displayName = "", profilePhotoUrl = "", mcpAccessToken = "") {
-  const payload = Buffer.from(JSON.stringify({
-    u: userId,
-    e: Date.now() + 15 * 60 * 1000,
-    ...(displayName ? { n: displayName } : {}),
-    ...(profilePhotoUrl ? { p: profilePhotoUrl } : {}),
-    // Kept only in the signed, HttpOnly dashboard session cookie so server-side
-    // Copilot requests can invoke the authenticated MCPize tool catalog.
-    ...(mcpAccessToken ? { mt: mcpAccessToken } : {}),
-  })).toString("base64url");
-  const signature = createHmac("sha256", secret).update(payload).digest("base64url");
-  return `${payload}.${signature}`;
+/**
+ * The user id reported by the authenticated MCPize session endpoint, if it
+ * returns one. That call requires the bearer token, so its answer is
+ * authoritative — unlike the unverified claims inside the token itself.
+ */
+function identityFromSessionResponse(body) {
+  const candidates = [
+    body?.user?.id, body?.user_id, body?.userId, body?.id, body?.sub,
+    body?.data?.user?.id, body?.result?.user?.id,
+  ];
+  return candidates.find((value) => typeof value === "string" && USER_ID_PATTERN.test(value)) || "";
 }
 
 function identityFromAccessToken(accessToken) {
   // The token only reaches this code after a successful authorization-code +
-  // PKCE exchange with MCPize. We never accept an identity from the browser.
+  // PKCE exchange with MCPize over TLS, so transport is the trust anchor: its
+  // signature is not verified here because MCPize publishes no verification key.
+  // Where the session endpoint also reports an identity, the two are compared
+  // below and a mismatch aborts sign-in.
   const parts = String(accessToken || "").split(".");
   if (parts.length !== 3) return null;
   try {
@@ -98,13 +98,13 @@ function identityFromAccessToken(accessToken) {
   }
 }
 
-function sessionToken(body) {
-  const candidates = [
-    body?.dashboard_token,
-    body?.data?.dashboard_token,
-    body?.result?.dashboard_token,
-  ];
-  return candidates.find((value) => typeof value === "string" && value.length > 20) || null;
+// `res.send` with a string defaults to text/html, and the error paths below
+// include field names and messages that come from the MCPize response. Forcing
+// text/plain means that third-party text can never be parsed as markup.
+function plainText(res, status, message) {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  return res.status(status).send(String(message).replace(/[\u0000-\u001f\u007f]+/g, " ").slice(0, 500));
 }
 
 function responseShape(body, response) {
@@ -115,13 +115,13 @@ function responseShape(body, response) {
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
-  const secret = process.env.DASHBOARD_SESSION_SECRET;
+  const secret = signingSecret();
   const code = typeof req.query.code === "string" ? req.query.code : "";
   const state = typeof req.query.state === "string" ? req.query.state : "";
   const pending = secret ? verifyState(cookieValue(req, STATE_COOKIE), secret) : null;
   if (!pending || !code || pending.state !== state) {
     res.setHeader("Set-Cookie", clearStateCookie());
-    return res.status(400).send("Dashboard sign-in expired or could not be verified. Please return to /dashboard and try again.");
+    return plainText(res, 400, "Dashboard sign-in expired or could not be verified. Please return to /dashboard and try again.");
   }
 
   try {
@@ -131,8 +131,8 @@ export default async function handler(req, res) {
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri: `${DASHBOARD_ORIGIN}/authorize`,
-        client_id: `${DASHBOARD_ORIGIN}/dashboard/client-metadata.json`,
+        redirect_uri: authorizeRedirectUri(),
+        client_id: clientMetadataUrl(),
         code_verifier: pending.verifier,
       }),
     });
@@ -148,6 +148,16 @@ export default async function handler(req, res) {
     // 200 response, so use the identity returned by the verified OAuth token
     // exchange as a secure fallback.
     const identity = identityFromAccessToken(tokenBody.access_token);
+
+    // Cross-check: the session endpoint's answer is authoritative because it
+    // required the bearer token. The token's own `sub` remains the stored user id
+    // so existing data keeps resolving, but the two must agree.
+    const sessionIdentity = identityFromSessionResponse(sessionBody);
+    if (identity && sessionIdentity && sessionIdentity !== identity.userId) {
+      console.error("[authorize] identity mismatch between access token and session endpoint");
+      throw new Error("The sign-in identity could not be confirmed.");
+    }
+
     const mcpizeProfile = identity ? await readMcpizeProfile(identity.profileId || identity.userId) : { displayName: "", profilePhotoUrl: "" };
     const responseDisplayName = cleanDisplayName(
       sessionBody?.user?.name ||
@@ -177,25 +187,37 @@ export default async function handler(req, res) {
       tokenBody?.data?.user?.avatar_url ||
       tokenBody?.data?.user?.image,
     );
+    // Only a session this server signed itself is accepted downstream, so an
+    // unreadable identity has to fail loudly rather than mint a dead cookie.
     const privateSession = identity
-      ? createDashboardSession(
-        identity.userId,
-        secret,
-        mcpizeProfile.displayName || identity.displayName || responseDisplayName,
-        mcpizeProfile.profilePhotoUrl || identity.profilePhotoUrl || responseProfilePhoto,
-        tokenBody.access_token,
-      )
-      : sessionToken(sessionBody);
+      ? createDashboardSession({
+        userId: identity.userId,
+        displayName: mcpizeProfile.displayName || identity.displayName || responseDisplayName,
+        profilePhotoUrl: mcpizeProfile.profilePhotoUrl || identity.profilePhotoUrl || responseProfilePhoto,
+        mcpAccessToken: tokenBody.access_token,
+      })
+      : "";
     if (!privateSession) {
       const detail = typeof sessionBody.error === "string" ? ` ${sessionBody.error}` : "";
       throw new Error(`Could not create the private dashboard session (MCPize returned ${sessionResponse.status}; ${responseShape(sessionBody, sessionResponse)}).${detail}`);
     }
 
-    res.setHeader("Set-Cookie", [clearStateCookie(), dashboardCookie(privateSession)]);
+    res.setHeader("Set-Cookie", [clearStateCookie(), dashboardSessionCookie(privateSession)]);
     res.setHeader("Cache-Control", "no-store");
-    return res.redirect(302, `${DASHBOARD_ORIGIN}/dashboard?month=${encodeURIComponent(pending.month)}`);
+
+    /*
+     * A popup used to be sent straight to /dashboard, so it downloaded the entire
+     * application (~520KB of JS and CSS) and ran a full boot purely to redirect
+     * its opener — which then downloaded all of it again. The popup flow now ends
+     * on a tiny handoff page that signals the opener and closes.
+     */
+    const month = encodeURIComponent(pending.month);
+    const destination = pending.popup
+      ? `${dashboardOrigin()}/dashboard/authorize.html?month=${month}&handoff=1`
+      : `${dashboardOrigin()}/dashboard?month=${month}`;
+    return res.redirect(302, destination);
   } catch (error) {
     res.setHeader("Set-Cookie", clearStateCookie());
-    return res.status(502).send(`Dashboard sign-in could not be completed. ${error instanceof Error ? error.message : "Please try again."}`);
+    return plainText(res, 502, `Dashboard sign-in could not be completed. ${error instanceof Error ? error.message : "Please try again."}`);
   }
 }

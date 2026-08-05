@@ -1,25 +1,208 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/site/index.html" },
-    { "source": "/dashboard", "destination": "/site/dashboard/index.html" },
-    { "source": "/dashboard/(.*)", "destination": "/site/dashboard/$1" },
-    { "source": "/owner", "destination": "/site/owner/login.html" },
-    { "source": "/owner/login", "destination": "/site/owner/login.html" },
-    { "source": "/owner/monitor", "destination": "/site/owner/monitor.html" },
-    { "source": "/owner/(.*)", "destination": "/site/owner/$1" },
-    { "source": "/authorize", "destination": "/api/dashboard-authorize" },
-    { "source": "/login", "destination": "/site/login.html" },
-    { "source": "/privacy", "destination": "/site/privacy.html" },
-    { "source": "/terms", "destination": "/site/terms.html" },
-    { "source": "/support", "destination": "/site/support.html" },
-    { "source": "/robots.txt", "destination": "/site/robots.txt" },
-    { "source": "/sitemap.xml", "destination": "/site/sitemap.xml" },
-    { "source": "/assets/(.*)", "destination": "/site/assets/$1" }
+    {
+      "source": "/",
+      "destination": "/site/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/site/dashboard/index.html"
+    },
+    {
+      "source": "/dashboard/(.*)",
+      "destination": "/site/dashboard/$1"
+    },
+    {
+      "source": "/owner",
+      "destination": "/site/owner/login.html"
+    },
+    {
+      "source": "/owner/login",
+      "destination": "/site/owner/login.html"
+    },
+    {
+      "source": "/owner/monitor",
+      "destination": "/site/owner/monitor.html"
+    },
+    {
+      "source": "/owner/(.*)",
+      "destination": "/site/owner/$1"
+    },
+    {
+      "source": "/authorize",
+      "destination": "/api/dashboard-authorize"
+    },
+    {
+      "source": "/login",
+      "destination": "/site/login.html"
+    },
+    {
+      "source": "/login.js",
+      "destination": "/site/login.js"
+    },
+    {
+      "source": "/login-boot.js",
+      "destination": "/site/login-boot.js"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/site/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/site/terms.html"
+    },
+    {
+      "source": "/support",
+      "destination": "/site/support.html"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/site/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/site/sitemap.xml"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/site/assets/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+        }
+      ]
+    },
+    {
+      "source": "/dashboard/:path*",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/dashboard",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/owner/:path*",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.copilotai.live; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/owner",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.copilotai.live; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/login",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        }
+      ]
+    }
   ],
   "redirects": [
-    { "source": "/:path*", "has": [{ "type": "host", "value": "copilotai.live" }], "destination": "https://www.copilotai.live/:path*", "permanent": true },
-    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
-    { "source": "/terms.html", "destination": "/terms", "permanent": true },
-    { "source": "/support.html", "destination": "/support", "permanent": true }
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "copilotai.live"
+        }
+      ],
+      "destination": "https://www.copilotai.live/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/privacy.html",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/terms.html",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/support.html",
+      "destination": "/support",
+      "permanent": true
+    }
   ]
 }

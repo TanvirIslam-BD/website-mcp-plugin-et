@@ -1,48 +1,24 @@
-import { createClient } from "@libsql/client";
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { database } from "./_db.js";
+import { sameOriginRequest } from "./_config.js";
+import { readDashboardSession, refreshDashboardSession } from "./_dashboard-session.js";
 import { cleanDisplayName, cleanProfilePhoto, readMcpizeProfile } from "./_mcpize-profile.js";
 import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
+import { consumeRateLimit } from "./_rate-limit.js";
+import {
+  amountToMinor,
+  categoryCatalog,
+  cleanText,
+  mutateFinanceState,
+  readFinanceState,
+  reconcileUserData,
+  replaceBudgetStatements,
+} from "./_finance-state.js";
 
-const COOKIE = "expense_tracker_dashboard";
-
-function verifyToken(token) {
-  const secret = process.env.DASHBOARD_SESSION_SECRET;
-  if (!token || !secret) return null;
-  const [payload, received, ...extra] = token.split(".");
-  if (!payload || !received || extra.length) return null;
-  const expected = createHmac("sha256", secret).update(payload).digest("base64url");
-  const a = Buffer.from(received);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-  try {
-    const value = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (typeof value.u !== "string" || !value.u || !Number.isFinite(value.e) || value.e <= Date.now()) return null;
-    const displayName = typeof value.n === "string" ? value.n.trim().replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 80) : "";
-    let profilePhotoUrl = "";
-    if (typeof value.p === "string" && value.p.length <= 500) {
-      try {
-        const url = new URL(value.p);
-        if (url.protocol === "https:") profilePhotoUrl = url.toString();
-      } catch {
-        profilePhotoUrl = "";
-      }
-    }
-    return { userId: value.u, displayName, profilePhotoUrl };
-  } catch {
-    return null;
-  }
-}
-
-function cookieValue(req) {
-  return req.headers.cookie?.match(new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`))?.[1];
-}
+const WRITE_RATE_LIMIT = { limit: 120, windowMs: 60_000 };
 
 function money(minor, currency) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format((minor || 0) / 100);
-}
-
-function cleanText(value, maxLength = 120) {
-  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
 function validDate(value) {
@@ -50,11 +26,8 @@ function validDate(value) {
   return new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
 }
 
-function amountMinor(value) {
-  const raw = typeof value === "number" ? String(value) : cleanText(value, 32).replace(/,/g, "");
-  if (!/^\d+(\.\d{1,2})?$/.test(raw)) return null;
-  const minor = Math.round(Number(raw) * 100);
-  return Number.isSafeInteger(minor) && minor > 0 && minor <= 100000000000 ? minor : null;
+function validMonth(value) {
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(value || "");
 }
 
 function decodeBody(body) {
@@ -69,28 +42,13 @@ function decodeBody(body) {
   return typeof body === "object" ? body : {};
 }
 
-function defaultFinance() {
-  return {
-    incomes: [],
-    recurring: [],
-    budgetRules: [],
-    categories: [],
-    templates: [],
-    categoryCatalog: [],
-    alertThresholds: [50, 80, 100],
-    expenseMetadata: {},
-    goals: [],
-    settings: {},
-  };
-}
-
 function safeSettings(value) {
   const settings = value && typeof value === "object" ? value : {};
   const currency = cleanText(settings.currency, 3).toUpperCase();
   const theme = settings.theme === "dark" ? "dark" : settings.theme === "light" ? "light" : "";
-  const copilotModel = ["gemini-2.5-flash", "gemini-2.5-pro"].includes(settings.copilotModel)
+  const copilotModel = ["auto", "fast", "standard", "advanced", "premium"].includes(settings.copilotModel)
     ? settings.copilotModel
-    : "gemini-2.5-flash";
+    : "auto";
   return {
     currency: /^[A-Z]{3}$/.test(currency) ? currency : "",
     theme,
@@ -104,43 +62,6 @@ function safeSettings(value) {
     pushNotifications: settings.pushNotifications === true,
     emailNotifications: settings.emailNotifications !== false,
   };
-}
-
-function safeFinance(value) {
-  if (!value) return defaultFinance();
-  try {
-    return { ...defaultFinance(), ...JSON.parse(String(value)) };
-  } catch {
-    return defaultFinance();
-  }
-}
-
-function categoryCatalog(value) {
-  if (!Array.isArray(value)) return [];
-  const seen = new Set();
-  return value.reduce((catalog, item) => {
-    const name = cleanText(item?.name ?? item, 60).toLowerCase();
-    if (!name || seen.has(name)) return catalog;
-    seen.add(name);
-    const subcategories = Array.isArray(item?.subcategories)
-      ? [...new Set(item.subcategories.map((sub) => cleanText(sub, 80)).filter(Boolean))]
-      : [];
-    catalog.push({ name, subcategories });
-    return catalog;
-  }, []);
-}
-
-async function readFinance(db, userId) {
-  const existing = await db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] });
-  return safeFinance(existing.rows[0]?.data);
-}
-
-async function writeFinance(db, userId, finance) {
-  const now = new Date().toISOString();
-  await db.execute({
-    sql: "INSERT INTO finance_state (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at",
-    args: [userId, JSON.stringify(finance), now],
-  });
 }
 
 function monthRange(month) {
@@ -161,7 +82,11 @@ function inMonth(entry, month) {
 }
 
 function csvCell(value) {
-  const text = String(value ?? "");
+  let text = String(value ?? "");
+  // Spreadsheet applications execute a cell that begins with one of these, so a
+  // merchant name like `=HYPERLINK(...)` would run on open. Neutralize it with a
+  // leading apostrophe, which Excel and Sheets treat as "this is text".
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -174,34 +99,42 @@ export default async function handler(req, res) {
   if (!["GET", "POST"].includes(req.method)) return res.status(405).json({ error: "Method not allowed" });
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Cache-Control", "private, no-store, max-age=0");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  // SameSite=Lax already blocks cross-site POSTs; this is the second lock.
+  if (req.method === "POST" && !sameOriginRequest(req)) return res.status(403).json({ error: "Origin not allowed." });
 
-  const session = verifyToken(req.query.dashboard_token) || verifyToken(cookieValue(req));
+  const session = readDashboardSession(req);
   if (!session) return res.status(401).json({ error: "A valid dashboard link is required." });
   const userId = session.userId;
-  if (req.query.dashboard_token) {
-    res.setHeader("Set-Cookie", `${COOKIE}=${req.query.dashboard_token}; Path=/; Max-Age=900; HttpOnly; Secure; SameSite=Lax`);
-  }
+  refreshDashboardSession(res, session);
 
-  const url = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-  if (!url || !authToken) return res.status(500).json({ error: "Dashboard database is not configured.", code: "dashboard_database_not_configured" });
+  const db = database();
+  if (!db) return res.status(500).json({ error: "Dashboard database is not configured.", code: "dashboard_database_not_configured" });
 
   try {
-    const db = createClient({ url, authToken });
     await ensureMonitoringTables(db);
     const control = await userControl(db, userId);
     if (control.status === "suspended") {
       return res.status(403).json({ error: "This account has been suspended. Contact support if you believe this is a mistake.", code: "account_suspended" });
     }
+    if (req.method === "POST") {
+      const quota = await consumeRateLimit(db, `dashboard-write:${userId}`, WRITE_RATE_LIMIT);
+      if (!quota.allowed) {
+        res.setHeader("Retry-After", String(quota.retryAfterSeconds));
+        return res.status(429).json({ error: "Too many changes at once. Please try again in a moment." });
+      }
+    }
+    await reconcileUserData(db, userId);
+
     if (req.method === "GET" && req.query.export === "csv") {
-      const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month || "") ? req.query.month : new Date().toISOString().slice(0, 7);
+      const month = validMonth(req.query.month) ? req.query.month : new Date().toISOString().slice(0, 7);
       const range = monthRange(month);
       const all = req.query.scope === "all";
       const expenseResult = await db.execute({
         sql: `SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ?${all ? "" : " AND date >= ? AND date <= ?"} ORDER BY date DESC`,
         args: all ? [userId] : [userId, range.from, range.to],
       });
-      const finance = await readFinance(db, userId);
+      const { finance } = await readFinanceState(db, userId);
       const incomes = (finance.incomes || []).filter((income) => all || inMonth(income, month));
       const expenseRows = expenseResult.rows.map((row) => {
         const meta = finance.expenseMetadata?.[row.id] || {};
@@ -211,17 +144,19 @@ export default async function handler(req, res) {
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", `attachment; filename="expense-tracker-${all ? "all-data" : month}.csv"`);
       await recordActivity(db, { userId, source: "dashboard", eventType: "data_exported", detail: { scope: all ? "all" : "month", month } });
-      return res.status(200).send(`\uFEFF${csvDocument([...expenseRows, ...incomeRows])}`);
+      return res.status(200).send(`﻿${csvDocument([...expenseRows, ...incomeRows])}`);
     }
+
     if (req.method === "POST") {
       const body = decodeBody(req.body);
       const kind = body.kind;
-      const amount = amountMinor(body.amount);
-      const target = amountMinor(body.target);
+      const amount = amountToMinor(body.amount);
+      const target = amountToMinor(body.target);
       const date = cleanText(body.date, 10);
       const currency = cleanText(body.currency, 3).toUpperCase();
       const category = cleanText(body.category, 60).toLowerCase();
       const description = cleanText(body.description, 240);
+      const now = new Date().toISOString();
       await recordActivity(db, { userId, source: "dashboard", eventType: `${cleanText(kind, 40) || "unknown"}_requested`, detail: { month: cleanText(body.month, 7) } });
 
       if (kind === "clear_all") {
@@ -234,57 +169,50 @@ export default async function handler(req, res) {
       }
 
       if (kind === "clear_month") {
-        const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(body.month || "") ? body.month : null;
+        const month = validMonth(body.month) ? body.month : null;
         if (!month) return res.status(400).json({ error: "Choose a valid month." });
         const range = monthRange(month);
         const ids = await db.execute({ sql: "SELECT id FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, range.from, range.to] });
-        const finance = await readFinance(db, userId);
-        finance.incomes = (finance.incomes || []).filter((income) => !inMonth(income, month));
         const removed = new Set(ids.rows.map((row) => String(row.id)));
-        finance.expenseMetadata = Object.fromEntries(Object.entries(finance.expenseMetadata || {}).filter(([id]) => !removed.has(id)));
-        const now = new Date().toISOString();
-        await db.batch([
-          { sql: "DELETE FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, range.from, range.to] },
-          { sql: "INSERT INTO finance_state (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data,updated_at=excluded.updated_at", args: [userId, JSON.stringify(finance), now] },
-        ], "write");
+        await db.execute({ sql: "DELETE FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, range.from, range.to] });
+        await mutateFinanceState(db, userId, (finance) => {
+          finance.incomes = (finance.incomes || []).filter((income) => !inMonth(income, month));
+          finance.expenseMetadata = Object.fromEntries(Object.entries(finance.expenseMetadata || {}).filter(([id]) => !removed.has(id)));
+          return finance;
+        });
         return res.status(200).json({ ok: true });
       }
 
       if (kind === "settings") {
-        const finance = await readFinance(db, userId);
-        finance.settings = safeSettings(body.settings);
-        await writeFinance(db, userId, finance);
+        const finance = await mutateFinanceState(db, userId, (current) => {
+          current.settings = safeSettings(body.settings);
+          return current;
+        });
         await recordActivity(db, { userId, source: "dashboard", eventType: "settings_updated", detail: { theme: finance.settings.theme, currency: finance.settings.currency, copilotModel: finance.settings.copilotModel } });
         return res.status(200).json({ ok: true, settings: finance.settings });
       }
 
       if (kind === "budget") {
         if (!amount || !/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: "Enter a positive budget amount and 3-letter currency code." });
-        const now = new Date().toISOString();
-        await db.execute({
-          sql: `INSERT INTO budgets (id,user_id,category,amount_minor,currency,period,created_at)
-                VALUES (?,?,?,?,?,?,?)
-                ON CONFLICT DO UPDATE SET amount_minor=excluded.amount_minor,
-                                          currency=excluded.currency,
-                                          period=excluded.period,
-                                          created_at=excluded.created_at`,
-          args: [randomUUID(), userId, null, amount, currency, "monthly", now],
-        });
+        await db.batch(replaceBudgetStatements({
+          id: randomUUID(), userId, category: null, amountMinor: amount, currency, createdAt: now,
+        }), "write");
         return res.status(201).json({ ok: true });
       }
 
       if (kind === "goal") {
         if (!target || !/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: "Enter a positive goal amount and 3-letter currency code." });
-        const finance = await readFinance(db, userId);
-        finance.goals = Array.isArray(finance.goals) ? finance.goals : [];
-        finance.goals[0] = {
-          id: finance.goals[0]?.id || randomUUID(),
-          name: cleanText(body.name, 80) || "Savings goal",
-          targetMinor: target,
-          currency,
-          updatedAt: new Date().toISOString(),
-        };
-        await writeFinance(db, userId, finance);
+        await mutateFinanceState(db, userId, (finance) => {
+          finance.goals = Array.isArray(finance.goals) ? finance.goals : [];
+          finance.goals[0] = {
+            id: finance.goals[0]?.id || randomUUID(),
+            name: cleanText(body.name, 80) || "Savings goal",
+            targetMinor: target,
+            currency,
+            updatedAt: now,
+          };
+          return finance;
+        });
         return res.status(201).json({ ok: true });
       }
 
@@ -295,14 +223,10 @@ export default async function handler(req, res) {
           sql: "DELETE FROM expenses WHERE id = ? AND user_id = ?",
           args: [id, userId],
         });
-        const finance = await readFinance(db, userId);
-        if (Array.isArray(finance.expenses)) {
-          finance.expenses = finance.expenses.filter(exp => exp.id !== id);
-        }
-        if (finance.expenseMetadata && typeof finance.expenseMetadata === "object") {
-          delete finance.expenseMetadata[id];
-        }
-        await writeFinance(db, userId, finance);
+        await mutateFinanceState(db, userId, (finance) => {
+          if (finance.expenseMetadata && typeof finance.expenseMetadata === "object") delete finance.expenseMetadata[id];
+          return finance;
+        });
         return res.status(200).json({ ok: true });
       }
 
@@ -310,12 +234,16 @@ export default async function handler(req, res) {
         const name = cleanText(body.category, 60).toLowerCase();
         const subcategory = cleanText(body.subcategory, 80);
         if (!name) return res.status(400).json({ error: "Enter a category name." });
-        const finance = await readFinance(db, userId);
-        const catalog = categoryCatalog(finance.categoryCatalog);
-        if (catalog.some((item) => item.name === name)) return res.status(400).json({ error: "This category already exists." });
-        catalog.push({ name, subcategories: subcategory ? [subcategory] : [] });
-        finance.categoryCatalog = catalog;
-        await writeFinance(db, userId, finance);
+        const { finance: existing } = await readFinanceState(db, userId);
+        if (categoryCatalog(existing.categoryCatalog).some((item) => item.name === name)) {
+          return res.status(400).json({ error: "This category already exists." });
+        }
+        await mutateFinanceState(db, userId, (finance) => {
+          const catalog = categoryCatalog(finance.categoryCatalog);
+          if (!catalog.some((item) => item.name === name)) catalog.push({ name, subcategories: subcategory ? [subcategory] : [] });
+          finance.categoryCatalog = catalog;
+          return finance;
+        });
         return res.status(201).json({ ok: true });
       }
 
@@ -323,46 +251,54 @@ export default async function handler(req, res) {
         const previous = cleanText(body.previousCategory, 60).toLowerCase();
         const next = cleanText(body.category, 60).toLowerCase();
         if (!previous || !next) return res.status(400).json({ error: "Enter both category names." });
-        const finance = await readFinance(db, userId);
-        const catalog = categoryCatalog(finance.categoryCatalog);
-        if (previous !== next && catalog.some((item) => item.name === next)) return res.status(400).json({ error: "A category with that name already exists." });
+        const { finance: existing } = await readFinanceState(db, userId);
+        if (previous !== next && categoryCatalog(existing.categoryCatalog).some((item) => item.name === next)) {
+          return res.status(400).json({ error: "A category with that name already exists." });
+        }
         await db.execute({ sql: "UPDATE expenses SET category = ? WHERE category = ? AND user_id = ?", args: [next, previous, userId] });
-        if (Array.isArray(finance.expenses)) finance.expenses.forEach((expense) => { if (expense.category === previous) expense.category = next; });
-        const current = catalog.find((item) => item.name === previous);
-        if (current) current.name = next;
-        else catalog.push({ name: next, subcategories: [] });
-        finance.categoryCatalog = categoryCatalog(catalog);
-        await writeFinance(db, userId, finance);
+        await mutateFinanceState(db, userId, (finance) => {
+          const catalog = categoryCatalog(finance.categoryCatalog);
+          const current = catalog.find((item) => item.name === previous);
+          if (current) current.name = next;
+          else if (!catalog.some((item) => item.name === next)) catalog.push({ name: next, subcategories: [] });
+          finance.categoryCatalog = categoryCatalog(catalog);
+          return finance;
+        });
         return res.status(200).json({ ok: true });
       }
 
       if (kind === "create_subcategory" || kind === "rename_subcategory" || kind === "delete_subcategory") {
-        const category = cleanText(body.category, 60).toLowerCase();
+        const targetCategory = cleanText(body.category, 60).toLowerCase();
         const previous = cleanText(body.previousSubcategory, 80);
         const next = cleanText(body.subcategory, 80);
-        if (!category || (kind !== "delete_subcategory" && !next)) return res.status(400).json({ error: "Enter a category and sub-category name." });
-        const finance = await readFinance(db, userId);
-        const catalog = categoryCatalog(finance.categoryCatalog);
-        let group = catalog.find((item) => item.name === category);
-        if (!group) { group = { name: category, subcategories: [] }; catalog.push(group); }
-        if (kind === "create_subcategory") {
-          if (group.subcategories.some((item) => item.toLowerCase() === next.toLowerCase())) return res.status(400).json({ error: "This sub-category already exists." });
-          group.subcategories.push(next);
-        } else {
-          if (!previous) return res.status(400).json({ error: "Select a sub-category first." });
-          group.subcategories = group.subcategories.filter((item) => item !== previous);
-          if (kind === "rename_subcategory") group.subcategories.push(next);
-          finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
-          for (const expense of finance.expenses || []) {
-            if (expense.category !== category) continue;
-            const metadata = finance.expenseMetadata[expense.id];
-            if (metadata?.subcategory !== previous) continue;
-            if (kind === "rename_subcategory") metadata.subcategory = next;
-            else delete metadata.subcategory;
-          }
+        if (!targetCategory || (kind !== "delete_subcategory" && !next)) return res.status(400).json({ error: "Enter a category and sub-category name." });
+        if (kind !== "create_subcategory" && !previous) return res.status(400).json({ error: "Select a sub-category first." });
+
+        const { finance: existing } = await readFinanceState(db, userId);
+        const existingGroup = categoryCatalog(existing.categoryCatalog).find((item) => item.name === targetCategory);
+        if (kind === "create_subcategory" && existingGroup?.subcategories.some((item) => item.toLowerCase() === next.toLowerCase())) {
+          return res.status(400).json({ error: "This sub-category already exists." });
         }
-        finance.categoryCatalog = categoryCatalog(catalog);
-        await writeFinance(db, userId, finance);
+
+        await mutateFinanceState(db, userId, (finance) => {
+          const catalog = categoryCatalog(finance.categoryCatalog);
+          let group = catalog.find((item) => item.name === targetCategory);
+          if (!group) { group = { name: targetCategory, subcategories: [] }; catalog.push(group); }
+          if (kind === "create_subcategory") {
+            if (!group.subcategories.some((item) => item.toLowerCase() === next.toLowerCase())) group.subcategories.push(next);
+          } else {
+            group.subcategories = group.subcategories.filter((item) => item !== previous);
+            if (kind === "rename_subcategory") group.subcategories.push(next);
+            finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
+            for (const metadata of Object.values(finance.expenseMetadata)) {
+              if (metadata?.subcategory !== previous) continue;
+              if (kind === "rename_subcategory") metadata.subcategory = next;
+              else delete metadata.subcategory;
+            }
+          }
+          finance.categoryCatalog = categoryCatalog(catalog);
+          return finance;
+        });
         return res.status(200).json({ ok: true });
       }
 
@@ -377,21 +313,15 @@ export default async function handler(req, res) {
           sql: "UPDATE expenses SET category = ? WHERE id = ? AND user_id = ?",
           args: [newCategory, id, userId],
         });
-        const finance = await readFinance(db, userId);
-        if (Array.isArray(finance.expenses)) {
-          for (const exp of finance.expenses) {
-            if (exp.id === id) {
-              exp.category = newCategory;
-            }
-          }
-        }
-        finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
-        const metadata = { ...(finance.expenseMetadata[id] || {}) };
-        if (subcategory) metadata.subcategory = subcategory;
-        else delete metadata.subcategory;
-        if (Object.keys(metadata).length) finance.expenseMetadata[id] = metadata;
-        else delete finance.expenseMetadata[id];
-        await writeFinance(db, userId, finance);
+        await mutateFinanceState(db, userId, (finance) => {
+          finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
+          const metadata = { ...(finance.expenseMetadata[id] || {}) };
+          if (subcategory) metadata.subcategory = subcategory;
+          else delete metadata.subcategory;
+          if (Object.keys(metadata).length) finance.expenseMetadata[id] = metadata;
+          else delete finance.expenseMetadata[id];
+          return finance;
+        });
         return res.status(200).json({ ok: true });
       }
 
@@ -399,7 +329,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Enter a positive amount, valid date, and 3-letter currency code." });
       }
 
-      const now = new Date().toISOString();
       if (kind === "expense") {
         if (!category) return res.status(400).json({ error: "Choose an expense category." });
         const expenseId = randomUUID();
@@ -415,56 +344,57 @@ export default async function handler(req, res) {
           ? body.tags.map((tag) => cleanText(tag, 30)).filter(Boolean).slice(0, 8)
           : cleanText(body.tags, 120).split(",").map((tag) => cleanText(tag, 30)).filter(Boolean).slice(0, 8);
         if (merchant || paymentMethod || tags.length || subcategory) {
-          const finance = await readFinance(db, userId);
-          finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
-          finance.expenseMetadata[expenseId] = { merchant, paymentMethod, tags, subcategory };
-          await writeFinance(db, userId, finance);
+          await mutateFinanceState(db, userId, (finance) => {
+            finance.expenseMetadata = finance.expenseMetadata && typeof finance.expenseMetadata === "object" ? finance.expenseMetadata : {};
+            finance.expenseMetadata[expenseId] = { merchant, paymentMethod, tags, subcategory };
+            return finance;
+          });
         }
       } else {
-        const finance = await readFinance(db, userId);
-        finance.incomes = Array.isArray(finance.incomes) ? finance.incomes : [];
-        finance.incomes.push({
-          id: randomUUID(),
-          amountMinor: amount,
-          currency,
-          source: cleanText(body.source, 80) || category || "Income",
-          date,
-          notes: description,
-          createdAt: now,
+        await mutateFinanceState(db, userId, (finance) => {
+          finance.incomes = Array.isArray(finance.incomes) ? finance.incomes : [];
+          finance.incomes.push({
+            id: randomUUID(),
+            amountMinor: amount,
+            currency,
+            source: cleanText(body.source, 80) || category || "Income",
+            date,
+            notes: description,
+            createdAt: now,
+          });
+          return finance;
         });
-        await writeFinance(db, userId, finance);
       }
       return res.status(201).json({ ok: true });
     }
 
-    const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(req.query.month || "") ? req.query.month : new Date().toISOString().slice(0, 7);
+    const month = validMonth(req.query.month) ? req.query.month : new Date().toISOString().slice(0, 7);
     const current = monthRange(month);
     const previous = previousMonth(month);
     const previousRange = monthRange(previous);
 
-    const [expenseResult, previousExpenseResult, budgetResult, financeResult] = await Promise.all([
+    const [expenseResult, previousExpenseResult, budgetResult, financeState] = await Promise.all([
       db.execute({ sql: "SELECT id,date,category,description,amount_minor,currency,created_at FROM expenses WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date DESC, created_at DESC LIMIT 200", args: [userId, current.from, current.to] }),
       db.execute({ sql: "SELECT amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?", args: [userId, previousRange.from, previousRange.to] }),
       db.execute({ sql: "SELECT category,amount_minor,currency FROM budgets WHERE user_id = ? ORDER BY created_at DESC", args: [userId] }),
-      db.execute({ sql: "SELECT data FROM finance_state WHERE user_id = ?", args: [userId] }),
+      readFinanceState(db, userId),
     ]);
 
-    const finance = safeFinance(financeResult.rows[0]?.data);
-    const sqlExpenses = expenseResult.rows.map((row) => ({ id: row.id, date: row.date, category: row.category, description: row.description, amountMinor: Number(row.amount_minor), currency: row.currency }));
-    const jsonExpenses = (finance.expenses || [])
-      .filter((e) => inMonth(e, month))
-      .map((e) => ({ id: e.id, date: e.date, category: e.category, description: e.description, amountMinor: Number(e.amountMinor || 0), currency: e.currency || finance.currency || "BDT" }));
-
-    const map = new Map();
-    [...sqlExpenses, ...jsonExpenses].forEach(e => {
-      if (!map.has(e.id || `${e.date}-${e.amountMinor}`)) map.set(e.id || `${e.date}-${e.amountMinor}`, e);
-    });
-    const expenses = Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
+    const finance = financeState.finance;
+    // The expenses table is the single source of truth; the JSON blob only
+    // carries per-expense metadata now.
+    const expenses = expenseResult.rows.map((row) => ({
+      id: row.id,
+      date: row.date,
+      category: row.category,
+      description: row.description,
+      amountMinor: Number(row.amount_minor),
+      currency: row.currency,
+    }));
 
     const budgets = budgetResult.rows.map((row) => ({ category: row.category, amountMinor: Number(row.amount_minor), currency: row.currency }));
     const currency = budgets.find((budget) => budget.category === null)?.currency || finance.currency || expenses[0]?.currency || finance.incomes?.[0]?.currency || "BDT";
-    const scoped = expenses;
-    const spentMinor = scoped.reduce((sum, expense) => sum + expense.amountMinor, 0);
+    const spentMinor = expenses.reduce((sum, expense) => sum + expense.amountMinor, 0);
 
     const incomes = (finance.incomes || []).filter((income) => inMonth(income, month));
     const previousIncomes = (finance.incomes || []).filter((income) => inMonth(income, previous));
@@ -477,11 +407,12 @@ export default async function handler(req, res) {
       overallBudgetMinor = Number(finance.budgetMinor);
     }
     if (overallBudgetMinor === undefined) overallBudgetMinor = null;
-    const categories = Object.entries(scoped.reduce((map, expense) => {
-      map[expense.category] = (map[expense.category] || 0) + expense.amountMinor;
-      return map;
+
+    const categories = Object.entries(expenses.reduce((totals, expense) => {
+      totals[expense.category] = (totals[expense.category] || 0) + expense.amountMinor;
+      return totals;
     }, {})).map(([name, amountMinor]) => ({ name, amountMinor })).sort((a, b) => b.amountMinor - a.amountMinor);
-    const daily = Object.entries(scoped.reduce((days, expense) => {
+    const daily = Object.entries(expenses.reduce((days, expense) => {
       days[expense.date] = (days[expense.date] || 0) + expense.amountMinor;
       return days;
     }, {})).map(([date, amountMinor]) => ({ date, amountMinor })).sort((a, b) => a.date.localeCompare(b.date));
@@ -531,7 +462,7 @@ export default async function handler(req, res) {
       previousIncomeMinor,
       budgetMinor: overallBudgetMinor ?? null,
       categories,
-      expenses: scoped.slice(0, 200),
+      expenses,
       daily,
       dailyIncome,
       incomes,

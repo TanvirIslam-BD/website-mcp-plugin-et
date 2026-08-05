@@ -1,36 +1,128 @@
+import { database } from "./_db.js";
+import { sameOriginRequest } from "./_config.js";
+import { readDashboardSession, refreshDashboardSession } from "./_dashboard-session.js";
+import { cleanDisplayName } from "./_mcpize-profile.js";
+import { reconcileUserData } from "./_finance-state.js";
+import { currentMonth, formatMoney, monthlySummary, validMonth } from "./_monthly-summary.js";
+import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
+import { consumeRateLimit } from "./_rate-limit.js";
+
+// Sending mail costs money and reputation, so the ceiling is deliberately low.
+const REPORT_RATE_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 };
+// Verified Resend sending domain. Overridable via EMAIL_FROM.
+const DEFAULT_EMAIL_FROM = "Money Copilot <reports@contact.copilotai.live>";
+const EMAIL_PATTERN = /^[^\s@,;:<>"']{1,64}@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+
+// Every value below is caller-supplied and lands inside an HTML document.
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]);
+}
+
+// Plain text: control characters stripped, but not HTML-escaped. Use only where
+// the value is not written into markup (mail headers, JSON responses, logs).
+function safeText(value, fallback, maxLength = 80) {
+  const text = typeof value === "string"
+    ? value.replace(/[\u0000-\u001f\u007f]+/g, " ").trim().slice(0, maxLength)
+    : typeof value === "number" && Number.isFinite(value) ? String(value) : "";
+  return text || fallback;
+}
+
+function safeField(value, fallback, maxLength = 80) {
+  const text = safeText(value, "", maxLength);
+  return text ? escapeHtml(text) : fallback;
+}
+
+function safePercent(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? Math.min(100, Math.max(0, Math.round(numeric))) : 0;
+}
+
+/** Greeting name from the signed session, falling back to the stored profile. */
+async function resolveDisplayName(db, session) {
+  if (session.displayName) return session.displayName;
+  try {
+    const result = await db.execute({
+      sql: "SELECT display_name FROM app_users WHERE user_id = ? LIMIT 1",
+      args: [session.userId],
+    });
+    return cleanDisplayName(result.rows[0]?.display_name);
+  } catch {
+    return "";
+  }
+}
+
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "private, no-store, max-age=0");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("X-Content-Type-Options", "nosniff");
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
+  if (!sameOriginRequest(req)) return res.status(403).json({ error: "Origin not allowed." });
 
-  const {
-    recipientEmail,
-    month = "August 2026",
-    currency = "BDT",
-    spentFormatted = "৳0.00",
-    budgetFormatted = "৳0.00",
-    budgetUsed = 0,
-    remainingFormatted = "৳0.00",
-    incomeFormatted = "৳0.00",
-    savedFormatted = "৳0.00",
-    categories = [],
-    displayName = "User"
-  } = req.body || {};
+  // Without this check the endpoint is an open relay: anybody could send
+  // arbitrary HTML from this project's verified sending domain.
+  const session = readDashboardSession(req);
+  if (!session) return res.status(401).json({ error: "A valid dashboard session is required." });
+  refreshDashboardSession(res, session);
 
-  if (!recipientEmail || typeof recipientEmail !== "string" || !recipientEmail.includes("@")) {
+  const db = database();
+  if (!db) return res.status(503).json({ error: "Email reporting is not configured." });
+  await ensureMonitoringTables(db);
+  const control = await userControl(db, session.userId);
+  if (control.status === "suspended") {
+    return res.status(403).json({ error: "This account has been suspended.", code: "account_suspended" });
+  }
+  const quota = await consumeRateLimit(db, `report-email:${session.userId}`, REPORT_RATE_LIMIT);
+  if (!quota.allowed) {
+    res.setHeader("Retry-After", String(quota.retryAfterSeconds));
+    return res.status(429).json({ error: "Too many report emails. Please try again later." });
+  }
+
+  const body = req.body && typeof req.body === "object" ? req.body : {};
+  const recipientEmail = typeof body.recipientEmail === "string" ? body.recipientEmail.trim() : "";
+  if (!recipientEmail || recipientEmail.length > 254 || !EMAIL_PATTERN.test(recipientEmail)) {
     return res.status(400).json({ error: "A valid recipient email address is required." });
   }
 
-  const emailSubject = `📊 Money Copilot Report - ${month}`;
+  // Only the month and the recipient come from the caller. Every figure below is
+  // read from this user's stored data, so the report cannot be made to state
+  // numbers that are not in the database.
+  await reconcileUserData(db, session.userId);
+  const requestedMonth = validMonth(body.month) ? body.month : currentMonth();
+  const summary = await monthlySummary(db, session.userId, requestedMonth);
+  const currency = summary.currency;
+
+  const monthText = safeText(summary.monthLabel, "This month", 40);
+  const month = escapeHtml(monthText);
+  const spentFormatted = escapeHtml(formatMoney(summary.spentMinor, currency));
+  const budgetFormatted = summary.budgetMinor === null ? "No budget set" : escapeHtml(formatMoney(summary.budgetMinor, currency));
+  const budgetUsed = safePercent(summary.usedPercent);
+  const remainingFormatted = summary.remainingMinor === null
+    ? "N/A"
+    : escapeHtml(summary.remainingMinor < 0
+      ? `${formatMoney(Math.abs(summary.remainingMinor), currency)} over budget`
+      : formatMoney(summary.remainingMinor, currency));
+  const displayName = safeField(await resolveDisplayName(db, session), "User", 60);
+  const categories = summary.categories.slice(0, 12).map((entry) => ({
+    name: entry.category,
+    amount: entry.amountMinor / 100,
+    amountFormatted: formatMoney(entry.amountMinor, currency),
+  }));
+
+  const emailSubject = `📊 Money Copilot Report - ${monthText}`;
 
   // Clean remaining formatted value to prevent duplicate "remaining" text
   const cleanRemaining = (remainingFormatted || "").replace(/\s*remaining\s*/i, "").trim() || remainingFormatted;
 
   // Helper to strictly parse numeric amounts from number or formatted string
   const getNumericAmount = (cat) => {
-    if (typeof cat.amount === "number" && !isNaN(cat.amount)) return cat.amount;
+    if (typeof cat.amount === "number" && Number.isFinite(cat.amount)) return cat.amount;
     const str = String(cat.amountFormatted || cat.amount || "0").replace(/[^0-9.]/g, "");
-    return parseFloat(str) || 0;
+    const parsed = parseFloat(str);
+    return Number.isFinite(parsed) ? parsed : 0;
   };
 
   // Color lookup for spending categories matching mockup
@@ -48,12 +140,16 @@ export default async function handler(req, res) {
   // Compute category breakdown with accurate percentage bars
   const categoryTotal = (categories || []).reduce((sum, c) => sum + getNumericAmount(c), 0) || 1;
   const breakdownRows = (categories || []).slice(0, 4).map((cat) => {
-    const key = (cat.name || "").toLowerCase().trim();
-    const meta = categoryMeta[key] || { color: "#10b981", icon: "🏷️", bg: "#ecfdf5" };
-    const nameFormatted = cat.name ? cat.name.charAt(0).toUpperCase() + cat.name.slice(1) : "Uncategorized";
+    const key = String(cat.name || "").toLowerCase().trim();
+    // Own-property check so category names like "constructor" cannot reach
+    // Object.prototype and render as undefined styles.
+    const meta = Object.hasOwn(categoryMeta, key) ? categoryMeta[key] : { color: "#10b981", icon: "🏷️", bg: "#ecfdf5" };
+    const rawName = safeText(cat.name, "Uncategorized", 60);
+    const nameFormatted = escapeHtml(rawName.charAt(0).toUpperCase() + rawName.slice(1));
     const amountVal = getNumericAmount(cat);
     const percent = Math.min(100, Math.max(1, Math.round((amountVal / categoryTotal) * 100)));
-    const amountDisp = cat.amountFormatted || `${currency === "BDT" ? "৳" : currency === "USD" ? "$" : ""}${amountVal.toLocaleString("en-US")}`;
+    const amountDisp = safeField(cat.amountFormatted, "", 40)
+      || escapeHtml(`${currency === "BDT" ? "৳" : currency === "USD" ? "$" : ""}${amountVal.toLocaleString("en-US")}`);
 
     return `
     <tr>
@@ -86,7 +182,7 @@ export default async function handler(req, res) {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <title>${emailSubject}</title>
+      <title>${escapeHtml(emailSubject)}</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         body, td, th, p, div, span, a, h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important; }
@@ -564,7 +660,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || "Money Copilot <onboarding@resend.dev>",
+          from: process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM,
           to: [recipientEmail],
           subject: emailSubject,
           html: emailHtml
@@ -578,6 +674,13 @@ export default async function handler(req, res) {
       }
 
       const data = await response.json();
+      // Recorded so outbound mail stays attributable to the account that sent it.
+      await recordActivity(db, {
+        userId: session.userId,
+        source: "dashboard",
+        eventType: "report_email_sent",
+        detail: { recipientDomain: recipientEmail.split("@")[1] || "", month: monthText },
+      }).catch((error) => console.error("report email activity log failed", error));
       return res.status(200).json({ success: true, message: `Report sent successfully to ${recipientEmail}`, id: data.id });
     } catch (err) {
       console.error("Email send exception:", err);
@@ -585,16 +688,15 @@ export default async function handler(req, res) {
     }
   }
 
-  console.log(`[Money Copilot Email Dispatcher] Report queued for ${recipientEmail}:`, {
-    month,
-    spentFormatted,
-    budgetFormatted,
-    budgetUsed
+  console.log("[Money Copilot Email Dispatcher] Report queued (no RESEND_API_KEY configured):", {
+    userId: session.userId,
+    month: monthText,
+    budgetUsed,
   });
 
   return res.status(200).json({
     success: true,
     simulated: true,
-    message: `Report for ${month} sent successfully to ${recipientEmail}.`
+    message: `Report for ${monthText} was generated for ${recipientEmail}, but email delivery is not configured.`
   });
 }
