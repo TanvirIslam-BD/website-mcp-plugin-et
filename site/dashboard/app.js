@@ -900,7 +900,7 @@ function renderAiAssistantRail(model) {
           <span class="copilot-logo bot-mascot" aria-hidden="true" style="width: 44px; height: 44px; display: block; flex: 0 0 auto;"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt="" style="width: 100%; height: auto;"></span>
           <div class="assistant-header-content" style="display: flex; flex-direction: column; gap: 3px;">
             <span class="assistant-title" style="font-size: 15px; font-weight: 700; color: #070c16; line-height: 1.2; display: block;">Money Copilot AI Assistant</span>
-            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
+            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
           </div>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -939,7 +939,7 @@ function renderEmptyAssistantRail() {
           <span class="copilot-logo bot-mascot" aria-hidden="true" style="width: 44px; height: 44px; display: block; flex: 0 0 auto;"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt="" style="width: 100%; height: auto;"></span>
           <div class="assistant-header-content" style="display: flex; flex-direction: column; gap: 3px;">
             <span class="assistant-title" style="font-size: 15px; font-weight: 700; color: #070c16; line-height: 1.2; display: block;">Money Copilot AI Assistant</span>
-            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
+            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
           </div>
         </div>
       </div>
@@ -1305,7 +1305,7 @@ function setAiSubmitLoading(button, isLoading) {
 function openEmptyAiChat(prefill = "") {
   openModal("Money Copilot", "Build your first financial picture with guided, private help.", `
     <div class="copilot-modal-status empty-copilot-status">
-      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
         <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
       </a>
       <span class="assistant-online"><i></i>Online</span>
@@ -1354,7 +1354,7 @@ function openAiChat(prefill = "") {
 
   openModal("Money Copilot", "Get verified answers from your private expense data.", `
     <div class="copilot-modal-status">
-      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/console/login?aff=mURH" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
+      <a class="comet-badge comet-badge-modal" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI">
         <span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI">
       </a>
       <span class="assistant-online"><i></i>Online</span>
