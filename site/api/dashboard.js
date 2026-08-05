@@ -9,6 +9,7 @@ import {
   amountToMinor,
   categoryCatalog,
   cleanText,
+  mergeExpenseSources,
   mutateFinanceState,
   readFinanceState,
   reconcileUserData,
@@ -136,9 +137,10 @@ export default async function handler(req, res) {
       });
       const { finance } = await readFinanceState(db, userId);
       const incomes = (finance.incomes || []).filter((income) => all || inMonth(income, month));
-      const expenseRows = expenseResult.rows.map((row) => {
-        const meta = finance.expenseMetadata?.[row.id] || {};
-        return ["expense", row.date, row.description, row.category, meta.subcategory || "", (Number(row.amount_minor || 0) / 100).toFixed(2), row.currency, meta.merchant || "", meta.paymentMethod || "", (meta.tags || []).join("|")];
+      const exported = mergeExpenseSources(expenseResult.rows, finance, all ? {} : { startDate: range.from, endDate: range.to });
+      const expenseRows = exported.map((expense) => {
+        const meta = finance.expenseMetadata?.[expense.id] || {};
+        return ["expense", expense.date, expense.description, expense.category, meta.subcategory || "", (expense.amountMinor / 100).toFixed(2), expense.currency, meta.merchant || "", meta.paymentMethod || "", (meta.tags || []).join("|")];
       });
       const incomeRows = incomes.map((income) => ["income", income.date, income.notes || income.source || "Income", income.source || "income", "", (Number(income.amountMinor || 0) / 100).toFixed(2), income.currency, "", "", ""]);
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -381,16 +383,12 @@ export default async function handler(req, res) {
     ]);
 
     const finance = financeState.finance;
-    // The expenses table is the single source of truth; the JSON blob only
-    // carries per-expense metadata now.
-    const expenses = expenseResult.rows.map((row) => ({
-      id: row.id,
-      date: row.date,
-      category: row.category,
-      description: row.description,
-      amountMinor: Number(row.amount_minor),
-      currency: row.currency,
-    }));
+    // Both stores are read: the MCP server can record an expense into the JSON
+    // document rather than the table, and reading only the table hid those.
+    const expenses = mergeExpenseSources(expenseResult.rows, finance, {
+      startDate: current.from,
+      endDate: current.to,
+    });
 
     const budgets = budgetResult.rows.map((row) => ({ category: row.category, amountMinor: Number(row.amount_minor), currency: row.currency }));
     const currency = budgets.find((budget) => budget.category === null)?.currency || finance.currency || expenses[0]?.currency || finance.incomes?.[0]?.currency || "BDT";

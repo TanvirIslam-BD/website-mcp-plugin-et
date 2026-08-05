@@ -320,17 +320,30 @@ money-copilot-ai/
 
 ### Data model
 
-The `expenses` and `budgets` tables are the source of truth for transactions and
-limits. A single `finance_state` JSON document per user holds everything the
-schema has no column for — incomes, goals, recurring bills, the category
-catalogue, per-expense metadata (merchant, payment method, tags, subcategory),
-and preferences. Writes to that document go through a compare-and-swap helper, so
-two concurrent requests cannot silently discard each other's changes.
+This schema is **owned by the MCP server**, not by this repo — nothing here
+creates the `expenses`, `budgets` or `finance_state` tables. That matters, because
+an expense can be written to **either** store: the dashboard writes rows to the
+`expenses` table, while a transaction recorded through a connected AI client can
+land in `finance_state.expenses`. Every read path therefore merges both via
+`mergeExpenseSources()`, de-duplicating by id and falling back to a
+date/amount/category signature.
 
-`finance_state.schemaVersion` tracks per-user migrations. Version 2 moved a
-legacy duplicate copy of expenses out of the JSON blob into the `expenses` table
-and normalized every timestamp to an ISO string; it runs once per user, on
-first read.
+`finance_state` also holds everything the schema has no column for: incomes,
+goals, recurring bills, the category catalogue, per-expense metadata (merchant,
+payment method, tags, subcategory) and preferences. Writes to that document go
+through a compare-and-swap helper, so two concurrent requests cannot silently
+discard each other's changes.
+
+`finance_state.schemaVersion` tracks per-user migrations. Version 3 normalizes
+every timestamp to an ISO string and nothing else; it runs once per user, on first
+read.
+
+> **Do not "consolidate" the two expense stores.** Version 2 of this migration did
+> exactly that — copying `finance_state.expenses` into the table, deleting the
+> array, and dropping the merge from every read. It looks like dead duplication.
+> It is not: the MCP server keeps writing there, so anything recorded through chat
+> became invisible on the dashboard and absent from every total.
+> `test/finance-state.test.js` guards against a repeat.
 
 ### Sign-in flow
 

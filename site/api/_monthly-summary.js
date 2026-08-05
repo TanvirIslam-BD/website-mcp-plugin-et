@@ -1,4 +1,4 @@
-import { readFinanceState } from "./_finance-state.js";
+import { mergeExpenseSources, readFinanceState } from "./_finance-state.js";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -44,7 +44,7 @@ export async function monthlySummary(db, userId, month, fallbackCurrency = "BDT"
 
   const [expenseResult, budgetResult, financeState] = await Promise.all([
     db.execute({
-      sql: "SELECT date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date DESC",
+      sql: "SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date DESC",
       args: [userId, startDate, endDate],
     }),
     db.execute({ sql: "SELECT category,amount_minor,currency FROM budgets WHERE user_id = ? ORDER BY created_at DESC", args: [userId] }),
@@ -52,13 +52,9 @@ export async function monthlySummary(db, userId, month, fallbackCurrency = "BDT"
   ]);
 
   const finance = financeState.finance;
-  const expenses = expenseResult.rows.map((row) => ({
-    date: String(row.date),
-    category: String(row.category || "uncategorized"),
-    description: String(row.description || ""),
-    amountMinor: Number(row.amount_minor || 0),
-    currency: String(row.currency || ""),
-  }));
+  // Both stores, so a total never silently omits what the MCP server recorded.
+  const expenses = mergeExpenseSources(expenseResult.rows, finance, { startDate, endDate })
+    .map((expense) => ({ ...expense, category: expense.category || "uncategorized" }));
 
   const overallBudget = budgetResult.rows.find((row) => row.category === null);
   const preferredCurrency = typeof finance.settings?.currency === "string" && /^[A-Z]{3}$/.test(finance.settings.currency)

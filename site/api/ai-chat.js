@@ -4,7 +4,7 @@ import { sameOriginRequest } from "./_config.js";
 import { readDashboardSession, refreshDashboardSession } from "./_dashboard-session.js";
 import { ensureMonitoringTables, recordActivity, userControl } from "./_monitoring.js";
 import { consumeRateLimit } from "./_rate-limit.js";
-import { amountToMinor, mutateFinanceState, readFinanceState, reconcileUserData, replaceBudgetStatements } from "./_finance-state.js";
+import { amountToMinor, mergeExpenseSources, mutateFinanceState, readFinanceState, reconcileUserData, replaceBudgetStatements } from "./_finance-state.js";
 import { monthlySummary } from "./_monthly-summary.js";
 import { completionEvents, createDeltaAccumulator } from "./_completion-stream.js";
 
@@ -21,6 +21,9 @@ const MODEL_TIMEOUT_MS = 12_000;
 const CATALOG_TTL_MS = 5 * 60_000;
 const MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
 const mcpCatalogCache = new Map();
+// Models whose gateway rejected a streaming request; remembered so the failed
+// attempt is paid once per instance rather than once per request.
+const bufferedOnlyModels = new Set();
 const CATEGORY_NAMES = {
   food: "Food",
   groceries: "Groceries",
@@ -210,11 +213,21 @@ function expenseRow(row) {
 }
 
 async function getLatestExpense(db, userId) {
-  const result = await db.execute({
-    sql: "SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT 1",
-    args: [userId],
-  });
-  return { expense: result.rows[0] ? expenseRow(result.rows[0]) : null };
+  // Both stores, because the MCP server may have written the newest expense into
+  // the JSON document rather than the table.
+  const [result, financeState] = await Promise.all([
+    db.execute({
+      sql: "SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT 1",
+      args: [userId],
+    }),
+    readFinanceState(db, userId),
+  ]);
+  const [latest] = mergeExpenseSources(result.rows, financeState.finance);
+  return {
+    expense: latest
+      ? { id: latest.id, date: latest.date, category: latest.category, description: latest.description, amount: latest.amountMinor / 100, currency: latest.currency }
+      : null,
+  };
 }
 
 async function getExpenses(db, userId, input, dashboardMonth, fallbackCurrency) {
@@ -226,12 +239,16 @@ async function getExpenses(db, userId, input, dashboardMonth, fallbackCurrency) 
   const endDate = validDate(input.endDate) ? input.endDate : range.endDate;
   const category = safeText(input.category, 60).toLowerCase();
 
-  const result = await db.execute({
-    sql: `SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?${category ? " AND lower(category) = ?" : ""} ORDER BY date DESC, created_at DESC LIMIT 250`,
-    args: category ? [userId, startDate, endDate, category] : [userId, startDate, endDate],
-  });
+  const [result, financeState] = await Promise.all([
+    db.execute({
+      sql: `SELECT id,date,category,description,amount_minor,currency FROM expenses WHERE user_id = ? AND date >= ? AND date <= ?${category ? " AND lower(category) = ?" : ""} ORDER BY date DESC, created_at DESC LIMIT 250`,
+      args: category ? [userId, startDate, endDate, category] : [userId, startDate, endDate],
+    }),
+    readFinanceState(db, userId),
+  ]);
 
-  const expenses = result.rows.map(expenseRow);
+  const expenses = mergeExpenseSources(result.rows, financeState.finance, { startDate, endDate, category })
+    .map((expense) => ({ ...expense, amount: expense.amountMinor / 100 }));
   return {
     startDate,
     endDate,
@@ -772,9 +789,28 @@ export default async function handler(req, res) {
     // the client actually renders, so a fallback substitution later cannot leave
     // stale text on screen.
     const emitText = stream ? (text) => stream.send("delta", { text }) : null;
-    const runPass = () => (stream
-      ? callCometStream(activeModel, messages, availableTools, emitText)
-      : callComet(activeModel, messages, availableTools));
+
+    /*
+     * Streaming is an enhancement, never a requirement. A gateway that rejects
+     * `stream` or `stream_options` must not take the whole request down with it —
+     * that turned every chat into the database fallback, so a "record this
+     * expense" instruction never reached a tool call at all.
+     *
+     * The verdict is remembered per model for the life of the instance, so an
+     * unsupported model costs one failed attempt rather than one per request.
+     */
+    const runPass = async () => {
+      if (stream && !bufferedOnlyModels.has(activeModel)) {
+        try {
+          return await callCometStream(activeModel, messages, availableTools, emitText);
+        } catch (error) {
+          console.error(`[ai-chat] streaming unavailable for ${activeModel}, using a buffered completion`, error);
+          bufferedOnlyModels.add(activeModel);
+          stream.send("buffering", { model: activeModel });
+        }
+      }
+      return callComet(activeModel, messages, availableTools);
+    };
 
     for (let pass = 0; pass < MAX_MODEL_PASSES; pass += 1) {
       try {
