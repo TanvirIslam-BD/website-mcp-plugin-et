@@ -3339,10 +3339,41 @@ img[src$="money-copilot-app-logo.png"] {
 .mobile-date-nav .month-picker-popover {
   top: auto;
   right: auto;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 12px);
   left: 0;
   width: min(258px, calc(100vw - 32px));
   transform: none;
+  border-radius: 18px;
+  border: 1px solid rgba(185, 221, 204, 0.7);
+  background: rgba(251, 255, 253, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16px 40px rgba(18, 76, 51, 0.16);
+  padding: 14px;
+}
+
+@keyframes mobile-popover-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-date-nav .month-picker-popover:not([hidden]) {
+  animation: mobile-popover-slide-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mobile-date-nav .month-picker-option {
+  transition: all 0.15s ease;
+}
+
+.mobile-date-nav .month-picker-year button,
+.mobile-date-nav .month-picker-footer button {
+  transition: all 0.15s ease;
 }
 :root[data-theme="dark"] .mobile-date-nav .month-picker-trigger { color:#65e9aa; }
 :root[data-theme="dark"] .mobile-date-nav .month-picker-trigger:hover,
@@ -3350,4 +3381,10 @@ img[src$="money-copilot-app-logo.png"] {
 :root[data-theme="dark"] .mobile-date-nav .month-picker-trigger:focus-visible {
   color:#8af6c0;
   background:#102a20;
+}
+
+:root[data-theme="dark"] .mobile-date-nav .month-picker-popover {
+  border-color: rgba(40, 81, 63, 0.7);
+  background: rgba(8, 27, 19, 0.96);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
 }
