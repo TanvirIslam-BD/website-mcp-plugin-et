@@ -4,7 +4,8 @@
   "type": "module",
   "dependencies": {
     "@libsql/client": "^0.14.0",
-    "@vercel/analytics": "^2.0.1"
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0"
   },
   "optionalDependencies": {
     "@libsql/linux-x64-gnu": "0.4.7"
