@@ -61,6 +61,69 @@ function applyDashboardPreferences(preferences = {}) {
     localStorage.setItem("bill_reminders", String(preferences.billReminders !== false));
     localStorage.setItem("income_received_notifications", String(preferences.incomeReceived !== false));
     localStorage.setItem("overdue_alerts", String(preferences.overdueAlerts !== false));
+const app = document.getElementById("app");
+const params = new URLSearchParams(location.search);
+const token = params.get("dashboard_token");
+let selectedMonth = params.get("month") || new Date().toISOString().slice(0, 7);
+const DASHBOARD_LOGIN_URL = "/api/dashboard-auth";
+const MONEY_COPILOT_MCP_ENDPOINT = "https://expense-tracker-mcp.mcpize.run/mcp";
+
+function localDisplayCurrency(fallbackCurrency = "") {
+  const saved = (() => {
+    try { return localStorage.getItem("dashboard_display_currency"); } catch { return ""; }
+  })();
+  if (/^[A-Z]{3}$/.test(saved || "")) return saved;
+
+  const region = (() => {
+    try { return new Intl.Locale(navigator.language).region || ""; } catch { return ""; }
+  })();
+  const regionalCurrency = { BD: "BDT", IN: "INR", GB: "GBP", CA: "CAD", AU: "AUD", EU: "EUR", DE: "EUR", FR: "EUR", IT: "EUR", ES: "EUR", PT: "EUR" }[region];
+  return regionalCurrency || (/^[A-Z]{3}$/.test(fallbackCurrency) ? fallbackCurrency : "USD");
+}
+
+function setTheme(mode) {
+  const theme = mode === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem("expenseTrackerTheme", theme); } catch {}
+  syncThemeSwitch();
+}
+
+function readLocalPreferences(fallback = {}) {
+  const readBoolean = (key, defaultValue) => {
+    try {
+      const value = localStorage.getItem(key);
+      return value === null ? defaultValue : value === "true";
+    } catch { return defaultValue; }
+  };
+  let copilotModel = fallback.copilotModel || "gemini-2.5-flash";
+  try { copilotModel = localStorage.getItem("copilot_model") || copilotModel; } catch {}
+  return {
+    ...fallback,
+    currency: localDisplayCurrency(fallback.currency || ""),
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+    compactMode: readBoolean("compact_mode", fallback.compactMode === true),
+    copilotModel,
+    autoSuggest: readBoolean("auto_suggest", fallback.autoSuggest !== false),
+    billReminders: readBoolean("bill_reminders", fallback.billReminders !== false),
+    incomeReceived: readBoolean("income_received_notifications", fallback.incomeReceived !== false),
+    overdueAlerts: readBoolean("overdue_alerts", fallback.overdueAlerts !== false),
+    newsletter: readBoolean("newsletter_notifications", fallback.newsletter !== false),
+    pushNotifications: readBoolean("push_notifications", fallback.pushNotifications === true),
+    emailNotifications: readBoolean("email_notifications", fallback.emailNotifications !== false),
+  };
+}
+
+function applyDashboardPreferences(preferences = {}) {
+  if (preferences.theme === "dark" || preferences.theme === "light") setTheme(preferences.theme);
+  document.documentElement.dataset.density = preferences.compactMode ? "compact" : "comfortable";
+  try {
+    if (preferences.currency) localStorage.setItem("dashboard_display_currency", preferences.currency);
+    if (preferences.copilotModel) localStorage.setItem("copilot_model", preferences.copilotModel);
+    localStorage.setItem("compact_mode", String(Boolean(preferences.compactMode)));
+    localStorage.setItem("auto_suggest", String(preferences.autoSuggest !== false));
+    localStorage.setItem("bill_reminders", String(preferences.billReminders !== false));
+    localStorage.setItem("income_received_notifications", String(preferences.incomeReceived !== false));
+    localStorage.setItem("overdue_alerts", String(preferences.overdueAlerts !== false));
     localStorage.setItem("newsletter_notifications", String(preferences.newsletter !== false));
     localStorage.setItem("push_notifications", String(preferences.pushNotifications === true));
     localStorage.setItem("email_notifications", String(preferences.emailNotifications !== false));
@@ -71,7 +134,7 @@ function showNotificationOnce(key, title, body) {
   try {
     const storageKey = `money_copilot_notification:${key}`;
     if (localStorage.getItem(storageKey)) return;
-    new Notification(title, { body, icon: "/assets/logo/money-copilot-app-logo.png", tag: key });
+    new Notification(title, { body, icon: "/assets/logo/money-copilot-app-logo-108.webp", tag: key });
     localStorage.setItem(storageKey, new Date().toISOString());
   } catch {}
 }
@@ -763,7 +826,7 @@ function renderTransactions(model) {
 
 function renderSidebar(model) {
   const displayName = esc(model.user?.displayName || "User");
-  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo.png");
+  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo-108.webp");
   const nav = [
     ["dashboard", "Dashboard", "dashboard"],
     ["transactions", "Transactions", "transactions"],
@@ -777,8 +840,8 @@ function renderSidebar(model) {
   return `
     <aside class="sidebar">
       <div class="brand">
-        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-app-logo.png" alt="">
-        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-app-logo.png" alt="">
+        <img class="brand-logo brand-logo-dark" src="/assets/logo/money-copilot-app-logo-108.webp" alt="">
+        <img class="brand-logo brand-logo-light" src="/assets/logo/money-copilot-app-logo-108.webp" alt="">
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
@@ -824,7 +887,7 @@ function renderHeader(model) {
 
 function renderMobileDashboardHeader(model) {
   const displayName = esc(model.user?.displayName || "User");
-  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo.png");
+  const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo-108.webp");
   const month = esc(monthLabel(model.month).split(" ")[0]);
   return `
     <header class="mobile-dashboard-header">
@@ -1062,7 +1125,7 @@ function openModal(title, subtitle, content, options = {}) {
       <section class="modal ${options.wide ? "wide" : ""} ${options.className || ""}">
         <div class="modal-top">
           <div class="modal-heading">
-            <div class="modal-title-row">${isAiModal ? '<img class="modal-title-logo" src="/assets/logo/money-copilot-app-logo.png" alt="">' : ""}<h2>${esc(title)}</h2></div>
+            <div class="modal-title-row">${isAiModal ? '<img class="modal-title-logo" src="/assets/logo/money-copilot-app-logo-108.webp" alt="">' : ""}<h2>${esc(title)}</h2></div>
             <p>${esc(subtitle || "")}</p>
           </div>
           <button class="modal-close" data-close aria-label="Close">${icon("close")}</button>
@@ -1831,7 +1894,7 @@ function openPanel(kind) {
     openModal("Connect Money Copilot", "Use your private finance tools from ChatGPT, Claude, or another MCP client.", `
       <section class="mcp-connect-card" aria-label="Money Copilot MCP connection">
         <div class="mcp-connect-head">
-          <span class="mcp-connect-identity"><img src="/assets/logo/money-copilot-app-logo.png" alt=""><span><b>Money Copilot MCP</b><small>Remote MCP server</small></span></span>
+          <span class="mcp-connect-identity"><img src="/assets/logo/money-copilot-app-logo-108.webp" alt=""><span><b>Money Copilot MCP</b><small>Remote MCP server</small></span></span>
           <span class="mcp-ready"><i></i>Ready</span>
         </div>
         <div class="mcp-credential-status"><i></i><span><b>Secure connection available</b><small>Each user signs in with their own OAuth session.</small></span></div>
@@ -2418,233 +2481,6 @@ function submitPanelForm(form) {
       category: finalCategory,
       subcategory: String(data.get("subcategory") || "").trim(),
     }, form);
-  }
-  if (form.dataset.form === "budget") {
-    return postDashboard({ kind: "budget", amount: data.get("amount"), currency: String(data.get("currency") || "").toUpperCase() }, form);
-  }
-  if (form.dataset.form === "goal") {
-    return postDashboard({ kind: "goal", name: data.get("name"), target: data.get("target"), currency: String(data.get("currency") || "").toUpperCase() }, form);
-  }
-  return submitEntry(form);
-}
-
-function chartDataset(model, mode = "month") {
-  const monthName = monthLabel(model.month).split(" ")[0];
-  const year = model.month.slice(0, 4);
-  let start = 0;
-  let income = model.incomeCum;
-  let expense = model.expenseCum;
-  let saving = model.savingsCum;
-  let labels = income.map((_, index) => `${index + 1} ${monthName} ${year}`);
-  if (mode === "daily") {
-    income = model.incomeDaily;
-    expense = model.expenseDaily;
-    saving = model.incomeDaily.map((value, index) => Math.max(0, value - (model.expenseDaily[index] || 0)));
-  }
-  if (mode === "week") {
-    const end = Math.min(todayDay(model.month), model.incomeDaily.length);
-    start = Math.max(0, end - 7);
-    income = model.incomeDaily.slice(start, end);
-    expense = model.expenseDaily.slice(start, end);
-    saving = income.map((value, index) => Math.max(0, value - (expense[index] || 0)));
-  }
-  labels = income.map((_, index) => `${start + index + 1} ${monthName} ${year}`);
-  return { income, expense, saving, labels, startDay: start + 1 };
-}
-
-function setChartText(root, selector, value) {
-  const node = root.querySelector(selector);
-  if (node) node.textContent = value;
-}
-
-function updateIncomeExpenseChart(mode = "month", selectedIndex) {
-  const model = window.dashboardModel;
-  const root = document.querySelector("[data-income-expense-chart]");
-  if (!model || !root) return;
-  const width = 600;
-  const height = 178;
-  const padX = 34;
-  const padY = 24;
-  const data = chartDataset(model, mode);
-  const max = Math.max(...data.income, ...data.expense, ...data.saving, 1);
-  const count = Math.max(data.income.length, data.expense.length, data.saving.length, 1);
-  const safeIndex = Math.max(0, Math.min(selectedIndex ?? Math.floor((count - 1) / 2), count - 1));
-  const incomePoints = linePoints(data.income, width, height, padX, padY, max);
-  const expensePoints = linePoints(data.expense, width, height, padX, padY, max);
-  const savingPoints = linePoints(data.saving, width, height, padX, padY, max);
-  const x = padX + ((width - padX * 2) * safeIndex) / Math.max(count - 1, 1);
-  const yFor = (value) => height - padY - ((height - padY * 2) * Number(value || 0)) / max;
-  const tooltip = root.querySelector("[data-chart-tooltip]");
-  const chart = root.querySelector(".income-expense-chart");
-
-  root.querySelector('[data-chart-line="income"]')?.setAttribute("points", incomePoints);
-  root.querySelector('[data-chart-line="expense"]')?.setAttribute("points", expensePoints);
-  root.querySelector('[data-chart-line="saving"]')?.setAttribute("points", savingPoints);
-  root.querySelector('[data-chart-area="income"]')?.setAttribute("d", areaPath(incomePoints, height, padY));
-  root.querySelector('[data-chart-area="expense"]')?.setAttribute("d", areaPath(expensePoints, height, padY));
-  const cursor = root.querySelector("[data-chart-cursor]");
-  if (cursor) {
-    cursor.setAttribute("x1", x);
-    cursor.setAttribute("x2", x);
-  }
-  const points = [
-    ["income", data.income[safeIndex]],
-    ["expense", data.expense[safeIndex]],
-    ["saving", data.saving[safeIndex]],
-  ];
-  for (const [name, value] of points) {
-    const point = root.querySelector(`[data-chart-point="${name}"]`);
-    if (!point) continue;
-    point.setAttribute("cx", x);
-    point.setAttribute("cy", yFor(value));
-  }
-  setChartText(root, '[data-axis-label="max"]', formatMoney(max, model.currency, { compact: true }));
-  setChartText(root, '[data-axis-label="mid"]', formatMoney(max * .66, model.currency, { compact: true }));
-  setChartText(root, '[data-axis-label="low"]', formatMoney(max * .33, model.currency, { compact: true }));
-  setChartText(root, '[data-x-label="start"]', data.labels[0] ? data.labels[0].replace(` ${model.month.slice(0, 4)}`, "") : "");
-  setChartText(root, '[data-x-label="mid"]', data.labels[Math.floor((count - 1) / 2)] ? data.labels[Math.floor((count - 1) / 2)].replace(` ${model.month.slice(0, 4)}`, "") : "");
-  setChartText(root, '[data-x-label="end"]', data.labels[count - 1] ? data.labels[count - 1].replace(` ${model.month.slice(0, 4)}`, "") : "");
-  setChartText(root, "[data-tip-date]", data.labels[safeIndex] || "");
-  setChartText(root, "[data-tip-income]", formatMoney(data.income[safeIndex] || 0, model.currency));
-  setChartText(root, "[data-tip-expense]", formatMoney(data.expense[safeIndex] || 0, model.currency));
-  setChartText(root, "[data-tip-saving]", formatMoney(data.saving[safeIndex] || 0, model.currency));
-
-  if (tooltip && chart) {
-    const percent = count > 1 ? safeIndex / (count - 1) : .5;
-    const chartWidth = chart.getBoundingClientRect().width || 1;
-    const tipWidth = tooltip.offsetWidth || 124;
-    const left = Math.max(8, Math.min(chartWidth - tipWidth - 8, padX / width * chartWidth + percent * ((width - padX * 2) / width * chartWidth) - tipWidth / 2));
-    tooltip.style.left = `${left}px`;
-  }
-}
-
-function bindIncomeExpenseChart() {
-  const root = document.querySelector("[data-income-expense-chart]");
-  const model = window.dashboardModel;
-  if (!root || !model) return;
-  const select = root.querySelector("[data-chart-mode]");
-  const hitbox = root.querySelector("[data-chart-hitbox]");
-  const mode = () => select?.value || "month";
-  const indexFromEvent = (event) => {
-    const box = hitbox.getBoundingClientRect();
-    const data = chartDataset(model, mode());
-    const count = Math.max(data.income.length, data.expense.length, data.saving.length, 1);
-    const ratio = Math.max(0, Math.min(1, (event.clientX - box.left) / Math.max(1, box.width)));
-    return Math.round(ratio * Math.max(count - 1, 0));
-  };
-  updateIncomeExpenseChart(mode());
-  hitbox?.addEventListener("pointermove", (event) => updateIncomeExpenseChart(mode(), indexFromEvent(event)));
-  hitbox?.addEventListener("pointerdown", (event) => updateIncomeExpenseChart(mode(), indexFromEvent(event)));
-  hitbox?.addEventListener("pointerleave", () => updateIncomeExpenseChart(mode()));
-  select?.addEventListener("change", () => updateIncomeExpenseChart(mode()));
-}
-
-function filterDashboard(query) {
-  const needle = String(query || "").trim().toLowerCase();
-  document.querySelectorAll(".transactions tbody tr[data-search]").forEach((row) => {
-    row.style.display = !needle || row.dataset.search.includes(needle) ? "" : "none";
-  });
-}
-
-const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
-const COPILOT_RAIL_DEFAULT_WIDTH = 440;
-const COPILOT_RAIL_MIN_WIDTH = 280;
-const COPILOT_RAIL_MAX_WIDTH = 560;
-
-function copilotRailBounds() {
-  const sidebarWidth = document.querySelector(".sidebar")?.getBoundingClientRect().width || 224;
-  const availableWidth = window.innerWidth - sidebarWidth - 720;
-  return {
-    min: COPILOT_RAIL_MIN_WIDTH,
-    max: Math.max(COPILOT_RAIL_MIN_WIDTH, Math.min(COPILOT_RAIL_MAX_WIDTH, availableWidth)),
-  };
-}
-
-function initializeAssistantRailResize() {
-  const rail = document.querySelector(".assistant-rail");
-  const handle = rail?.querySelector("[data-ai-rail-resizer]");
-  if (!rail || !handle) return;
-
-  let width = COPILOT_RAIL_DEFAULT_WIDTH;
-  try {
-    const savedWidth = Number(localStorage.getItem(COPILOT_RAIL_WIDTH_KEY));
-    if (Number.isFinite(savedWidth) && savedWidth > 0) {
-      width = savedWidth === 380 ? COPILOT_RAIL_DEFAULT_WIDTH : savedWidth;
-    }
-  } catch {}
-
-  const applyWidth = (nextWidth, { persist = false } = {}) => {
-    const bounds = copilotRailBounds();
-    width = Math.round(Math.min(bounds.max, Math.max(bounds.min, Number(nextWidth) || COPILOT_RAIL_DEFAULT_WIDTH)));
-    app.style.setProperty("--assistant-rail-width", `${width}px`);
-    handle.setAttribute("aria-valuemin", String(bounds.min));
-    handle.setAttribute("aria-valuemax", String(bounds.max));
-    handle.setAttribute("aria-valuenow", String(width));
-    handle.setAttribute("aria-valuetext", `${width} pixels wide`);
-    if (persist) {
-      try { localStorage.setItem(COPILOT_RAIL_WIDTH_KEY, String(width)); } catch {}
-    }
-  };
-
-  applyWidth(width);
-
-  let dragStartX = 0;
-  let dragStartWidth = width;
-  let activePointerId = null;
-
-  const finishResize = (event) => {
-    if (activePointerId === null || (event.pointerId !== undefined && event.pointerId !== activePointerId)) return;
-    activePointerId = null;
-    document.body.classList.remove("is-resizing-copilot");
-    handle.classList.remove("is-active");
-    applyWidth(width, { persist: true });
-  };
-
-  handle.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    activePointerId = event.pointerId;
-    dragStartX = event.clientX;
-    dragStartWidth = rail.getBoundingClientRect().width || width;
-    handle.setPointerCapture?.(event.pointerId);
-    document.body.classList.add("is-resizing-copilot");
-    handle.classList.add("is-active");
-  });
-
-  handle.addEventListener("pointermove", (event) => {
-    if (activePointerId !== event.pointerId) return;
-    applyWidth(dragStartWidth + dragStartX - event.clientX);
-  });
-
-  handle.addEventListener("pointerup", finishResize);
-  handle.addEventListener("pointercancel", finishResize);
-  handle.addEventListener("lostpointercapture", finishResize);
-
-  handle.addEventListener("keydown", (event) => {
-    const step = event.shiftKey ? 32 : 16;
-    let nextWidth = width;
-    if (event.key === "ArrowLeft") nextWidth += step;
-    else if (event.key === "ArrowRight") nextWidth -= step;
-    else if (event.key === "Home") nextWidth = copilotRailBounds().min;
-    else if (event.key === "End") nextWidth = copilotRailBounds().max;
-    else return;
-    event.preventDefault();
-    applyWidth(nextWidth, { persist: true });
-  });
-
-  handle.addEventListener("dblclick", () => applyWidth(COPILOT_RAIL_DEFAULT_WIDTH, { persist: true }));
-  window.addEventListener("resize", () => applyWidth(width));
-}
-
-function bindEvents() {
-  const profilePhoto = document.querySelector("[data-profile-photo]");
-  profilePhoto?.addEventListener("error", () => {
-    profilePhoto.removeAttribute("data-profile-photo");
-    profilePhoto.src = "/assets/logo/money-copilot-app-logo.png";
-  }, { once: true });
-
-  document.addEventListener("click", (event) => {
-    const deleteBtn = event.target.closest("[data-delete-expense-id]");
     if (deleteBtn) {
       const id = deleteBtn.dataset.deleteExpenseId;
       openConfirmModal("Delete Expense", "Are you sure you want to remove this expense? This action cannot be undone.", () => {
