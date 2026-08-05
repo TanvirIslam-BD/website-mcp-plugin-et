@@ -153,12 +153,29 @@
     }
     .custom-lang-select-container .custom-lang-select {
       position: absolute;
-      inset: 0;
-      width: 100%;
+      right: 0;
+      top: 0;
+      width: 40px;
       height: 100%;
       opacity: 0 !important;
       padding: 0 !important;
       margin: 0 !important;
+      z-index: 2;
+      transition: width 0.15s ease, opacity 0.15s ease;
+    }
+    .custom-lang-select-container .custom-lang-select:focus {
+      width: 150px;
+      opacity: 1 !important;
+      background: var(--bg2);
+      border: 1px solid var(--violet2);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 0 12px 0 34px !important;
+      z-index: 10;
+    }
+    html[data-theme="light"] .custom-lang-select-container .custom-lang-select:focus {
+      background: #ffffff;
+      color: #000;
     }
     html[data-theme="light"] .custom-lang-select-container {
       background: #ffffff;
