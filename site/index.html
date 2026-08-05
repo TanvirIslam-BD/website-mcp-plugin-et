@@ -2731,6 +2731,12 @@ function googleTranslateElementInit() {
 }
 
 function changeLanguage(langCode) {
+  if (typeof google === 'undefined' || !google.translate) {
+    loadTranslateScript(() => {
+      setTimeout(() => { changeLanguage(langCode); }, 150);
+    });
+    return;
+  }
   document.querySelectorAll('.custom-lang-select').forEach(sel => {
     sel.value = langCode;
   });
@@ -2745,7 +2751,31 @@ function changeLanguage(langCode) {
     selectEl.dispatchEvent(new Event('change'));
   }
 }
+
+let translateScriptLoaded = false;
+function loadTranslateScript(callback) {
+  if (translateScriptLoaded) {
+    if (callback) callback();
+    return;
+  }
+  translateScriptLoaded = true;
+  const script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  if (callback) {
+    script.onload = callback;
+  }
+  document.body.appendChild(script);
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => loadTranslateScript(), 2500);
+  document.querySelectorAll('.custom-lang-select').forEach(el => {
+    el.addEventListener('focus', () => loadTranslateScript(), { once: true });
+    el.addEventListener('click', () => loadTranslateScript(), { once: true });
+    el.addEventListener('mouseenter', () => loadTranslateScript(), { once: true });
+  });
+});
 </script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
