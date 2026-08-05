@@ -10604,19 +10604,21 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 
 /* Boot screen dark theme polish */
 :root[data-theme="dark"] .boot-screen {
-  background: radial-gradient(circle at 50% 42%, rgba(16, 185, 129, .15), transparent 32rem), linear-gradient(145deg, #070f1a, #0b1728 58%, #081424)!important;
+  background: radial-gradient(circle at 12% 18%,rgba(24,201,156,.13),transparent 32rem), radial-gradient(circle at 88% 82%,rgba(22,140,255,.14),transparent 35rem), radial-gradient(circle at 50% 50%,rgba(167,139,250,0.06),transparent 40rem), #030a12!important;
 }
 
 :root[data-theme="dark"] .boot-panel {
-  background: rgba(11, 23, 40, .96)!important;
-  border-color: #1e324a!important;
+  background: rgba(11, 23, 40, .45)!important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-color: rgba(255, 255, 255, .08)!important;
   color: #e4edf8!important;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, .6), inset 0 1px rgba(255, 255, 255, .06)!important;
+  box-shadow: 0 32px 90px rgba(0, 0, 0, .85), 0 0 80px -15px rgba(22, 140, 255, 0.08), inset 0 1px rgba(255, 255, 255, .05)!important;
 }
 
 :root[data-theme="dark"] .boot-logo {
   background: #091726!important;
-  border-color: #1e3654!important;
+  border-color: rgba(255, 255, 255, 0.1)!important;
   box-shadow: 0 17px 38px rgba(0, 0, 0, .4), 0 0 0 8px rgba(11, 23, 40, .96)!important;
 }
 
@@ -10671,6 +10673,10 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
 
 :root[data-theme="dark"] .boot-progress {
   background: #16263b!important;
+}
+
+:root[data-theme="dark"] .boot-progress span {
+  box-shadow: 0 0 10px rgba(37, 99, 255, 0.5), 0 0 4px rgba(16, 185, 129, 0.4);
 }
 
 :root[data-theme="dark"] .boot-status {
