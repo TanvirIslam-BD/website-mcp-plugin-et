@@ -1,41 +1,74 @@
 import { randomUUID } from "node:crypto";
 
-export async function ensureMonitoringTables(db) {
-  await db.batch([
-    `CREATE TABLE IF NOT EXISTS app_users (
-      user_id TEXT PRIMARY KEY,
-      display_name TEXT NOT NULL DEFAULT '',
-      profile_photo_url TEXT NOT NULL DEFAULT '',
-      first_seen_at TEXT NOT NULL,
-      last_seen_at TEXT NOT NULL
-    )`,
-    `CREATE TABLE IF NOT EXISTS owner_user_controls (
-      user_id TEXT PRIMARY KEY,
-      status TEXT NOT NULL DEFAULT 'active',
-      reason TEXT NOT NULL DEFAULT '',
-      updated_at TEXT NOT NULL,
-      updated_by TEXT NOT NULL
-    )`,
-    `CREATE TABLE IF NOT EXISTS app_activity (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      source TEXT NOT NULL,
-      event_type TEXT NOT NULL,
-      detail TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL
-    )`,
-    "CREATE INDEX IF NOT EXISTS idx_app_activity_created ON app_activity (created_at DESC)",
-    "CREATE INDEX IF NOT EXISTS idx_app_activity_user ON app_activity (user_id, created_at DESC)",
-    `CREATE TABLE IF NOT EXISTS owner_audit_log (
-      id TEXT PRIMARY KEY,
-      actor TEXT NOT NULL,
-      action TEXT NOT NULL,
-      target_user_id TEXT,
-      detail TEXT NOT NULL DEFAULT '{}',
-      created_at TEXT NOT NULL
-    )`,
-    "CREATE INDEX IF NOT EXISTS idx_owner_audit_created ON owner_audit_log (created_at DESC)",
-  ], "write");
+// The DDL is idempotent but was previously re-issued on every single request.
+// Caching the promise per lambda instance keeps it to once per cold start.
+let schemaPromise = null;
+
+const SCHEMA_STATEMENTS = [
+  `CREATE TABLE IF NOT EXISTS app_users (
+    user_id TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL DEFAULT '',
+    profile_photo_url TEXT NOT NULL DEFAULT '',
+    first_seen_at TEXT NOT NULL,
+    last_seen_at TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS owner_user_controls (
+    user_id TEXT PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'active',
+    reason TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL,
+    updated_by TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS app_activity (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    source TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    detail TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_app_activity_created ON app_activity (created_at DESC)",
+  "CREATE INDEX IF NOT EXISTS idx_app_activity_user ON app_activity (user_id, created_at DESC)",
+  `CREATE TABLE IF NOT EXISTS owner_audit_log (
+    id TEXT PRIMARY KEY,
+    actor TEXT NOT NULL,
+    action TEXT NOT NULL,
+    target_user_id TEXT,
+    detail TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL
+  )`,
+  "CREATE INDEX IF NOT EXISTS idx_owner_audit_created ON owner_audit_log (created_at DESC)",
+  `CREATE TABLE IF NOT EXISTS owner_credentials (
+    id TEXT PRIMARY KEY,
+    password_hash TEXT NOT NULL,
+    session_epoch INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS rate_limits (
+    key TEXT PRIMARY KEY,
+    window_start INTEGER NOT NULL,
+    count INTEGER NOT NULL
+  )`,
+];
+
+export function ensureMonitoringTables(db) {
+  if (!schemaPromise) {
+    schemaPromise = db.batch(SCHEMA_STATEMENTS, "write")
+      .then(async () => {
+        // owner_credentials predates session_epoch, and CREATE TABLE IF NOT
+        // EXISTS will not add a column to a table that already exists.
+        try {
+          await db.execute("ALTER TABLE owner_credentials ADD COLUMN session_epoch INTEGER NOT NULL DEFAULT 0");
+        } catch {
+          // Already present.
+        }
+      })
+      .catch((error) => {
+        schemaPromise = null;
+        throw error;
+      });
+  }
+  return schemaPromise;
 }
 
 function safeJson(value) {
@@ -75,4 +108,3 @@ export async function recordOwnerAudit(db, { actor, action, targetUserId = null,
     args: [randomUUID(), actor, action, targetUserId, safeJson(detail).slice(0, 2000), new Date().toISOString()],
   });
 }
-

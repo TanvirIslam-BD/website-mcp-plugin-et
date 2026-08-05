@@ -4,23 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>Continuing to Money Copilot AI</title>
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
-<script defer src="/_vercel/speed-insights/script.js"></script>
-  <script>
-    (() => {
-      const target = new URL("/dashboard", location.origin);
-      const params = new URLSearchParams(location.search);
-      for (const [key, value] of params) target.searchParams.set(key, value);
-      if (!target.searchParams.has("month")) target.searchParams.set("month", new Date().toISOString().slice(0, 7));
-      location.replace(target.toString());
-    })();
-  </script>
+  <meta name="robots" content="noindex,nofollow">
+  <title>Signed in — Money Copilot AI</title>
+  <link rel="stylesheet" href="/dashboard/handoff.css">
 </head>
 <body>
-  <p>Continuing to your private dashboard…</p>
+  <main class="handoff" role="status" aria-live="polite">
+    <span class="handoff-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12.5l5.2 5.2L20 7" />
+      </svg>
+    </span>
+    <h1>You're signed in</h1>
+    <p data-handoff-message>Returning to your dashboard…</p>
+    <a class="handoff-link" href="/dashboard" hidden data-handoff-continue>Continue to dashboard</a>
+  </main>
+  <script src="/dashboard/handoff.js"></script>
 </body>
 </html>

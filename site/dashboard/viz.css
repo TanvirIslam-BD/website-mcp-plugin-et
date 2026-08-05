@@ -1,0 +1,330 @@
+/*
+ * Dashboard visualization layer.
+ *
+ * Loaded AFTER styles.css and report.css so it is the final word on the
+ * data-visualization palette and the small layout corrections below. The two
+ * sheets before it total ~350KB of accumulated overrides; putting these rules in
+ * either one meant losing ties to the other purely on file order.
+ *
+ * Keep this file small and additive. If a rule here needs !important, that is
+ * because an earlier sheet already used it for the same property.
+ */
+
+/* ============================================================================
+   Data-visualization palette
+   ----------------------------------------------------------------------------
+   Earlier override layers in this file had collapsed the three cash-flow series
+   onto three near-identical greens (income #078f50 vs expenses #019a56 is a
+   distance of 14 in RGB — indistinguishable), and forced every legend swatch to
+   a single green, so the legend could not be read at all.
+
+   These slots come from a validated categorical palette: fixed hue order, and
+   verified for the lightness band, chroma floor, protanopia/deuteranopia
+   separation and normal-vision separation in both light and dark modes. Do not
+   hand-pick replacements — a substitute must be re-validated.
+
+   Series assignment reads naturally for finance while keeping the validated
+   three-hue set: aqua = money in, orange = money out, blue = what is kept.
+   ========================================================================== */
+:root {
+  --viz-surface: #ffffff;
+  --series-income: #1baf7a;
+  --series-expense: #eb6834;
+  --series-savings: #2a78d6;
+  --series-income-soft: rgba(27, 175, 122, .16);
+  --series-expense-soft: rgba(235, 104, 52, .14);
+  --viz-grid: #e8eef7;
+  --viz-track: #eceff5;
+
+  /* Categorical slots for the spending breakdown, in fixed order. */
+  --cat-1: #2a78d6;
+  --cat-2: #eb6834;
+  --cat-3: #1baf7a;
+  --cat-4: #eda100;
+  --cat-5: #e87ba4;
+  --cat-6: #008300;
+  --cat-7: #4a3aa7;
+  --cat-8: #e34948;
+  --cat-other: #c8d2e2;
+
+  /* Status scale — reserved, never reused as a series colour. */
+  --status-good: #1baf7a;
+  --status-warning: #eda100;
+  --status-critical: #e34948;
+}
+
+:root[data-theme="dark"] {
+  --viz-surface: #102119;
+  --series-income: #199e70;
+  --series-expense: #d95926;
+  --series-savings: #3987e5;
+  --series-income-soft: rgba(25, 158, 112, .22);
+  --series-expense-soft: rgba(217, 89, 38, .18);
+  --viz-grid: #223c33;
+  --viz-track: #1c2c26;
+
+  --cat-1: #3987e5;
+  --cat-2: #d95926;
+  --cat-3: #199e70;
+  --cat-4: #c98500;
+  --cat-5: #d55181;
+  --cat-6: #008300;
+  --cat-7: #9085e9;
+  --cat-8: #e66767;
+  --cat-other: #2a3b34;
+
+  --status-good: #199e70;
+  --status-warning: #c98500;
+  --status-critical: #e66767;
+}
+
+/* One source of truth for the three series, overriding every earlier layer. */
+:root .chart-line.income,
+:root[data-theme="light"] .chart-line.income,
+:root[data-theme="dark"] .chart-line.income { stroke: var(--series-income) !important; }
+:root .chart-line.expense,
+:root[data-theme="light"] .chart-line.expense,
+:root[data-theme="dark"] .chart-line.expense { stroke: var(--series-expense) !important; }
+:root .chart-line.saving,
+:root[data-theme="light"] .chart-line.saving,
+:root[data-theme="dark"] .chart-line.saving { stroke: var(--series-savings) !important; }
+
+:root .chart-point.income,
+:root[data-theme="light"] .chart-point.income,
+:root[data-theme="dark"] .chart-point.income { stroke: var(--series-income) !important; }
+:root .chart-point.expense,
+:root[data-theme="light"] .chart-point.expense,
+:root[data-theme="dark"] .chart-point.expense { stroke: var(--series-expense) !important; }
+:root .chart-point.saving,
+:root[data-theme="light"] .chart-point.saving,
+:root[data-theme="dark"] .chart-point.saving { stroke: var(--series-savings) !important; }
+
+/* A 2px surface ring keeps a marker legible where two lines cross. */
+.chart-point,
+:root[data-theme="dark"] .chart-point {
+  fill: var(--viz-surface);
+  stroke-width: 2.5;
+  paint-order: stroke fill;
+}
+
+/* Legend swatches carry the series colour; the label stays in text ink. */
+.legend i { background: var(--tone) !important; }
+.legend {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Recessive grid: present enough to read a value against, quiet enough to
+   never compete with the data. */
+:root .grid-line,
+:root[data-theme="light"] .grid-line,
+:root[data-theme="dark"] .grid-line {
+  stroke: var(--viz-grid) !important;
+  stroke-width: 1;
+}
+
+/* Caption replaces the percentage trend on cards where a month-over-month
+   comparison has no meaning (there is no historical budget to compare against). */
+.metric-caption {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+}
+
+/* Legend swatch: a plain colour chip. Identity lives in the chip, the label
+   stays in text ink. */
+.category-swatch,
+.tip-swatch {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1px rgba(9, 30, 24, .07);
+}
+.category-line .category-swatch {
+  width: 11px;
+  height: 11px;
+  margin-right: 2px;
+}
+.category-line.is-other label { color: var(--muted); }
+.chart-tooltip .tip-swatch { margin-right: 6px; }
+
+/* Tabular figures stop the hero numbers from shifting width as values change. */
+.metric-card h2,
+.category-amount,
+.chart-tooltip strong,
+.chart-y-axis span,
+.transactions td:last-child {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A long category name shortens with an ellipsis instead of being cut mid-glyph. */
+.category-line label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Visible keyboard focus on every interactive surface. Several controls
+   previously relied on the UA outline, which the custom backgrounds hid. */
+.dashboard-shell :is(button, a, select, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--series-savings);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+:root[data-theme="dark"] .dashboard-shell :is(button, a, select, input, textarea, [tabindex]):focus-visible {
+  outline-color: #7fb2ff;
+}
+
+/* Honour a reduced-motion preference across the transitions this dashboard adds. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The breakdown legend sits beside the donut in a narrow column. Without an
+   unbroken min-width:0 chain the rows refuse to shrink and spill past the panel
+   edge; the amount stays fixed while the category name takes the slack. */
+.spending-report { min-width: 0; }
+.category-legend {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.category-line {
+  min-width: 0;
+  gap: 6px;
+}
+.category-line b {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* 9px was too small to read comfortably for a chart that carries the identity
+   of three series. */
+.legend { font-size: 11px; }
+.legend i {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* The legend row's grid was `20px 52px auto` — 129px of columns inside a 115px
+   row, so the amount overhung the panel edge. The swatch column now matches the
+   swatch, and the name column is the one that yields. */
+.category-line {
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+/* Side by side, the legend needs room for a swatch (12px), gaps (14px), the
+   amount (~57px) and a readable category name (~70px) = ~153px, plus the 132px
+   donut and a 12px gap. Below ~300px of panel width the name column gets starved
+   and ellipsises to two letters, so donut and legend stack and the name takes the
+   full width instead. A container query is the right tool: the panel takes its
+   width from the dashboard grid, not the viewport. */
+.spending-panel { container-type: inline-size; }
+@container (max-width: 300px) {
+  .spending-report {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+    row-gap: 14px;
+  }
+  .spending-donut { justify-self: center; }
+  .category-legend { width: 100%; }
+}
+
+/* ── Hero metric cards ──────────────────────────────────────────────────────
+   At around 1600px the sidebar, four cards and the AI rail leave each card
+   ~212px, of which the icon and the direction chip took all but 68px — so the
+   value itself was clipped mid-number. The card becomes its own container, the
+   text column is allowed to shrink, and when it gets tight the direction chip
+   goes first: it is pure redundancy, encoding the same up/down that the trend
+   arrow beside it already shows. */
+.metric-card { container-type: inline-size; }
+.metric-copy,
+.metric-card h2 {
+  min-width: 0;
+}
+.metric-card h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* styles.css pins the value to `font-size: 26px !important`, which also defeats
+   the `clamp(21px, 1.75vw, 27px)` an earlier layer had set for the same purpose.
+   Card-width container queries are the better control than a viewport clamp, so
+   they have to match that !important to take effect. */
+@container (max-width: 250px) {
+  .metric-direction { display: none; }
+  /* Hiding the chip is not enough on its own: the third grid track is a fixed
+     30px and stays reserved once its only child is display:none. */
+  .metric-card-main { grid-template-columns: 58px minmax(0, 1fr) !important; }
+  /* 26px needed ~95px for a seven-character amount in an 89px column. */
+  .metric-card h2,
+  .metric-card.balance h2 { font-size: 23px !important; }
+}
+@container (max-width: 205px) {
+  .metric-card h2,
+  .metric-card.balance h2 { font-size: 21px !important; }
+  .metric-trend small { display: none; }
+}
+
+/* ── Hero row wrapping ──────────────────────────────────────────────────────
+   The four cards were pinned to `repeat(4, minmax(0, 1fr)) !important`, so
+   between roughly 1180px (where the assistant rail is hidden and an earlier rule
+   drops to two columns) and 1700px they were forced four-across at ~170px each
+   and the amounts were clipped.
+
+   auto-fit removes the breakpoint guessing: four across while each card can hold
+   210px, otherwise 2x2. The !important is required to beat the pinned rule. */
+.summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+}
+
+/* The score ring holds a fixed 120px track, so the stats column beside it
+   absorbed every shortfall — down to 19px for rows needing 105px. In the band
+   where the assistant rail is visible but the panel grid is tight, the ring and
+   the stats stack instead of the stats being crushed. Same container-query
+   pattern as the spending breakdown, for the same reason. */
+.financial-health { container-type: inline-size; }
+@container (max-width: 300px) {
+  .health-body {
+    grid-template-columns: minmax(0, 1fr) !important;
+    row-gap: 12px;
+  }
+  .financial-health .score-ring { justify-self: center; }
+}
+
+/* ── Streaming assistant message ────────────────────────────────────────────
+   While tokens arrive the bubble holds raw text, so it needs the same wrapping
+   the rendered markdown gets, plus a caret to show it is still being written. */
+.ai-message.is-streaming .ai-message-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ai-message.is-streaming .ai-message-body::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--series-income);
+  animation: ai-caret 1s steps(2, start) infinite;
+}
+@keyframes ai-caret {
+  50% { opacity: 0; }
+}
+.ai-message.is-streaming .ai-message-footer { visibility: hidden; }

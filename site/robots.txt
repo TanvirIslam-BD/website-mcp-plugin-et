@@ -2,10 +2,14 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /authorize
+Disallow: /owner
+Disallow: /dashboard
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /api/
 Disallow: /authorize
+Disallow: /owner
+Disallow: /dashboard
 
 Sitemap: https://www.copilotai.live/sitemap.xml

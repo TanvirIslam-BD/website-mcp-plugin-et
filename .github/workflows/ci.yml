@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Check syntax of every serverless handler and browser script
+        run: |
+          set -e
+          for file in api/*.js site/api/*.js site/dashboard/*.js site/owner/*.js; do
+            node --check "$file"
+          done
+
+      - name: Validate JSON config
+        run: node -e "JSON.parse(require('fs').readFileSync('vercel.json','utf8'))"
+
+      - name: Run tests
+        run: npm test

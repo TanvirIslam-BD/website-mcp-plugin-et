@@ -1,0 +1,113 @@
+/* Standalone styles for the popup handoff page. Deliberately tiny and
+   self-contained — pulling in the dashboard stylesheets would defeat the point of
+   not loading the application here. */
+:root {
+  color-scheme: light dark;
+  --handoff-bg: #f4faf7;
+  --handoff-panel: #ffffff;
+  --handoff-ink: #0f2a1f;
+  --handoff-muted: #5b7a6c;
+  --handoff-accent: #0f9d58;
+  --handoff-ring: rgba(15, 157, 88, .16);
+  --handoff-border: #dcece4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --handoff-bg: #091711;
+    --handoff-panel: #102119;
+    --handoff-ink: #ecf8f1;
+    --handoff-muted: #9fbcae;
+    --handoff-accent: #34d399;
+    --handoff-ring: rgba(52, 211, 153, .18);
+    --handoff-border: #1e3c2e;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 24px;
+  background: var(--handoff-bg);
+  color: var(--handoff-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-align: center;
+}
+
+.handoff {
+  max-width: 340px;
+  padding: 32px 28px;
+  border: 1px solid var(--handoff-border);
+  border-radius: 18px;
+  background: var(--handoff-panel);
+  box-shadow: 0 18px 40px rgba(11, 45, 30, .08);
+}
+
+.handoff-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  color: var(--handoff-accent);
+  background: var(--handoff-ring);
+  animation: handoff-pop .32s cubic-bezier(.2, .9, .3, 1.2) both;
+}
+
+.handoff-mark svg {
+  width: 26px;
+  height: 26px;
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: handoff-draw .34s .12s ease-out forwards;
+}
+
+.handoff h1 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -.01em;
+}
+
+.handoff p {
+  margin: 0;
+  color: var(--handoff-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.handoff-link {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--handoff-accent);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.handoff-link:focus-visible {
+  outline: 2px solid var(--handoff-ink);
+  outline-offset: 2px;
+}
+
+@keyframes handoff-pop {
+  from { transform: scale(.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes handoff-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handoff-mark, .handoff-mark svg { animation: none; }
+  .handoff-mark svg { stroke-dashoffset: 0; }
+}

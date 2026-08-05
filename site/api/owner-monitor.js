@@ -1,12 +1,6 @@
-import { createClient } from "@libsql/client";
-import { sameOriginRequest, verifyOwnerSession } from "./_owner-auth.js";
+import { database } from "./_db.js";
+import { sameOriginRequest, verifyActiveOwnerSession } from "./_owner-auth.js";
 import { ensureMonitoringTables, recordOwnerAudit } from "./_monitoring.js";
-
-function database() {
-  const url = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-  return url && authToken ? createClient({ url, authToken }) : null;
-}
 
 function cleanText(value, max = 200) {
   return typeof value === "string" ? value.trim().replace(/[\u0000-\u001f\u007f]/g, "").slice(0, max) : "";
@@ -21,13 +15,13 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "private, no-store, max-age=0");
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("X-Content-Type-Options", "nosniff");
-  const owner = verifyOwnerSession(req);
-  if (!owner) return res.status(401).json({ error: "Owner authentication required." });
   const db = database();
   if (!db) return res.status(503).json({ error: "Monitoring database is not configured." });
 
   try {
     await ensureMonitoringTables(db);
+    const owner = await verifyActiveOwnerSession(req, db);
+    if (!owner) return res.status(401).json({ error: "Owner authentication required." });
 
     if (req.method === "POST") {
       if (!sameOriginRequest(req)) return res.status(403).json({ error: "Origin not allowed." });
@@ -38,9 +32,11 @@ export default async function handler(req, res) {
       if (!/^[A-Za-z0-9:_-]{1,200}$/.test(userId)) return res.status(400).json({ error: "Choose a valid user." });
 
       if (action === "send_test_email") {
+        // This records the request only. Report delivery runs through
+        // /api/send-report-email, which requires the user's own session.
         const recipientEmail = cleanText(req.body?.email, 200) || owner.email;
-        await recordOwnerAudit(db, { actor: owner.email, action: "sent_test_report", targetUserId: userId, detail: { recipient: recipientEmail } });
-        return res.status(200).json({ ok: true, message: `Test report queued for ${recipientEmail}` });
+        await recordOwnerAudit(db, { actor: owner.email, action: "test_report_requested", targetUserId: userId, detail: { recipient: recipientEmail } });
+        return res.status(200).json({ ok: true, message: `Logged a test-report request for ${recipientEmail}. Reports are sent from the user's own dashboard.` });
       }
 
       if (!['suspend', 'restore'].includes(action)) return res.status(400).json({ error: "Unsupported owner action." });
