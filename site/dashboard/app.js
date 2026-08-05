@@ -2419,6 +2419,18 @@ function submitPanelForm(form) {
       category: finalCategory,
       subcategory: String(data.get("subcategory") || "").trim(),
     }, form);
+  }
+}
+
+function bindEvents() {
+  const profilePhoto = document.querySelector("[data-profile-photo]");
+  profilePhoto?.addEventListener("error", () => {
+    profilePhoto.removeAttribute("data-profile-photo");
+    profilePhoto.src = "/assets/logo/money-copilot-app-logo-108.webp";
+  }, { once: true });
+
+  document.addEventListener("click", (event) => {
+    const deleteBtn = event.target.closest("[data-delete-expense-id]");
     if (deleteBtn) {
       const id = deleteBtn.dataset.deleteExpenseId;
       openConfirmModal("Delete Expense", "Are you sure you want to remove this expense? This action cannot be undone.", () => {
