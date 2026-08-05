@@ -63,33 +63,64 @@
     align-items: center;
     margin-right: 8px;
     position: relative;
+    height: 40px;
   }
   .custom-lang-select {
+    height: 40px;
     background: var(--bg2);
     border: 1px solid var(--line2);
     color: var(--ink);
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 0 32px 0 34px;
+    border-radius: 10px;
     font-family: var(--sans);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
     appearance: none;
     -webkit-appearance: none;
-    padding-right: 28px;
   }
+  /* Globe icon style */
+  .custom-lang-select-container::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%237d8ea0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='2' y1='12' x2='22' y2='12'/%3E%3Cpath d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+  /* Modern clean arrow style */
   .custom-lang-select-container::after {
-    content: "▼";
-    font-size: 8px;
-    color: var(--muted);
+    content: "";
     position: absolute;
     right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%237d8ea0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
     pointer-events: none;
   }
   .custom-lang-select:hover {
-    border-color: var(--violet);
+    border-color: var(--violet2);
+    transform: translateY(-1px);
+  }
+  /* Light theme overrides */
+  html[data-theme="light"] .custom-lang-select {
+    background: #ffffff;
+    border-color: var(--line2);
+    color: var(--ink);
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
   /* Hide the Google Translate widgets entirely */
   #google_translate_element, .skiptranslate, .goog-te-banner-frame {
