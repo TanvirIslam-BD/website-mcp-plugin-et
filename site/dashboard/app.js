@@ -2422,6 +2422,124 @@ function submitPanelForm(form) {
   }
 }
 
+function chartDataset(model, mode = "month") {
+  const monthName = monthLabel(model.month).split(" ")[0];
+  const year = model.month.slice(0, 4);
+  let start = 0;
+  let income = model.incomeCum;
+  let expense = model.expenseCum;
+  let saving = model.savingsCum;
+  let labels = income.map((_, index) => `${index + 1} ${monthName} ${year}`);
+  if (mode === "daily") {
+    income = model.incomeDaily;
+    expense = model.expenseDaily;
+    saving = model.incomeDaily.map((value, index) => Math.max(0, value - (model.expenseDaily[index] || 0)));
+  }
+  if (mode === "week") {
+    const end = Math.min(todayDay(model.month), model.incomeDaily.length);
+    start = Math.max(0, end - 7);
+    income = model.incomeDaily.slice(start, end);
+    expense = model.expenseDaily.slice(start, end);
+    saving = income.map((value, index) => Math.max(0, value - (expense[index] || 0)));
+  }
+  labels = income.map((_, index) => `${start + index + 1} ${monthName} ${year}`);
+  return { income, expense, saving, labels, startDay: start + 1 };
+}
+
+function setChartText(root, selector, value) {
+  const node = root.querySelector(selector);
+  if (node) node.textContent = value;
+}
+
+function updateIncomeExpenseChart(mode = "month", selectedIndex) {
+  const model = window.dashboardModel;
+  const root = document.querySelector("[data-income-expense-chart]");
+  if (!model || !root) return;
+  const width = 600;
+  const height = 178;
+  const padX = 34;
+  const padY = 24;
+  const data = chartDataset(model, mode);
+  const max = Math.max(...data.income, ...data.expense, ...data.saving, 1);
+  const count = Math.max(data.income.length, data.expense.length, data.saving.length, 1);
+  const safeIndex = Math.max(0, Math.min(selectedIndex ?? Math.floor((count - 1) / 2), count - 1));
+  const incomePoints = linePoints(data.income, width, height, padX, padY, max);
+  const expensePoints = linePoints(data.expense, width, height, padX, padY, max);
+  const savingPoints = linePoints(data.saving, width, height, padX, padY, max);
+  const x = padX + ((width - padX * 2) * safeIndex) / Math.max(count - 1, 1);
+  const yFor = (value) => height - padY - ((height - padY * 2) * Number(value || 0)) / max;
+  const tooltip = root.querySelector("[data-chart-tooltip]");
+  const chart = root.querySelector(".income-expense-chart");
+
+  root.querySelector('[data-chart-line="income"]')?.setAttribute("points", incomePoints);
+  root.querySelector('[data-chart-line="expense"]')?.setAttribute("points", expensePoints);
+  root.querySelector('[data-chart-line="saving"]')?.setAttribute("points", savingPoints);
+  root.querySelector('[data-chart-area="income"]')?.setAttribute("d", areaPath(incomePoints, height, padY));
+  root.querySelector('[data-chart-area="expense"]')?.setAttribute("d", areaPath(expensePoints, height, padY));
+  const cursor = root.querySelector("[data-chart-cursor]");
+  if (cursor) {
+    cursor.setAttribute("x1", x);
+    cursor.setAttribute("x2", x);
+  }
+  const points = [
+    ["income", data.income[safeIndex]],
+    ["expense", data.expense[safeIndex]],
+    ["saving", data.saving[safeIndex]],
+  ];
+  for (const [name, value] of points) {
+    const point = root.querySelector(`[data-chart-point="${name}"]`);
+    if (!point) continue;
+    point.setAttribute("cx", x);
+    point.setAttribute("cy", yFor(value));
+  }
+  setChartText(root, '[data-axis-label="max"]', formatMoney(max, model.currency, { compact: true }));
+  setChartText(root, '[data-axis-label="mid"]', formatMoney(max * .66, model.currency, { compact: true }));
+  setChartText(root, '[data-axis-label="low"]', formatMoney(max * .33, model.currency, { compact: true }));
+  setChartText(root, '[data-x-label="start"]', data.labels[0] ? data.labels[0].replace(` ${model.month.slice(0, 4)}`, "") : "");
+  setChartText(root, '[data-x-label="mid"]', data.labels[Math.floor((count - 1) / 2)] ? data.labels[Math.floor((count - 1) / 2)].replace(` ${model.month.slice(0, 4)}`, "") : "");
+  setChartText(root, '[data-x-label="end"]', data.labels[count - 1] ? data.labels[count - 1].replace(` ${model.month.slice(0, 4)}`, "") : "");
+  setChartText(root, "[data-tip-date]", data.labels[safeIndex] || "");
+  setChartText(root, "[data-tip-income]", formatMoney(data.income[safeIndex] || 0, model.currency));
+  setChartText(root, "[data-tip-expense]", formatMoney(data.expense[safeIndex] || 0, model.currency));
+  setChartText(root, "[data-tip-saving]", formatMoney(data.saving[safeIndex] || 0, model.currency));
+
+  if (tooltip && chart) {
+    const percent = count > 1 ? safeIndex / (count - 1) : .5;
+    const chartWidth = chart.getBoundingClientRect().width || 1;
+    const tipWidth = tooltip.offsetWidth || 124;
+    const left = Math.max(8, Math.min(chartWidth - tipWidth - 8, padX / width * chartWidth + percent * ((width - padX * 2) / width * chartWidth) - tipWidth / 2));
+    tooltip.style.left = `${left}px`;
+  }
+}
+
+function bindIncomeExpenseChart() {
+  const root = document.querySelector("[data-income-expense-chart]");
+  const model = window.dashboardModel;
+  if (!root || !model) return;
+  const select = root.querySelector("[data-chart-mode]");
+  const hitbox = root.querySelector("[data-chart-hitbox]");
+  const mode = () => select?.value || "month";
+  const indexFromEvent = (event) => {
+    const box = hitbox.getBoundingClientRect();
+    const data = chartDataset(model, mode());
+    const count = Math.max(data.income.length, data.expense.length, data.saving.length, 1);
+    const ratio = Math.max(0, Math.min(1, (event.clientX - box.left) / Math.max(1, box.width)));
+    return Math.round(ratio * Math.max(count - 1, 0));
+  };
+  updateIncomeExpenseChart(mode());
+  hitbox?.addEventListener("pointermove", (event) => updateIncomeExpenseChart(mode(), indexFromEvent(event)));
+  hitbox?.addEventListener("pointerdown", (event) => updateIncomeExpenseChart(mode(), indexFromEvent(event)));
+  hitbox?.addEventListener("pointerleave", () => updateIncomeExpenseChart(mode()));
+  select?.addEventListener("change", () => updateIncomeExpenseChart(mode()));
+}
+
+function filterDashboard(query) {
+  const needle = String(query || "").trim().toLowerCase();
+  document.querySelectorAll(".transactions tbody tr[data-search]").forEach((row) => {
+    row.style.display = !needle || row.dataset.search.includes(needle) ? "" : "none";
+  });
+}
+
 const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
 const COPILOT_RAIL_DEFAULT_WIDTH = 440;
 const COPILOT_RAIL_MIN_WIDTH = 280;
