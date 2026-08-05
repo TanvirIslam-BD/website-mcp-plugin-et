@@ -3337,6 +3337,7 @@ img[src$="money-copilot-app-logo.png"] {
   outline: 0;
 }
 .mobile-date-nav .month-picker-popover {
+  top: auto;
   right: auto;
   bottom: calc(100% + 10px);
   left: 50%;
