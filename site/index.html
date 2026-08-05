@@ -1527,7 +1527,7 @@
   .mcta{display:none;}
   @media(max-width:820px){
     body{padding-bottom:76px;}
-    .mcta{display:flex;justify-content:center;position:fixed;left:0;right:auto;bottom:0;width:100%;z-index:60;
+    .mcta{display:flex;justify-content:center;position:fixed;left:0;right:0;bottom:0;width:100%;z-index:60;
       padding:10px 14px;background:rgba(10,10,15,.94);backdrop-filter:blur(16px);
       border-top:1px solid var(--line2);box-shadow:0 -8px 30px -12px rgba(0,0,0,.7);}
     .mcta .inner{display:flex;gap:10px;width:100%;max-width:560px;}
@@ -1747,7 +1747,7 @@
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top">
-      <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.webp" alt="Money Copilot AI Logo" width="54" height="54"></span>
+      <span class="mark theme-mark brand-mark" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo.webp" alt="Money Copilot AI Logo" width="54" height="54" fetchpriority="high"></span>
       <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
     </a>
     <nav>
@@ -2720,21 +2720,22 @@
   const header=document.querySelector('header.nav');
   const navlinks=[...document.querySelectorAll('.nav nav a.lnk')];
   const secIds=['about','how','features','pricing','faq'];
+  let scrollRange=0;
+  const updateScrollRange=()=>{
+    scrollRange=document.documentElement.scrollHeight-window.innerHeight;
+  };
+  window.addEventListener('resize',updateScrollRange);
+  window.addEventListener('load',updateScrollRange);
+  updateScrollRange();
+
   const onScroll=()=>{
     header.classList.toggle('scrolled',window.scrollY>10);
-    const scrollRange=document.documentElement.scrollHeight-window.innerHeight;
     header.style.setProperty('--scroll-progress',scrollRange>0?Math.min(1,window.scrollY/scrollRange):0);
     let cur='';
     for(const id of secIds){const el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=140)cur=id;}
     navlinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
   };
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
-
-  // pin the sticky CTA bar to the LAYOUT width (guards against environments where
-  // the visual viewport is wider than the layout column, e.g. narrow-column previews)
-  const mcta=document.querySelector('.mcta');
-  const syncMcta=()=>{ if(mcta) mcta.style.width=document.documentElement.clientWidth+'px'; };
-  window.addEventListener('resize',syncMcta);window.addEventListener('orientationchange',syncMcta);syncMcta();
 </script>
 <script type="text/javascript">
 function googleTranslateElementInit() {
