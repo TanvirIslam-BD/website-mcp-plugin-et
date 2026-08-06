@@ -1345,6 +1345,17 @@ function showCelebrationToast() {
   setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 4600);
 }
 
+function showInfoToast(text) {
+  document.getElementById("info-toast")?.remove();
+  const toast = document.createElement("div");
+  toast.id = "info-toast";
+  toast.className = "celebrate-toast info-toast";
+  toast.innerHTML = `<span class="celebrate-emoji" aria-hidden="true">🔧</span><div><b>Coming soon</b><span>${esc(text)}</span></div>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3400);
+}
+
 function celebrateFirstData() {
   try { if (localStorage.getItem("firstDataCelebrated") === "1") return; } catch { /* storage blocked */ }
   try { localStorage.setItem("firstDataCelebrated", "1"); } catch { /* storage blocked */ }
@@ -1353,7 +1364,151 @@ function celebrateFirstData() {
   showCelebrationToast();
 }
 
+// Dedicated first-run onboarding experience shown while the account is empty.
+// It replaces the standard dashboard body with a guided hero, an inline copilot,
+// quick-start actions, a setup tracker and supporting cards — then hands back to
+// the normal dashboard the moment any real data exists.
+function renderOnboarding(model) {
+  const displayName = esc((model.user?.displayName || "there").split(/\s+/)[0]);
+  const loveItems = [
+    "AI categorizes expenses", "Voice expense logging", "Receipt scanner",
+    "Monthly reports", "Budget alerts", "Spending insights", "Privacy first",
+  ];
+  const setupSteps = [
+    { label: "Account created", done: true },
+    { label: "Add first expense", done: false },
+    { label: "Add income", done: false },
+    { label: "Create budget", done: false },
+    { label: "Get first AI insight", done: false },
+  ];
+  const doneCount = setupSteps.filter((step) => step.done).length;
+  const setupPercent = Math.round((doneCount / setupSteps.length) * 100);
+
+  return `
+    ${renderMobileDashboardHeader(model)}
+    <section class="onb-hero">
+      <div class="onb-hero-copy">
+        <h1>Welcome to Money Copilot AI <span aria-hidden="true">👋</span></h1>
+        <p class="onb-hero-sub">Let's build your financial picture in under 60 seconds.</p>
+        <ul class="onb-hero-checks">
+          <li>${icon("check")}Track expenses</li>
+          <li>${icon("check")}Create budgets</li>
+          <li>${icon("check")}Get AI insights</li>
+          <li>${icon("check")}Save more money</li>
+        </ul>
+        <div class="onb-hero-actions">
+          <button class="onb-hero-btn primary" type="button" data-entry="expense">${icon("plus")}Add First Expense</button>
+          <button class="onb-hero-btn" type="button" data-coming-soon="Receipt upload">${icon("camera")}Upload Receipt<span class="onb-soon">Soon</span></button>
+          <button class="onb-hero-btn" type="button" data-coming-soon="Voice expense logging">${icon("microphone")}Voice Expense<span class="onb-soon">Soon</span></button>
+          <button class="onb-hero-btn" type="button" data-preview-sample>${icon("eye")}Explore Demo</button>
+        </div>
+        <p class="onb-hero-note">${icon("lock")}No bank connection required. Your data stays private and secure.</p>
+      </div>
+      <div class="onb-hero-art" aria-hidden="true">
+        <img src="/assets/logo/money-copilot-bot-mascot.png" alt="">
+      </div>
+    </section>
+
+    <div class="onb-body">
+      <div class="onb-main-col">
+        <section class="onb-copilot" data-ai-chat>
+          <div class="onb-copilot-head">
+            <span class="onb-copilot-id"><img class="bot-mascot" data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""><b>Money Copilot AI</b><span class="onb-beta">Beta</span></span>
+          </div>
+          <p class="onb-copilot-intro">Hi! I'm your personal AI money assistant. What would you like to do?</p>
+          <div class="onb-chips">
+            <button type="button" data-ai-send="I spent money">💸 I spent money</button>
+            <button type="button" data-ai-send="I received income">💰 I received income</button>
+            <button type="button" data-coming-soon="Receipt scanning">📷 Scan a receipt</button>
+            <button type="button" data-ai-send="Help me create a budget">🎯 Create my budget</button>
+            <button type="button" data-preview-sample>📊 Show sample dashboard</button>
+          </div>
+          <div class="ai-chat-messages onb-chat-messages" data-ai-messages></div>
+          <form class="onb-copilot-form" data-ai-chat-form>
+            <span class="compose-clip" aria-hidden="true">${icon("attachment")}</span>
+            <textarea name="message" maxlength="2000" placeholder="Ask or add expense… e.g., &quot;I spent 350 on groceries&quot;" aria-label="Ask Money Copilot" required></textarea>
+            <button class="assistant-send" type="submit" aria-label="Send">${icon("send")}</button>
+          </form>
+        </section>
+
+        <div class="onb-quick-row">
+          <section class="onb-quickstart panel">
+            <div class="onb-section-head"><h3>Quick Start</h3><span>Complete a few simple steps to get personalized insights</span></div>
+            <div class="onb-quick-grid">
+              <button class="onb-quick-card" type="button" data-entry="expense">
+                <span class="onb-quick-icon green">${icon("wallet")}</span>
+                <b>Add Expense</b><small>Log spending in seconds</small>${icon("chevron")}
+              </button>
+              <button class="onb-quick-card" type="button" data-entry="income">
+                <span class="onb-quick-icon violet">${icon("up")}</span>
+                <b>Add Income</b><small>Track salary or business income</small>${icon("chevron")}
+              </button>
+              <button class="onb-quick-card" type="button" data-panel="budget-editor">
+                <span class="onb-quick-icon amber">${icon("goals")}</span>
+                <b>Create Budget</b><small>Set monthly spending limits</small>${icon("chevron")}
+              </button>
+              <button class="onb-quick-card" type="button" data-preview-sample>
+                <span class="onb-quick-icon blue">${icon("database")}</span>
+                <b>Import Sample Data</b><small>See the full experience instantly</small>${icon("chevron")}
+              </button>
+            </div>
+          </section>
+
+          <section class="onb-setup panel">
+            <div class="onb-setup-head"><b>Your Financial Setup</b><span class="onb-setup-pct">${setupPercent}%</span></div>
+            <div class="onb-setup-track"><i style="width:${setupPercent}%"></i></div>
+            <ul class="onb-setup-list">
+              ${setupSteps.map((step) => `<li class="${step.done ? "done" : ""}"><span class="onb-setup-dot">${step.done ? icon("check") : ""}</span>${esc(step.label)}</li>`).join("")}
+            </ul>
+            <p class="onb-setup-foot">Complete setup to unlock personalized recommendations.</p>
+          </section>
+        </div>
+
+        <div class="onb-panels">
+          ${renderIncomeExpense(model)}
+          ${renderBudget(model)}
+          ${renderTransactions(model)}
+        </div>
+      </div>
+
+      <aside class="onb-rail">
+        <section class="panel onb-love">
+          <h3>Why users love<br>Money Copilot AI <span aria-hidden="true">❤️</span></h3>
+          <ul>${loveItems.map((item) => `<li>${icon("check")}${esc(item)}</li>`).join("")}</ul>
+        </section>
+        <section class="panel onb-tip">
+          <div class="onb-tip-head"><span class="onb-tip-bulb" aria-hidden="true">💡</span><b>Tip #1</b></div>
+          <p>The fastest way to save money is knowing where it goes. Start by adding today's expenses.</p>
+          <button class="onb-tip-btn" type="button" data-entry="expense">${icon("plus")}Add Expense</button>
+        </section>
+        <section class="panel onb-insight">
+          <div class="onb-insight-head">${icon("advisor")}<b>AI Insight</b></div>
+          <p class="onb-insight-empty">No data yet. After only 5 expenses I'll start finding:</p>
+          <ul>
+            <li>${icon("check")}Spending leaks</li>
+            <li>${icon("check")}Saving opportunities</li>
+            <li>${icon("check")}Budget suggestions</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  `;
+}
+
 function renderDashboard(model) {
+  if (!model.hasFinancialData) {
+    app.className = "dashboard-shell onboarding-active";
+    app.innerHTML = `
+      ${renderSidebar(model)}
+      <button class="mobile-menu-backdrop" type="button" data-mobile-menu-toggle aria-label="Close dashboard menu"></button>
+      <section class="main onboarding-main">
+        ${renderOnboarding(model)}
+      </section>
+      <button class="floating-ai bot-mascot" data-open-ai-chat aria-label="Open Money Copilot"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
+      ${renderMobileCopilotComposer()}
+    `;
+    return;
+  }
   app.className = "dashboard-shell";
   app.innerHTML = `
     ${renderSidebar(model)}
@@ -3291,6 +3446,11 @@ function bindEvents() {
     if (dismissWelcome) {
       dismissWelcome.closest("[data-welcome-banner]")?.remove();
       try { localStorage.setItem("welcomeBannerDismissed", "1"); } catch {}
+      return;
+    }
+    const comingSoon = event.target.closest("[data-coming-soon]");
+    if (comingSoon) {
+      showInfoToast(`${comingSoon.dataset.comingSoon} is on the way.`);
       return;
     }
     if (event.target.closest("[data-preview-sample]")) {
