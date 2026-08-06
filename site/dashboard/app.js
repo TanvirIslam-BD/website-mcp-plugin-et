@@ -1465,17 +1465,41 @@ async function consumeAiStream(response, handlers) {
   return true;
 }
 
-function appendAiLoading(chatRoot = document, message = "Processing your data...") {
+// The loading steps should reflect what the user actually asked, not always
+// claim to be "verifying monthly expenses & budget limits". Pick a step set
+// from the message intent so the wait narrates the right work.
+function loadingStepsFor(message) {
+  const m = String(message || "").toLowerCase();
+  const hasAmount = /[০-৯0-9]/.test(m);
+  const addVerb = /\b(add|record|log|save|spent|spend|paid|bought|track)\b/.test(m);
+
+  if (addVerb && /\bincome|salary|paid me|received|earned\b/.test(m)) {
+    return ["Reading your income details...", "Recording it to your private ledger...", "Updating your dashboard..."];
+  }
+  if ((addVerb && (hasAmount || /expense|transaction|purchase/.test(m))) || /\badd (my )?(first )?expense\b/.test(m)) {
+    return ["Reading your expense details...", "Choosing the right category...", "Saving it to your private ledger...", "Updating your dashboard..."];
+  }
+  if (/\b(budget|limit|plan)\b/.test(m)) {
+    return ["Reviewing your spending patterns...", "Drafting sensible budget limits...", "Preparing your budget..."];
+  }
+  if (/\b(save|saving|reduce|cut|where can i)\b/.test(m)) {
+    return ["Scanning your transactions...", "Finding your biggest categories...", "Spotting realistic ways to save..."];
+  }
+  if (/\b(report|summary|spend|spent|expense|how much|cash flow|forecast|compare|category|breakdown)\b/.test(m)) {
+    return ["Connecting to your private financial data...", "Verifying monthly expenses & budget limits...", "Computing spending insights & patterns...", "Summarizing the results..."];
+  }
+  if (/\b(privacy|secure|safe|data|delete|what can you|help|how do|how can)\b/.test(m)) {
+    return ["Thinking...", "Preparing a clear answer for you..."];
+  }
+  return ["Thinking...", "Checking your private financial data...", "Preparing your answer..."];
+}
+
+function appendAiLoading(chatRoot = document, message = "") {
   const list = (chatRoot === document ? window.activeAiChatRoot || document : chatRoot).querySelector("[data-ai-messages]");
   if (!list) return null;
   const id = `ai-loading-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  
-  const steps = [
-    "Connecting to private financial database...",
-    "Verifying monthly expenses & budget limits...",
-    "Computing spending insights & patterns...",
-    "Generating personalized recommendations..."
-  ];
+
+  const steps = loadingStepsFor(message);
 
   list.insertAdjacentHTML("beforeend", `
     <div class="ai-message assistant ai-loading-message" id="${id}" aria-live="polite">
@@ -1658,8 +1682,8 @@ async function submitAiQuestion(form) {
   const message = String(textarea?.value || "").trim();
   if (!message) return;
   appendAiMessage("user", message, "", chatRoot);
-  const isQuickExpense = /^\s*(?:add|record|save|spent)\s+(?:[$\u09F3]\s*)?\d/i.test(message);
-  const loadingMessage = appendAiLoading(chatRoot, isQuickExpense ? "Saving your expense..." : undefined);
+  const isQuickExpense = /^\s*(?:add|record|save|spent)\s+(?:[$৳]\s*)?\d/i.test(message);
+  const loadingMessage = appendAiLoading(chatRoot, message);
   textarea.value = "";
   textarea.disabled = true;
   setAiSubmitLoading(button, true);
