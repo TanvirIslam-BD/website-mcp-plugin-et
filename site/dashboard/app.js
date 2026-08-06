@@ -888,7 +888,7 @@ function renderHeader(model) {
     <header class="topbar">
       <div class="headline">
         <h1>${timeGreeting()}, ${displayName} <span class="headline-wave" aria-hidden="true">👋</span></h1>
-        <p>Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.</p>
+        <p>${model.hasFinancialData ? `Here’s your financial picture for ${esc(monthLabel(model.month).split(" ")[0])}.` : "Let’s set up your financial picture — add your first expense to begin."}</p>
       </div>
       <div class="toolbar">
         ${renderMonthPicker(model.month)}
@@ -912,7 +912,7 @@ function renderMobileDashboardHeader(model) {
       <div class="mobile-greeting">
         <div class="mobile-greeting-copy">
           <h1>${timeGreeting()},<br>${displayName} <span aria-hidden="true">👋</span></h1>
-          <p>Here&rsquo;s your financial picture for ${month}.</p>
+          <p>${model.hasFinancialData ? `Here&rsquo;s your financial picture for ${month}.` : "Let&rsquo;s set up your first financial picture."}</p>
         </div>
         <button class="mobile-profile-button" type="button" data-mobile-menu-toggle aria-label="Open profile and navigation" aria-expanded="false">
           <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
@@ -959,6 +959,36 @@ function renderAssistantIntegrationCta() {
   `;
 }
 
+// Seeds the copilot conversation. A brand-new account gets a warm welcome plus
+// starter chips (which send real chat messages), instead of a hollow
+// "You spent ৳0 this month" summary that reads as broken to a first-time user.
+function copilotSeedMessages(model) {
+  if (!model?.hasFinancialData) {
+    return `
+      <div class="ai-message assistant copilot-summary">
+        <div class="ai-message-body">
+          <p>👋 Hi, I’m your Money Copilot. I can help you record expenses, set budgets, and find smart ways to save — all from your private dashboard.</p>
+          <p>Here’s a good place to start:</p>
+          <div class="ai-suggestions">
+            <button type="button" data-ai-send="I’d like to add my first expense.">Add my first expense</button>
+            <button type="button" data-ai-send="Help me create a starter budget.">Create a starter budget</button>
+            <button type="button" data-ai-send="What can you help me with?">What can you do?</button>
+          </div>
+        </div>
+        <small>Just now</small>
+      </div>
+    `;
+  }
+  const topCategory = model.categories?.[0];
+  const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
+  const overBudget = model.remainingMinor !== null && Number(model.remainingMinor || 0) < 0;
+  const budgetDifference = Math.abs(Number(model.remainingMinor || 0));
+  return `
+    <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
+    <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${esc(monthLabel(model.month).split(" ")[0])}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
+  `;
+}
+
 function renderAiAssistantRail(model) {
   const topCategory = model.categories?.[0];
   const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
@@ -998,8 +1028,7 @@ function renderAiAssistantRail(model) {
         </div>
         <div class="assistant-day"><span>Today</span></div>
         <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
-          <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
-          <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${esc(monthLabel(model.month).split(" ")[0])}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
+          ${copilotSeedMessages(model)}
         </div>
         ${renderAssistantIntegrationCta()}
         <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
@@ -1546,8 +1575,7 @@ function openAiChat(prefill = "") {
       </div>
       <div class="assistant-day"><span>Today</span></div>
       <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
-        <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
-        <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${reportMonth}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model?.budgetUsed || 0)}%"></i><strong>${model?.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} of ${model?.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model?.remainingMinor === null || !model ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${model ? formatMoney(model.spentMinor, model.currency, { compact: true }) : "--"} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
+        ${copilotSeedMessages(model)}
       </div>
       </div>
       ${renderAssistantIntegrationCta()}
