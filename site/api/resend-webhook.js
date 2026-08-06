@@ -94,22 +94,31 @@ function asList(value) {
 
 /**
  * The email.* webhook payloads carry metadata but not the message body, so the
- * body is fetched separately by id. Returns { text, html } or null.
+ * body is fetched separately by id. Inbound (email.received) bodies live at
+ * /emails/receiving/:id; outbound ones at /emails/:id. Tries the endpoint that
+ * matches the event first, then the other as a fallback. Returns { text, html }
+ * or null.
  */
-async function fetchEmailBody(apiKey, emailId) {
-  try {
-    const response = await fetch(`https://api.resend.com/emails/${encodeURIComponent(emailId)}`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!response.ok) return null;
-    const json = await response.json();
-    return {
-      text: typeof json.text === "string" ? json.text : "",
-      html: typeof json.html === "string" ? json.html : "",
-    };
-  } catch {
-    return null;
+async function fetchEmailBody(apiKey, emailId, type) {
+  const id = encodeURIComponent(emailId);
+  const paths = String(type || "").startsWith("email.received")
+    ? [`emails/receiving/${id}`, `emails/${id}`]
+    : [`emails/${id}`, `emails/receiving/${id}`];
+  for (const path of paths) {
+    try {
+      const response = await fetch(`https://api.resend.com/${path}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (!response.ok) continue;
+      const json = await response.json();
+      const text = typeof json.text === "string" ? json.text : "";
+      const html = typeof json.html === "string" ? json.html : "";
+      if (text || html) return { text, html };
+    } catch {
+      // Try the next candidate endpoint.
+    }
   }
+  return null;
 }
 
 // Minimal HTML→text fallback for messages that only ship an HTML part, so the
@@ -236,7 +245,7 @@ export default async function handler(req, res) {
     html: typeof data.html === "string" ? data.html : "",
   };
   if (!body.text && !body.html && data.email_id) {
-    const fetched = await fetchEmailBody(resendApiKey, data.email_id);
+    const fetched = await fetchEmailBody(resendApiKey, data.email_id, type);
     if (fetched) body = fetched;
   }
 
