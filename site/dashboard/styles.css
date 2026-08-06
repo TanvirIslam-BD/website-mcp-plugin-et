@@ -2173,6 +2173,44 @@ button {
   font-size: 12px;
 }
 
+/* Gentle first-run guidance shown inside otherwise-zeroed panels so a new
+   account reads as "ready to start" rather than broken/empty. */
+.panel-empty-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.panel-empty-hint svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  opacity: .8;
+}
+.income-expense-chart { position: relative; }
+.chart-empty-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 26px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--panel) 88%);
+  pointer-events: none;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

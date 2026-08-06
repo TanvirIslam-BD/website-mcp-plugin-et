@@ -568,6 +568,7 @@ function renderHealth(model) {
           <div class="health-stat"><span><i class="status-dot" style="--tone:#06133a;--tone-bg:#f1f4f8">${icon("wallet")}</i>Emergency fund</span><b>${recurringMonths} months</b></div>
         </div>
       </div>
+      ${model.hasFinancialData ? "" : `<div class="panel-empty-hint">${icon("advisor")}<span>This score is a starting estimate. It sharpens as you add income, expenses, and a budget.</span></div>`}
       <button class="panel-footer-link" data-panel="analytics">View details</button>
     </article>
   `;
@@ -639,6 +640,7 @@ function renderIncomeExpense(model) {
           <span><i class="tip-swatch" style="background:var(--series-expense)"></i><label>Expenses</label><strong data-tip-expense>${formatMoney(model.expenseCum[midIndex] || 0, model.currency)}</strong></span>
           <span><i class="tip-swatch" style="background:var(--series-savings)"></i><label>Savings</label><strong data-tip-saving>${formatMoney(model.savingsCum[midIndex] || 0, model.currency)}</strong></span>
         </div>
+        ${model.hasFinancialData ? "" : `<div class="chart-empty-overlay">Your income, spending, and savings trends will appear here once you add your first transactions.</div>`}
       </div>
     </article>
   `;
@@ -716,6 +718,7 @@ function renderCategories(model) {
         </div>
         <div class="category-legend">${rows}</div>
       </div>
+      ${model.hasFinancialData ? "" : `<div class="panel-empty-hint">${icon("search")}<span>Add your first expense and Money Copilot will show exactly where your money goes.</span></div>`}
       <button class="panel-footer-link" data-panel="categories">View all categories</button>
     </article>
   `;
@@ -728,6 +731,21 @@ function renderInsights(model) {
         <div class="panel-head"><h3>Smart insights</h3></div>
         <div class="empty-state">Automatic insights are paused in Dashboard Settings.</div>
         <button class="panel-footer-link" data-panel="settings">Enable smart insights</button>
+      </article>
+    `;
+  }
+  if (!model.hasFinancialData) {
+    return `
+      <article class="panel insights-panel">
+        <div class="panel-head">
+          <h3>Smart insights</h3>
+        </div>
+        <div class="insight-list">
+          <button class="insight-item" data-open-ai-chat data-ai-prefill="I’d like to add my first expense."><i style="--tone:#18b9a6;--tone-bg:#e6f8f4">${icon("plus")}</i><span><b>Add your first expense</b></span>${icon("chevron")}</button>
+          <button class="insight-item" data-open-ai-chat data-ai-prefill="Help me create a starter budget."><i style="--tone:#019a56;--tone-bg:#e7f6ee">${icon("budget")}</i><span><b>Set a monthly budget</b></span>${icon("chevron")}</button>
+        </div>
+        <div class="panel-empty-hint">${icon("advisor")}<span>Personalized insights appear here once you start tracking. Add a few expenses to unlock them.</span></div>
+        <button class="panel-footer-link" data-open-ai-chat>Ask AI Advisor</button>
       </article>
     `;
   }
