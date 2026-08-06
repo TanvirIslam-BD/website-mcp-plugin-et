@@ -2000,8 +2000,12 @@ async function refreshDashboard() {
     if (!data.preferencesConfigured) data.preferences = readLocalPreferences(data.preferences || {});
     applyDashboardPreferences(data.preferences || {});
     window.dashboardModel = buildModel(data);
-    if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
-    else renderEmptyDashboard(window.dashboardModel);
+    // Always render the same dashboard layout regardless of whether the
+    // account has any data yet — a separate onboarding-style layout for
+    // empty accounts (renderEmptyDashboard) looked like a different page
+    // to reviewers/new users testing a fresh account instead of the
+    // product's actual dashboard.
+    renderDashboard(window.dashboardModel);
     
     document.querySelectorAll("[data-ai-messages]").forEach((list, index) => {
       const saved = savedChats.find(c => c.index === index);
@@ -3327,8 +3331,12 @@ loadDashboard()
     if (!data.preferencesConfigured) data.preferences = readLocalPreferences(data.preferences || {});
     applyDashboardPreferences(data.preferences || {});
     window.dashboardModel = buildModel(data);
-    if (window.dashboardModel.hasFinancialData) renderDashboard(window.dashboardModel);
-    else renderEmptyDashboard(window.dashboardModel);
+    // Always render the same dashboard layout regardless of whether the
+    // account has any data yet — a separate onboarding-style layout for
+    // empty accounts (renderEmptyDashboard) looked like a different page
+    // to reviewers/new users testing a fresh account instead of the
+    // product's actual dashboard.
+    renderDashboard(window.dashboardModel);
     syncThemeSwitch();
     try {
       localStorage.removeItem("expenseTrackerSidebar");
