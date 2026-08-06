@@ -45,6 +45,10 @@
       "destination": "/site/login-boot.js"
     },
     {
+      "source": "/docs",
+      "destination": "/site/docs.html"
+    },
+    {
       "source": "/privacy",
       "destination": "/site/privacy.html"
     },
@@ -187,6 +191,11 @@
         }
       ],
       "destination": "https://www.copilotai.live/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/docs.html",
+      "destination": "/docs",
       "permanent": true
     },
     {
