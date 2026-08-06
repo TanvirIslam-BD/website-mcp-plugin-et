@@ -1031,9 +1031,9 @@ function renderEmptyAssistantRail() {
         <div class="empty-copilot-greeting"><span><img class="bot-mascot-tiny" data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span>What would you like to do first?</div>
         <div class="empty-divider"><span>Suggested questions</span></div>
         <div class="empty-questions">
-          <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
-          <button type="button" data-panel="budget-editor">${icon("budget")}Create a starter budget</button>
-          <button type="button" data-ai-suggestion="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
+          <button type="button" data-ai-send="I'd like to add my first expense.">${icon("transactions")}Add my first expense</button>
+          <button type="button" data-ai-send="Help me create a starter budget.">${icon("budget")}Create a starter budget</button>
+          <button type="button" data-ai-send="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
         </div>
         <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       </div>
@@ -1493,9 +1493,9 @@ function openEmptyAiChat(prefill = "") {
       </div>
       <div class="empty-divider"><span>Suggested questions</span></div>
       <div class="empty-questions">
-        <button type="button" data-entry="expense">${icon("transactions")}Add my first expense</button>
-        <button type="button" data-panel="budget-editor">${icon("budget")}Create a starter budget</button>
-        <button type="button" data-ai-suggestion="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
+        <button type="button" data-ai-send="I'd like to add my first expense.">${icon("transactions")}Add my first expense</button>
+        <button type="button" data-ai-send="Help me create a starter budget.">${icon("budget")}Create a starter budget</button>
+        <button type="button" data-ai-send="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
       </div>
       <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
       <form class="empty-mobile-copilot-compose" data-ai-chat-form>
@@ -3037,6 +3037,17 @@ function bindEvents() {
       if (input) {
         input.value = suggestion.dataset.aiSuggestion || "";
         input.focus();
+      }
+      return;
+    }
+    const sendSuggestion = event.target.closest("[data-ai-send]");
+    if (sendSuggestion) {
+      const chatRoot = sendSuggestion.closest("[data-ai-chat]");
+      const form = chatRoot?.querySelector("[data-ai-chat-form]") || document.querySelector("[data-ai-chat-form]");
+      const input = form?.querySelector("textarea[name=message]");
+      if (form && input) {
+        input.value = sendSuggestion.dataset.aiSend || "";
+        submitAiQuestion(form);
       }
       return;
     }
