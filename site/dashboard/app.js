@@ -1508,10 +1508,10 @@ function openEmptyAiChat(prefill = "") {
 
 function openAiChat(prefill = "") {
   const model = window.dashboardModel;
-  if (!model?.hasFinancialData) {
-    openEmptyAiChat(prefill);
-    return;
-  }
+  // Every user — new/empty account or existing — gets the exact same chat
+  // modal. The old empty-account variant (openEmptyAiChat) looked and behaved
+  // like a different UI; the full modal below already handles empty data safely
+  // (optional chaining + budget/category fallbacks).
   const topCategory = model?.categories?.[0];
   const topShare = topCategory && model?.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
   const overBudget = model?.remainingMinor !== null && Number(model?.remainingMinor || 0) < 0;
