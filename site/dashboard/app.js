@@ -1147,6 +1147,45 @@ function renderEmptyDashboard(model) {
   `;
 }
 
+// A warm getting-started strip for brand-new accounts. It sits above the (all
+// zero) metric cards so the first thing a new user sees is "here's what to do"
+// rather than empty numbers. Dismissible, and it disappears automatically the
+// moment any data exists.
+function renderWelcomeBanner(model) {
+  if (model.hasFinancialData) return "";
+  try { if (localStorage.getItem("welcomeBannerDismissed") === "1") return ""; } catch {}
+  const firstName = esc((model.user?.displayName || "there").split(/\s+/)[0]);
+  return `
+    <section class="welcome-banner" data-welcome-banner>
+      <button class="welcome-dismiss" type="button" data-dismiss-welcome aria-label="Dismiss getting started">${icon("close")}</button>
+      <div class="welcome-intro">
+        <span class="welcome-emoji" aria-hidden="true">👋</span>
+        <div>
+          <h2>Welcome, ${firstName}!</h2>
+          <p>Three quick steps to get your money organized. This guide disappears once you add your first expense.</p>
+        </div>
+      </div>
+      <div class="welcome-steps">
+        <button class="welcome-step" type="button" data-entry="expense">
+          <span class="ws-num">1</span>
+          <span class="ws-copy"><b>Add your first expense</b><small>Log what you spent in seconds</small></span>
+          ${icon("chevron")}
+        </button>
+        <button class="welcome-step" type="button" data-panel="budget-editor">
+          <span class="ws-num">2</span>
+          <span class="ws-copy"><b>Set a monthly budget</b><small>See what's left as you spend</small></span>
+          ${icon("chevron")}
+        </button>
+        <button class="welcome-step" type="button" data-panel="connections">
+          <span class="ws-num">3</span>
+          <span class="ws-copy"><b>Connect ChatGPT or Claude</b><small>Add expenses from your AI chat</small></span>
+          ${icon("chevron")}
+        </button>
+      </div>
+    </section>
+  `;
+}
+
 function renderDashboard(model) {
   app.className = "dashboard-shell";
   app.innerHTML = `
@@ -1155,6 +1194,7 @@ function renderDashboard(model) {
     <section class="main">
       ${renderMobileDashboardHeader(model)}
       ${renderHeader(model)}
+      ${renderWelcomeBanner(model)}
       ${renderMetricCards(model)}
       <section class="content-grid">
         ${renderIncomeExpense(model)}
@@ -3068,6 +3108,12 @@ function bindEvents() {
     const dismissIntegration = event.target.closest("[data-dismiss-integration]");
     if (dismissIntegration) {
       dismissIntegration.closest(".assistant-integration-cta")?.classList.add("is-dismissed");
+      return;
+    }
+    const dismissWelcome = event.target.closest("[data-dismiss-welcome]");
+    if (dismissWelcome) {
+      dismissWelcome.closest("[data-welcome-banner]")?.remove();
+      try { localStorage.setItem("welcomeBannerDismissed", "1"); } catch {}
       return;
     }
     const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");
