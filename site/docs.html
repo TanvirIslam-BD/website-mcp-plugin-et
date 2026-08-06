@@ -92,17 +92,17 @@
   .doc li{margin-bottom:9px;}
   .doc li::marker{color:var(--violet2);}
   .doc strong{color:var(--ink);font-weight:600;}
-  .doc code{background:#0c1522;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;font-size:14px;color:var(--violet-ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .doc code{background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;font-size:14px;color:var(--violet-ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
   .doc hr{border:none;border-top:1px solid var(--line);margin:34px 0;}
 
   /* on-this-page nav */
   .toc{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 6px;padding:16px;background:var(--panel2);border:1px solid var(--line2);border-radius:14px;}
   .toc b{width:100%;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px;}
-  .toc a{background:#0c1522;border:1px solid var(--line2);border-radius:99px;padding:7px 14px;font-size:13.5px;color:var(--ink2);}
+  .toc a{background:var(--panel);border:1px solid var(--line2);border-radius:99px;padding:7px 14px;font-size:13.5px;color:var(--ink2);}
   .toc a:hover{color:var(--violet2);border-color:var(--violet2);text-decoration:none;}
 
   /* code snippet + copy button */
-  .snippet{display:flex;align-items:center;gap:10px;background:#0c1522;border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin:10px 0 16px;}
+  .snippet{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin:10px 0 16px;}
   .snippet code{background:none;border:0;padding:0;flex:1;min-width:0;overflow-x:auto;white-space:nowrap;}
   .copy-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:.15s;}
   .copy-btn:hover{color:var(--violet2);border-color:var(--violet2);}
@@ -117,8 +117,8 @@
   .tools tr:last-child td{border-bottom:0;}
   .badge{display:inline-block;flex:0 0 auto;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:99px;padding:3px 9px;margin-left:8px;white-space:nowrap;vertical-align:middle;}
   .badge.ro{background:rgba(45,212,191,.12);color:var(--violet-ink);border:1px solid rgba(45,212,191,.3);}
-  .badge.wr{background:rgba(59,130,246,.12);color:#7db4fb;border:1px solid rgba(59,130,246,.3);}
-  .badge.de{background:rgba(239,68,68,.12);color:#ff9c9c;border:1px solid rgba(239,68,68,.32);}
+  .badge.wr{background:rgba(59,130,246,.12);color:#1d4ed8;border:1px solid rgba(59,130,246,.3);}
+  .badge.de{background:rgba(239,68,68,.12);color:#b91c1c;border:1px solid rgba(239,68,68,.32);}
   .legend{display:flex;flex-wrap:wrap;gap:14px;margin:2px 0 18px;font-size:13px;color:var(--muted);}
   .legend span{display:flex;align-items:center;gap:6px;}
 
@@ -129,12 +129,12 @@
   /* data formats grid */
   .formats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:14px 0 20px;}
   .formats .f{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:15px 17px;}
-  .formats .f b{display:block;font-size:13.5px;color:#fff;margin-bottom:4px;}
+  .formats .f b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:4px;}
   .formats .f span{font-size:13.5px;color:var(--ink2);}
 
   /* FAQ / troubleshooting */
   .faq details{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:15px 18px;margin-bottom:10px;}
-  .faq summary{cursor:pointer;font-weight:600;font-size:15px;color:#fff;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .faq summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;}
   .faq summary::-webkit-details-marker{display:none;}
   .faq summary::after{content:"+";font-size:20px;color:var(--violet2);font-weight:400;flex:0 0 auto;}
   .faq details[open] summary::after{content:"\2212";}
