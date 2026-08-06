@@ -1182,8 +1182,110 @@ function renderWelcomeBanner(model) {
           ${icon("chevron")}
         </button>
       </div>
+      <div class="welcome-footer">
+        <span class="welcome-footer-hint">Curious what it looks like full?</span>
+        <button class="welcome-preview" type="button" data-preview-sample>✨ See it with sample data</button>
+      </div>
     </section>
   `;
+}
+
+/*
+ * Builds a realistic, internally-consistent sample month so a brand-new user can
+ * press one button and instantly see what a fully-used dashboard looks like —
+ * charts, category donut, insights and transactions all populated. It is derived
+ * entirely on the client through the same buildModel() the real data uses, is
+ * never persisted, and never touches the account. base is the real (empty) model,
+ * so the sample keeps the user's name, currency and month.
+ */
+function buildSampleModel(base) {
+  const month = base.month;
+  const dim = daysInMonth(month);
+  const cap = Math.max(6, Math.min(dim, todayDay(month) || dim));
+  // [category, merchant, majorAmount, paymentMethod, time]
+  const pool = [
+    ["Food", "Sultan's Dine", 1250, "bKash", "01:15 PM"],
+    ["Groceries", "Shwapno", 980, "Visa", "06:40 PM"],
+    ["Shopping", "Aarong", 1500, "Visa", "04:10 PM"],
+    ["Transport", "Uber", 320, "bKash", "09:05 AM"],
+    ["Utilities", "DESCO Bill", 640, "Bank Transfer", "11:30 AM"],
+    ["Health", "Lazz Pharma", 430, "Cash", "07:55 PM"],
+    ["Food", "Kacchi Bhai", 890, "bKash", "08:45 PM"],
+    ["Entertainment", "Star Cineplex", 300, "Visa", "03:20 PM"],
+    ["Groceries", "Meena Bazar", 720, "Nagad", "05:35 PM"],
+    ["Transport", "Pathao", 210, "bKash", "10:15 AM"],
+    ["Food", "Cafe Rio", 560, "Cash", "01:50 PM"],
+    ["Shopping", "Daraz", 640, "Visa", "08:05 PM"],
+  ];
+  const expenses = pool.map((entry, index) => {
+    const day = Math.max(1, Math.min(cap, 2 + Math.round((index / (pool.length - 1)) * (cap - 2))));
+    return {
+      id: `demo-${index + 1}`,
+      date: `${month}-${String(day).padStart(2, "0")}`,
+      category: entry[0],
+      merchant: entry[1],
+      amountMinor: entry[2] * 100,
+    };
+  }).sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  const expenseMetadata = {};
+  expenses.forEach((expense, index) => {
+    const source = pool.find((p) => p[1] === expense.merchant) || [];
+    expenseMetadata[expense.id] = { merchant: expense.merchant, paymentMethod: source[3] || "Cash", time: source[4] || "" };
+  });
+
+  const categoryTotals = {};
+  for (const expense of expenses) categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amountMinor;
+  const categories = Object.entries(categoryTotals)
+    .map(([name, amountMinor]) => ({ name, amountMinor }))
+    .sort((a, b) => b.amountMinor - a.amountMinor);
+  const spentMinor = expenses.reduce((sum, expense) => sum + expense.amountMinor, 0);
+  const incomeMinor = 8500000;
+  const budgetMinor = 6000000;
+
+  return buildModel({
+    ...base,
+    spentMinor,
+    incomeMinor,
+    budgetMinor,
+    previousSpentMinor: Math.round(spentMinor * 1.09),
+    previousIncomeMinor: Math.round(incomeMinor * 0.97),
+    categories,
+    expenses,
+    incomes: [{ date: `${month}-01`, amountMinor: incomeMinor }],
+    expenseMetadata,
+    recurring: [],
+    goals: [],
+  });
+}
+
+function showPreviewBar() {
+  if (document.getElementById("preview-bar")) return;
+  const bar = document.createElement("div");
+  bar.id = "preview-bar";
+  bar.className = "preview-bar";
+  bar.innerHTML = `<span class="preview-dot" aria-hidden="true"></span><b>Sample preview</b><span class="preview-sub">Demo data — your account is still empty.</span><button type="button" class="preview-exit" data-exit-preview>Exit preview</button>`;
+  document.body.appendChild(bar);
+}
+
+function enterSamplePreview() {
+  if (!window.dashboardModel || window.__previewActive) return;
+  window.__realModel = window.dashboardModel;
+  window.__previewActive = true;
+  document.body.classList.add("preview-mode");
+  renderDashboard(buildSampleModel(window.dashboardModel));
+  showPreviewBar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function exitSamplePreview() {
+  if (!window.__previewActive) return;
+  const real = window.__realModel || window.dashboardModel;
+  window.__previewActive = false;
+  window.__realModel = null;
+  document.body.classList.remove("preview-mode");
+  document.getElementById("preview-bar")?.remove();
+  renderDashboard(real);
 }
 
 function renderDashboard(model) {
@@ -2135,6 +2237,13 @@ async function refreshDashboard() {
 }
 
 async function postDashboard(payload, form) {
+  // In sample-preview mode nothing may touch the real account. This single
+  // choke point covers every server write (add/delete/budget/category/…).
+  if (window.__previewActive) {
+    closeModal();
+    exitSamplePreview();
+    return;
+  }
   const error = form?.querySelector("[data-error]");
   if (error) error.textContent = "";
   showSyncMask("Saving changes…");
@@ -3114,6 +3223,14 @@ function bindEvents() {
     if (dismissWelcome) {
       dismissWelcome.closest("[data-welcome-banner]")?.remove();
       try { localStorage.setItem("welcomeBannerDismissed", "1"); } catch {}
+      return;
+    }
+    if (event.target.closest("[data-preview-sample]")) {
+      enterSamplePreview();
+      return;
+    }
+    if (event.target.closest("[data-exit-preview]")) {
+      exitSamplePreview();
       return;
     }
     const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");

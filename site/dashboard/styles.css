@@ -2303,9 +2303,79 @@ button {
   background: linear-gradient(135deg, rgba(16, 185, 129, .12), rgba(37, 99, 235, .08));
 }
 :root[data-theme="dark"] .welcome-dismiss:hover { background: rgba(255, 255, 255, .08); }
+.welcome-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px dashed var(--line);
+}
+.welcome-footer-hint { font-size: 12px; color: var(--muted); }
+.welcome-preview {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #10b981, #2563eb);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -10px rgba(16, 185, 129, .7);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+.welcome-preview:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 12px 26px -10px rgba(16, 185, 129, .8); }
+
+/* Sample-preview banner pinned above the dashboard while demo data is shown. */
+.preview-bar {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 24px);
+  padding: 9px 10px 9px 15px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  box-shadow: 0 18px 40px -14px rgba(2, 6, 23, .6);
+  font-size: 12.5px;
+}
+.preview-bar b { font-weight: 800; }
+.preview-bar .preview-sub { color: #cbd5e1; font-size: 11.5px; }
+.preview-bar .preview-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, .18);
+}
+.preview-bar .preview-exit {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: #10b981;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: filter .15s ease;
+}
+.preview-bar .preview-exit:hover { filter: brightness(1.08); }
+
 @media (max-width: 720px) {
   .welcome-steps { grid-template-columns: 1fr; }
   .welcome-banner { padding: 15px 15px; }
+  .welcome-footer { flex-wrap: wrap; gap: 8px; }
+  .welcome-preview { margin-left: 0; width: 100%; justify-content: center; }
+  .preview-bar .preview-sub { display: none; }
 }
 
 .modal-backdrop {
