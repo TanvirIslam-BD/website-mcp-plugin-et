@@ -92,6 +92,51 @@ function asList(value) {
   return value ? [value] : [];
 }
 
+/**
+ * The email.* webhook payloads carry metadata but not the message body, so the
+ * body is fetched separately by id. Returns { text, html } or null.
+ */
+async function fetchEmailBody(apiKey, emailId) {
+  try {
+    const response = await fetch(`https://api.resend.com/emails/${encodeURIComponent(emailId)}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!response.ok) return null;
+    const json = await response.json();
+    return {
+      text: typeof json.text === "string" ? json.text : "",
+      html: typeof json.html === "string" ? json.html : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Minimal HTML→text fallback for messages that only ship an HTML part, so the
+// forwarded summary is still readable without rendering untrusted sender markup.
+function htmlToPlain(html) {
+  return String(html)
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|tr|li|h[1-6])>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">").replace(/&#39;|&apos;/gi, "'").replace(/&quot;/gi, '"')
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function bodySectionHtml(body) {
+  if (!body) return "";
+  const text = body.text && body.text.trim() ? body.text : (body.html ? htmlToPlain(body.html) : "");
+  if (!text.trim()) return "";
+  return `<div style="margin-top:14px;">
+      <div style="font-size:11px;font-weight:800;color:#334155;margin-bottom:6px;">✉️ Message body</div>
+      <pre style="margin:0;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-family:inherit;font-size:12.5px;line-height:1.5;color:#0f172a;white-space:pre-wrap;word-break:break-word;">${escapeHtml(text.slice(0, 20000))}</pre>
+    </div>`;
+}
+
 function summaryRows(type, data) {
   const rows = [
     ["Event", type],
@@ -108,7 +153,7 @@ function summaryRows(type, data) {
   return rows.filter(([, value]) => value !== undefined && value !== null && value !== "");
 }
 
-function buildForwardHtml(type, data, rawJson) {
+function buildForwardHtml(type, data, rawJson, body) {
   const rows = summaryRows(type, data).map(([label, value]) => `
     <tr>
       <td style="padding:6px 12px;font-size:12px;font-weight:700;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;white-space:nowrap;vertical-align:top;">${escapeHtml(label)}</td>
@@ -122,6 +167,7 @@ function buildForwardHtml(type, data, rawJson) {
       </td></tr>
       <tr><td style="padding:14px 16px;">
         <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${rows}</table>
+        ${bodySectionHtml(body)}
         <details style="margin-top:12px;">
           <summary style="font-size:11px;font-weight:700;color:#64748b;cursor:pointer;">Raw payload</summary>
           <pre style="margin:8px 0 0;padding:10px;background:#0f172a;color:#e2e8f0;border-radius:8px;font-size:11px;line-height:1.4;white-space:pre-wrap;word-break:break-word;">${escapeHtml(rawJson)}</pre>
@@ -184,6 +230,16 @@ export default async function handler(req, res) {
   const forwardSubject = `${LOG_SUBJECT_PREFIX} ${type} → ${firstRecipient}`.slice(0, 180);
   const rawJson = JSON.stringify(event, null, 2).slice(0, 20_000);
 
+  // The webhook payload has no body; fetch it by id so the forward is readable.
+  let body = {
+    text: typeof data.text === "string" ? data.text : "",
+    html: typeof data.html === "string" ? data.html : "",
+  };
+  if (!body.text && !body.html && data.email_id) {
+    const fetched = await fetchEmailBody(resendApiKey, data.email_id);
+    if (fetched) body = fetched;
+  }
+
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -192,7 +248,7 @@ export default async function handler(req, res) {
         from: process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM,
         to: [forwardTo],
         subject: forwardSubject,
-        html: buildForwardHtml(type, data, rawJson),
+        html: buildForwardHtml(type, data, rawJson, body),
       }),
     });
     if (!response.ok) {
