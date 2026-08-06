@@ -1288,6 +1288,71 @@ function exitSamplePreview() {
   renderDashboard(real);
 }
 
+// A one-time confetti burst + toast for the moment a user's account goes from
+// empty to having its first real entry. Self-contained (no external libraries,
+// which the page CSP would block) and honours reduced-motion preferences.
+function launchConfetti() {
+  const canvas = document.createElement("canvas");
+  canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:11000;";
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const resize = () => { canvas.width = window.innerWidth * dpr; canvas.height = window.innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  resize();
+  const colors = ["#10b981", "#2563eb", "#f59e0b", "#ec4899", "#8b5cf6", "#34d399"];
+  const parts = Array.from({ length: 150 }, () => ({
+    x: window.innerWidth / 2 + (Math.random() - 0.5) * 140,
+    y: window.innerHeight * 0.26 + (Math.random() - 0.5) * 40,
+    vx: (Math.random() - 0.5) * 11,
+    vy: Math.random() * -9 - 4,
+    g: 0.28 + Math.random() * 0.14,
+    size: 6 + Math.random() * 6,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rot: Math.random() * Math.PI,
+    vr: (Math.random() - 0.5) * 0.32,
+    round: Math.random() < 0.5,
+  }));
+  const start = performance.now();
+  const duration = 2600;
+  const frame = (now) => {
+    const elapsed = now - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const p of parts) {
+      p.vy += p.g; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.max(0, 1 - elapsed / duration);
+      ctx.fillStyle = p.color;
+      if (p.round) { ctx.beginPath(); ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2); ctx.fill(); }
+      else ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    }
+    if (elapsed < duration) requestAnimationFrame(frame);
+    else canvas.remove();
+  };
+  requestAnimationFrame(frame);
+}
+
+function showCelebrationToast() {
+  document.getElementById("celebrate-toast")?.remove();
+  const toast = document.createElement("div");
+  toast.id = "celebrate-toast";
+  toast.className = "celebrate-toast";
+  toast.innerHTML = `<span class="celebrate-emoji" aria-hidden="true">🎉</span><div><b>You're all set!</b><span>Your first entry is in — your dashboard is now live.</span></div>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 4600);
+}
+
+function celebrateFirstData() {
+  try { if (localStorage.getItem("firstDataCelebrated") === "1") return; } catch { /* storage blocked */ }
+  try { localStorage.setItem("firstDataCelebrated", "1"); } catch { /* storage blocked */ }
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduceMotion) launchConfetti();
+  showCelebrationToast();
+}
+
 function renderDashboard(model) {
   app.className = "dashboard-shell";
   app.innerHTML = `
@@ -2246,6 +2311,8 @@ async function postDashboard(payload, form) {
   }
   const error = form?.querySelector("[data-error]");
   if (error) error.textContent = "";
+  // Remembered across the await so we can celebrate the empty → first-data moment.
+  const wasEmpty = !window.dashboardModel?.hasFinancialData;
   showSyncMask("Saving changes…");
   try {
     const response = await fetch("/api/dashboard", {
@@ -2259,6 +2326,7 @@ async function postDashboard(payload, form) {
     if (!response.ok) throw new Error(body.error || "Could not save changes.");
     closeModal();
     await refreshDashboard();
+    if (wasEmpty && window.dashboardModel?.hasFinancialData) celebrateFirstData();
   } catch (err) {
     if (err.code === "AUTH_REQUIRED") {
       hideSyncMask();
