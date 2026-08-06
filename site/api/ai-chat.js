@@ -863,8 +863,14 @@ export default async function handler(req, res) {
     }
 
     // A financial question answered without touching a tool is unverified, so
-    // it is replaced with a figure read straight from the database.
-    const unverified = needsFinancialData(message) && !usedTools.length;
+    // it is replaced with a figure read straight from the database. But an
+    // intent to add/record/create data — or a request for help getting started —
+    // is not a figure query: the model correctly replies with a follow-up
+    // ("What did you spend?") and no tool call yet. Overwriting that with a
+    // read-only monthly report is what made "I'd like to add my first expense"
+    // answer with a hollow "৳0.00 across 0 expenses" dump, so exclude it.
+    const isEntryOrHelpIntent = /\b(add|record|log|save|create|set up|set a|start|new|help|get started|how (do|can) i|walk me|guide me)\b/i.test(message);
+    const unverified = needsFinancialData(message) && !usedTools.length && !isEntryOrHelpIntent;
     let answer = unverified ? "" : lastAssistantText(messages);
     let usedFallback = false;
     if (!answer) {
