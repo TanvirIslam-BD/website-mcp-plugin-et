@@ -37,7 +37,7 @@
   a:hover{text-decoration:underline;}
   ::selection{background:var(--violet);color:#fff;}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
-  .wrap.wide{max-width:1400px;}
+  .wrap.wide{max-width:1280px;}
 
   /* ---------- nav (matches the home page lockup) ---------- */
   header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
@@ -61,57 +61,57 @@
   .btn:hover{transform:translateY(-2px);text-decoration:none;
     box-shadow:0 14px 34px -10px var(--glow),inset 0 1px 0 rgba(255,255,255,.3);}
 
-  /* ---------- page head ---------- */
-  .pagehead{position:relative;text-align:center;padding:60px 0 40px;}
-  .pagehead::before{content:"";position:absolute;top:-220px;left:50%;transform:translateX(-50%);
-    width:900px;max-width:130vw;height:520px;z-index:-1;pointer-events:none;
-    background:radial-gradient(closest-side,rgba(20,184,166,.18),transparent 72%);filter:blur(22px);}
-  .pill{display:inline-flex;align-items:center;gap:9px;padding:9px 18px;border-radius:999px;
+  /* ---------- compact doc-site page head ---------- */
+  .pagehead{border-bottom:1px solid var(--line);padding:30px 0;}
+  .pagehead .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;
     border:1px solid rgba(45,212,191,.32);background:rgba(20,184,166,.07);
-    font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--violet-ink);}
-  .pill svg{width:15px;height:15px;fill:var(--violet2);}
-  .pagehead h1{font-size:clamp(34px,4.6vw,52px);font-weight:800;letter-spacing:-.03em;
-    line-height:1.1;margin-top:20px;color:#fff;}
-  .pagehead h1 .g{background:var(--grad-text);-webkit-background-clip:text;
-    background-clip:text;color:transparent;}
-  .updated{color:var(--muted);font-size:14.5px;margin-top:14px;}
+    font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--violet-ink);}
+  .pill svg{width:13px;height:13px;fill:var(--violet2);}
+  .pagehead h1{font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.02em;color:#fff;margin-top:8px;}
+  .pagehead .g{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .updated{color:var(--muted);font-size:13.5px;margin-top:6px;}
+
+  /* ---------- docs shell: sidebar + content ---------- */
+  main{padding:40px 0 88px;}
+  .docs-shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:48px;align-items:start;}
+
+  .mobile-toc{display:none;}
+
+  .docs-sidebar{position:sticky;top:104px;max-height:calc(100vh - 124px);overflow-y:auto;padding-bottom:20px;}
+  .side-group{margin-bottom:24px;}
+  .side-group b{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;padding:0 10px;}
+  .sidebar-nav a{display:block;padding:7px 10px;margin-bottom:2px;border-radius:8px;font-size:13.5px;color:var(--ink2);border-left:2px solid transparent;transition:.12s;}
+  .sidebar-nav a:hover{color:var(--ink);background:var(--panel2);text-decoration:none;}
+  .sidebar-nav a.active{color:var(--violet-ink);background:rgba(20,184,166,.09);border-left-color:var(--violet2);font-weight:700;}
 
   /* ---------- document panel ---------- */
-  main{padding-bottom:88px;}
-  .doc{background:var(--panel);border:1px solid var(--line);border-radius:20px;
-    padding:44px 46px;box-shadow:0 40px 90px -50px rgba(0,0,0,.9);}
-  .doc>.lead{font-size:17px;color:var(--ink2);margin-bottom:4px;}
-  .doc h2{font-size:21px;font-weight:700;color:#fff;letter-spacing:-.01em;
-    margin:36px 0 12px;display:flex;align-items:baseline;gap:12px;}
-  .doc h2:first-child{margin-top:0;}
-  .doc h2 .n{flex:0 0 auto;font-size:13px;font-weight:800;color:var(--violet2);
-    font-variant-numeric:tabular-nums;letter-spacing:.04em;}
-  .doc h3{font-size:16.5px;font-weight:700;margin-bottom:7px;margin-top:22px;}
-  .doc p,.doc li{color:var(--ink2);font-size:16px;margin-bottom:14px;}
+  .doc{min-width:0;}
+  .doc>.lead{font-size:16px;color:var(--ink2);margin-bottom:8px;max-width:70ch;}
+  .doc h2{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em;
+    margin:40px 0 12px;padding-top:14px;border-top:1px solid var(--line);
+    scroll-margin-top:100px;}
+  .doc h2:first-of-type{margin-top:28px;}
+  .doc h3{font-size:16px;font-weight:700;margin-bottom:7px;margin-top:24px;color:var(--ink);scroll-margin-top:100px;}
+  .doc p,.doc li{color:var(--ink2);font-size:15.5px;margin-bottom:14px;max-width:70ch;}
   .doc ul,.doc ol{padding-left:22px;margin-bottom:16px;}
   .doc li{margin-bottom:9px;}
   .doc li::marker{color:var(--violet2);}
   .doc strong{color:var(--ink);font-weight:600;}
-  .doc code{background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;font-size:14px;color:var(--violet-ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .doc code{background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;font-size:13.5px;color:var(--violet-ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
   .doc hr{border:none;border-top:1px solid var(--line);margin:34px 0;}
-
-  /* on-this-page nav */
-  .toc{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 6px;padding:16px;background:var(--panel2);border:1px solid var(--line2);border-radius:14px;}
-  .toc b{width:100%;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px;}
-  .toc a{background:var(--panel);border:1px solid var(--line2);border-radius:99px;padding:7px 14px;font-size:13.5px;color:var(--ink2);}
-  .toc a:hover{color:var(--violet2);border-color:var(--violet2);text-decoration:none;}
 
   /* code snippet + copy button */
   .snippet{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin:10px 0 16px;}
   .snippet code{background:none;border:0;padding:0;flex:1;min-width:0;overflow-x:auto;white-space:nowrap;}
-  .copy-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:.15s;}
+  .copy-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:inherit;transition:.15s;}
   .copy-btn:hover{color:var(--violet2);border-color:var(--violet2);}
   .copy-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .copy-btn.copied{color:var(--violet2);border-color:var(--violet2);}
 
   /* tool reference table */
-  .tools{width:100%;border-collapse:collapse;margin:14px 0 24px;font-size:14.5px;}
-  .tools th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:0 12px 10px 0;border-bottom:1px solid var(--line2);}
+  .tools{width:100%;border-collapse:collapse;margin:14px 0 24px;font-size:14px;}
+  .tools th{text-align:left;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;padding:0 12px 10px 0;border-bottom:1px solid var(--line2);}
   .tools td{padding:11px 12px 11px 0;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top;}
   .tools td:first-child{white-space:nowrap;}
   .tools tr:last-child td{border-bottom:0;}
@@ -119,7 +119,7 @@
   .badge.ro{background:rgba(45,212,191,.12);color:var(--violet-ink);border:1px solid rgba(45,212,191,.3);}
   .badge.wr{background:rgba(59,130,246,.12);color:#1d4ed8;border:1px solid rgba(59,130,246,.3);}
   .badge.de{background:rgba(239,68,68,.12);color:#b91c1c;border:1px solid rgba(239,68,68,.32);}
-  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:2px 0 18px;font-size:13px;color:var(--muted);}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:2px 0 18px;font-size:12.5px;color:var(--muted);}
   .legend span{display:flex;align-items:center;gap:6px;}
 
   /* example prompts */
@@ -154,6 +154,17 @@
     color:var(--muted);font-size:13px;text-align:center;}
 
   /* ---------- responsive ---------- */
+  @media(max-width:960px){
+    .docs-shell{grid-template-columns:1fr;gap:0;}
+    .docs-sidebar{display:none;}
+    .mobile-toc{display:block;margin-bottom:26px;background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:4px 16px;}
+    .mobile-toc summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:14.5px;color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;}
+    .mobile-toc summary::-webkit-details-marker{display:none;}
+    .mobile-toc summary::after{content:"\25be";color:var(--violet2);}
+    .mobile-toc[open] summary::after{content:"\25b4";}
+    .mobile-toc-links{padding:2px 0 14px;border-top:1px solid var(--line2);}
+    .mobile-toc-links a{display:block;padding:8px 4px;font-size:14px;color:var(--ink2);}
+  }
   @media(max-width:820px){
     .nav .wrap{height:76px;}
     .back{display:none;}
@@ -164,11 +175,9 @@
     .mark{width:54px;height:54px;flex:0 0 54px;}
     .wordmark{font-size:18px;}
     .btn{padding:11px 16px;font-size:14px;}
-    .pagehead{padding:40px 0 28px;}
-    .doc{padding:26px 20px;border-radius:16px;}
-    .doc p,.doc li{font-size:15.5px;}
-    .doc h2{font-size:19px;gap:9px;}
-    .tools{font-size:13.5px;}
+    .doc p,.doc li{font-size:15px;}
+    .doc h2{font-size:18px;}
+    .tools{font-size:13px;}
     .formats{grid-template-columns:1fr;}
     .snippet{flex-direction:column;align-items:stretch;}
     .snippet code{white-space:normal;word-break:break-all;}
@@ -195,162 +204,199 @@
 </header>
 
 <section class="pagehead">
-  <div class="wrap">
-    <span class="pill"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Documentation</span>
-    <h1>Get set up with <span class="g">Money Copilot AI</span></h1>
-    <div class="updated">Everything you need to connect, and the full tool reference.</div>
+  <div class="wrap wide">
+    <div>
+      <span class="pill"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Documentation</span>
+      <h1>Money Copilot <span class="g">AI</span> Docs</h1>
+      <div class="updated">Connection guide, tool reference, and troubleshooting.</div>
+    </div>
   </div>
 </section>
 
 <main>
-  <div class="wrap">
-    <article class="doc">
-      <p class="lead">Money Copilot AI is a Model Context Protocol (MCP) server that lets your AI assistant &mdash; Claude, ChatGPT, or any MCP-compatible client &mdash; track expenses, manage budgets, and report on your finances through natural conversation. Each subscriber's data is isolated automatically; no bank account linking is required.</p>
+  <div class="wrap wide">
+    <div class="docs-shell">
 
-      <nav class="toc" aria-label="On this page">
-        <b>On this page</b>
-        <a href="#connect">Connect your assistant</a>
-        <a href="#try">What you can do</a>
-        <a href="#tools">Tool reference</a>
-        <a href="#formats">Data &amp; formats</a>
-        <a href="#privacy">Privacy &amp; data</a>
-        <a href="#faq">Troubleshooting</a>
-        <a href="#help">Need help?</a>
-      </nav>
+      <aside class="docs-sidebar">
+        <nav class="sidebar-nav" aria-label="Documentation sections">
+          <div class="side-group">
+            <b>Get started</b>
+            <a href="#connect" data-section="connect">Connect your assistant</a>
+            <a href="#try" data-section="try">What you can do</a>
+          </div>
+          <div class="side-group">
+            <b>Reference</b>
+            <a href="#tools" data-section="tools">All tools</a>
+            <a href="#expenses" data-section="expenses">Expenses</a>
+            <a href="#budgets" data-section="budgets">Budgets &amp; categories</a>
+            <a href="#income" data-section="income">Income &amp; reports</a>
+            <a href="#account" data-section="account">Account</a>
+            <a href="#formats" data-section="formats">Data &amp; formats</a>
+          </div>
+          <div class="side-group">
+            <b>Help</b>
+            <a href="#privacy" data-section="privacy">Privacy &amp; data</a>
+            <a href="#faq" data-section="faq">Troubleshooting</a>
+            <a href="#help" data-section="help">Need help?</a>
+          </div>
+        </nav>
+      </aside>
 
-      <h2 id="connect"><span class="n">01</span>Connect your assistant</h2>
+      <article class="doc">
+        <p class="lead">Money Copilot AI is a Model Context Protocol (MCP) server that lets your AI assistant &mdash; Claude, ChatGPT, or any MCP-compatible client &mdash; track expenses, manage budgets, and report on your finances through natural conversation. Each subscriber's data is isolated automatically; no bank account linking is required.</p>
 
-      <h3>Claude</h3>
-      <ol>
-        <li>In Claude, go to <strong>Settings &rarr; Connectors</strong>.</li>
-        <li>Select <strong>Add custom connector</strong> (or find <strong>Money Copilot AI</strong> in the connector directory, once listed).</li>
-        <li>Enter the server URL:
-          <div class="snippet"><code>https://expense-tracker-mcp.mcpize.run/mcp</code><button class="copy-btn" type="button" data-copy="https://expense-tracker-mcp.mcpize.run/mcp"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-label">Copy</span></button></div>
-        </li>
-        <li>Approve the connection when Claude prompts you to sign in &mdash; this authenticates the assistant to your account without exposing your credentials to Claude.</li>
-        <li>Start a new conversation and try one of the example prompts below.</li>
-      </ol>
-
-      <h3>ChatGPT</h3>
-      <ol>
-        <li>In ChatGPT, open <strong>Settings &rarr; Connectors &rarr; Advanced</strong> and enable developer mode if prompted.</li>
-        <li>Add a new connector using the same server URL:
-          <div class="snippet"><code>https://expense-tracker-mcp.mcpize.run/mcp</code><button class="copy-btn" type="button" data-copy="https://expense-tracker-mcp.mcpize.run/mcp"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-label">Copy</span></button></div>
-        </li>
-        <li>Complete the sign-in prompt to link your account.</li>
-        <li>Enable the connector for the conversation and start tracking.</li>
-      </ol>
-      <p>Prefer a visual walkthrough? See the <a href="/#how">step-by-step guide</a> on the home page.</p>
-
-      <h2 id="try"><span class="n">02</span>What you can do</h2>
-      <p>Once connected, just talk naturally &mdash; no forms, no menus. A few examples:</p>
-      <div class="prompts">
-        <span>&ldquo;Spent $12 on lunch today.&rdquo;</span>
-        <span>&ldquo;How much did I spend this month?&rdquo;</span>
-        <span>&ldquo;Show my restaurant expenses from last month.&rdquo;</span>
-        <span>&ldquo;Which category did I spend the most on?&rdquo;</span>
-        <span>&ldquo;Set my monthly food budget to $300.&rdquo;</span>
-        <span>&ldquo;What unnecessary expenses can I reduce?&rdquo;</span>
-        <span>&ldquo;Update yesterday's coffee expense to $5.&rdquo;</span>
-        <span>&ldquo;Give me a full budget report for July.&rdquo;</span>
-      </div>
-
-      <h2 id="tools"><span class="n">03</span>Tool reference</h2>
-      <p>All tools operate only on your own authenticated account &mdash; the server never has access to another subscriber's data.</p>
-      <div class="legend">
-        <span><span class="badge ro">Read-only</span> runs without confirmation</span>
-        <span><span class="badge wr">Write</span> creates or updates your data</span>
-        <span><span class="badge de">Destructive</span> your assistant will always confirm first</span>
-      </div>
-
-      <h3>Expenses</h3>
-      <table class="tools">
-        <tr><th>Tool</th><th>What it does</th></tr>
-        <tr><td><code>add_expense</code><span class="badge wr">Write</span></td><td>Record a single expense (amount, category, description, date, currency).</td></tr>
-        <tr><td><code>add_expenses</code><span class="badge wr">Write</span></td><td>Record several expenses in one call &mdash; efficient for a receipt with many line items.</td></tr>
-        <tr><td><code>list_expenses</code><span class="badge ro">Read-only</span></td><td>List expenses, newest first, with category / date-range / free-text search filters.</td></tr>
-        <tr><td><code>get_expense</code> / <code>get_recent_expense</code><span class="badge ro">Read-only</span></td><td>Fetch one expense by id, or resolve "my last expense" to a concrete record.</td></tr>
-        <tr><td><code>update_expense</code><span class="badge wr">Write</span></td><td>Update fields of an existing expense.</td></tr>
-        <tr><td><code>delete_expense</code><span class="badge de">Destructive</span></td><td>Delete a single expense by id.</td></tr>
-        <tr><td><code>split_expense</code><span class="badge wr">Write</span></td><td>Record one purchase split across two or more categories.</td></tr>
-        <tr><td><code>import_expenses</code><span class="badge wr">Write</span></td><td>Bulk-import expenses from CSV, with duplicate-row skipping.</td></tr>
-        <tr><td><code>export_expenses</code><span class="badge ro">Read-only</span></td><td>Export expenses as CSV, JSON, or a portable PDF report.</td></tr>
-        <tr><td><code>find_duplicate_expenses</code><span class="badge ro">Read-only</span></td><td>Identify likely duplicate transactions.</td></tr>
-        <tr><td><code>summarize_expenses</code><span class="badge ro">Read-only</span></td><td>Aggregate totals grouped by category or month.</td></tr>
-      </table>
-
-      <h3>Budgets &amp; categories</h3>
-      <table class="tools">
-        <tr><th>Tool</th><th>What it does</th></tr>
-        <tr><td><code>set_budget</code><span class="badge wr">Write</span></td><td>Create or update a monthly budget (overall or per-category).</td></tr>
-        <tr><td><code>list_budgets</code><span class="badge ro">Read-only</span></td><td>List all budgets you've set.</td></tr>
-        <tr><td><code>delete_budget</code><span class="badge de">Destructive</span></td><td>Remove a budget (overall or per-category).</td></tr>
-        <tr><td><code>get_budget_status</code><span class="badge ro">Read-only</span></td><td>Compare spending against your budgets, with over-budget flags.</td></tr>
-        <tr><td><code>get_budget_alerts</code><span class="badge ro">Read-only</span></td><td>Check configured threshold alerts and over-budget categories.</td></tr>
-        <tr><td><code>set_alert_thresholds</code><span class="badge wr">Write</span></td><td>Configure the 50/80/100%-style budget alert thresholds.</td></tr>
-        <tr><td><code>set_budget_email_alert</code><span class="badge wr">Write</span></td><td>Opt into an email notification when a monthly budget is crossed.</td></tr>
-        <tr><td><code>list_categories</code><span class="badge ro">Read-only</span></td><td>List categories you've used, with counts and totals.</td></tr>
-        <tr><td><code>manage_categories</code><span class="badge de">Destructive</span></td><td>List, create, update, or remove custom category limits and colors.</td></tr>
-        <tr><td><code>manage_budget_templates</code><span class="badge de">Destructive</span></td><td>Save, apply, list, or delete reusable budget templates.</td></tr>
-      </table>
-
-      <h3>Income, cash flow &amp; reports</h3>
-      <table class="tools">
-        <tr><th>Tool</th><th>What it does</th></tr>
-        <tr><td><code>add_income</code><span class="badge wr">Write</span></td><td>Record income for cash-flow and savings tracking.</td></tr>
-        <tr><td><code>get_cash_flow_report</code><span class="badge ro">Read-only</span></td><td>Income, expenses, net cash flow, and savings rate for a month.</td></tr>
-        <tr><td><code>get_spending_forecast</code><span class="badge ro">Read-only</span></td><td>Forecast month-end spending from what you've spent so far.</td></tr>
-        <tr><td><code>compare_months</code><span class="badge ro">Read-only</span></td><td>Compare spending across recent months, with a trend chart.</td></tr>
-        <tr><td><code>full_budget_report</code><span class="badge ro">Read-only</span></td><td>Complete monthly report: totals, category breakdown, and budget charts.</td></tr>
-        <tr><td><code>set_recurring_expense</code><span class="badge wr">Write</span></td><td>Track recurring rent, subscriptions, utilities, or loan payments.</td></tr>
-      </table>
-
-      <h3>Account</h3>
-      <table class="tools">
-        <tr><th>Tool</th><th>What it does</th></tr>
-        <tr><td><code>get_dashboard_link</code><span class="badge ro">Read-only</span></td><td>Create a short-lived link to your private web dashboard.</td></tr>
-        <tr><td><code>delete_account</code><span class="badge de">Destructive</span></td><td>Permanently delete every expense, budget, and finance record on your account. Irreversible &mdash; see our <a href="/privacy">Privacy Policy</a> for what's retained briefly for security purposes.</td></tr>
-      </table>
-
-      <h2 id="formats"><span class="n">04</span>Data &amp; formats</h2>
-      <p>A few conventions your assistant (and the server) follow under the hood:</p>
-      <div class="formats">
-        <div class="f"><b>Amounts</b><span>Major units, e.g. <code>12.50</code> for $12.50. Never minor units (cents).</span></div>
-        <div class="f"><b>Dates</b><span><code>YYYY-MM-DD</code>. Omit it and today's date is used.</span></div>
-        <div class="f"><b>Months</b><span><code>YYYY-MM</code> for monthly reports and budgets.</span></div>
-        <div class="f"><b>Currency</b><span>3-letter ISO-4217 code, e.g. <code>USD</code>, <code>EUR</code>, <code>BDT</code>. Defaults to your account's currency if omitted.</span></div>
-      </div>
-
-      <h2 id="privacy"><span class="n">05</span>Privacy &amp; data</h2>
-      <p>Your financial data is private to your authenticated account and is never used to train third-party AI models. Read the full <a href="/privacy">Privacy Policy</a> for what's collected, how it's used, and how to request deletion.</p>
-
-      <h2 id="faq"><span class="n">06</span>Troubleshooting</h2>
-      <div class="faq">
-        <details>
-          <summary>My assistant isn't finding the connector</summary>
-          <p>Double-check the server URL is exactly <code>https://expense-tracker-mcp.mcpize.run/mcp</code> (including the trailing <code>/mcp</code>), and that the connector is enabled for your current conversation &mdash; some clients require enabling tools per-chat even after connecting once.</p>
+        <details class="mobile-toc">
+          <summary>On this page</summary>
+          <div class="mobile-toc-links">
+            <a href="#connect">Connect your assistant</a>
+            <a href="#try">What you can do</a>
+            <a href="#tools">All tools</a>
+            <a href="#expenses">Expenses</a>
+            <a href="#budgets">Budgets &amp; categories</a>
+            <a href="#income">Income &amp; reports</a>
+            <a href="#account">Account</a>
+            <a href="#formats">Data &amp; formats</a>
+            <a href="#privacy">Privacy &amp; data</a>
+            <a href="#faq">Troubleshooting</a>
+            <a href="#help">Need help?</a>
+          </div>
         </details>
-        <details>
-          <summary>It says "authentication required" or asks me to sign in again</summary>
-          <p>Your session may have expired. Re-run the connection step in your assistant's connector settings and approve the sign-in prompt again &mdash; this doesn't affect any of your existing data.</p>
-        </details>
-        <details>
-          <summary>Can I use more than one currency?</summary>
-          <p>Yes. Each expense, budget, and income entry stores its own currency; reports total per-currency rather than incorrectly combining amounts across currencies.</p>
-        </details>
-        <details>
-          <summary>How do I permanently delete my data?</summary>
-          <p>Ask your assistant to delete your account, or use the data-management option in your <a href="/dashboard">dashboard</a>. This is irreversible &mdash; see the <a href="/privacy">Privacy Policy</a> for exactly what's removed.</p>
-        </details>
-        <details>
-          <summary>Is my data shared with other users, or used to train AI models?</summary>
-          <p>No. Your data is isolated to your authenticated account and is never sold or used to train third-party AI models &mdash; see the <a href="/privacy">Privacy Policy</a> for details.</p>
-        </details>
-      </div>
 
-      <h2 id="help"><span class="n">07</span>Need help?</h2>
-      <p>Something not working as expected? Visit <a href="/support">Customer Support</a> or email <a href="mailto:support@contact.copilotai.live">support@contact.copilotai.live</a>.</p>
-    </article>
+        <h2 id="connect">Connect your assistant</h2>
+
+        <h3>Claude</h3>
+        <ol>
+          <li>In Claude, go to <strong>Settings &rarr; Connectors</strong>.</li>
+          <li>Select <strong>Add custom connector</strong> (or find <strong>Money Copilot AI</strong> in the connector directory, once listed).</li>
+          <li>Enter the server URL:
+            <div class="snippet"><code>https://expense-tracker-mcp.mcpize.run/mcp</code><button class="copy-btn" type="button" data-copy="https://expense-tracker-mcp.mcpize.run/mcp"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-label">Copy</span></button></div>
+          </li>
+          <li>Approve the connection when Claude prompts you to sign in &mdash; this authenticates the assistant to your account without exposing your credentials to Claude.</li>
+          <li>Start a new conversation and try one of the example prompts below.</li>
+        </ol>
+
+        <h3>ChatGPT</h3>
+        <ol>
+          <li>In ChatGPT, open <strong>Settings &rarr; Connectors &rarr; Advanced</strong> and enable developer mode if prompted.</li>
+          <li>Add a new connector using the same server URL:
+            <div class="snippet"><code>https://expense-tracker-mcp.mcpize.run/mcp</code><button class="copy-btn" type="button" data-copy="https://expense-tracker-mcp.mcpize.run/mcp"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-label">Copy</span></button></div>
+          </li>
+          <li>Complete the sign-in prompt to link your account.</li>
+          <li>Enable the connector for the conversation and start tracking.</li>
+        </ol>
+        <p>Prefer a visual walkthrough? See the <a href="/#how">step-by-step guide</a> on the home page.</p>
+
+        <h2 id="try">What you can do</h2>
+        <p>Once connected, just talk naturally &mdash; no forms, no menus. A few examples:</p>
+        <div class="prompts">
+          <span>&ldquo;Spent $12 on lunch today.&rdquo;</span>
+          <span>&ldquo;How much did I spend this month?&rdquo;</span>
+          <span>&ldquo;Show my restaurant expenses from last month.&rdquo;</span>
+          <span>&ldquo;Which category did I spend the most on?&rdquo;</span>
+          <span>&ldquo;Set my monthly food budget to $300.&rdquo;</span>
+          <span>&ldquo;What unnecessary expenses can I reduce?&rdquo;</span>
+          <span>&ldquo;Update yesterday's coffee expense to $5.&rdquo;</span>
+          <span>&ldquo;Give me a full budget report for July.&rdquo;</span>
+        </div>
+
+        <h2 id="tools">Tool reference</h2>
+        <p>All tools operate only on your own authenticated account &mdash; the server never has access to another subscriber's data.</p>
+        <div class="legend">
+          <span><span class="badge ro">Read-only</span> runs without confirmation</span>
+          <span><span class="badge wr">Write</span> creates or updates your data</span>
+          <span><span class="badge de">Destructive</span> your assistant will always confirm first</span>
+        </div>
+
+        <h3 id="expenses">Expenses</h3>
+        <table class="tools">
+          <tr><th>Tool</th><th>What it does</th></tr>
+          <tr><td><code>add_expense</code><span class="badge wr">Write</span></td><td>Record a single expense (amount, category, description, date, currency).</td></tr>
+          <tr><td><code>add_expenses</code><span class="badge wr">Write</span></td><td>Record several expenses in one call &mdash; efficient for a receipt with many line items.</td></tr>
+          <tr><td><code>list_expenses</code><span class="badge ro">Read-only</span></td><td>List expenses, newest first, with category / date-range / free-text search filters.</td></tr>
+          <tr><td><code>get_expense</code> / <code>get_recent_expense</code><span class="badge ro">Read-only</span></td><td>Fetch one expense by id, or resolve "my last expense" to a concrete record.</td></tr>
+          <tr><td><code>update_expense</code><span class="badge wr">Write</span></td><td>Update fields of an existing expense.</td></tr>
+          <tr><td><code>delete_expense</code><span class="badge de">Destructive</span></td><td>Delete a single expense by id.</td></tr>
+          <tr><td><code>split_expense</code><span class="badge wr">Write</span></td><td>Record one purchase split across two or more categories.</td></tr>
+          <tr><td><code>import_expenses</code><span class="badge wr">Write</span></td><td>Bulk-import expenses from CSV, with duplicate-row skipping.</td></tr>
+          <tr><td><code>export_expenses</code><span class="badge ro">Read-only</span></td><td>Export expenses as CSV, JSON, or a portable PDF report.</td></tr>
+          <tr><td><code>find_duplicate_expenses</code><span class="badge ro">Read-only</span></td><td>Identify likely duplicate transactions.</td></tr>
+          <tr><td><code>summarize_expenses</code><span class="badge ro">Read-only</span></td><td>Aggregate totals grouped by category or month.</td></tr>
+        </table>
+
+        <h3 id="budgets">Budgets &amp; categories</h3>
+        <table class="tools">
+          <tr><th>Tool</th><th>What it does</th></tr>
+          <tr><td><code>set_budget</code><span class="badge wr">Write</span></td><td>Create or update a monthly budget (overall or per-category).</td></tr>
+          <tr><td><code>list_budgets</code><span class="badge ro">Read-only</span></td><td>List all budgets you've set.</td></tr>
+          <tr><td><code>delete_budget</code><span class="badge de">Destructive</span></td><td>Remove a budget (overall or per-category).</td></tr>
+          <tr><td><code>get_budget_status</code><span class="badge ro">Read-only</span></td><td>Compare spending against your budgets, with over-budget flags.</td></tr>
+          <tr><td><code>get_budget_alerts</code><span class="badge ro">Read-only</span></td><td>Check configured threshold alerts and over-budget categories.</td></tr>
+          <tr><td><code>set_alert_thresholds</code><span class="badge wr">Write</span></td><td>Configure the 50/80/100%-style budget alert thresholds.</td></tr>
+          <tr><td><code>set_budget_email_alert</code><span class="badge wr">Write</span></td><td>Opt into an email notification when a monthly budget is crossed.</td></tr>
+          <tr><td><code>list_categories</code><span class="badge ro">Read-only</span></td><td>List categories you've used, with counts and totals.</td></tr>
+          <tr><td><code>manage_categories</code><span class="badge de">Destructive</span></td><td>List, create, update, or remove custom category limits and colors.</td></tr>
+          <tr><td><code>manage_budget_templates</code><span class="badge de">Destructive</span></td><td>Save, apply, list, or delete reusable budget templates.</td></tr>
+        </table>
+
+        <h3 id="income">Income, cash flow &amp; reports</h3>
+        <table class="tools">
+          <tr><th>Tool</th><th>What it does</th></tr>
+          <tr><td><code>add_income</code><span class="badge wr">Write</span></td><td>Record income for cash-flow and savings tracking.</td></tr>
+          <tr><td><code>get_cash_flow_report</code><span class="badge ro">Read-only</span></td><td>Income, expenses, net cash flow, and savings rate for a month.</td></tr>
+          <tr><td><code>get_spending_forecast</code><span class="badge ro">Read-only</span></td><td>Forecast month-end spending from what you've spent so far.</td></tr>
+          <tr><td><code>compare_months</code><span class="badge ro">Read-only</span></td><td>Compare spending across recent months, with a trend chart.</td></tr>
+          <tr><td><code>full_budget_report</code><span class="badge ro">Read-only</span></td><td>Complete monthly report: totals, category breakdown, and budget charts.</td></tr>
+          <tr><td><code>set_recurring_expense</code><span class="badge wr">Write</span></td><td>Track recurring rent, subscriptions, utilities, or loan payments.</td></tr>
+        </table>
+
+        <h3 id="account">Account</h3>
+        <table class="tools">
+          <tr><th>Tool</th><th>What it does</th></tr>
+          <tr><td><code>get_dashboard_link</code><span class="badge ro">Read-only</span></td><td>Create a short-lived link to your private web dashboard.</td></tr>
+          <tr><td><code>delete_account</code><span class="badge de">Destructive</span></td><td>Permanently delete every expense, budget, and finance record on your account. Irreversible &mdash; see our <a href="/privacy">Privacy Policy</a> for what's retained briefly for security purposes.</td></tr>
+        </table>
+
+        <h2 id="formats">Data &amp; formats</h2>
+        <p>A few conventions your assistant (and the server) follow under the hood:</p>
+        <div class="formats">
+          <div class="f"><b>Amounts</b><span>Major units, e.g. <code>12.50</code> for $12.50. Never minor units (cents).</span></div>
+          <div class="f"><b>Dates</b><span><code>YYYY-MM-DD</code>. Omit it and today's date is used.</span></div>
+          <div class="f"><b>Months</b><span><code>YYYY-MM</code> for monthly reports and budgets.</span></div>
+          <div class="f"><b>Currency</b><span>3-letter ISO-4217 code, e.g. <code>USD</code>, <code>EUR</code>, <code>BDT</code>. Defaults to your account's currency if omitted.</span></div>
+        </div>
+
+        <h2 id="privacy">Privacy &amp; data</h2>
+        <p>Your financial data is private to your authenticated account and is never used to train third-party AI models. Read the full <a href="/privacy">Privacy Policy</a> for what's collected, how it's used, and how to request deletion.</p>
+
+        <h2 id="faq">Troubleshooting</h2>
+        <div class="faq">
+          <details>
+            <summary>My assistant isn't finding the connector</summary>
+            <p>Double-check the server URL is exactly <code>https://expense-tracker-mcp.mcpize.run/mcp</code> (including the trailing <code>/mcp</code>), and that the connector is enabled for your current conversation &mdash; some clients require enabling tools per-chat even after connecting once.</p>
+          </details>
+          <details>
+            <summary>It says "authentication required" or asks me to sign in again</summary>
+            <p>Your session may have expired. Re-run the connection step in your assistant's connector settings and approve the sign-in prompt again &mdash; this doesn't affect any of your existing data.</p>
+          </details>
+          <details>
+            <summary>Can I use more than one currency?</summary>
+            <p>Yes. Each expense, budget, and income entry stores its own currency; reports total per-currency rather than incorrectly combining amounts across currencies.</p>
+          </details>
+          <details>
+            <summary>How do I permanently delete my data?</summary>
+            <p>Ask your assistant to delete your account, or use the data-management option in your <a href="/dashboard">dashboard</a>. This is irreversible &mdash; see the <a href="/privacy">Privacy Policy</a> for exactly what's removed.</p>
+          </details>
+          <details>
+            <summary>Is my data shared with other users, or used to train AI models?</summary>
+            <p>No. Your data is isolated to your authenticated account and is never sold or used to train third-party AI models &mdash; see the <a href="/privacy">Privacy Policy</a> for details.</p>
+          </details>
+        </div>
+
+        <h2 id="help">Need help?</h2>
+        <p>Something not working as expected? Visit <a href="/support">Customer Support</a> or email <a href="mailto:support@contact.copilotai.live">support@contact.copilotai.live</a>.</p>
+      </article>
+
+    </div>
   </div>
 </main>
 
@@ -401,6 +447,28 @@
       }
     });
   });
+
+  // Scroll-spy: highlight the sidebar link for whichever section is
+  // currently at the top of the viewport.
+  (function () {
+    var links = document.querySelectorAll(".sidebar-nav a[data-section]");
+    if (!links.length || !("IntersectionObserver" in window)) return;
+    var linkFor = {};
+    links.forEach(function (a) { linkFor[a.getAttribute("data-section")] = a; });
+    var sections = Array.from(links)
+      .map(function (a) { return document.getElementById(a.getAttribute("data-section")); })
+      .filter(Boolean);
+    var setActive = function (id) {
+      links.forEach(function (a) { a.classList.remove("active"); });
+      var active = linkFor[id];
+      if (active) active.classList.add("active");
+    };
+    var observer = new IntersectionObserver(function (entries) {
+      var visible = entries.filter(function (e) { return e.isIntersecting; });
+      if (visible.length) setActive(visible[0].target.id);
+    }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+    sections.forEach(function (el) { observer.observe(el); });
+  })();
 </script>
 </body>
 </html>
