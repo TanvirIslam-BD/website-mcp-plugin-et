@@ -1386,17 +1386,6 @@ function renderOnboarding(model) {
 
   return `
     ${renderMobileDashboardHeader(model)}
-    <header class="topbar onb-topbar">
-      <div class="toolbar">
-        ${renderMonthPicker(model.month)}
-        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
-        <button class="notice-button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${buildNotifications(model).length}</b></button>
-        <div class="toolbar-actions">
-          <button class="action-button" data-entry="income">${icon("plus")}Add Income</button>
-          <button class="action-button primary" data-entry="expense">${icon("plus")}Add Expense</button>
-        </div>
-      </div>
-    </header>
     <section class="onb-hero">
       <div class="onb-hero-copy">
         <h1>Welcome to Money Copilot AI <span aria-hidden="true">👋</span></h1>
