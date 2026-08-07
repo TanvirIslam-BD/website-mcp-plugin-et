@@ -2014,23 +2014,24 @@ body.is-resizing-copilot * {
     transform: scale(1.2);
   }
 
-  .mobile-finance-composer textarea {
+  /* The bar is a trigger, not a field: tapping it opens the copilot modal and
+     the typing happens there. It keeps the geometry of the textarea it replaced
+     so the composer reads as an input, and takes the colour that used to be the
+     placeholder's, because its label is permanently placeholder text. */
+  .mobile-finance-composer .mobile-composer-trigger {
     width: 100%;
     height: 42px;
     min-height: 42px;
     padding: 11px 5px;
     border: 0;
     outline: 0;
-    color: var(--mobile-ink);
+    color: #69768f;
     background: transparent;
     font: inherit;
     font-size: 13px;
     line-height: 20px;
-    resize: none;
-  }
-
-  .mobile-finance-composer textarea::placeholder {
-    color: #7d8aa0;
+    text-align: left;
+    cursor: pointer;
   }
 
   .mobile-composer-action {
@@ -2560,11 +2561,10 @@ body.is-resizing-copilot * {
     backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
   }
-  :root[data-theme="dark"] .mobile-finance-composer textarea{
-    color:#e9f1ed!important;
-  }
-  :root[data-theme="dark"] .mobile-finance-composer textarea::placeholder{
-    color:#91a29b!important;
+  /* One colour now, not two: the trigger's label is always the prompt text, so
+     the old typed-text/placeholder pair collapses to a single value. */
+  :root[data-theme="dark"] .mobile-finance-composer .mobile-composer-trigger{
+    color:#a9bcb4!important;
   }
   :root[data-theme="dark"] .mobile-composer-action{
     color:#25e486!important;
@@ -3722,7 +3722,7 @@ img[src$="money-copilot-app-logo.png"] {
 
   .mobile-composer-bot,
   .mobile-composer-action { min-width: 44px !important; min-height: 44px !important; }
-  .mobile-finance-composer textarea { min-height: 44px !important; }
+  .mobile-finance-composer .mobile-composer-trigger { min-height: 44px !important; }
 
   /* The slide-out sidebar's own controls sat at 30px. */
   .sidebar .nav button { min-height: 44px !important; }

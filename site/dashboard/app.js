@@ -1162,8 +1162,8 @@ function renderMobileCopilotComposer() {
   return `
     <section class="mobile-finance-composer" aria-label="Money Copilot quick actions">
       <button class="mobile-composer-bot bot-mascot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
-      <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
-      <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Money Copilot">${icon("send")}</button>
+      <button class="mobile-composer-trigger" type="button" data-open-ai-chat>Ask or add expense...</button>
+      <button class="mobile-composer-action" type="button" data-open-ai-chat aria-label="Open Money Copilot">${icon("send")}</button>
     </section>
   `;
 }
@@ -2208,18 +2208,17 @@ function openAiChat(prefill = "") {
       </form>
     </div>
   `, { wide: true, className: "ai-modal ai-desktop-modal" });
-}
-
-function openMobileCopilotAndSend(message) {
-  const text = String(message || "").trim();
-  if (!text) {
-    openAiChat();
-    return;
-  }
-  openAiChat(text);
+  // Focus belongs inside the dialog the moment it opens: it was staying on
+  // <body>, which left keyboard and screen-reader users outside the thing that
+  // had just appeared. It also makes the mobile composer's one job work -- that
+  // bar is a trigger now, so the tap that opens this modal has to be the same
+  // tap that raises the keyboard, or typing costs two taps instead of one.
   requestAnimationFrame(() => {
-    const form = document.querySelector(".ai-modal [data-ai-chat-form]");
-    if (form) submitAiQuestion(form);
+    const field = document.querySelector(".ai-modal [data-ai-chat-form] textarea[name=message]");
+    if (!field) return;
+    field.focus();
+    // Prefilled questions land ready to send rather than ready to overwrite.
+    field.setSelectionRange(field.value.length, field.value.length);
   });
 }
 
@@ -3678,11 +3677,6 @@ function bindEvents() {
       openAiChat(aiChat.dataset.aiPrefill || "");
       return;
     }
-    const mobileCopilotSend = event.target.closest("[data-mobile-copilot-send]");
-    if (mobileCopilotSend) {
-      openMobileCopilotAndSend(document.querySelector("[data-mobile-copilot-input]")?.value);
-      return;
-    }
     const dismissIntegration = event.target.closest("[data-dismiss-integration]");
     if (dismissIntegration) {
       dismissIntegration.closest(".assistant-integration-cta")?.classList.add("is-dismissed");
@@ -4057,16 +4051,11 @@ function bindEvents() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.target.matches("[data-mobile-copilot-input]") && event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      openMobileCopilotAndSend(event.target.value.trim());
-      return;
-    }
-    // Enter sends, Shift+Enter newlines — the same contract the mobile composer
-    // above already had. Every desktop surface (rail, onboarding, modal) uses a
-    // textarea inside [data-ai-chat-form], where Enter previously just inserted
-    // a line break, so the send button was the only way to submit a message.
-    // The mobile composer is a standalone section, so these never both fire.
+    // Enter sends, Shift+Enter newlines. Every surface that accepts a question
+    // (rail, onboarding, modal) uses a textarea inside [data-ai-chat-form],
+    // where Enter previously just inserted a line break, so the send button was
+    // the only way to submit a message. The mobile composer is not in this set:
+    // it is a trigger that opens the modal, and the typing happens there.
     if (event.key === "Enter" && !event.shiftKey && event.target.matches("[data-ai-chat-form] textarea[name=message]")) {
       event.preventDefault();
       const form = event.target.closest("[data-ai-chat-form]");
