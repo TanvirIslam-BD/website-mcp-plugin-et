@@ -3351,3 +3351,16 @@ img[src$="money-copilot-app-logo.png"] {
   background: rgba(8, 27, 19, 0.96);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
 }
+
+/* The full-color bot mascot must never inherit the legacy hue-rotate/saturate
+   filters that were tuned for the old monochrome logo mark — they garble it
+   (it read as a broken image in the mobile composer). Keep it true-color in both
+   themes; dark mode already swaps to the -dark.webp asset for contrast. */
+:root[data-theme="light"] .mobile-composer-bot.bot-mascot img,
+:root[data-theme="dark"] .mobile-composer-bot.bot-mascot img,
+:root[data-theme="light"] .copilot-logo.bot-mascot img,
+:root[data-theme="dark"] .copilot-logo.bot-mascot img,
+:root[data-theme="light"] .floating-ai.bot-mascot img,
+:root[data-theme="dark"] .floating-ai.bot-mascot img {
+  filter: none !important;
+}
