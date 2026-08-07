@@ -2526,10 +2526,16 @@ body.is-resizing-copilot * {
     border-color:#1b3036!important;
     background:#07141a!important;
   }
+  /* Indigo, not green: these are links, and green is reserved for money.
+     The light-theme twin of this rule was already corrected in place; this one
+     was left green and then "fixed" by a shorter selector further down the
+     file, which cannot win -- among !important declarations specificity still
+     decides, and .spending-panel/.transactions-panel each add an ancestor
+     class that the later rule lacks. Corrected at source, same as light. */
   :root[data-theme="dark"] .spending-panel .panel-footer-link,
   :root[data-theme="dark"] .mobile-budget-link,
   :root[data-theme="dark"] .transactions-panel .panel-link{
-    color:#25e486!important;
+    color:#8b93ff!important;
   }
   :root[data-theme="dark"] .insight-item{
     color:#e8f0ec!important;
@@ -4412,9 +4418,11 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
     align-items: center !important;
   }
 
-  /* Panel links: the green they used to take here is corrected at its source
-     rule higher in this file, where the winning declaration lives. Only the dark
-     theme needs stating separately. */
+  /* Panel links: both themes are corrected at their source rules higher in this
+     file, which is where the panel-scoped selectors win. This rule is not a
+     duplicate of those -- it catches the links that carry no panel ancestor
+     class ("View details", "Ask AI Advisor"), which would otherwise fall
+     through to the green dark-theme default in styles.css. */
   :root[data-theme="dark"] .panel-footer-link,
   :root[data-theme="dark"] .panel-link {
     color: #8b93ff !important;
