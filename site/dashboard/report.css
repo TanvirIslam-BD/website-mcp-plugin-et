@@ -3487,13 +3487,19 @@ img[src$="money-copilot-app-logo.png"] {
      Every surface was `1px solid` + `box-shadow: none`: depth carried entirely
      by hairlines, which is what dated the page most. Soft shadow carries the
      lift; the border drops to a near-invisible hairline for definition. */
-  .metric-card, .metric-card.balance, .panel {
-    border-color: rgba(16, 24, 40, .06) !important;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 12px rgba(16, 24, 40, .04) !important;
+  /* Theme-scoped to match the per-theme blocks in styles.css, which pin these
+     same properties at (0,2,0) — an unscoped `.panel` here would simply lose.
+     Light previously had a .025-alpha shadow (invisible) on panels and none at
+     all on the metric cards. */
+  :root[data-theme="light"] .metric-card,
+  :root[data-theme="light"] .metric-card.balance,
+  :root[data-theme="light"] .panel {
+    border-color: rgba(16, 24, 40, .07) !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 4px 12px rgba(16, 24, 40, .05) !important;
   }
 
-  /* Shadows do not read on dark backgrounds; elevation there comes from a
-     surface a step lighter than the page, plus a slightly stronger hairline. */
+  /* Shadows do not read on dark backgrounds; elevation there comes from the
+     hairline plus the surface itself sitting above the page. */
   :root[data-theme="dark"] .metric-card,
   :root[data-theme="dark"] .metric-card.balance,
   :root[data-theme="dark"] .panel {
@@ -3548,9 +3554,11 @@ img[src$="money-copilot-app-logo.png"] {
   .metric-card.balance h2 { letter-spacing: -.02em !important; }
   .metric-card.balance label { font-size: 12.5px !important; }
 
-  .metric-card.balance {
-    border-color: color-mix(in srgb, var(--report-green) 26%, transparent) !important;
-    background: linear-gradient(140deg, color-mix(in srgb, var(--report-green) 7%, var(--surface, #fff)), var(--surface, #fff)) !important;
+  /* Scoped to (0,3,0) so it outranks the themed elevation rule above, which
+     would otherwise reset this card's border back to the neutral hairline. */
+  :root[data-theme="light"] .metric-card.balance {
+    border-color: color-mix(in srgb, var(--report-green) 30%, transparent) !important;
+    background: linear-gradient(140deg, color-mix(in srgb, var(--report-green) 9%, #fff), #fff) !important;
   }
 
   :root[data-theme="dark"] .metric-card.balance {
