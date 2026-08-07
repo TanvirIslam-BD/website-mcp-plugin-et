@@ -922,6 +922,12 @@ function renderHeader(model) {
 }
 
 function renderMobileDashboardHeader(model) {
+  // Greet by name only when it's a real one — a generic placeholder like
+  // "User" should read "Good afternoon 👋", not "Good afternoon, User".
+  const rawFirst = String(model.user?.displayName || "").trim().split(/\s+/)[0] || "";
+  const GENERIC_NAMES = new Set(["user", "there", "guest", "friend", "account", "customer"]);
+  const hasName = Boolean(rawFirst) && !GENERIC_NAMES.has(rawFirst.toLowerCase());
+  const firstName = hasName ? esc(rawFirst) : "";
   const displayName = esc(model.user?.displayName || "User");
   const profilePhotoUrl = esc(model.user?.profilePhotoUrl || "/assets/logo/money-copilot-app-logo-108.webp");
   const month = esc(monthLabel(model.month).split(" ")[0]);
@@ -929,7 +935,7 @@ function renderMobileDashboardHeader(model) {
     <header class="mobile-dashboard-header">
       <div class="mobile-greeting">
         <div class="mobile-greeting-copy">
-          <h1>${timeGreeting()},<br>${displayName} <span aria-hidden="true">👋</span></h1>
+          <h1>${timeGreeting()}${hasName ? `,<br>${firstName}` : ""} <span aria-hidden="true">👋</span></h1>
           <p>${model.hasFinancialData ? `Here&rsquo;s your financial picture for ${month}.` : "Let&rsquo;s set up your first financial picture."}</p>
         </div>
         <button class="mobile-profile-button" type="button" data-mobile-menu-toggle aria-label="Open profile and navigation" aria-expanded="false">
