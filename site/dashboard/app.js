@@ -1405,7 +1405,7 @@ function renderOnboarding(model) {
       <section class="ob-hero ob-card rise d1">
         <div class="ob-hero-body">
           <h2>Your money, <span class="ob-accentword">on autopilot.</span></h2>
-          <p>Tell Money Copilot what you spent in plain language &mdash; it categorizes, tracks your budget, and surfaces savings. No spreadsheets, no bank connection.</p>
+          <p>Just say what you spent in plain language &mdash; from <b>ChatGPT</b>, <b>Claude</b>, or right here. Money Copilot categorizes it, tracks your budget, and surfaces savings. No spreadsheets, no bank connection.</p>
           <div class="ob-cta-row">
             <button class="ob-btn primary" type="button" data-entry="expense">${icon("plus")}Add your first expense</button>
             <button class="ob-btn ghost" type="button" data-preview-sample>${icon("eye")}Explore with demo data</button>
@@ -1413,6 +1413,23 @@ function renderOnboarding(model) {
           <p class="ob-reassure">${icon("lock")}No bank connection required &middot; your data stays private</p>
         </div>
         <div class="ob-hero-art" aria-hidden="true"><span class="ob-halo"></span><img src="/assets/logo/money-copilot-bot-mascot-cutout.png" alt=""></div>
+      </section>
+
+      <section class="ob-connect ob-card rise d2">
+        <div class="ob-connect-main">
+          <p class="ob-connect-eyebrow">${icon("advisor")}Works with your AI</p>
+          <h3>Track spending without leaving your chat</h3>
+          <p>Connect Money Copilot to ChatGPT or Claude and just tell it what you spent &mdash; it logs, categorizes, and budgets for you, right inside the conversation.</p>
+          <div class="ob-connect-logos">
+            <span class="ob-brand"><img src="/assets/brands/chatgpt.png" alt="">ChatGPT</span>
+            <span class="ob-brand"><img src="/assets/brands/claude.png" alt="">Claude</span>
+            <span class="ob-brand ob-brand-more"><img src="/assets/brands/mcp.png" alt="">+ any MCP client</span>
+          </div>
+        </div>
+        <div class="ob-connect-cta">
+          <button class="ob-btn primary ob-btn-ai" type="button" data-panel="connections">${icon("advisor")}Connect ChatGPT or Claude</button>
+          <span class="ob-connect-note">${icon("lock")}2-minute setup &middot; OAuth secure</span>
+        </div>
       </section>
 
       <div class="ob-split">
@@ -1426,6 +1443,7 @@ function renderOnboarding(model) {
           </div>
           <p class="ob-cop-lead">Hi ${displayName} &mdash; I'm your finance assistant. <b>Just tell me what you spent</b> and I'll handle the rest. Try one of these:</p>
           <div class="ob-chips">
+            <button type="button" class="ob-chip ob-chip-ai" data-panel="connections">${icon("advisor")}Connect ChatGPT or Claude</button>
             <button type="button" class="ob-chip" data-ai-send="I spent 350 on groceries">${icon("wallet")}I spent 350 on groceries</button>
             <button type="button" class="ob-chip" data-ai-send="I received my salary">${icon("up")}I received my salary</button>
             <button type="button" class="ob-chip" data-panel="budget-editor">${icon("budget")}Set up a monthly budget</button>

@@ -2460,6 +2460,33 @@ button {
 .ob-halo{position:absolute; width:230px;height:230px;border-radius:50%; background:radial-gradient(circle,color-mix(in srgb,var(--ob-accent) 26%,transparent),transparent 66%); filter:blur(4px)}
 .ob-hero-art img{position:relative; width:200px; height:auto; filter:drop-shadow(0 20px 26px rgba(9,40,30,.26))}
 
+/* connect promo band — the headline selling point (AI-tinted, distinct from the green hero) */
+.ob-connect{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:24px; align-items:center; padding:22px 26px; margin-bottom:20px;
+  border-color:color-mix(in srgb,var(--ob-ai) 34%, var(--ob-line));
+  background:
+    radial-gradient(120% 150% at 100% -30%, color-mix(in srgb,var(--ob-ai) 14%, transparent), transparent 62%),
+    linear-gradient(120deg, color-mix(in srgb,var(--ob-ai) 8%, var(--ob-surface)), var(--ob-surface));
+}
+.ob-connect-eyebrow{display:inline-flex; align-items:center; gap:7px; margin:0 0 8px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ob-ai)}
+.ob-connect-eyebrow svg{width:14px;height:14px}
+.ob-connect h3{margin:0 0 8px; font-size:clamp(19px,2vw,24px); font-weight:790; letter-spacing:-.02em; color:var(--ob-ink)}
+.ob-connect-main > p{margin:0 0 14px; font-size:14px; line-height:1.55; color:var(--ob-muted); max-width:58ch}
+.ob-connect-logos{display:flex; flex-wrap:wrap; gap:8px}
+.ob-brand{display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; background:var(--ob-surface); border:1px solid var(--ob-line); font-size:12.5px; font-weight:650; color:var(--ob-ink-2)}
+.ob-brand img{width:16px;height:16px;object-fit:contain;border-radius:4px}
+.ob-brand-more{color:var(--ob-muted); font-weight:600}
+.ob-connect-cta{display:flex; flex-direction:column; align-items:flex-start; gap:9px}
+.ob-btn-ai{background:linear-gradient(140deg,var(--ob-ai),color-mix(in srgb,var(--ob-ai) 55%, #241a63)); color:#fff; box-shadow:0 12px 26px -12px color-mix(in srgb,var(--ob-ai) 85%,transparent)}
+.ob-btn-ai:hover{transform:translateY(-2px); box-shadow:0 18px 34px -12px color-mix(in srgb,var(--ob-ai) 90%,transparent)}
+.ob-btn-ai svg{color:#fff}
+.ob-connect-note{display:inline-flex; align-items:center; gap:7px; font-size:11.5px; color:var(--ob-faint)}
+.ob-connect-note svg{width:13px;height:13px}
+
+/* AI-tinted chip in the copilot card */
+.ob-chip.ob-chip-ai{background:var(--ob-ai-soft); border-color:color-mix(in srgb,var(--ob-ai) 34%, transparent); color:var(--ob-ai); font-weight:700}
+.ob-chip.ob-chip-ai svg{color:var(--ob-ai)}
+.ob-chip.ob-chip-ai:hover{background:var(--ob-ai-soft); border-color:color-mix(in srgb,var(--ob-ai) 55%, transparent); box-shadow:0 0 0 3px color-mix(in srgb,var(--ob-ai) 12%, transparent)}
+
 /* split */
 .ob-split{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:20px; margin-bottom:20px; align-items:start}
 
@@ -2546,6 +2573,12 @@ button {
   .ob-hero-body{padding:30px}
   .ob-split{grid-template-columns:1fr}
 }
+@media (max-width:760px){
+  .ob-connect{grid-template-columns:1fr; gap:16px}
+  .ob-connect-cta{align-items:stretch}
+  .ob-connect-cta .ob-btn{justify-content:center; min-height:46px}
+  .ob-connect-note{justify-content:center}
+}
 @media (max-width:640px){
   .ob{padding:18px 15px 44px}
   .ob-topline{flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:16px}
@@ -2558,6 +2591,7 @@ button {
   .ob-halo{width:150px;height:150px}
   .ob-cta-row{gap:8px}
   .ob-cta-row .ob-btn{flex:1 1 100%; justify-content:center; min-height:46px}
+  .ob-connect{padding:18px}
   .ob-split{gap:14px; margin-bottom:14px}
   .ob-copilot{padding:18px}
   .ob-setup{padding:18px}
