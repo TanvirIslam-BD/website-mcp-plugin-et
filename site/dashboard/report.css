@@ -4255,3 +4255,97 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
     align-self: center !important;
   }
 }
+
+/* ===========================================================================
+   Sidebar and top bar.
+   =========================================================================== */
+
+/* Primary navigation was 11px. The rows are already 44px, so the height for
+   readable labels was there — it just was not being used. */
+@media (min-width: 1181px) {
+  .sidebar .nav button { font-size: 13px !important; }
+}
+
+.sidebar .nav button span { font-size: 13px; }
+
+/* The active item was marked by colour alone; the render now sets
+   aria-current="page" and this keeps the two in step if either changes. */
+.sidebar .nav button[aria-current="page"] { font-weight: 700; }
+
+/* Icon-only appearance toggle: 176px of labelled segmented control for a
+   once-a-session preference, reduced to two 44px targets. */
+.theme-switch-compact {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  /* Shrinking the buttons alone left the container at its stretched 189px, so the
+     space was reclaimed inside the control and not from the column. It has to
+     stop filling its parent to actually give the width back. */
+  width: max-content;
+  min-width: 0;
+  align-self: start;
+  grid-template-columns: none;
+}
+
+.theme-switch-compact button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.theme-switch-compact button span { display: none; }
+
+.theme-switch-compact button svg { width: 17px; height: 17px; }
+
+/* Was 38px wide — the only toolbar control under the 44px target guideline,
+   and it carries a count badge. */
+.topbar .notice-button {
+  min-width: 44px !important;
+  padding-inline: 0 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   The header could not survive being narrowed.
+
+   The greeting and the toolbar sit in one non-wrapping row, and measured on the
+   live page the greeting ended 18px from the first control. With no wrap and no
+   shrink, anything that took width — a longer display name, a side panel, a
+   smaller window — pushed the primary action off the edge. That is exactly what
+   happened at ~1530px, where "Add Expense" rendered clipped.
+
+   The greeting now truncates and the toolbar refuses to shrink, so the buttons
+   are never the thing that gives way. Removing the search field from the toolbar
+   also returned 188px of it.
+   --------------------------------------------------------------------------- */
+.topbar .greeting,
+.topbar .greeting h1 {
+  min-width: 0;
+}
+
+.topbar .greeting h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar .toolbar {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+/* Below the widest desktop the toolbar takes its own line rather than competing
+   with the greeting for the same one. */
+@media (min-width: 721px) and (max-width: 1320px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) !important;
+    row-gap: 12px;
+  }
+
+  .topbar .toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}

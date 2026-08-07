@@ -1023,7 +1023,7 @@ function renderTransactions(model) {
       ? ` <span class="tag subcategory-tag" style="background: var(--line); border: 1px solid var(--line2); color: var(--text-muted); font-size: 9px; min-height: 18px; padding: 0 6px; border-radius: 4px; display: inline-flex; align-items: center; vertical-align: middle;">${esc(metadata.subcategory)}</span>`
       : "";
     return `
-      <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${metadata.subcategory || ""} ${payment}`.toLowerCase())}">
+      <tr>
         <td class="tx-date">${esc(expense.date)}</td>
         <td class="tx-merchant"><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
         <td class="tx-category"><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
@@ -1078,19 +1078,32 @@ function renderSidebar(model) {
         <strong>Money<span>Copilot AI</span></strong>
       </div>
       <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse sidebar" aria-expanded="true">${icon("chevron")}</button>
-      <button class="sidebar-search" type="button" data-sidebar-search aria-label="Search dashboard">${icon("search")}<span>Search dashboard</span><kbd>⌘ K</kbd></button>
+      <!-- The "Search dashboard ⌘K" button was removed. It was not a search: its
+           whole handler focused the topbar field, so it was a second entry point
+           to one control, and it promised the wrong scope — "Search dashboard"
+           focusing a field labelled "Search transactions". ⌘K now opens the
+           Transactions view with its own search focused, which searches every
+           expense rather than the six rows the old field could reach. -->
       <span class="nav-label">Workspace</span>
       <nav class="nav" aria-label="Dashboard navigation">
-        ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}" data-nav="${panel}" data-tooltip="${label}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
+        ${nav.map(([iconName, label, panel], index) => `<button class="${index === 0 ? "active" : ""}"${index === 0 ? ` aria-current="page"` : ""} data-nav="${panel}" data-tooltip="${label}">${icon(iconName)}<span>${label}</span>${label === "AI Advisor" ? "<em class='pill-new'>New</em>" : ""}</button>`).join("")}
       </nav>
       ${model.hasFinancialData ? `<a class="sidebar-promo" href="/#how" aria-label="Discover Money Copilot AI features"><img src="/assets/sidebar-promo.webp" alt="Money Copilot AI — know where your money is going"></a>` : ""}
-      <div class="theme-switch" role="group" aria-label="Dashboard appearance">
-        <button type="button" data-theme-choice="light" aria-label="Use light theme">${icon("sun")}<span>Light</span></button>
-        <button type="button" data-theme-choice="dark" aria-label="Use dark theme">${icon("moon")}<span>Dark</span></button>
+      <!-- Icon-only. Two 88x44 labelled buttons gave a once-a-session preference
+           the same visual weight as the active nav item and 176px of the sidebar's
+           most valuable edge. The sun/moon pair keeps the explicit light/dark
+           choice and its aria-pressed state — a single toggle would have been
+           smaller still, but it loses the "which mode am I in" answer at a glance. -->
+      <div class="theme-switch theme-switch-compact" role="group" aria-label="Dashboard appearance">
+        <button type="button" data-theme-choice="light" aria-label="Use light theme" title="Light">${icon("sun")}</button>
+        <button type="button" data-theme-choice="dark" aria-label="Use dark theme" title="Dark">${icon("moon")}</button>
       </div>
       <section class="profile-card">
         <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
-        <div><b>${displayName}</b><span>Signed dashboard</span></div>
+        <!-- Was "Signed dashboard", which reads as a truncated string. The session
+             is an OAuth signed session, so this line only ever meant "you are
+             signed in" — said plainly. -->
+        <div><b>${displayName}</b><span>Signed in</span></div>
         <button class="profile-logout" type="button" data-logout aria-label="Log out" title="Log out">${icon("logout")}</button>
       </section>
     </aside>
@@ -1107,7 +1120,6 @@ function renderHeader(model) {
       </div>
       <div class="toolbar">
         ${renderMonthPicker(model.month)}
-        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
         <button class="notice-button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${buildNotifications(model).length}</b></button>
         <div class="toolbar-actions">
           <button class="action-button" data-entry="income">${icon("plus")}Add Income</button>
@@ -1327,7 +1339,6 @@ function renderEmptyHeader(model) {
         <p>Let’s build your first financial picture.</p>
       </div>
       <div class="toolbar">
-        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
         <button class="notice-button" aria-label="Notifications">${icon("bell")}<b>0</b></button>
         <button class="empty-manual-action" data-entry="expense">Enter expenses manually</button>
       </div>
@@ -3423,13 +3434,6 @@ function bindIncomeExpenseChart() {
   select?.addEventListener("change", () => updateIncomeExpenseChart(mode()));
 }
 
-function filterDashboard(query) {
-  const needle = String(query || "").trim().toLowerCase();
-  document.querySelectorAll(".transactions tbody tr[data-search]").forEach((row) => {
-    row.style.display = !needle || row.dataset.search.includes(needle) ? "" : "none";
-  });
-}
-
 const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
 const COPILOT_RAIL_COLLAPSED_KEY = "expenseTrackerCopilotCollapsed";
 const COPILOT_RAIL_DEFAULT_WIDTH = 440;
@@ -3729,10 +3733,6 @@ function bindEvents() {
     const mobileThemeToggle = event.target.closest("[data-mobile-theme-toggle]");
     if (mobileThemeToggle) {
       setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
-      return;
-    }
-    if (event.target.closest("[data-sidebar-search]")) {
-      document.querySelector("[data-search]")?.focus();
       return;
     }
     const suggestion = event.target.closest("[data-ai-suggestion]");
@@ -4048,7 +4048,6 @@ function bindEvents() {
 
   document.addEventListener("input", (event) => {
     if (event.target.matches("[data-ai-chat-form] textarea[name=message]")) autosizeComposer(event.target);
-    if (event.target.matches("[data-search]")) filterDashboard(event.target.value);
     if (event.target.matches('input[name="compact_mode"]')) {
       document.documentElement.dataset.density = event.target.checked ? "compact" : "comfortable";
     }
@@ -4073,7 +4072,13 @@ function bindEvents() {
     }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
-      document.querySelector("[data-search]")?.focus();
+      // Opens Transactions and focuses its filter, which searches every expense.
+      // This used to focus a topbar field that only hid rows in Recent
+      // Transactions — six of them — so a miss read as "no such expense".
+      openPanel("transactions");
+      window.requestAnimationFrame(() => {
+        document.querySelector("[data-tx-filter-search]")?.focus();
+      });
     }
     if (event.key === "Escape") {
       closeMonthPickers();
