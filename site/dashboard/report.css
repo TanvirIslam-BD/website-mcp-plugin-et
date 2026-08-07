@@ -4009,3 +4009,53 @@ img[src$="money-copilot-app-logo.png"] {
 }
 
 .assistant-privacy .comet-badge span { font-size: 10px !important; }
+
+/* ===========================================================================
+   Corrections found by measuring the live site instead of the local harness.
+
+   The harness resolves theming differently from production, so colour readings
+   taken there do not transfer. Two "findings" from it were phantoms — the
+   sidebar nav measured 1.86:1 locally and 14.1:1 live, the panel footer links
+   2.7:1 green locally and 5.49:1 indigo live — and one real failure was hidden
+   the other way round: the rail's privacy line reads 6.92:1 in the harness and
+   2.8:1 on the live site, where it fails AA. An earlier commit message here
+   claimed that line passed. It did not. Sizes matched between the two; colours
+   did not. Live is the authority.
+   =========================================================================== */
+.assistant-privacy,
+.assistant-privacy > span {
+  color: #4b5a72 !important;
+}
+
+:root[data-theme="dark"] .assistant-privacy,
+:root[data-theme="dark"] .assistant-privacy > span {
+  color: #a9b8cc !important;
+}
+
+/* The share-of-total figures in Spending breakdown were 8px at 3.65:1 — the
+   smallest type on the page and under AA at any size. They qualify the amount
+   beside them, so they stay secondary, just legibly so. */
+.category-line b small {
+  color: #46556e !important;
+  font-size: 10px !important;
+}
+
+:root[data-theme="dark"] .category-line b small { color: #a9b8cc !important; }
+
+/* Parent segment of a category path ("groceries › cooking oil"), so a child row
+   reads as a child rather than an unrelated peer of its own parent. */
+.category-line .category-parent {
+  color: #7b8aa3;
+  font-weight: 550;
+}
+
+:root[data-theme="dark"] .category-line .category-parent { color: #8595ad; }
+
+/* The delete control fades in on hover through an inline onmouseover handler,
+   which keyboard focus never triggers — so a keyboard user got the 2px outline
+   around a half-transparent icon. Focus now reveals it the same way hover does.
+   :focus-visible rather than :focus, so a mouse click does not leave it stuck on. */
+.tx-delete-btn:focus-visible {
+  opacity: 1 !important;
+  background: rgba(234, 88, 12, .08) !important;
+}
