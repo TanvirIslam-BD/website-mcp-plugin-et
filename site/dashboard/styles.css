@@ -2512,7 +2512,9 @@ button {
 .onb-hero-note { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 12px; color: var(--muted); }
 .onb-hero-note svg { width: 14px; height: 14px; }
 .onb-hero-art { flex: 0 0 auto; width: 190px; text-align: center; }
-.onb-hero-art img { width: 100%; max-width: 200px; height: auto; filter: drop-shadow(0 20px 30px rgba(16,185,129,.25)); }
+/* Transparent mascot: a soft shadow that follows the robot's silhouette grounds
+   it in the hero instead of the old opaque white square reading as a pasted card. */
+.onb-hero-art img { width: 100%; max-width: 200px; height: auto; filter: drop-shadow(0 14px 18px rgba(16, 42, 76, .16)); }
 
 /* Body split: main + right rail */
 .onb-body { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }

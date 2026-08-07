@@ -1405,7 +1405,7 @@ function renderOnboarding(model) {
         <p class="onb-hero-note">${icon("lock")}No bank connection required. Your data stays private and secure.</p>
       </div>
       <div class="onb-hero-art" aria-hidden="true">
-        <img src="/assets/logo/money-copilot-bot-mascot.png" alt="">
+        <img src="/assets/logo/money-copilot-bot-mascot-transparent.png" alt="">
       </div>
     </section>
 
