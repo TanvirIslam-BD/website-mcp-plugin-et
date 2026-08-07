@@ -1235,13 +1235,24 @@ function copilotSeedMessages(model) {
   const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
   const overBudget = model.remainingMinor !== null && Number(model.remainingMinor || 0) < 0;
   const budgetDifference = Math.abs(Number(model.remainingMinor || 0));
+  // Same thresholds the health panel and the ring already use (>=100 over,
+  // >=80 warn, otherwise good). The bar carried no state at all before, so it
+  // was painted the over-budget red at every value -- including, as here, a
+  // month with money left, directly under a green card saying so.
+  const budgetState = !model.budgetMinor
+    ? "is-good"
+    : model.budgetUsed >= 100
+      ? "is-over"
+      : model.budgetUsed >= 80
+        ? "is-warn"
+        : "is-good";
   // No fabricated user turn. This used to open with "How is my spending this
   // month?" attributed to the user, and both messages were stamped 9:42 AM no
   // matter the actual time — a conversation that never happened, presented as
   // history. The summary is worth keeping; it just has to be the assistant
   // speaking unprompted, timestamped honestly.
   return `
-    <div class="ai-message assistant copilot-summary">${COPILOT_BOT_LABEL}<div class="ai-message-body"><p>Here’s where ${esc(monthLabel(model.month).split(" ")[0])} stands so far:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>Just now</small></div>
+    <div class="ai-message assistant copilot-summary">${COPILOT_BOT_LABEL}<div class="ai-message-body"><p>Here’s where ${esc(monthLabel(model.month).split(" ")[0])} stands so far:</p><b>Budget usage</b><div class="copilot-progress ${budgetState}"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>Just now</small></div>
   `;
 }
 
