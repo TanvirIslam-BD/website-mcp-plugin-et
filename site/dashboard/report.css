@@ -3771,3 +3771,71 @@ img[src$="money-copilot-app-logo.png"] {
   .budget-panel { order: 2 !important; }
   .spending-panel { order: 3 !important; }
 }
+
+/* ===========================================================================
+   Full-width panel interiors.
+
+   Going single-column widened the cards but left their interiors sized for the
+   old 196px column, so the budget ring and the donut ended up as small objects
+   marooned in wide cards. The budget ring was also coming out as a 92x68
+   ellipse: the base rule keeps `flex: 0 0 68px`, which in a column flex
+   container pins the cross-size, so overriding width/height alone deformed it.
+   =========================================================================== */
+@media (max-width: 720px) {
+
+  /* Ring beside the figures rather than a narrow centred stack. The ring spans
+     both text rows so it stays vertically centred against them, and the layout
+     survives .budget-over being hidden in the under-budget case. */
+  .budget-panel {
+    display: grid !important;
+    grid-template-columns: 128px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "head head"
+      "ring total"
+      "ring over"
+      "link link" !important;
+    /* Two equal rows for the figures so they meet at the ring's vertical centre.
+       Without this the text rows size to their own content and the spanning ring
+       pushes them to the top, which is especially visible in the common case
+       where the remaining line is hidden and only one row has content. */
+    grid-template-rows: auto 1fr 1fr auto !important;
+    align-items: center !important;
+    column-gap: 18px !important;
+    row-gap: 2px !important;
+  }
+
+  .budget-panel .panel-head { grid-area: head !important; margin-bottom: 10px !important; }
+  .budget-panel .budget-ring { grid-area: ring !important; }
+  .budget-panel .budget-total { grid-area: total !important; align-self: end !important; }
+  .budget-panel .budget-over { grid-area: over !important; align-self: start !important; }
+  .budget-panel .mobile-budget-link { grid-area: link !important; margin-top: 10px !important; }
+
+  /* flex-basis has to go with the size, or the ring stays an ellipse. */
+  .budget-ring {
+    width: 128px !important;
+    height: 128px !important;
+    flex: 0 0 128px !important;
+    margin: 0 !important;
+  }
+  .budget-ring .inner { inset: 13px !important; }
+  .budget-ring b { font-size: 28px !important; }
+  .budget-ring span { font-size: 11px !important; }
+
+  .budget-total { font-size: 14px !important; text-align: left !important; }
+  .budget-over { font-size: 13px !important; text-align: left !important; }
+
+  /* The donut can afford to be a real chart at full width. */
+  /* The donut is sized against the row it shares with the legend: big enough to
+     read as a chart, but not so big that a long category name ("Groceries >
+     Cooking Oil") starts ellipsing on a 375px phone. */
+  .spending-report {
+    grid-template-columns: clamp(104px, 30vw, 124px) minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+  .spending-donut {
+    width: clamp(104px, 30vw, 124px) !important;
+    height: clamp(104px, 30vw, 124px) !important;
+  }
+  .spending-donut b { font-size: 13px !important; }
+  .spending-donut span { font-size: 9.5px !important; }
+}
