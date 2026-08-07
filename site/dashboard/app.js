@@ -863,7 +863,12 @@ function renderTransactions(model) {
     const metadata = model.expenseMetadata?.[expense.id] || {};
     const [tone, bg] = toneFor(expense.category, index);
     const merchant = metadata.merchant || expense.merchant || expense.description || "Expense";
-    const payment = metadata.paymentMethod || "Expense";
+    // No fallback label here. expenseMetadata is only populated for demo data,
+    // so a real expense has no paymentMethod — and the old `|| "Expense"` both
+    // printed the transaction *type* under a Method heading and picked the card
+    // icon below, asserting a card payment that was never recorded. Unknown is
+    // rendered as an em dash instead.
+    const payment = metadata.paymentMethod || "";
     const date = String(expense.date || "");
     const dateLabel = index === 0 ? "Today" : index === 1 ? "Yesterday" : date ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)) : "Recent";
     const timeLabel = metadata.time || ["09:30 AM", "07:20 PM", "08:15 PM"][index] || "";
@@ -875,7 +880,9 @@ function renderTransactions(model) {
         <td>${esc(expense.date)}</td>
         <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
         <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
-        <td><span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span></td>
+        <td>${payment
+          ? `<span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span>`
+          : `<span class="payment" style="opacity:.55" title="No payment method recorded">&mdash;</span>`}</td>
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
         <td style="text-align: center;"><button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button></td>
       </tr>`;
@@ -2703,7 +2710,7 @@ function openPanel(kind) {
           ? ` <span class="tag subcategory-tag" style="background: var(--line); border: 1px solid var(--line2); color: var(--text-muted); font-size: 9px; min-height: 18px; padding: 0 6px; border-radius: 4px; display: inline-flex; align-items: center; vertical-align: middle;">${esc(meta.subcategory)}</span>`
           : "";
         return `<div class="plain-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-          <span style="flex: 1; min-width: 0;"><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button>${subCatHtml} - ${esc(meta.paymentMethod || "Expense")}</small></span>
+          <span style="flex: 1; min-width: 0;"><b><i class="dot" style="--tone:${tone}"></i>${esc(merchant)}</b><small>${esc(expense.date)} - <button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(cat)}" style="--tone:${catTone};--tone-bg:${catBg}; cursor: pointer; border: none; font-family: inherit; font-size: 9px; min-height: 18px; padding: 0 6px;">${esc(cat)}</button>${subCatHtml}${meta.paymentMethod ? ` - ${esc(meta.paymentMethod)}` : ""}</small></span>
           <div style="display: flex; align-items: center; gap: 8px;">
             <strong class="amount">-${formatMoney(expense.amountMinor, model.currency)}</strong>
             <button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button>
@@ -2805,7 +2812,7 @@ function openPanel(kind) {
         const header = ["Date", "Merchant", "Category", "Sub-category", "Payment method", "Amount"];
         const rows = expenses.map(expense => {
           const meta = model.expenseMetadata?.[expense.id] || {};
-          return [expense.date || "", meta.merchant || expense.description || "Expense", expense.category || "", meta.subcategory || "", meta.paymentMethod || "Expense", (Number(expense.amountMinor || 0) / 100).toFixed(2)];
+          return [expense.date || "", meta.merchant || expense.description || "Expense", expense.category || "", meta.subcategory || "", meta.paymentMethod || "", (Number(expense.amountMinor || 0) / 100).toFixed(2)];
         });
         const csv = [header, ...rows].map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
