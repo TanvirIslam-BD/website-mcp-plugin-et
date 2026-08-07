@@ -2524,7 +2524,7 @@ button {
 .onb-copilot { padding: 18px 20px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); box-shadow: var(--shadow); }
 .onb-copilot-head { display: flex; align-items: center; margin-bottom: 6px; }
 .onb-copilot-id { display: inline-flex; align-items: center; gap: 9px; font-size: 14px; }
-.onb-copilot-id img { width: 34px; height: 34px; }
+.onb-copilot-id img { width: 32px; height: 32px; object-fit: contain; }
 .onb-copilot-id b { font-weight: 800; color: var(--ink); }
 .onb-beta { padding: 2px 8px; border-radius: 999px; background: rgba(37,99,235,.12); color: #2563eb; font-size: 10px; font-weight: 800; }
 .onb-copilot-intro { margin: 0 0 12px; font-size: 13.5px; color: var(--text); }
