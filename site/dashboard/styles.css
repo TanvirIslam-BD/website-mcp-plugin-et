@@ -3013,9 +3013,16 @@ button {
     flex-direction: column;
   }
 
+  /* These two containers turn column just above, which flips what `flex: 1`
+     means: flex-basis:0% stops being a width and becomes the height, so the
+     38px above never applies and the button collapses to ~17px -- well under
+     the 44px touch target. Width is already 100% here, so growing along the
+     main axis buys nothing; opt these out and state the height instead. */
   .category-manager-row .tx-modal-action,
   .category-manager-toolbar .tx-modal-action {
     width: 100%;
+    flex: 0 0 auto;
+    min-height: 44px;
   }
 }
 

@@ -2828,7 +2828,10 @@ function openPanel(kind) {
     const categoryNames = Array.from(new Set([...(model.categories || []).map(category => category.name), ...(model.categoryCatalog || []).map(category => category?.name).filter(Boolean)])).sort();
     const categoriesHtml = categoryNames.length ? `<div class="category-manager-list">${categoryNames.map((name, index) => {
       const amountMinor = categoryTotals.get(name) || 0;
-      const pct = amountMinor ? Math.round((amountMinor / Math.max(model.spentMinor, 1)) * 100) : 0;
+      // Rounding a real amount to "0%" reads as "nothing was spent here", which is
+      // the one thing it does not mean. Anything under half a percent says so.
+      const share = amountMinor ? (amountMinor / Math.max(model.spentMinor, 1)) * 100 : 0;
+      const pct = share > 0 && share < 0.5 ? "<1" : Math.round(share);
       const [tone] = toneFor(name, index);
       const subcategories = subcategoriesForCategory(model, name);
       return `<article class="category-manager-row"><div><b><i class="dot" style="--tone:${tone}"></i>${esc(name)}</b><small>${amountMinor ? `${pct}% of monthly expenses · ${formatMoney(amountMinor, model.currency)}` : "Ready to use for future expenses"}</small>${subcategories.length ? `<div class="category-manager-subcategories">${subcategories.map(subcategory => `<span>${esc(subcategory)}</span>`).join("")}</div>` : ""}</div><button type="button" class="tx-modal-action" data-manage-category="${esc(name)}">Manage</button></article>`;
