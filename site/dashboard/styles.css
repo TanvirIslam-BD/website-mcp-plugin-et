@@ -2671,6 +2671,16 @@ button {
 }
 :root[data-theme="dark"] .onb-hero-sub { color: #34d399; }
 
+/* The onboarding view renders no assistant rail, so the shell must not reserve
+   the rail's third column — otherwise a ~440px empty gap opens on wide desktop. */
+@media (min-width: 721px) {
+  .dashboard-shell.onboarding-active,
+  .dashboard-shell.onboarding-active:has(.assistant-rail),
+  .dashboard-shell.onboarding-active.sidebar-collapsed {
+    grid-template-columns: 218px minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 720px) {
   .welcome-steps { grid-template-columns: 1fr; }
   .welcome-banner { padding: 15px 15px; }
