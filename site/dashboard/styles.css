@@ -2699,7 +2699,7 @@ button {
   .dashboard-shell.onboarding-active,
   .dashboard-shell.onboarding-active:has(.assistant-rail),
   .dashboard-shell.onboarding-active.sidebar-collapsed {
-    grid-template-columns: 218px minmax(0, 1fr);
+    grid-template-columns: 218px minmax(0, 1fr) !important;
   }
 }
 
