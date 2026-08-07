@@ -1496,7 +1496,6 @@ function renderDashboard(model) {
       <section class="main onboarding-main">
         ${renderOnboarding(model)}
       </section>
-      <button class="floating-ai bot-mascot" data-open-ai-chat aria-label="Open Money Copilot"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
     `;
     return;
   }
