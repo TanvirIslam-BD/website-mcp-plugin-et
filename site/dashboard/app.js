@@ -374,7 +374,15 @@ function areaPath(points, height, padY) {
 }
 
 function spark(values, tone = "currentColor") {
-  const max = Math.max(...values, 1);
+  const series = (values || []).filter((value) => Number.isFinite(value));
+  // A sparkline is a claim that there is a trend to see. Two points cannot carry
+  // one, and a series with no variance draws a flat line that reads as "steady"
+  // when what it actually means is "nothing recorded here". Draw nothing rather
+  // than draw something untrue — the card keeps its number either way.
+  if (series.length < 3) return "";
+  if (Math.max(...series) === Math.min(...series)) return "";
+  const max = Math.max(...series, 1);
+  values = series;
   const points = values.map((value, index) => `${(index * 100 / Math.max(values.length - 1, 1)).toFixed(1)},${(48 - (value / max) * 38).toFixed(1)}`).join(" ");
   return `<div class="sparkline" style="color:${tone}"><svg viewBox="0 0 100 50" preserveAspectRatio="none"><polyline points="${points}"/></svg></div>`;
 }
@@ -445,10 +453,20 @@ function buildModel(data) {
 }
 
 function renderMetricCards(model) {
-  const balanceSpark = model.savingsCum.length ? model.savingsCum : [1, 2, 1, 3, 4, 3, 5];
-  const incomeSpark = model.incomeDaily.length ? model.incomeDaily : [1, 2, 3, 2, 4, 3, 5];
-  const expenseSpark = model.expenseDaily.length ? model.expenseDaily : [1, 3, 4, 3, 2, 5, 4];
-  const previousSaved = Number(model.previousIncomeMinor || 0) - Number(model.previousSpentMinor || 0);
+  /*
+   * Every series is built across the whole month — groupByDate pads to
+   * daysInMonth — so on the 7th of a 31-day month 24 of the 31 points are zeros,
+   * and cumulative() flattens those into a dead level tail filling roughly
+   * three-quarters of the sparkline width. That tail is not "spending held
+   * steady"; it is days that have not happened, drawn as if they had. Cut every
+   * series to the days that actually exist.
+   *
+   * The literal fallbacks that used to sit here ([1,2,1,3,4,3,5] and friends)
+   * are gone with it. An invented shape on an account with no data is the same
+   * class of thing: decoration presented as a reading.
+   */
+  const elapsedDays = Math.max(1, Math.min(daysInMonth(model.month), todayDay(model.month)));
+  const upto = (series) => (series || []).slice(0, elapsedDays);
 
   /*
    * The first card used to be "Balance", computed as income − spent — the exact
@@ -467,6 +485,27 @@ function renderMetricCards(model) {
     ? "var(--status-critical)"
     : hasBudget && model.budgetUsed >= 80 ? "var(--status-warning)" : "var(--status-good)";
 
+  /*
+   * "Left to spend" and "Saved" were both handed model.savingsCum, so the two
+   * adjacent cards drew the identical line. They print the identical number
+   * too: the formulas differ — budget − spent against income − spent — and both
+   * are correct, they simply meet whenever the budget equals the income, as it
+   * does this month.
+   *
+   * Giving the runway card its own budget − spent series does not separate them
+   * either, and this was measured rather than assumed: with the budget equal to
+   * income and the income landing on day one, the two sequences are the same
+   * numbers, so the rendered polylines came out matching to the decimal.
+   *
+   * So the runway card drops its sparkline rather than draw the neighbouring
+   * card's line a second time. Its second line already states the pace in words
+   * — currency per day, days remaining — which answers "how much can I spend"
+   * better than an unlabelled curve. One line instead of two identical ones.
+   */
+  const savingsSeries = upto(model.savingsCum);
+  const incomeSpark = upto(model.incomeDaily);
+  const expenseSpark = upto(model.expenseDaily);
+
   const metrics = [
     hasBudget
       ? {
@@ -475,7 +514,7 @@ function renderMetricCards(model) {
         value: Math.abs(model.remainingMinor),
         favorable: !overBudget,
         iconName: "wallet",
-        spark: balanceSpark,
+        spark: [],
         sparkTone: runwayTone,
         caption: overBudget
           ? `${model.budgetUsed}% of ${formatMoney(model.budgetMinor, model.currency, { compact: true })} budget used`
@@ -488,7 +527,7 @@ function renderMetricCards(model) {
         value: Math.abs(model.savedMinor),
         favorable: model.savedMinor >= 0,
         iconName: "wallet",
-        spark: balanceSpark,
+        spark: savingsSeries,
         sparkTone: model.savedMinor < 0 ? "var(--status-critical)" : "var(--status-good)",
         caption: "Set a budget to track what is left",
       },
@@ -520,12 +559,22 @@ function renderMetricCards(model) {
       className: `saving ${model.savedMinor < 0 ? "is-negative" : ""}`,
       label: "Saved",
       value: model.savedMinor,
-      trend: percentChange(model.savedMinor, previousSaved),
-      trendDirection: model.savedMinor >= 0 ? 1 : -1,
       favorable: model.savedMinor >= 0,
       iconName: "piggy",
-      spark: model.savingsCum.length ? model.savingsCum : balanceSpark,
+      spark: savingsSeries,
       sparkTone: model.savedMinor < 0 ? "var(--status-critical)" : "var(--series-savings)",
+      /*
+       * A caption rather than the "vs last month" badge the other cards carry,
+       * for two reasons. It gives this card its own second line, so it no longer
+       * reads as a copy of "Left to spend" when the two figures coincide. And a
+       * rate survives a small base where a percentage change does not: this
+       * month's badge said +141.9%, which is arithmetically true and tells a
+       * reader almost nothing, because last month's saving was near zero. The
+       * share of income kept is comparable across months without that swing.
+       */
+      caption: model.savedMinor >= 0
+        ? `${model.savingsRate}% of income kept`
+        : `${Math.abs(model.savingsRate)}% more spent than earned`,
       hint: "Income minus spending this month.",
     },
   ];
