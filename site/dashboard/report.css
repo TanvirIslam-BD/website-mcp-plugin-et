@@ -3839,3 +3839,27 @@ img[src$="money-copilot-app-logo.png"] {
   .spending-donut b { font-size: 13px !important; }
   .spending-donut span { font-size: 9.5px !important; }
 }
+
+/* ===========================================================================
+   Mobile reading order.
+
+   Ranked by what a returning user opens the app on a phone to do, rather than
+   by the desktop composition:
+
+     1 Budget            — confirms the hero: am I on track
+     2 Recent Transactions — "did that charge land?", the most frequent check,
+                             and previously last, a screen and a half down
+     3 Smart insights    — compact, says what to do about it
+     4 Spending breakdown— analysis, deliberate rather than glanceable
+     5 Cash flow         — the KPI row already states income/spent/saved, and
+                           "Pace is running high" states the trajectory in
+                           words, so three cumulative series in a 398x168 box
+                           add the least here. It stays an anchor on desktop.
+   =========================================================================== */
+@media (max-width: 720px) {
+  .budget-panel { order: 1 !important; }
+  .transactions-panel { order: 2 !important; }
+  .insights-panel { order: 3 !important; }
+  .spending-panel { order: 4 !important; }
+  .large-chart { order: 5 !important; }
+}
