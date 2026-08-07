@@ -2353,10 +2353,15 @@ body.is-resizing-copilot * {
     text-overflow:ellipsis!important;
     white-space:nowrap!important;
   }
+  /* Was #019a56, which measured 3.62:1 at 12px — under AA — while the same links
+     read indigo on desktop. Changed here at source rather than overridden later:
+     this rule carries an extra ancestor class, so anything added further down the
+     file has to grow a longer selector to beat it, and the file already has
+     several competing !important layers for these links. */
   :root[data-theme="light"] .spending-panel .panel-footer-link,
   :root[data-theme="light"] .mobile-budget-link,
   :root[data-theme="light"] .transactions-panel .panel-link{
-    color:#019a56!important;
+    color:#3f49b8!important;
   }
   :root[data-theme="light"] .mobile-finance-composer,
   :root[data-theme="light"] .mobile-bottom-nav{
@@ -4348,4 +4353,81 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
     flex-wrap: wrap;
     justify-content: flex-start;
   }
+}
+
+/* ===========================================================================
+   Mobile pass. Everything here was measured at 430x932 on the live site.
+
+   The earlier contrast-and-size work reported "nothing below 10px, both
+   themes". That was true, and only at desktop width — the rules were written
+   inside @media (min-width: 1181px), so the phone kept every one of these. The
+   same mistake shape as the theme-scoped colour a few commits ago: a fix
+   verified in one condition and reported as general.
+   =========================================================================== */
+@media (max-width: 720px) {
+  /* Percentage change beside each KPI — 9px on the figures that say whether the
+     month is better or worse than the last one. */
+  .metric-trend b { font-size: 11px !important; }
+  .metric-trend small { font-size: 10px !important; }
+
+  /* Cash-flow legend and both axes were 8px, the smallest type in the product,
+     on the panel whose whole job is being read. */
+  .chart-tools .legend span { font-size: 11px !important; }
+  .income-expense-chart .chart-y-axis span,
+  .income-expense-chart .chart-x-axis span { font-size: 10px !important; }
+
+  .budget-panel .mobile-budget-link { font-size: 11px !important; }
+
+  .sidebar .profile-card div span { font-size: 11px !important; }
+
+  /* ---------------------------------------------------------------------------
+     Financial health was display:none below 720px, so the score, the savings
+     rate, the budget percentage and the emergency fund were all absent from the
+     phone — including "0.4 of 3 months", the most actionable number the panel
+     holds. Hiding it shortens the page by one card and removes the answer to
+     "am I actually OK", on the surface where that gets asked most.
+
+     It sits after Recent Transactions: standing-versus-plan is worth seeing
+     early, but not ahead of "did that charge land", which the ranking work put
+     second deliberately. Everything below it shifts down one.
+     --------------------------------------------------------------------------- */
+  .financial-health {
+    display: flex !important;
+    flex-direction: column;
+    order: 3 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .insights-panel { order: 4 !important; }
+  .spending-panel { order: 5 !important; }
+  .large-chart { order: 6 !important; }
+
+  /* The health body is a ring beside a stat list; at 398px it needs to stack
+     rather than squeeze the ring. */
+  .financial-health .health-body {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: 14px !important;
+    align-items: center !important;
+  }
+
+  /* Panel links: the green they used to take here is corrected at its source
+     rule higher in this file, where the winning declaration lives. Only the dark
+     theme needs stating separately. */
+  :root[data-theme="dark"] .panel-footer-link,
+  :root[data-theme="dark"] .panel-link {
+    color: #8b93ff !important;
+  }
+}
+
+/* ===========================================================================
+   Correcting the mobile pass above. Three faults, all mine, all found by
+   re-measuring instead of assuming the rules had landed.
+   =========================================================================== */
+@media (max-width: 720px) {
+  /* 3. Un-hiding Financial health brought its own sub-10px text with it: the
+     "/ 3 mo" target beside the emergency-fund figure sat at 8.75px. Surfacing a
+     panel means owning what is inside it. */
+  .financial-health .health-target { font-size: 10px !important; }
 }
