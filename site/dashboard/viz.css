@@ -272,13 +272,20 @@
      30px and stays reserved once its only child is display:none. */
   .metric-card-main { grid-template-columns: 58px minmax(0, 1fr) !important; }
   /* 26px needed ~95px for a seven-character amount in an 89px column. */
-  .metric-card h2,
-  .metric-card.balance h2 { font-size: 23px !important; }
+  .metric-card:not(.balance) h2 { font-size: 23px !important; }
 }
 @container (max-width: 205px) {
-  .metric-card h2,
-  .metric-card.balance h2 { font-size: 21px !important; }
+  .metric-card:not(.balance) h2 { font-size: 21px !important; }
   .metric-trend small { display: none; }
+}
+
+/* The runway card is the one the dashboard exists to answer, and it is also the
+   roomiest: it renders a caption instead of a trend row, so it never carries the
+   direction chip the thresholds above are budgeting for. It therefore holds a
+   larger value further down, and only steps back when genuinely tight. Kept in
+   this file so every rule that can clip an amount stays in one place. */
+@container (max-width: 215px) {
+  .metric-card.balance h2 { font-size: 24px !important; }
 }
 
 /* ── Hero row wrapping ──────────────────────────────────────────────────────
@@ -328,3 +335,22 @@
   50% { opacity: 0; }
 }
 .ai-message.is-streaming .ai-message-footer { visibility: hidden; }
+
+/* The runway value earns more size than its neighbours, but only once the card
+   has measurably room for it — a viewport clamp cannot see the card, which is
+   how the amount ended up clipped mid-number before. Thresholds are the value's
+   own column: container width minus the 54px icon and its 18px gutter. */
+@container (min-width: 300px) {
+  .metric-card.balance h2 { font-size: 30px !important; }
+}
+@container (min-width: 360px) {
+  .metric-card.balance h2 { font-size: 36px !important; }
+}
+
+/* Widen the runway card's track where the row has room to give it one. This has
+   to live beside the auto-fit rule above rather than in report.css, because that
+   rule is !important and this file is the later of the two. The 1fr siblings
+   still float above the 210px auto-fit floor at these widths. */
+@media (min-width: 1600px) {
+  .summary-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr !important; }
+}

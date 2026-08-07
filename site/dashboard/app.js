@@ -573,6 +573,18 @@ function renderHealth(model) {
     ? [["#18b96f", "#e8faef"], "good"]
     : recurringMonths >= 1 ? [["#ff9f1c", "#fff7e6"], "warn"]
     : [["#ff4548", "#fff0f0"], "negative"];
+  /*
+   * This row used to read "Debt: Low" from a hardcoded literal — there is no
+   * debt anywhere in the model, so it asserted a financial fact the app cannot
+   * know. Savings rate is already computed in buildModel() from real income and
+   * spending, so the row now reports something true. 20% is the conventional
+   * healthy target, 10% the usual floor.
+   */
+  const [rateTone, rateClass] = !model.incomeMinor
+    ? [["#06133a", "#f1f4f8"], ""]
+    : model.savingsRate >= 20 ? [["#18b96f", "#e8faef"], "good"]
+    : model.savingsRate >= 10 ? [["#ff9f1c", "#fff7e6"], "warn"]
+    : [["#ff4548", "#fff0f0"], "negative"];
   return `
     <article class="panel financial-health" id="analytics">
       <div class="panel-head">
@@ -583,9 +595,9 @@ function renderHealth(model) {
           <div class="inner"><b>${model.health}</b><span>/ 100</span></div>
         </div>
         <div class="health-stats">
-          <div class="health-stat"><span><i class="status-dot" style="--tone:${budgetTone[0]};--tone-bg:${budgetTone[1]}">${icon("budget")}</i>Budget</span><b class="${budgetClass}">${model.budgetMinor ? `${model.budgetUsed}%` : "Not set"}</b></div>
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#18b96f;--tone-bg:#e8faef">${icon("card")}</i>Debt</span><b class="good">Low</b></div>
-          <div class="health-stat"><span><i class="status-dot" style="--tone:${fundTone[0]};--tone-bg:${fundTone[1]}">${icon("wallet")}</i>Emergency fund</span><b class="${fundClass}" title="Months of spending your current savings would cover.">${recurringMonths} months</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:${budgetTone[0]};--tone-bg:${budgetTone[1]}">${icon("budget")}</i>Budget</span><b class="${budgetClass}">${model.budgetMinor ? `${model.budgetUsed}% used` : "Not set"}</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:${rateTone[0]};--tone-bg:${rateTone[1]}">${icon("card")}</i>Savings rate</span><b class="${rateClass}" title="Share of this month's income you did not spend.">${model.incomeMinor ? `${model.savingsRate}%` : "No income yet"}</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:${fundTone[0]};--tone-bg:${fundTone[1]}">${icon("wallet")}</i>Emergency fund</span><b class="${fundClass}" title="Months of spending your current savings would cover. Three months is the common rule of thumb.">${recurringMonths} <small class="health-target">/ 3 mo</small></b></div>
         </div>
       </div>
       ${model.hasFinancialData ? "" : `<div class="panel-empty-hint">${icon("advisor")}<span>This score is a starting estimate. It sharpens as you add income, expenses, and a budget.</span></div>`}
@@ -3237,9 +3249,31 @@ function filterDashboard(query) {
 }
 
 const COPILOT_RAIL_WIDTH_KEY = "expenseTrackerCopilotWidth";
+const COPILOT_RAIL_COLLAPSED_KEY = "expenseTrackerCopilotCollapsed";
 const COPILOT_RAIL_DEFAULT_WIDTH = 440;
 const COPILOT_RAIL_MIN_WIDTH = 280;
 const COPILOT_RAIL_MAX_WIDTH = 560;
+/* Below this the sidebar (218px) plus an expanded rail (~420px) claim well over
+   a third of the viewport, squeezing the actual dashboard into what is left. */
+const COPILOT_RAIL_AUTO_COLLAPSE_WIDTH = 1440;
+
+/**
+ * Decides whether the assistant rail starts open. An explicit user choice always
+ * wins; only when none has been stored do we fall back to the viewport, so wide
+ * screens still get the rail open by default and laptops get their space back.
+ */
+function applyRailDefault() {
+  const rail = document.querySelector(".assistant-rail");
+  if (!rail) return;
+  let stored = null;
+  try { stored = localStorage.getItem(COPILOT_RAIL_COLLAPSED_KEY); } catch {}
+  const collapsed = stored === null
+    ? window.innerWidth < COPILOT_RAIL_AUTO_COLLAPSE_WIDTH
+    : stored === "1";
+  rail.classList.toggle("collapsed", collapsed);
+  const toggle = rail.querySelector("[data-ai-rail-toggle]");
+  toggle?.setAttribute("aria-label", collapsed ? "Expand AI Finance Assistant" : "Minimize AI Finance Assistant");
+}
 
 function copilotRailBounds() {
   const sidebarWidth = document.querySelector(".sidebar")?.getBoundingClientRect().width || 224;
@@ -3487,8 +3521,12 @@ function bindEvents() {
     const aiRailToggle = event.target.closest("[data-ai-rail-toggle]");
     if (aiRailToggle) {
       const rail = document.querySelector(".assistant-rail");
-      rail?.classList.toggle("collapsed");
-      aiRailToggle.setAttribute("aria-label", rail?.classList.contains("collapsed") ? "Expand AI Finance Assistant" : "Minimize AI Finance Assistant");
+      const collapsed = rail?.classList.toggle("collapsed");
+      aiRailToggle.setAttribute("aria-label", collapsed ? "Expand AI Finance Assistant" : "Minimize AI Finance Assistant");
+      // Remember the choice, so the rail does not spring back open on every
+      // navigation. Once set, this preference always beats the width-based
+      // default in applyRailDefault().
+      try { localStorage.setItem(COPILOT_RAIL_COLLAPSED_KEY, collapsed ? "1" : "0"); } catch {}
       return;
     }
     const sidebarToggle = event.target.closest("[data-sidebar-toggle]");
@@ -3838,6 +3876,7 @@ loadDashboard()
     } catch {}
     app.classList.remove("sidebar-collapsed");
     initializeAssistantRailResize();
+    applyRailDefault();
     bindEvents();
     window.addEventListener("popstate", () => {
       const newParams = new URLSearchParams(location.search);
