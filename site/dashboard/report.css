@@ -3582,3 +3582,93 @@ img[src$="money-copilot-app-logo.png"] {
   .theme-switch button, [data-theme-choice] { min-height: 44px !important; }
   .profile-card [data-logout], .sidebar [data-logout] { min-height: 44px !important; min-width: 44px !important; }
 }
+
+/* ===========================================================================
+   Mobile layout corrections (phones).
+
+   The dense two-column composition above was drawn to match a static
+   reference, and it holds up for the KPI tiles. It does not hold up for the
+   panels: at 430px each column is 196px, and the panels carrying the most
+   content — Recent Transactions and Smart insights — were pinned to 148px with
+   overflow:hidden, which measured 60px of transactions clipped outright. A
+   phone has vertical room; it does not have horizontal room. So the report
+   grid goes single-column and the panels size to their content.
+   =========================================================================== */
+@media (max-width: 720px) {
+  .content-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Release the fixed heights and the half-width pinning from the 2-up layout.
+     `height:auto` is what actually stops the clipping; the rest keeps the old
+     column/width pins from fighting the single track. */
+  .spending-panel,
+  .budget-panel,
+  .insights-panel,
+  .transactions-panel {
+    grid-column: 1 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 14px !important;
+  }
+
+  .large-chart {
+    height: auto !important;
+    min-height: 168px !important;
+    padding: 12px 14px 10px !important;
+  }
+
+  /* Full width means the 8-9px type from the 196px columns is no longer
+     necessary — and it was well under a comfortable reading size. */
+  .panel h3 { font-size: 15px !important; }
+  .category-line { font-size: 12px !important; }
+  .category-line label { font-size: 12px !important; }
+  /* The amount was collapsed to font-size:0 to survive the 196px column, so the
+     legend could only report percentages. Full width has room for both. */
+  .category-line b { font-size: 12px !important; }
+  .category-line b small { font-size: 11px !important; }
+  .category-paren { display: inline !important; }
+  .insight-item b { font-size: 12.5px !important; }
+  .insight-item { min-height: 44px !important; padding: 6px 8px !important; }
+  .transactions tbody tr { height: auto !important; min-height: 44px !important; }
+  .transactions td:nth-child(2) b { font-size: 13px !important; }
+  .transactions td:nth-child(5) { font-size: 13px !important; }
+  .mobile-transaction-meta { font-size: 11px !important; }
+  .spending-panel .panel-footer-link,
+  .transactions-panel .panel-link,
+  .insights-panel > .panel-footer-link { font-size: 12px !important; }
+  /* The insights footer link was hidden only because the 148px box had no room
+     for it; at natural height it is the panel's way out to the advisor. */
+  .insights-panel > .panel-footer-link { display: flex !important; }
+
+  /* The donut earns more size once it is not sharing a 196px column. */
+  .spending-report { grid-template-columns: 108px minmax(0, 1fr) !important; gap: 14px !important; }
+  .spending-donut { width: 108px !important; height: 108px !important; }
+  /* 13px wrapped the centre total onto three lines for currencies that render a
+     three-letter code ("INR 35,361") rather than a one-glyph symbol. */
+  .spending-donut b { font-size: 11.5px !important; }
+  .spending-donut span { font-size: 9px !important; }
+
+  .budget-ring { width: 92px !important; height: 92px !important; }
+  .budget-ring b { font-size: 21px !important; }
+  .budget-total, .budget-over { font-size: 12px !important; }
+
+  /* Nav labels sat at 9px. */
+  .mobile-bottom-nav button { font-size: 10px !important; }
+
+  /* The composer and the nav together occupy ~130px of fixed chrome, so the
+     page has to end above them or the last panel sits underneath. */
+  .main {
+    padding-bottom: calc(150px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* The month picker moved up here from the bottom nav. */
+  .mobile-dashboard-header .mobile-date-nav {
+    display: flex !important;
+    margin-top: 10px;
+  }
+  .mobile-dashboard-header .mobile-date-nav > * { width: 100%; }
+}

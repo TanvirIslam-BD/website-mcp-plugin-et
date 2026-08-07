@@ -287,6 +287,12 @@
 @container (max-width: 215px) {
   .metric-card.balance h2 { font-size: 24px !important; }
 }
+/* In the phone 2x2 the card is ~195px, and 24px still clipped a value carrying
+   a three-letter currency code ("INR 14,639"). At this size the runway card
+   gives up its size advantage and leans on its tinted surface instead. */
+@container (max-width: 185px) {
+  .metric-card.balance h2 { font-size: 21px !important; }
+}
 
 /* ── Hero row wrapping ──────────────────────────────────────────────────────
    The four cards were pinned to `repeat(4, minmax(0, 1fr)) !important`, so
@@ -353,4 +359,13 @@
    still float above the 210px auto-fit floor at these widths. */
 @media (min-width: 1600px) {
   .summary-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr !important; }
+}
+
+/* On a phone the 210px auto-fit floor above cannot fit two tiles in a ~398px
+   row, so all four stacked one-per-row and pushed everything else below the
+   fold. The labels here are short ("Income", "Spent", "Saved") and the
+   container queries already downsize the amount to fit, so a 2x2 is both
+   legible and roughly half the height. */
+@media (max-width: 720px) {
+  .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }

@@ -978,6 +978,9 @@ function renderMobileDashboardHeader(model) {
           <img src="${profilePhotoUrl}" alt="${displayName} profile photo" referrerpolicy="no-referrer" data-profile-photo>
         </button>
       </div>
+      <!-- The month picker scopes everything below it, so it belongs with the
+           content it filters rather than in the bottom navigation bar. -->
+      <div class="mobile-date-nav">${renderMonthPicker(model.month)}</div>
     </header>
   `;
 }
@@ -988,20 +991,27 @@ function renderMobileCopilotComposer() {
       <button class="mobile-composer-bot bot-mascot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
       <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
       <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Money Copilot">${icon("send")}</button>
-      <button class="mobile-composer-action" type="button" data-entry="expense" aria-label="Scan a receipt">${icon("camera")}</button>
     </section>
   `;
 }
 
+/*
+ * Primary destinations only. This bar previously mixed four different kinds of
+ * control in five slots: a month filter, two destinations, a global action and
+ * an appearance setting. A month picker and a theme switch are not navigation —
+ * the picker now sits in the mobile header beside the month it labels, and the
+ * theme switch stays in the sidebar (reachable from the header avatar), which
+ * already carried its own Light/Dark pair. That frees the bar for the four jobs
+ * a returning user actually comes back for, around the add action.
+ */
 function renderMobileBottomNav() {
-  const darkTheme = document.documentElement.dataset.theme === "dark";
   return `
     <nav class="mobile-bottom-nav" aria-label="Mobile dashboard navigation">
-      <div class="mobile-date-nav">${renderMonthPicker(selectedMonth)}</div>
       <button type="button" data-nav="transactions">${icon("transactions")}<span>Transactions</span></button>
-      <button class="mobile-add-button" type="button" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
       <button type="button" data-nav="budget">${icon("budget")}<span>Budget</span></button>
-      <button type="button" data-mobile-theme-toggle aria-label="Use ${darkTheme ? "light" : "dark"} theme" aria-pressed="${darkTheme}">${icon(darkTheme ? "sun" : "moon")}<span>${darkTheme ? "Light" : "Dark"}</span></button>
+      <button class="mobile-add-button" type="button" data-entry="expense" aria-label="Add expense">${icon("plus")}</button>
+      <button type="button" data-nav="categories">${icon("categories")}<span>Categories</span></button>
+      <button type="button" data-nav="analysis">${icon("advisor")}<span>Insights</span></button>
     </nav>
   `;
 }
