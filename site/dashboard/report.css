@@ -3679,3 +3679,95 @@ img[src$="money-copilot-app-logo.png"] {
   }
   .mobile-dashboard-header .mobile-date-nav > * { width: 100%; }
 }
+
+/* ===========================================================================
+   Mobile review pass 2 — touch targets, header density, hero rank.
+   =========================================================================== */
+@media (max-width: 720px) {
+
+  /* --- Touch targets (WCAG 2.5.5) ---------------------------------------
+     The earlier 44px pass was scoped to >=721px — desktop, where a mouse is
+     doing the pointing. On the touch surface these were still 17-38px, with
+     the transactions "View All" the worst of them. */
+  .panel-footer-link,
+  .panel-link,
+  .spending-panel .panel-footer-link,
+  .transactions-panel .panel-link,
+  .insights-panel > .panel-footer-link,
+  .mobile-budget-link {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .panel-head .panel-link { padding: 0 6px !important; }
+
+  .period-select { min-height: 44px !important; }
+
+  .mobile-composer-bot,
+  .mobile-composer-action { min-width: 44px !important; min-height: 44px !important; }
+  .mobile-finance-composer textarea { min-height: 44px !important; }
+
+  /* The slide-out sidebar's own controls sat at 30px. */
+  .sidebar .nav button { min-height: 44px !important; }
+  .theme-switch button,
+  [data-theme-choice] { min-height: 44px !important; }
+  .sidebar [data-logout] { min-width: 44px !important; min-height: 44px !important; }
+
+  /* --- Month picker -----------------------------------------------------
+     Moving this out of the bottom nav left it wearing the nav's button
+     styling: icon stacked under the label, no border, centred — which reads
+     as a caption, not a control. In the header it needs to look tappable. */
+  .mobile-dashboard-header .mobile-date-nav { justify-content: flex-start !important; }
+  .mobile-dashboard-header .mobile-date-nav .month-picker-trigger {
+    height: 44px !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 0 14px !important;
+    border: 1px solid var(--mobile-line) !important;
+    border-radius: 12px !important;
+    background: var(--mobile-surface) !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+  }
+  .mobile-dashboard-header .mobile-date-nav .month-picker-trigger svg {
+    width: 18px !important; height: 18px !important; opacity: .7;
+  }
+
+  /* --- Header density ---------------------------------------------------
+     156px — 17% of the viewport — went by before the first number, with the
+     greeting set as the largest, heaviest text on the screen while carrying
+     the least information. */
+  .mobile-greeting h1 { font-size: 20px !important; line-height: 1.25 !important; }
+  .mobile-greeting p { font-size: 12px !important; margin: 2px 0 8px !important; }
+  .mobile-dashboard-header { padding-bottom: 4px !important; }
+  .mobile-dashboard-header .mobile-date-nav { margin-top: 6px !important; }
+
+  /* --- Hero rank --------------------------------------------------------
+     In the 2x2 the runway card cannot win on size (24px clipped at 195px), so
+     the surface has to carry it. A 9%-alpha tint was invisible in light; this
+     reads as a filled "primary" card against three plain ones. */
+  :root[data-theme="light"] .metric-card.balance {
+    border-color: color-mix(in srgb, var(--report-green) 42%, transparent) !important;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--report-green) 17%, #fff), color-mix(in srgb, var(--report-green) 7%, #fff)) !important;
+  }
+  :root[data-theme="dark"] .metric-card.balance {
+    border-color: color-mix(in srgb, var(--report-green) 46%, transparent) !important;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--report-green) 24%, #0b1712), #0b1712) !important;
+  }
+  :root[data-theme="light"] .metric-card.balance label { color: #06603a !important; }
+  :root[data-theme="dark"] .metric-card.balance label { color: #6ee7ad !important; }
+
+  /* --- Budget panel: stop restating the hero ----------------------------
+     The hero already answers "৳14,639 left to spend". The budget panel then
+     repeated the same figure a third of the way down the page. The ring and
+     the spent-of-budget line are unique and stay; only the duplicated
+     remaining line goes — and only while it is the benign case. When the user
+     is *over* budget the same element carries the warning, so it is kept. */
+  .budget-over.positive { display: none !important; }
+
+  /* "Am I on track" outranks "where did it go" once they are stacked. */
+  .budget-panel { order: 2 !important; }
+  .spending-panel { order: 3 !important; }
+}
