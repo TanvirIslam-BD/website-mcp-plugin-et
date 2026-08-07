@@ -420,7 +420,6 @@ function buildModel(data) {
   const elapsed = Math.max(1, todayDay(month));
   const forecastMinor = Math.round((Number(data.spentMinor || 0) / elapsed) * daysInMonth(month));
   const savingsRate = data.incomeMinor ? Math.round((savedMinor / data.incomeMinor) * 100) : 0;
-  const health = Math.max(38, Math.min(97, Math.round(70 + Math.min(18, Math.max(-18, savingsRate / 2)) - Math.max(0, budgetUsed - 100) / 3)));
   const hasFinancialData = Boolean(
     Number(data.spentMinor || 0) ||
     Number(data.incomeMinor || 0) ||
@@ -447,7 +446,6 @@ function buildModel(data) {
     budgetUsed,
     forecastMinor,
     savingsRate,
-    health,
     hasFinancialData,
   };
 }
@@ -565,16 +563,20 @@ function renderMetricCards(model) {
       sparkTone: model.savedMinor < 0 ? "var(--status-critical)" : "var(--series-savings)",
       /*
        * A caption rather than the "vs last month" badge the other cards carry,
-       * for two reasons. It gives this card its own second line, so it no longer
-       * reads as a copy of "Left to spend" when the two figures coincide. And a
-       * rate survives a small base where a percentage change does not: this
-       * month's badge said +141.9%, which is arithmetically true and tells a
-       * reader almost nothing, because last month's saving was near zero. The
-       * share of income kept is comparable across months without that swing.
+       * so this card has its own second line instead of reading as a copy of
+       * "Left to spend" when the two figures coincide. The badge was also a poor
+       * fit: it said +141.9%, arithmetically true and nearly uninformative,
+       * because last month's saving was close to zero.
+       *
+       * It states the base rather than the rate. "N% of income kept" was the
+       * first attempt and it duplicated the Financial health panel, which
+       * already prints "Savings rate 29%" — trading one duplicated figure for
+       * another. Naming the income the saving came out of is the part no other
+       * surface shows.
        */
-      caption: model.savedMinor >= 0
-        ? `${model.savingsRate}% of income kept`
-        : `${Math.abs(model.savingsRate)}% more spent than earned`,
+      caption: model.incomeMinor
+        ? `of ${formatMoney(model.incomeMinor, model.currency, { compact: true })} income`
+        : "No income recorded this month",
       hint: "Income minus spending this month.",
     },
   ];
@@ -586,7 +588,12 @@ function renderMetricCards(model) {
             <span class="metric-icon">${icon(metric.iconName)}</span>
             <div class="metric-copy">
               <label>${metric.label}</label>
-              <h2>${formatMoney(metric.value, model.currency, { compact: true })}</h2>
+              <!-- The value is the heading, so heading navigation used to announce
+                   four bare amounts — "৳14,639, ৳50,000, ৳35,361, ৳14,639" — with
+                   no clue which was which, the label being a <label> and not part
+                   of the outline. Naming the heading pairs them without moving any
+                   markup the card's styling depends on. -->
+              <h2 aria-label="${esc(metric.label)}: ${esc(formatMoney(metric.value, model.currency, { compact: true }))}">${formatMoney(metric.value, model.currency, { compact: true })}</h2>
               ${metric.caption
                 ? `<span class="metric-caption">${esc(metric.caption)}</span>`
                 : `<span class="metric-trend ${metric.favorable ? "positive" : "negative"}">
@@ -634,14 +641,57 @@ function renderHealth(model) {
     : model.savingsRate >= 20 ? [["#18b96f", "#e8faef"], "good"]
     : model.savingsRate >= 10 ? [["#ff9f1c", "#fff7e6"], "warn"]
     : [["#ff4548", "#fff0f0"], "negative"];
+
+  /*
+   * The score was `70 + savingsRate/2 − over-budget/3`, clamped to 38..97.
+   * Three things were wrong with that. The clamp meant it could never leave a
+   * narrow band, so an account in real trouble still scored 38 out of 100 and
+   * none could pass 97 — the "/ 100" was decoration on a scale that did not
+   * exist. The 70 base made it flattering by construction. And it ignored the
+   * emergency fund completely, while the panel prints that fund immediately
+   * beneath it: this month scored 85 with 0.4 of the 3 months it asks for.
+   *
+   * It is now the mean of the three components this panel already shows, each
+   * measured against the target displayed beside it, each able to reach a true
+   * 0 and a true 100. Components that do not apply — no budget set, no income
+   * recorded — stay out of the mean instead of scoring zero, so an account that
+   * simply has not configured a budget is not marked down for it.
+   */
+  const clamp01 = (value) => Math.max(0, Math.min(1, value));
+  const scoreParts = [];
+  if (model.incomeMinor) scoreParts.push(clamp01(model.savingsRate / 20));
+  if (model.budgetMinor) scoreParts.push(clamp01(1 - Math.max(0, model.budgetUsed - 100) / 50));
+  scoreParts.push(clamp01(recurringMonths / 3));
+  const health = scoreParts.length
+    ? Math.round((scoreParts.reduce((sum, part) => sum + part, 0) / scoreParts.length) * 100)
+    : 0;
+  const healthBasis = [
+    model.incomeMinor ? `savings rate ${model.savingsRate}% of a 20% target` : null,
+    model.budgetMinor ? `budget ${model.budgetUsed}% used` : null,
+    `emergency fund ${recurringMonths} of 3 months`,
+  ].filter(Boolean).join(", ");
+
+  /*
+   * An account with nothing in it gets no score at all. Scoring it produced a
+   * 0 / 100, which is a verdict on an absence — the same failing as the old
+   * clamp, pointed the other way: unknown is not the same as bad, and a first
+   * session should not open on a zero. The hint below the ring already explains
+   * that the score arrives once there is something to measure.
+   */
+  const hasScore = Boolean(model.hasFinancialData) && scoreParts.length > 0;
+  const healthDisplay = hasScore ? health : "—";
+  const healthRingValue = hasScore ? health : 0;
+  const healthTitle = hasScore
+    ? `Average of the measures below: ${healthBasis}.`
+    : "Add income, spending or a budget and this score starts reporting.";
   return `
     <article class="panel financial-health" id="analytics">
       <div class="panel-head">
         <h3>Financial health</h3>
       </div>
       <div class="health-body">
-        <div class="score-ring" style="--score:${model.health}%">
-          <div class="inner"><b>${model.health}</b><span>/ 100</span></div>
+        <div class="score-ring" style="--score:${healthRingValue}%" title="${esc(healthTitle)}">
+          <div class="inner"><b>${healthDisplay}</b><span>/ 100</span></div>
         </div>
         <div class="health-stats">
           <div class="health-stat"><span><i class="status-dot" style="--tone:${budgetTone[0]};--tone-bg:${budgetTone[1]}">${icon("budget")}</i>Budget</span><b class="${budgetClass}">${model.budgetMinor ? `${model.budgetUsed}% used` : "Not set"}</b></div>
@@ -784,7 +834,24 @@ function renderCategories(model) {
 
   const legendRows = shown.map((category, index) => {
     const percentage = Math.round((Number(category.amountMinor || 0) / total) * 100);
-    return `<div class="category-line"><i class="category-swatch" style="--tone:${categoryColor(index)}"></i><label>${esc(category.name)}</label><b><span class="category-amount">${formatMoney(category.amountMinor, model.currency, { compact: true })}</span> <small><span class="category-paren">(</span>${percentage}%<span class="category-paren">)</span></small></b></div>`;
+    /*
+     * Category names arrive as paths — "groceries", "groceries > cooking oil",
+     * "baby care > feeding" — and a parent sits beside its own children as a
+     * sibling here, because that is how the API aggregates them. Rolling the
+     * children into the parent would change every figure this panel reports, so
+     * the totals are left exactly as the server sends them.
+     *
+     * What is fixed is the reading of them: the parent segment of a path is set
+     * in a muted span so a child line is visibly a child. Before this, mixed
+     * depths looked like one flat list where "groceries" and "groceries >
+     * cooking oil" appeared to be unrelated peers.
+     */
+    const path = String(category.name || "");
+    const cut = path.lastIndexOf(">");
+    const labelHtml = cut === -1
+      ? esc(path)
+      : `<span class="category-parent">${esc(path.slice(0, cut).trim())} ›</span> ${esc(path.slice(cut + 1).trim())}`;
+    return `<div class="category-line"><i class="category-swatch" style="--tone:${categoryColor(index)}"></i><label title="${esc(path)}">${labelHtml}</label><b><span class="category-amount">${formatMoney(category.amountMinor, model.currency, { compact: true })}</span> <small><span class="category-paren">(</span>${percentage}%<span class="category-paren">)</span></small></b></div>`;
   });
   if (restMinor > 0) {
     const percentage = Math.round((restMinor / total) * 100);
@@ -908,19 +975,50 @@ function renderBillsAndSubscriptions(model) {
 
 function renderTransactions(model) {
   const expenses = (model.expenses || []).slice(0, 6);
+
+  /*
+   * Relative day labels are derived from the date, not the row position. The old
+   * code read `index === 0 ? "Today" : index === 1 ? "Yesterday" : …`, so the
+   * second row was labelled "Yesterday" whatever its date — three expenses all
+   * dated today came out as "Today", "Yesterday" and "Aug 7". A ledger that
+   * states the wrong day for a payment is worse than one that states no day.
+   *
+   * Local calendar days, not UTC: "today" has to mean the user's today, and a
+   * UTC comparison mislabels every evening east of Greenwich.
+   */
+  const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const todayIso = isoDay(new Date());
+  const yesterdayIso = isoDay(new Date(Date.now() - 86400000));
+
+  // The Method column is only worth its width when something fills it. Payment
+  // method is real but sparse — it lives in expenseMetadata and most expenses
+  // have none — so the column appears when a visible row carries one and stays
+  // out of the way when none does, rather than printing a column of dashes.
+  const anyPaymentMethod = expenses.some((expense) => (model.expenseMetadata?.[expense.id] || {}).paymentMethod);
+  const columnCount = anyPaymentMethod ? 6 : 5;
+
   const rows = expenses.map((expense, index) => {
     const metadata = model.expenseMetadata?.[expense.id] || {};
     const [tone, bg] = toneFor(expense.category, index);
     const merchant = metadata.merchant || expense.merchant || expense.description || "Expense";
-    // No fallback label here. expenseMetadata is only populated for demo data,
-    // so a real expense has no paymentMethod — and the old `|| "Expense"` both
-    // printed the transaction *type* under a Method heading and picked the card
-    // icon below, asserting a card payment that was never recorded. Unknown is
-    // rendered as an em dash instead.
+    // No fallback label. The old `|| "Expense"` printed the transaction *type*
+    // under a Method heading and, because the icon was picked with
+    // `=== "cash" ? wallet : card`, drew a card icon for it — asserting a card
+    // payment that was never recorded.
     const payment = metadata.paymentMethod || "";
     const date = String(expense.date || "");
-    const dateLabel = index === 0 ? "Today" : index === 1 ? "Yesterday" : date ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)) : "Recent";
-    const timeLabel = metadata.time || ["09:30 AM", "07:20 PM", "08:15 PM"][index] || "";
+    const dateLabel = !date
+      ? ""
+      : date === todayIso
+        ? "Today"
+        : date === yesterdayIso
+          ? "Yesterday"
+          : new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
+    // Times were `["09:30 AM", "07:20 PM", "08:15 PM"][index]` — invented clock
+    // times stamped on the top three rows. No expense carries a time: the field
+    // is absent from every record the API returns, so there is nothing to fall
+    // back to and nothing is shown.
+    const timeLabel = metadata.time || "";
     const subCatHtml = metadata.subcategory 
       ? ` <span class="tag subcategory-tag" style="background: var(--line); border: 1px solid var(--line2); color: var(--text-muted); font-size: 9px; min-height: 18px; padding: 0 6px; border-radius: 4px; display: inline-flex; align-items: center; vertical-align: middle;">${esc(metadata.subcategory)}</span>`
       : "";
@@ -929,13 +1027,15 @@ function renderTransactions(model) {
         <td>${esc(expense.date)}</td>
         <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
         <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
-        <td>${payment
-          ? `<span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span>`
-          : `<span class="payment" style="opacity:.55" title="No payment method recorded">&mdash;</span>`}</td>
+        ${anyPaymentMethod
+          ? `<td>${payment
+              ? `<span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span>`
+              : `<span class="payment" style="opacity:.55" title="No payment method recorded">&mdash;</span>`}</td>`
+          : ""}
         <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
         <td style="text-align: center;"><button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button></td>
       </tr>`;
-  }).join("") || `<tr><td colspan="6"><div class="empty-state">No transactions recorded for this month.</div></td></tr>`;
+  }).join("") || `<tr><td colspan="${columnCount}"><div class="empty-state">No transactions recorded for this month.</div></td></tr>`;
   return `
     <article class="panel transactions-panel" id="transactions">
       <div class="panel-head">
@@ -944,7 +1044,7 @@ function renderTransactions(model) {
       </div>
       <div class="transactions-wrap">
         <table class="transactions">
-          <thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Method</th><th class="amount">Amount</th><th style="width: 44px;"></th></tr></thead>
+          <thead><tr><th>Date</th><th>Merchant</th><th>Category</th>${anyPaymentMethod ? "<th>Method</th>" : ""}<th class="amount">Amount</th><th style="width: 44px;"></th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
