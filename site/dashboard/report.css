@@ -4149,3 +4149,85 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
 :root[data-theme="light"] .sidebar .profile-card div span {
   color: #067a45 !important;
 }
+
+/* ===========================================================================
+   Recent Transactions: column widths, amount alignment, and a mobile layout
+   that does not depend on column position.
+
+   Two faults, one of them mine.
+
+   Mine: making the Method column conditional shifted every nth-child index by
+   one, and the mobile layout in styles.css places cells that way. The rule that
+   hid Method (nth-child(4)) started hiding the Amount, and nth-child(5) styled
+   the delete button as though it were the figure — so at 375px a row showed a
+   merchant name and a trash icon, with no amount, category or date anywhere.
+   Cells now carry stable classes and the mobile grid is rebuilt from those.
+
+   Pre-existing, and made worse by removing that column: nothing constrained the
+   column widths, so with auto table layout the freed space pooled into
+   CATEGORY, which measured 354px to hold a 38px tag — 316px of dead space, with
+   the AMOUNT header stranded left of figures that align right.
+   =========================================================================== */
+@media (min-width: 721px) {
+  /* Shrink-to-content, so slack goes to Merchant, which can use it, rather than
+     collecting in a column holding one short tag. */
+  .transactions th.tx-category,
+  .transactions td.tx-category {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  .transactions th.tx-date,
+  .transactions td.tx-date { width: 116px; }
+
+  /* The header sits over its own figures instead of at the far side of a gap. */
+  .transactions th.tx-amount,
+  .transactions td.tx-amount {
+    width: 132px;
+    text-align: right !important;
+  }
+
+  .transactions th.tx-method,
+  .transactions td.tx-method { width: 1%; white-space: nowrap; }
+}
+
+/* Mobile: rebuild the card from classes. Left column stacks merchant over
+   category; the amount and the delete control each take their own track and
+   centre against both rows. Date is redundant on the card because the merchant
+   line already carries a relative day. */
+@media (max-width: 720px) {
+  .transactions tr {
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+  }
+
+  .transactions td.tx-date,
+  .transactions td.tx-method { display: none !important; }
+
+  .transactions td.tx-merchant {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .transactions td.tx-category {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  .transactions td.tx-amount {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 1 / 3 !important;
+    align-self: center !important;
+    text-align: right !important;
+    white-space: nowrap;
+  }
+
+  .transactions td.tx-actions {
+    display: block !important;
+    grid-column: 3 !important;
+    grid-row: 1 / 3 !important;
+    align-self: center !important;
+  }
+}

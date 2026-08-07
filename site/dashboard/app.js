@@ -1024,16 +1024,16 @@ function renderTransactions(model) {
       : "";
     return `
       <tr data-search="${esc(`${expense.date} ${merchant} ${expense.category} ${metadata.subcategory || ""} ${payment}`.toLowerCase())}">
-        <td>${esc(expense.date)}</td>
-        <td><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
-        <td><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
+        <td class="tx-date">${esc(expense.date)}</td>
+        <td class="tx-merchant"><div class="tx-title"><i style="--tone:${tone};--tone-bg:${bg}">${icon(index === 0 ? "transactions" : index === 1 ? "bills" : "categories")}</i><span><b>${esc(merchant)}</b><small class="mobile-transaction-meta">${esc(dateLabel)}${timeLabel ? `, ${esc(timeLabel)}` : ""}</small></span></div></td>
+        <td class="tx-category"><button class="tag interactive-category-btn" data-expense-id="${esc(expense.id)}" data-category="${esc(expense.category)}" style="--tone:${tone};--tone-bg:${bg}; cursor: pointer; border: none; font-family: inherit;">${esc(expense.category)}</button>${subCatHtml}</td>
         ${anyPaymentMethod
-          ? `<td>${payment
+          ? `<td class="tx-method">${payment
               ? `<span class="payment">${icon(payment.toLowerCase() === "cash" ? "wallet" : "card")}${esc(payment)}</span>`
               : `<span class="payment" style="opacity:.55" title="No payment method recorded">&mdash;</span>`}</td>`
           : ""}
-        <td class="amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
-        <td style="text-align: center;"><button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button></td>
+        <td class="amount tx-amount">-${formatMoney(expense.amountMinor, model.currency)}</td>
+        <td class="tx-actions" style="text-align: center;"><button type="button" class="tx-delete-btn" data-delete-expense-id="${esc(expense.id)}" aria-label="Delete expense" style="background:none; border:none; color:#ea580c; cursor:pointer; padding:6px; display:inline-flex; align-items:center; transition:opacity 0.15s; font-size:14px; opacity: 0.5; width: 28px; height: 28px; border-radius: 6px;" onmouseover="this.style.opacity=1; this.style.background='rgba(234,88,12,0.08)'" onmouseout="this.style.opacity=0.5; this.style.background='none'">${icon("trash")}</button></td>
       </tr>`;
   }).join("") || `<tr><td colspan="${columnCount}"><div class="empty-state">No transactions recorded for this month.</div></td></tr>`;
   return `
@@ -1044,7 +1044,12 @@ function renderTransactions(model) {
       </div>
       <div class="transactions-wrap">
         <table class="transactions">
-          <thead><tr><th>Date</th><th>Merchant</th><th>Category</th>${anyPaymentMethod ? "<th>Method</th>" : ""}<th class="amount">Amount</th><th style="width: 44px;"></th></tr></thead>
+          <!-- Cells carry stable classes because the Method column is now
+               conditional, and the mobile layout used to place cells by
+               nth-child. With one column removed those indices shifted by one:
+               the rule that hid Method started hiding the Amount, so a phone
+               showed merchant and a delete button with no figure at all. -->
+          <thead><tr><th class="tx-date">Date</th><th class="tx-merchant">Merchant</th><th class="tx-category">Category</th>${anyPaymentMethod ? `<th class="tx-method">Method</th>` : ""}<th class="amount tx-amount">Amount</th><th class="tx-actions" style="width: 44px;"></th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
