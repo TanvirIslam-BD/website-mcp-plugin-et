@@ -2215,7 +2215,13 @@ function openAiChat(prefill = "") {
       </div>
       <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
         <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask or add expense..." aria-label="Ask AI Finance Assistant" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
-        <small class="assistant-privacy">${icon("lock")}<span>Private · Uses only connected financial data</span><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a></small>
+        <!-- No CometAPI badge here. Moving it out of the rail header and into the
+             rail footer was right for the rail, which has no status bar -- but the
+             same replacement was applied to this modal, which already carries one
+             in .copilot-modal-status above. That put the identical attribution at
+             both ends of one sheet. One badge per surface: the rail's lives in its
+             footer, this modal's in its status bar. -->
+        <small class="assistant-privacy">${icon("lock")}<span>Private · Uses only connected financial data</span></small>
       </form>
     </div>
   `, { wide: true, className: "ai-modal ai-desktop-modal" });
@@ -2383,6 +2389,106 @@ function subcategoriesForCategory(model, category) {
     .map(expense => model.expenseMetadata?.[expense.id]?.subcategory)
     .filter(Boolean);
   return Array.from(new Set([...saved, ...used])).sort((a, b) => a.localeCompare(b));
+}
+
+// A category name can encode a hierarchy: "groceries > dairy". Everything else
+// in this file treats such a name as one opaque string, which is correct for
+// totalling but wrong for listing -- it puts a child next to its own parent as
+// a peer, and leaves a child whose parent has no direct spend with no parent
+// row at all. Split on the separator so the manager can group them.
+function splitCategoryPath(name) {
+  const parts = String(name || "").split(">").map(part => part.trim()).filter(Boolean);
+  if (parts.length < 2) return { parent: String(name || "").trim(), child: "" };
+  return { parent: parts[0], child: parts.slice(1).join(" > ") };
+}
+
+// Spending tagged with a sub-category through expense metadata rather than
+// through a "parent > child" category name. These amounts are already inside
+// the parent's own total, so they are a breakdown of it -- never an addition.
+function subcategorySpendForCategory(model, category) {
+  const normalized = String(category || "").toLowerCase();
+  const totals = new Map();
+  for (const expense of model.expenses || []) {
+    if (String(expense.category || "").toLowerCase() !== normalized) continue;
+    const subcategory = model.expenseMetadata?.[expense.id]?.subcategory;
+    if (!subcategory) continue;
+    totals.set(subcategory, (totals.get(subcategory) || 0) + Number(expense.amountMinor || 0));
+  }
+  return totals;
+}
+
+// Fold the flat name list into one entry per parent.
+//
+// The two amount sources sum differently and mixing them would double-count, so
+// they are kept apart deliberately:
+//   directMinor  -- spend recorded against the parent name itself
+//   children via "parent > child" names -- separate records, outside directMinor
+//   children via expense metadata        -- a breakdown *of* directMinor
+// So the card total is directMinor + the "> children", and the sub-category
+// rows plus the unassigned remainder add back up to exactly that. Verified on
+// production that the flat names are disjoint (all 22 summed to total spend,
+// overcount zero), which is what makes the rollup a fact rather than a guess.
+function buildCategoryTree(model, names, totalsByName) {
+  const groups = new Map();
+  const groupFor = (parent) => {
+    const key = parent.toLowerCase();
+    let group = groups.get(key);
+    if (!group) {
+      group = { name: parent, manageName: parent, directMinor: 0, hasOwnRow: false, children: new Map() };
+      groups.set(key, group);
+    }
+    return group;
+  };
+  const childFor = (group, label) => {
+    const key = label.toLowerCase();
+    let child = group.children.get(key);
+    if (!child) {
+      child = { label, manageName: "", amountMinor: 0, hasAmount: false };
+      group.children.set(key, child);
+    }
+    return child;
+  };
+
+  for (const name of names) {
+    const { parent, child } = splitCategoryPath(name);
+    if (!parent) continue;
+    const group = groupFor(parent);
+    if (!child) {
+      group.hasOwnRow = true;
+      group.manageName = name;
+      group.directMinor = Number(totalsByName.get(name) || 0);
+      continue;
+    }
+    const entry = childFor(group, child);
+    entry.manageName = name;
+    entry.amountMinor += Number(totalsByName.get(name) || 0);
+    entry.hasAmount = true;
+  }
+
+  for (const group of groups.values()) {
+    const tagged = subcategorySpendForCategory(model, group.manageName);
+    for (const label of subcategoriesForCategory(model, group.manageName)) {
+      const entry = childFor(group, label);
+      const amountMinor = Number(tagged.get(label) || 0);
+      if (amountMinor) {
+        entry.amountMinor += amountMinor;
+        entry.hasAmount = true;
+      }
+    }
+    // Only metadata-tagged spend is carved out of the parent's own total; the
+    // "> children" were never part of it.
+    let taggedMinor = 0;
+    for (const amount of tagged.values()) taggedMinor += Number(amount || 0);
+    let childMinor = 0;
+    for (const child of group.children.values()) childMinor += child.amountMinor;
+    group.unassignedMinor = Math.max(0, group.directMinor - taggedMinor);
+    group.totalMinor = group.directMinor + (childMinor - taggedMinor);
+    group.childList = Array.from(group.children.values()).sort((a, b) =>
+      b.amountMinor - a.amountMinor || a.label.localeCompare(b.label));
+  }
+
+  return Array.from(groups.values()).sort((a, b) =>
+    b.totalMinor - a.totalMinor || a.name.localeCompare(b.name));
 }
 
 function openSubcategoryEditor(category, previousSubcategory = "") {
@@ -2842,20 +2948,46 @@ function openPanel(kind) {
   if (kind === "categories") {
     const categoryTotals = new Map((model.categories || []).map(category => [category.name, category.amountMinor]));
     const categoryNames = Array.from(new Set([...(model.categories || []).map(category => category.name), ...(model.categoryCatalog || []).map(category => category?.name).filter(Boolean)])).sort();
-    const categoriesHtml = categoryNames.length ? `<div class="category-manager-list">${categoryNames.map((name, index) => {
-      const amountMinor = categoryTotals.get(name) || 0;
-      // Rounding a real amount to "0%" reads as "nothing was spent here", which is
-      // the one thing it does not mean. Anything under half a percent says so.
+    const groups = buildCategoryTree(model, categoryNames, categoryTotals);
+    // Rounding a real amount to "0%" reads as "nothing was spent here", which is
+    // the one thing it does not mean. Anything under half a percent says so.
+    const shareOf = (amountMinor) => {
       const share = amountMinor ? (amountMinor / Math.max(model.spentMinor, 1)) * 100 : 0;
-      const pct = share > 0 && share < 0.5 ? "<1" : Math.round(share);
-      const [tone] = toneFor(name, index);
-      const subcategories = subcategoriesForCategory(model, name);
-      return `<article class="category-manager-row"><div><b><i class="dot" style="--tone:${tone}"></i>${esc(name)}</b><small>${amountMinor ? `${pct}% of monthly expenses · ${formatMoney(amountMinor, model.currency)}` : "Ready to use for future expenses"}</small>${subcategories.length ? `<div class="category-manager-subcategories">${subcategories.map(subcategory => `<span>${esc(subcategory)}</span>`).join("")}</div>` : ""}</div><button type="button" class="tx-modal-action" data-manage-category="${esc(name)}">Manage</button></article>`;
+      return share > 0 && share < 0.5 ? "<1" : Math.round(share);
+    };
+    const money = (amountMinor) => formatMoney(amountMinor, model.currency);
+    const categoriesHtml = groups.length ? `<div class="category-manager-list">${groups.map((group, index) => {
+      const [tone] = toneFor(group.name, index);
+      const children = group.childList;
+      // With children present the card total is a rollup, so say what it is a
+      // rollup of. The rows below plus the unassigned line add back up to it.
+      const summary = !group.totalMinor
+        ? "Ready to use for future expenses"
+        : children.length
+          ? `${shareOf(group.totalMinor)}% of monthly expenses · ${money(group.totalMinor)} including sub-categories`
+          : `${shareOf(group.totalMinor)}% of monthly expenses · ${money(group.totalMinor)}`;
+      const childrenHtml = children.length ? `<ul class="category-manager-children">${children.map(child => {
+        const detail = child.hasAmount && child.amountMinor
+          ? `<span class="category-child-amount">${money(child.amountMinor)}</span>`
+          : `<span class="category-child-amount is-empty">No spending yet</span>`;
+        const manage = child.manageName
+          ? `data-manage-category="${esc(child.manageName)}"`
+          : `data-manage-subcategory="${esc(child.label)}" data-parent-category="${esc(group.manageName)}"`;
+        return `<li class="category-manager-child"><span class="category-child-name">${esc(child.label)}</span>${detail}<button type="button" class="tx-modal-action" ${manage}>Manage</button></li>`;
+      }).join("")}${group.unassignedMinor ? `<li class="category-manager-child is-unassigned"><span class="category-child-name">Not in a sub-category</span><span class="category-child-amount">${money(group.unassignedMinor)}</span></li>` : ""}</ul>` : "";
+      return `<article class="category-manager-row"><div class="category-manager-head"><div><b><i class="dot" style="--tone:${tone}"></i>${esc(group.name)}</b><small>${summary}</small></div><button type="button" class="tx-modal-action" data-manage-category="${esc(group.manageName)}">Manage</button></div>${childrenHtml}</article>`;
     }).join("")}</div>` : '<div class="empty-state">Create your first category to organize future expenses.</div>';
-    openModal("All Categories", "Manage reusable categories and sub-categories for your expenses.", `<div class="category-manager-toolbar"><div><b>${categoryNames.length} categories</b><small>Use categories and sub-categories to keep your transactions organized.</small></div><button type="button" class="tx-modal-action primary" data-add-category>Add category</button></div>${categoriesHtml}`, { wide: true });
+    // The old count was of flat names, so it counted a child as a category of
+    // its own -- 22 for what is really 11 categories and 11 sub-categories.
+    const subcategoryCount = groups.reduce((sum, group) => sum + group.childList.length, 0);
+    const countLabel = `${groups.length} ${groups.length === 1 ? "category" : "categories"}${subcategoryCount ? ` · ${subcategoryCount} sub-${subcategoryCount === 1 ? "category" : "categories"}` : ""}`;
+    openModal("All Categories", "Manage reusable categories and sub-categories for your expenses.", `<div class="category-manager-toolbar"><div><b>${countLabel}</b><small>Use categories and sub-categories to keep your transactions organized.</small></div><button type="button" class="tx-modal-action primary" data-add-category>Add category</button></div>${categoriesHtml}`, { wide: true });
     const modalEl = document.getElementById("dashboard-modal");
     modalEl?.querySelector("[data-add-category]")?.addEventListener("click", () => openCategoryEditor());
     modalEl?.querySelectorAll("[data-manage-category]").forEach(button => button.addEventListener("click", () => openCategoryEditor(button.dataset.manageCategory || "")));
+    // A sub-category that exists only in expense metadata or the saved catalog
+    // has no category record to edit, so it gets the sub-category editor.
+    modalEl?.querySelectorAll("[data-manage-subcategory]").forEach(button => button.addEventListener("click", () => openSubcategoryEditor(button.dataset.parentCategory || "", button.dataset.manageSubcategory || "")));
     return;
   }
   if (kind === "transactions") {

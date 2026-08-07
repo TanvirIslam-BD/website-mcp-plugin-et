@@ -2844,15 +2844,25 @@ button {
   gap: 10px;
 }
 
+/* The card is a block now, not a flex pair: it holds a head (name, rollup,
+   Manage) and, when the category has sub-categories, a list of them beneath.
+   The head keeps the alignment the row itself used to provide. */
 .category-manager-row {
+  padding: 12px 14px;
+  border: 1px solid var(--line, #e2ebe6);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.category-manager-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px;
-  border: 1px solid var(--line, #e2ebe6);
-  border-radius: 10px;
-  background: #fff;
+}
+
+.category-manager-head > div {
+  min-width: 0;
 }
 
 .category-manager-row b,
@@ -2863,6 +2873,9 @@ button {
 .category-manager-row b {
   color: var(--ink, #102131);
   font-size: 13px;
+  /* The dashboard capitalises these same values (.category-line label), so the
+     modal did too or the two surfaces disagreed about the user's own data. */
+  text-transform: capitalize;
 }
 
 .category-manager-row small {
@@ -2871,7 +2884,79 @@ button {
   font-size: 11px;
 }
 
-.category-manager-subcategories,
+.category-manager-children {
+  display: grid;
+  gap: 2px;
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--line, #e2ebe6);
+  list-style: none;
+}
+
+/* A grid, not a flex row, and the action column is a fixed width: that is what
+   gives every amount in the card the same right edge, including the unassigned
+   row at the bottom, which has no button to push against. */
+.category-manager-child {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto var(--category-action-col, 74px);
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+}
+
+.category-child-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink, #102131);
+  font-size: 12px;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.category-child-amount {
+  color: var(--ink, #102131);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Saying "0" for a sub-category that simply has not been used yet would read as
+   a measurement; it is an absence. */
+.category-child-amount.is-empty {
+  color: var(--muted, #66778a);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* The remainder that makes the rollup above add up: sub-category rows plus this
+   line equal the card total. Muted because it is arithmetic, not a category. */
+.category-manager-child.is-unassigned .category-child-name,
+.category-manager-child.is-unassigned .category-child-amount {
+  color: var(--muted, #66778a);
+  font-weight: 600;
+}
+
+/* capitalize is for the user's own category names. This row is our sentence, and
+   title-casing it produced "Not In A Sub-Category". */
+.category-manager-child.is-unassigned .category-child-name {
+  text-transform: none;
+}
+
+.category-manager-child .tx-modal-action {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+/* .category-manager-subcategories is gone: the manager listed a category's
+   sub-categories as amount-less chips *and*, for any stored as "parent > child",
+   as separate top-level rows carrying an amount -- the same name twice, in two
+   forms, one of them with a number. They are one list now
+   (.category-manager-children). The chip styling below stays for the category
+   editor, which still uses chips as an editing affordance. */
 .category-subcategory-list {
   display: flex;
   flex-wrap: wrap;
@@ -2879,7 +2964,6 @@ button {
   margin-top: 9px;
 }
 
-.category-manager-subcategories span,
 .category-subcategory-chip {
   min-height: 24px;
   padding: 3px 8px;
@@ -3007,21 +3091,41 @@ button {
     flex: 1;
   }
 
-  .category-manager-toolbar,
-  .category-manager-row {
+  .category-manager-toolbar {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  /* These two containers turn column just above, which flips what `flex: 1`
-     means: flex-basis:0% stops being a width and becomes the height, so the
-     38px above never applies and the button collapses to ~17px -- well under
-     the 44px touch target. Width is already 100% here, so growing along the
-     main axis buys nothing; opt these out and state the height instead. */
-  .category-manager-row .tx-modal-action,
+  /* This container turns column just above, which flips what `flex: 1` means:
+     flex-basis:0% stops being a width and becomes the height, so the 38px above
+     never applies and the button collapses to ~17px -- well under the 44px touch
+     target. Width is already 100% here, so growing along the main axis buys
+     nothing; opt out and state the height instead. */
   .category-manager-toolbar .tx-modal-action {
     width: 100%;
     flex: 0 0 auto;
+    min-height: 44px;
+  }
+
+  /* The head does NOT stack. A full-width parent button sat between the card's
+     own summary and its own sub-category list, reading as a member of that list
+     rather than as the card's action -- and cost ~56px on each of a dozen cards.
+     Inline and right-aligned, with the 44px coming from height rather than from
+     a flex-basis that column direction would reinterpret. */
+  .category-manager-head .tx-modal-action {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 4px 14px;
+  }
+
+  /* Sub-category rows stay rows for the same reason: one full-width button per
+     sub-category would make a category with six of them 400px tall on its own. */
+  .category-manager-child {
+    --category-action-col: 78px;
+    padding: 2px 0;
+  }
+
+  .category-manager-child .tx-modal-action {
     min-height: 44px;
   }
 }
@@ -11036,7 +11140,21 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   background: #0d1e30;
 }
 
-:root[data-theme="dark"] .category-manager-subcategories span,
+:root[data-theme="dark"] .category-manager-children {
+  border-top-color: #1e354e;
+}
+
+:root[data-theme="dark"] .category-child-name,
+:root[data-theme="dark"] .category-child-amount {
+  color: #f0f6ff;
+}
+
+:root[data-theme="dark"] .category-child-amount.is-empty,
+:root[data-theme="dark"] .category-manager-child.is-unassigned .category-child-name,
+:root[data-theme="dark"] .category-manager-child.is-unassigned .category-child-amount {
+  color: #8da1c2;
+}
+
 :root[data-theme="dark"] .category-subcategory-chip {
   border-color: #1e5b58;
   color: #77e3c4;
