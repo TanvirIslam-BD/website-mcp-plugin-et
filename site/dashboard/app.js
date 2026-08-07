@@ -1039,10 +1039,19 @@ function renderAssistantIntegrationCta() {
 // Seeds the copilot conversation. A brand-new account gets a warm welcome plus
 // starter chips (which send real chat messages), instead of a hollow
 // "You spent ৳0 this month" summary that reads as broken to a first-time user.
+// An account with data gets a proactive summary instead — assistant-initiated,
+// never a staged question-and-answer.
+//
+// Both seeds carry the same header every runtime message gets (see addMessage).
+// Without it the thread changed visual language the moment a real reply landed:
+// seeded turns had no speaker attribution, new ones did.
+const COPILOT_BOT_LABEL = `<div class="ai-message-header"><div class="ai-message-label"><span class="ai-bot-avatar bot-mascot"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span> Money Copilot AI</div></div>`;
+
 function copilotSeedMessages(model) {
   if (!model?.hasFinancialData) {
     return `
       <div class="ai-message assistant copilot-summary">
+        ${COPILOT_BOT_LABEL}
         <div class="ai-message-body">
           <p>👋 Hi, I’m your Money Copilot. I can help you record expenses, set budgets, and find smart ways to save — all from your private dashboard.</p>
           <p>Here’s a good place to start:</p>
@@ -1060,9 +1069,13 @@ function copilotSeedMessages(model) {
   const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
   const overBudget = model.remainingMinor !== null && Number(model.remainingMinor || 0) < 0;
   const budgetDifference = Math.abs(Number(model.remainingMinor || 0));
+  // No fabricated user turn. This used to open with "How is my spending this
+  // month?" attributed to the user, and both messages were stamped 9:42 AM no
+  // matter the actual time — a conversation that never happened, presented as
+  // history. The summary is worth keeping; it just has to be the assistant
+  // speaking unprompted, timestamped honestly.
   return `
-    <div class="ai-message user"><div class="ai-message-label">You</div><div class="ai-message-body">How is my spending this month?</div><small>9:42 AM</small></div>
-    <div class="ai-message assistant copilot-summary"><div class="ai-message-body"><p>Here’s your spending summary for ${esc(monthLabel(model.month).split(" ")[0])}:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>9:42 AM</small></div>
+    <div class="ai-message assistant copilot-summary">${COPILOT_BOT_LABEL}<div class="ai-message-body"><p>Here’s where ${esc(monthLabel(model.month).split(" ")[0])} stands so far:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>Just now</small></div>
   `;
 }
 
@@ -1088,7 +1101,7 @@ function renderAiAssistantRail(model) {
           <span class="copilot-logo bot-mascot" aria-hidden="true" style="width: 44px; height: 44px; display: block; flex: 0 0 auto;"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt="" style="width: 100%; height: auto;"></span>
           <div class="assistant-header-content" style="display: flex; flex-direction: column; gap: 3px;">
             <span class="assistant-title" style="font-size: 15px; font-weight: 700; color: #070c16; line-height: 1.2; display: block;">Money Copilot AI Assistant</span>
-            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
+            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><span class="assistant-online"><i></i>Online</span></span>
           </div>
         </div>
         <button type="button" class="assistant-collapse" data-ai-rail-toggle aria-label="Minimize AI Finance Assistant">−</button>
@@ -1098,19 +1111,18 @@ function renderAiAssistantRail(model) {
           <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
           <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
           <div class="assistant-alert-actions">
-            <button type="button" data-ai-suggestion="Record an expense of 50 BDT for food">${icon("plus")}Add expense</button>
+            <button type="button" data-ai-suggestion="Record an expense of ">${icon("plus")}Add expense</button>
             <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
             <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
           </div>
         </div>
-        <div class="assistant-day"><span>Today</span></div>
-        <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
+        ${renderAssistantIntegrationCta()}
+        <div class="ai-chat-messages assistant-rail-messages" data-ai-messages aria-live="polite" aria-relevant="additions text">
           ${copilotSeedMessages(model)}
         </div>
-        ${renderAssistantIntegrationCta()}
         <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
           <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask or add expense..." aria-label="Ask AI Finance Assistant" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
-          <small>▣ Private · Uses only connected financial data</small>
+          <small class="assistant-privacy">${icon("lock")}<span>Private · Uses only connected financial data</span><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a></small>
         </form>
       </div>
     </aside>
@@ -1126,7 +1138,7 @@ function renderEmptyAssistantRail() {
           <span class="copilot-logo bot-mascot" aria-hidden="true" style="width: 44px; height: 44px; display: block; flex: 0 0 auto;"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt="" style="width: 100%; height: auto;"></span>
           <div class="assistant-header-content" style="display: flex; flex-direction: column; gap: 3px;">
             <span class="assistant-title" style="font-size: 15px; font-weight: 700; color: #070c16; line-height: 1.2; display: block;">Money Copilot AI Assistant</span>
-            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI" style="margin: 0; padding: 2px 6px;"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a><span class="assistant-online" style="font-size: 10px;"><i></i>Online</span></span>
+            <span class="assistant-status-row" style="display: flex; align-items: center; gap: 8px; margin-top: 1px;"><span class="assistant-online"><i></i>Online</span></span>
           </div>
         </div>
       </div>
@@ -1141,7 +1153,7 @@ function renderEmptyAssistantRail() {
           <button type="button" data-ai-send="Help me create a starter budget.">${icon("budget")}Create a starter budget</button>
           <button type="button" data-ai-send="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
         </div>
-        <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
+        <div class="ai-chat-messages empty-ai-messages" data-ai-messages aria-live="polite" aria-relevant="additions text"></div>
       </div>
       <div class="empty-copilot-compose">
         <form data-ai-chat-form><span class="compose-clip">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Money Copilot..." aria-label="Ask Money Copilot" required></textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></form>
@@ -1514,7 +1526,7 @@ function renderOnboarding(model) {
             <button type="button" class="ob-chip" data-panel="budget-editor">${icon("budget")}Set up a monthly budget</button>
             <button type="button" class="ob-chip ob-chip-extra" data-ai-send="Where can I save money?">${icon("advisor")}Where can I save?</button>
           </div>
-          <div class="ai-chat-messages ob-chat-messages" data-ai-messages></div>
+          <div class="ai-chat-messages ob-chat-messages" data-ai-messages aria-live="polite" aria-relevant="additions text"></div>
           <form class="ob-composer" data-ai-chat-form>
             <textarea name="message" maxlength="2000" rows="1" placeholder="Ask, or just say what you spent…" aria-label="Ask Money Copilot" required></textarea>
             <button class="ob-send" type="submit" aria-label="Send">${icon("send")}</button>
@@ -1973,7 +1985,7 @@ function openEmptyAiChat(prefill = "") {
         <button type="button" data-ai-send="Help me create a starter budget.">${icon("budget")}Create a starter budget</button>
         <button type="button" data-ai-send="How does Money Copilot AI protect my privacy?">${icon("lock")}How does privacy work?</button>
       </div>
-      <div class="ai-chat-messages empty-ai-messages" data-ai-messages></div>
+      <div class="ai-chat-messages empty-ai-messages" data-ai-messages aria-live="polite" aria-relevant="additions text"></div>
       <form class="empty-mobile-copilot-compose" data-ai-chat-form>
         <div><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask Money Copilot..." aria-label="Ask Money Copilot" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
         <small>${icon("lock")} Private · Uses only data you approve</small>
@@ -2015,20 +2027,19 @@ function openAiChat(prefill = "") {
         <i class="assistant-alert-icon">${icon(overBudget ? "lock" : "wallet")}</i>
         <div><b>${budgetHeadline}</b><span>${budgetContext}</span></div>
         <div class="assistant-alert-actions">
-          <button type="button" data-ai-suggestion="Record an expense of 50 BDT for food">${icon("plus")}Add expense</button>
+          <button type="button" data-ai-suggestion="Record an expense of ">${icon("plus")}Add expense</button>
           <button type="button" data-ai-suggestion="Explain my budget status this month.">${icon("advisor")}Explain</button>
           <button type="button" data-ai-suggestion="Where can I reduce spending this month?">${icon("search")}Find savings</button>
         </div>
       </div>
-      <div class="assistant-day"><span>Today</span></div>
-      <div class="ai-chat-messages assistant-rail-messages" data-ai-messages>
+      ${renderAssistantIntegrationCta()}
+      <div class="ai-chat-messages assistant-rail-messages" data-ai-messages aria-live="polite" aria-relevant="additions text">
         ${copilotSeedMessages(model)}
       </div>
       </div>
-      ${renderAssistantIntegrationCta()}
       <form class="ai-chat-form assistant-rail-form" data-ai-chat-form>
         <div class="copilot-compose"><span class="compose-clip" aria-hidden="true">${icon("attachment")}</span><textarea name="message" maxlength="2000" placeholder="Ask or add expense..." aria-label="Ask AI Finance Assistant" required>${esc(prefill)}</textarea><button class="assistant-send" type="submit" aria-label="Send question">${icon("send")}</button></div>
-        <small>▣ Private · Uses only connected financial data</small>
+        <small class="assistant-privacy">${icon("lock")}<span>Private · Uses only connected financial data</span><a class="comet-badge" href="https://www.cometapi.com/?utm_source=copilotai&utm_medium=social" target="_blank" rel="noopener noreferrer" aria-label="Powered by CometAPI"><span>Powered by</span><img src="/assets/cometapi-logo.png" alt="CometAPI"></a></small>
       </form>
     </div>
   `, { wide: true, className: "ai-modal ai-desktop-modal" });
@@ -3852,7 +3863,37 @@ function bindEvents() {
     submitPanelForm(form);
   });
 
+  // The composer was a fixed 38-72px box with `resize: none` and a 2000-char
+  // limit, so a long question scrolled inside ~3 lines with no sign of how much
+  // room was left. Grow with the content up to a cap, and only surface the
+  // remaining count once it starts to matter.
+  const COMPOSER_MAX_H = 120;
+  function autosizeComposer(ta) {
+    ta.style.height = "auto";
+    ta.style.height = `${Math.min(COMPOSER_MAX_H, ta.scrollHeight)}px`;
+
+    const limit = Number(ta.getAttribute("maxlength")) || 2000;
+    const form = ta.closest("[data-ai-chat-form]");
+    if (!form) return;
+    let counter = form.querySelector("[data-compose-count]");
+    if (ta.value.length >= limit * 0.8) {
+      if (!counter) {
+        counter = document.createElement("span");
+        counter.className = "compose-count";
+        counter.setAttribute("data-compose-count", "");
+        counter.setAttribute("aria-live", "polite");
+        form.insertBefore(counter, form.querySelector("small"));
+      }
+      const left = limit - ta.value.length;
+      counter.textContent = `${left} character${left === 1 ? "" : "s"} left`;
+      counter.classList.toggle("is-limit", left <= 0);
+    } else if (counter) {
+      counter.remove();
+    }
+  }
+
   document.addEventListener("input", (event) => {
+    if (event.target.matches("[data-ai-chat-form] textarea[name=message]")) autosizeComposer(event.target);
     if (event.target.matches("[data-search]")) filterDashboard(event.target.value);
     if (event.target.matches('input[name="compact_mode"]')) {
       document.documentElement.dataset.density = event.target.checked ? "compact" : "comfortable";
@@ -3863,6 +3904,17 @@ function bindEvents() {
     if (event.target.matches("[data-mobile-copilot-input]") && event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       openMobileCopilotAndSend(event.target.value.trim());
+      return;
+    }
+    // Enter sends, Shift+Enter newlines — the same contract the mobile composer
+    // above already had. Every desktop surface (rail, onboarding, modal) uses a
+    // textarea inside [data-ai-chat-form], where Enter previously just inserted
+    // a line break, so the send button was the only way to submit a message.
+    // The mobile composer is a standalone section, so these never both fire.
+    if (event.key === "Enter" && !event.shiftKey && event.target.matches("[data-ai-chat-form] textarea[name=message]")) {
+      event.preventDefault();
+      const form = event.target.closest("[data-ai-chat-form]");
+      if (form && event.target.value.trim()) submitAiQuestion(form);
       return;
     }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
