@@ -3480,8 +3480,13 @@ img[src$="money-copilot-app-logo.png"] {
   /* Fixed panel heights have to grow with the padding and type below, or the
      taller content simply clips inside the old box. */
   .metric-card, .metric-card.balance { height: 188px !important; min-height: 188px !important; padding: 22px 22px 12px !important; }
-  .large-chart, .budget-panel { min-height: 276px !important; height: 276px !important; }
-  .spending-panel, .financial-health, .insights-panel { min-height: 250px !important; height: 250px !important; }
+  /* min-height, not height: the larger type and padding above push these past a
+     pinned box once the columns narrow (at 1440 with the rail open the spending
+     and health panels ran 119px and 98px past a fixed 250px, spilling their
+     content outside the card). Grid stretches row siblings, so they stay
+     aligned while being free to grow. */
+  .large-chart, .budget-panel { min-height: 276px !important; height: auto !important; }
+  .spending-panel, .financial-health, .insights-panel { min-height: 250px !important; height: auto !important; }
 
   /* --- Elevation ----------------------------------------------------------
      Every surface was `1px solid` + `box-shadow: none`: depth carried entirely
