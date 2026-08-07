@@ -869,7 +869,15 @@ export default async function handler(req, res) {
     // ("What did you spend?") and no tool call yet. Overwriting that with a
     // read-only monthly report is what made "I'd like to add my first expense"
     // answer with a hollow "৳0.00 across 0 expenses" dump, so exclude it.
-    const isEntryOrHelpIntent = /\b(add|record|log|save|create|set up|set a|start|new|help|get started|how (do|can) i|walk me|guide me)\b/i.test(message);
+    // Also treat first-person transaction statements ("I spent money", "I
+    // received income", "I paid 50", "I bought groceries") as entry intents: the
+    // user is starting to log something, so the model's follow-up question
+    // ("How much, and on what?") must survive rather than be replaced by a
+    // read-only ৳0.00 report. Note "how much did I spend" uses "spend", not
+    // "spent", so genuine figure queries are unaffected.
+    const isEntryOrHelpIntent =
+      /\b(add|record|log|save|create|set up|set a|start|new|help|get started|how (do|can) i|walk me|guide me)\b/i.test(message)
+      || /\bi\s+(just\s+)?(spent|paid|bought|received|earned|got\s+paid)\b/i.test(message);
     const unverified = needsFinancialData(message) && !usedTools.length && !isEntryOrHelpIntent;
     let answer = unverified ? "" : lastAssistantText(messages);
     let usedFallback = false;
