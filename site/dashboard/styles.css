@@ -2568,15 +2568,30 @@ button {
   background: var(--soft);
   text-align: left;
   cursor: pointer;
-  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+  box-shadow: 0 2px 6px -4px rgba(16, 42, 76, .2);
+  transition: transform .18s cubic-bezier(.2, .8, .3, 1.1), border-color .18s ease, box-shadow .18s ease;
 }
-.onb-quick-card:hover { transform: translateY(-2px); border-color: #6ee7b7; box-shadow: 0 12px 24px -16px rgba(16,185,129,.55); }
-.onb-quick-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 8px; border-radius: 12px; }
+.onb-quick-card:hover { transform: translateY(-3px); border-color: transparent; box-shadow: 0 16px 30px -16px rgba(16, 42, 76, .4); }
+.onb-quick-card:active { transform: translateY(-1px); }
+.onb-quick-card:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+.onb-quick-card:hover .onb-quick-icon { transform: scale(1.08) rotate(-3deg); }
+/* Per-accent hover glow + chevron nudge to match the hero buttons */
+.onb-quick-card:has(.onb-quick-icon.green):hover { box-shadow: 0 16px 30px -16px rgba(16, 185, 129, .5); }
+.onb-quick-card:has(.onb-quick-icon.violet):hover { box-shadow: 0 16px 30px -16px rgba(124, 63, 255, .5); }
+.onb-quick-card:has(.onb-quick-icon.amber):hover { box-shadow: 0 16px 30px -16px rgba(224, 138, 0, .5); }
+.onb-quick-card:has(.onb-quick-icon.blue):hover { box-shadow: 0 16px 30px -16px rgba(37, 99, 235, .5); }
+.onb-quick-card:hover > svg { transform: translateX(3px); color: var(--ink); }
+.onb-quick-card > svg { transition: transform .18s ease, color .18s ease; }
+.onb-quick-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 8px; border-radius: 12px; transition: transform .18s ease; }
 .onb-quick-icon svg { width: 20px; height: 20px; }
 .onb-quick-icon.green { background: #e6f8ef; color: #10b981; }
 .onb-quick-icon.violet { background: #efeaff; color: #7c3fff; }
 .onb-quick-icon.amber { background: #fff3df; color: #e08a00; }
 .onb-quick-icon.blue { background: #e6efff; color: #2563eb; }
+:root[data-theme="dark"] .onb-quick-icon.green { background: rgba(16, 185, 129, .2); color: #4dd6a8; }
+:root[data-theme="dark"] .onb-quick-icon.violet { background: rgba(124, 63, 255, .22); color: #b79bff; }
+:root[data-theme="dark"] .onb-quick-icon.amber { background: rgba(224, 138, 0, .2); color: #f7b955; }
+:root[data-theme="dark"] .onb-quick-icon.blue { background: rgba(37, 99, 235, .22); color: #7fa8ff; }
 .onb-quick-card b { font-size: 13.5px; font-weight: 750; color: var(--ink); }
 .onb-quick-card small { font-size: 11px; color: var(--muted); line-height: 1.35; }
 .onb-quick-card > svg { position: absolute; right: 12px; bottom: 12px; width: 15px; height: 15px; color: var(--muted); }
