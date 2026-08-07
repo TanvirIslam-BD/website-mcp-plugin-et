@@ -3872,37 +3872,58 @@ img[src$="money-copilot-app-logo.png"] {
 /* ===========================================================================
    Desktop reading order.
 
-   Same principle as the phone — rank by what the user came to do — but not the
-   same answer, because the medium differs. Measured at 1440x900 with the rail
-   open: the chart and budget are fully visible (560-836), the analysis trio
-   starts at y=856 and is cut by the fold, and Recent Transactions sits at
-   y=1264 — entirely below it. So transactions is buried here too, and swaps
-   rows with the trio: transactions moves to y=856 (above the fold), the trio
-   to y=1227. Absolute values assume the two-row KPI grid; with a single-row
-   KPI band everything above shifts up 204px and the ranking is unchanged.
+   Rank by what the user came to do, same as the phone — and now with the same
+   answer for the chart. An earlier version of this block kept Cash flow in the
+   prime top-left slot, arguing that at 479px it is readable enough to anchor
+   the view. Readable, yes, but it is still the panel that repeats what the page
+   has already said: the KPI row states income, spent and saved as numbers, and
+   Smart insights states the trajectory in words. So it goes last here too,
+   matching the mobile order set in 94329d9.
 
-   The chart does NOT move. At 479px wide it is readable and anchors the view,
-   which is exactly the thing it could not do in a 398x168 box on a phone.
-   Demoting it here would be copying the mobile conclusion into a context that
-   does not support it.
+   Recent Transactions keeps the full-width middle row. It is what most visits
+   are actually for — "did that charge land?" — so it must not fall below the
+   analysis panels. Measured at 1440x900 with the rail open it sits at y=856,
+   above the fold; absolute values assume the two-row KPI grid, and with a
+   single-row KPI band everything shifts up 204px without changing the ranking.
+
+   With the chart out of the top-left, the spending/health pair moves up into
+   it, so the first band reads Spending breakdown + Financial health beside the
+   budget ring. Cash flow lands bottom-left with Smart insights beside it.
+
+   Only rows move here — every column assignment is inherited from styles.css
+   untouched, which is why the 49.25% split that sits spending and health side
+   by side inside the wide column still holds.
    =========================================================================== */
 @media (min-width: 1181px) {
-  .transactions-panel { grid-row: 2 !important; }
   .spending-panel,
   .financial-health,
+  .budget-panel { grid-row: 1 !important; }
+  .transactions-panel { grid-row: 2 !important; }
+  .large-chart,
   .insights-panel { grid-row: 3 !important; }
 }
 
 /* Between the tablet breakpoint and the full 4-track grid the panels are
-   auto-placed in two columns, so ordering is the lever rather than explicit
-   rows. Transactions lands after the budget/spending pair instead of last —
-   moving it any earlier would strand the half-width budget panel beside the
-   full-width transactions block and open a gap. */
+   auto-placed in two equal columns, so ordering is the lever rather than
+   explicit rows — and the two full-width panels (chart, transactions) have to
+   land where they do not strand a half-width neighbour and open a gap. Pairing
+   spending with health and budget with insights keeps every row full:
+   spending|health, transactions, budget|insights, then chart last. */
 @media (min-width: 721px) and (max-width: 1180px) {
-  .large-chart { order: 1 !important; }
-  .budget-panel { order: 2 !important; }
-  .spending-panel { order: 3 !important; }
-  .transactions-panel { order: 4 !important; }
-  .financial-health { order: 5 !important; }
-  .insights-panel { order: 6 !important; }
+  /* `order` alone is not enough here. styles.css pins `.large-chart` (and
+     `.transactions-panel`) with an unconditional `grid-row: 1`, and its
+     max-width:1180px rule resets only the column — so both stay explicitly
+     placed, and a placed grid item ignores `order` entirely. The sibling
+     panels escape this because a max-width:1350px rule sets their grid-row
+     back to auto; the chart and transactions are absent from that list.
+     Releasing the row is what makes the ordering below take effect. */
+  .large-chart,
+  .transactions-panel { grid-row: auto !important; }
+
+  .spending-panel { order: 1 !important; }
+  .financial-health { order: 2 !important; }
+  .transactions-panel { order: 3 !important; }
+  .budget-panel { order: 4 !important; }
+  .insights-panel { order: 5 !important; }
+  .large-chart { order: 6 !important; }
 }
