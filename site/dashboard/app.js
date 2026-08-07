@@ -2494,44 +2494,45 @@ function openPanel(kind) {
   if (kind === "connections") {
     const endpoint = esc(MONEY_COPILOT_MCP_ENDPOINT);
     openModal("Connect Money Copilot", "Use your private finance tools from ChatGPT, Claude, or another MCP client.", `
-      <section class="mcp-connect-card" aria-label="Money Copilot MCP connection">
-        <div class="mcp-connect-head">
-          <span class="mcp-connect-identity"><img src="/assets/logo/money-copilot-app-logo-108.webp" alt=""><span><b>Money Copilot MCP</b><small>Remote MCP server</small></span></span>
-          <span class="mcp-ready"><i></i>Ready</span>
-        </div>
-        <div class="mcp-credential-status"><i></i><span><b>Secure connection available</b><small>Each user signs in with their own OAuth session.</small></span></div>
-        <div class="mcp-endpoint-field">
-          <span><small>MCP Endpoint</small><code>${endpoint}</code></span>
-          <button type="button" data-copy-mcp-endpoint="${endpoint}" aria-label="Copy MCP endpoint">${icon("copy")}<span>Copy</span></button>
-        </div>
-        <div class="mcp-auth-row"><span>${icon("lock")}Authentication</span><b>OAuth 2.0 + PKCE</b></div>
-        <p class="mcp-security-note">Your MCPize owner API key is never shown here. Connected clients authorize each user separately, keeping financial workspaces isolated.</p>
-      </section>
+      <div class="mcpx">
+        <section class="mcpx-endpoint" aria-label="Money Copilot MCP endpoint">
+          <div class="mcpx-endpoint-top">
+            <span class="mcpx-brand"><img src="/assets/logo/money-copilot-app-logo-108.webp" alt=""><span><b>Money Copilot MCP</b><small>Remote MCP server</small></span></span>
+            <span class="mcpx-ready"><i></i>Ready</span>
+          </div>
+          <div class="mcpx-endpoint-field">
+            <span class="mcpx-endpoint-label">MCP endpoint</span>
+            <code>${endpoint}</code>
+            <button type="button" class="mcpx-copy" data-copy-mcp-endpoint="${endpoint}" aria-label="Copy MCP endpoint">${icon("copy")}<span>Copy</span></button>
+          </div>
+          <p class="mcpx-secure">${icon("lock")}OAuth 2.0 &middot; PKCE &middot; each user signs in separately, so workspaces stay isolated.</p>
+        </section>
 
-      <section class="mcp-client-section">
-        <div class="mcp-client-heading"><div><h3>Choose your MCP client</h3><p>Select a client to see its connection steps.</p></div><span>3 options</span></div>
-        <div class="mcp-client-grid" role="tablist" aria-label="MCP clients">
-          <button class="active" type="button" role="tab" aria-selected="true" data-connect-client="chatgpt"><img src="/assets/brands/chatgpt.png" alt=""><span><b>ChatGPT</b><small>Custom MCP app</small></span>${icon("chevron")}</button>
-          <button type="button" role="tab" aria-selected="false" data-connect-client="claude"><img src="/assets/brands/claude.png" alt=""><span><b>Claude</b><small>Remote connector</small></span>${icon("chevron")}</button>
-          <button type="button" role="tab" aria-selected="false" data-connect-client="other"><img src="/assets/brands/mcp.png" alt=""><span><b>Any MCP client</b><small>Remote HTTP</small></span>${icon("chevron")}</button>
-        </div>
+        <section class="mcpx-clients">
+          <h3 class="mcpx-h">Connect your client</h3>
+          <div class="mcpx-seg" role="tablist" aria-label="MCP clients">
+            <button class="active" type="button" role="tab" aria-selected="true" data-connect-client="chatgpt"><img src="/assets/brands/chatgpt.png" alt=""><span class="mcpx-seg-txt"><b>ChatGPT</b><small>Custom MCP app</small></span></button>
+            <button type="button" role="tab" aria-selected="false" data-connect-client="claude"><img src="/assets/brands/claude.png" alt=""><span class="mcpx-seg-txt"><b>Claude</b><small>Remote connector</small></span></button>
+            <button type="button" role="tab" aria-selected="false" data-connect-client="other"><img src="/assets/brands/mcp.png" alt=""><span class="mcpx-seg-txt"><b>Any MCP client</b><small>Remote HTTP</small></span></button>
+          </div>
 
-        <div class="mcp-client-guide" data-connection-guide="chatgpt">
-          <strong>Connect with ChatGPT</strong>
-          <ol><li>Open ChatGPT Settings &gt; Apps and enable Developer Mode.</li><li>Select Create, then paste the MCP endpoint above.</li><li>Choose OAuth, complete sign-in, and scan the available tools.</li></ol>
-          <small>Full write actions such as adding expenses require a supported workspace plan and permissions.</small>
-        </div>
-        <div class="mcp-client-guide" data-connection-guide="claude" hidden>
-          <strong>Connect with Claude</strong>
-          <ol><li>Open Claude integrations or connector settings.</li><li>Add a remote MCP server and paste the endpoint above.</li><li>Complete OAuth authorization, then approve the Money Copilot tools.</li></ol>
-          <small>The exact menu name can vary between Claude.ai, Claude Desktop, and Claude Code.</small>
-        </div>
-        <div class="mcp-client-guide" data-connection-guide="other" hidden>
-          <strong>Connect another MCP client</strong>
-          <ol><li>Create a remote HTTP MCP connection.</li><li>Use the endpoint above as the server URL.</li><li>Choose OAuth/Bearer authentication and complete the authorization flow.</li></ol>
-          <small>Use only clients that support remote MCP over HTTPS and OAuth authentication.</small>
-        </div>
-      </section>
+          <div class="mcpx-guide" data-connection-guide="chatgpt">
+            <div class="mcpx-guide-head"><img src="/assets/brands/chatgpt.png" alt="">Connect with ChatGPT</div>
+            <ol><li>Open <b>ChatGPT &rsaquo; Settings &rsaquo; Apps</b> and enable <b>Developer Mode</b>.</li><li>Select <b>Create</b>, then paste the MCP endpoint above.</li><li>Choose <b>OAuth</b>, complete sign-in, and scan the available tools.</li></ol>
+            <p class="mcpx-note">Full write actions such as adding expenses require a supported workspace plan and permissions.</p>
+          </div>
+          <div class="mcpx-guide" data-connection-guide="claude" hidden>
+            <div class="mcpx-guide-head"><img src="/assets/brands/claude.png" alt="">Connect with Claude</div>
+            <ol><li>Open Claude <b>integrations</b> or connector settings.</li><li>Add a <b>remote MCP server</b> and paste the endpoint above.</li><li>Complete <b>OAuth</b> authorization, then approve the Money Copilot tools.</li></ol>
+            <p class="mcpx-note">The exact menu name can vary between Claude.ai, Claude Desktop, and Claude Code.</p>
+          </div>
+          <div class="mcpx-guide" data-connection-guide="other" hidden>
+            <div class="mcpx-guide-head"><img src="/assets/brands/mcp.png" alt="">Connect another MCP client</div>
+            <ol><li>Create a <b>remote HTTP</b> MCP connection.</li><li>Use the endpoint above as the <b>server URL</b>.</li><li>Choose <b>OAuth / Bearer</b> authentication and complete the flow.</li></ol>
+            <p class="mcpx-note">Use only clients that support remote MCP over HTTPS and OAuth authentication.</p>
+          </div>
+        </section>
+      </div>
     `, { wide: true, className: "connections-modal" });
     return;
   }
