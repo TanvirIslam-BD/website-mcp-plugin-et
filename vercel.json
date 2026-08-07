@@ -61,6 +61,10 @@
       "destination": "/site/support.html"
     },
     {
+      "source": "/manny-guide",
+      "destination": "/site/manny-guide.html"
+    },
+    {
       "source": "/robots.txt",
       "destination": "/site/robots.txt"
     },

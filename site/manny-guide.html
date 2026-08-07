@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Manny Copilot &mdash; Manual &amp; Specs | Money Copilot AI</title>
+<meta name="description" content="Manny Copilot manual and specifications: voice interaction, real-time finance updates, dimensions, hardware specs, what's in the box, and quick start." />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://www.copilotai.live/manny-guide" />
+<link rel="icon" type="image/png" sizes="256x256" href="assets/logo/money-copilot-app-logo.png?v=20260804" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logo/money-copilot-app-logo.png?v=20260804" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<link rel="stylesheet" href="assets/legal-pages.css">
+<style>
+  /* The one-page sheet this replaces is a 1200px image of dense 9px type. Set
+     as real content it stays readable on a phone, can be searched, read aloud
+     and printed, and the figures can be corrected without a redraw. */
+  .guide-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:28px;align-items:center;margin:0 0 34px;}
+  .guide-hero img{width:100%;height:auto;border-radius:16px;}
+  .guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:16px 0 8px;padding:0;list-style:none;}
+  .guide-grid li{display:flex;gap:12px;padding:15px 16px;border:1px solid #dfe5ee;border-radius:13px;background:#fff;}
+  .guide-grid svg{flex:0 0 auto;width:19px;height:19px;margin-top:2px;color:#1150e4;}
+  .guide-grid b{display:block;font-size:14.5px;color:#0b1533;}
+  .guide-grid span{display:block;margin-top:3px;font-size:13.5px;line-height:1.55;color:#4b5568;}
+  .guide-steps{counter-reset:gstep;margin:16px 0 8px;padding:0;list-style:none;}
+  .guide-steps li{position:relative;padding:0 0 0 40px;margin:0 0 14px;}
+  .guide-steps li::before{counter-increment:gstep;content:counter(gstep);position:absolute;left:0;top:0;display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#1150e4;color:#fff;font-size:13px;font-weight:800;}
+  .guide-steps b{display:block;font-size:14.5px;color:#0b1533;}
+  .guide-steps span{display:block;margin-top:2px;font-size:13.5px;line-height:1.55;color:#4b5568;}
+  .guide-quote{margin:8px 0 0;padding:9px 13px;border-radius:12px;background:#eef2f8;font-size:13.5px;color:#22304a;}
+  .guide-quote.bot{background:#0b2f5e;color:#e7f0fa;}
+  .spec-table{width:100%;border-collapse:collapse;margin:14px 0 8px;font-size:14px;}
+  .spec-table th,.spec-table td{padding:11px 14px;border-bottom:1px solid #e4eaf2;text-align:left;vertical-align:top;}
+  .spec-table th{width:180px;color:#5c6678;font-weight:700;font-size:12.5px;letter-spacing:.4px;text-transform:uppercase;}
+  .spec-table td{color:#0b1533;font-weight:600;}
+  .guide-tags{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 8px;padding:0;list-style:none;}
+  .guide-tags li{padding:8px 14px;border:1px solid #dfe5ee;border-radius:999px;background:#fff;font-size:13.5px;font-weight:650;color:#22304a;}
+  .guide-note{margin:26px 0 0;padding:15px 17px;border:1px solid #dbe4f2;border-radius:13px;background:#f4f8ff;font-size:13.5px;line-height:1.6;color:#33405a;}
+  /* legal-pages.css has no visually-hidden helper; the table caption names the
+     table for screen readers without printing a second heading above it. */
+  .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
+  @media(max-width:760px){.guide-hero{grid-template-columns:1fr;}.spec-table th{width:auto;display:block;border-bottom:0;padding-bottom:0;}.spec-table td{display:block;padding-top:4px;}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap wide">
+    <a class="brand" href="/">
+      <span class="mark"><img src="assets/logo/money-copilot-app-logo.png" alt="" width="54" height="54"></span>
+      <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
+    </a>
+    <div class="navright">
+      <nav class="legal-nav" aria-label="Primary navigation"><a href="/#manny">Manny</a><a href="/#about">Overview</a><a href="/#features">Features</a><a href="/#pricing">Pricing</a></nav>
+      <a class="back" href="/#manny"><span aria-hidden="true">&larr;</span> Manny</a>
+      <a class="btn" href="/dashboard">Get started <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </div>
+</header>
+
+<section class="pagehead">
+  <div class="wrap">
+    <span class="pill"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.4-3.2 8.2-8 9-4.8-.8-8-4.6-8-9V6z"/></svg>AI home &amp; desk assistant</span>
+    <h1>Manny Copilot <span class="g">Manual</span></h1>
+    <div class="updated">Specifications and quick start &middot; pricing and availability not yet announced</div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <article class="doc">
+
+      <div class="guide-hero">
+        <div>
+          <p class="lead">Manny Copilot listens, thinks and talks &mdash; helping you manage your money with natural conversation and real-time insights. This page is the full manual: what it does, what it says, what is inside it, and how to start it.</p>
+        </div>
+        <img src="assets/manny-device.jpg" width="658" height="930" alt="Manny Copilot desk assistant, showing budget left $420 of $1,800, a dining over-budget alert, an upcoming Netflix payment and monthly spend of $1,240." loading="lazy" decoding="async">
+      </div>
+
+      <h2>Why you&rsquo;ll love Manny Copilot</h2>
+      <ul class="guide-grid">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg><div><b>Voice Interaction</b><span>Talk naturally &mdash; it listens and replies.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg><div><b>Spoken Replies</b><span>It speaks back with helpful answers.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><div><b>Budget Notifications</b><span>Stay on track with real-time updates.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><div><b>Expense Tracking</b><span>Automatic tracking and smart insights.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><div><b>Over-Budget Alerts</b><span>It tells you before you go over.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><div><b>Recurring Payment Reminders</b><span>Never miss a payment again.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><div><b>Privacy First</b><span>Your data stays private and secure.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg><div><b>Compact &amp; Desk Friendly</b><span>Designed to fit beautifully anywhere.</span></div></li>
+      </ul>
+
+      <h2>It accepts voice input and replies to you</h2>
+      <ol class="guide-steps">
+        <li><b>You speak</b><span>Ask anything about your money.</span><p class="guide-quote">&ldquo;Hey Manny, how much budget is left this month?&rdquo;</p></li>
+        <li><b>It thinks and responds</b><span>It analyses your data and gives you the answer.</span><p class="guide-quote bot">&ldquo;You have $420 left in your monthly budget. You&rsquo;re doing great!&rdquo;</p></li>
+        <li><b>The conversation keeps going</b><span>Ask follow-up questions any time.</span><p class="guide-quote">&ldquo;What did I spend the most on this month?&rdquo;</p><p class="guide-quote bot">&ldquo;Your top expense is Dining Out at $420.&rdquo;</p></li>
+      </ol>
+
+      <h2>Real-time finance updates</h2>
+      <p>Each card on the screen has a spoken equivalent.</p>
+      <table class="spec-table">
+        <caption class="sr-only">What Manny shows and what it says</caption>
+        <tbody>
+          <tr><th scope="row">Budget left</th><td>$420 of $1,800 &mdash; &ldquo;You have $420 left in your monthly budget.&rdquo;</td></tr>
+          <tr><th scope="row">Over-budget alert</th><td>Dining, $58 over &mdash; &ldquo;You&rsquo;re $58 over budget in Dining.&rdquo;</td></tr>
+          <tr><th scope="row">Upcoming payment</th><td>Netflix, tomorrow, $15.49 &mdash; &ldquo;Netflix payment of $15.49 is due tomorrow.&rdquo;</td></tr>
+          <tr><th scope="row">Monthly spend</th><td>$1,240, up 8% &mdash; &ldquo;Your spending is up 8% compared to last month.&rdquo;</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Designed for your desk</h2>
+      <ul class="guide-grid">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg><div><b>Compact &amp; elegant</b><span>Fits perfectly on any desk.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg><div><b>High quality audio</b><span>Clear sound, crisp replies.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M9 10h.01M15 10h.01M9.5 13.5a3.5 3.5 0 0 0 5 0"/></svg><div><b>OLED expressive display</b><span>Easy to read, full of personality.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M4 8a8 8 0 0 1 16 0"/></svg><div><b>Premium fabric base</b><span>Looks good. Feels great.</span></div></li>
+      </ul>
+
+      <h2>Specifications</h2>
+      <table class="spec-table">
+        <tbody>
+          <tr><th scope="row">Height</th><td>150 mm (5.9 in)</td></tr>
+          <tr><th scope="row">Width</th><td>120 mm (4.7 in)</td></tr>
+          <tr><th scope="row">Depth</th><td>105 mm (4.1 in)</td></tr>
+          <tr><th scope="row">Weight</th><td>~750 g</td></tr>
+          <tr><th scope="row">Display</th><td>2.8&Prime; OLED touch</td></tr>
+          <tr><th scope="row">Audio</th><td>3 W speaker + microphone array</td></tr>
+          <tr><th scope="row">Connectivity</th><td>Wi-Fi, Bluetooth, Ethernet</td></tr>
+          <tr><th scope="row">Power input</th><td>USB-C, 5 V / 3 A</td></tr>
+          <tr><th scope="row">Storage</th><td>microSD / SSD (optional)</td></tr>
+          <tr><th scope="row">AI model</th><td>Manny Copilot AI (offline capable)</td></tr>
+          <tr><th scope="row">Material</th><td>ABS + fabric</td></tr>
+        </tbody>
+      </table>
+
+      <h2>What&rsquo;s in the box</h2>
+      <ul class="guide-tags">
+        <li>Manny Copilot AI robot</li>
+        <li>USB-C cable (1.5 m)</li>
+        <li>Power adapter (5 V / 3 A)</li>
+        <li>Quick start guide</li>
+      </ul>
+
+      <h2>Quick start</h2>
+      <ol class="guide-steps">
+        <li><b>Plug in USB-C power</b><span>Use the supplied 5 V / 3 A adapter.</span></li>
+        <li><b>The power LED turns on</b><span>The light ring confirms it has power.</span></li>
+        <li><b>It boots in about 30 seconds</b><span>Wait for the face to appear on the display.</span></li>
+        <li><b>Start talking</b><span>Ask your first question &mdash; it is listening.</span></li>
+      </ol>
+
+      <h2>Ideal for</h2>
+      <ul class="guide-tags">
+        <li>Daily budgeting</li>
+        <li>Bill reminders</li>
+        <li>Expense tracking</li>
+        <li>Money habits</li>
+        <li>Smart alerts</li>
+        <li>Voice assistant</li>
+      </ul>
+
+      <p class="guide-note"><strong>Availability.</strong> Manny Copilot is in development. Pricing, release date and shipping regions have not been announced. Email <a href="mailto:support@contact.copilotai.live?subject=Manny%20Copilot%20launch%20updates">support@contact.copilotai.live</a> and we will tell you when they are. In the meantime, <a href="/dashboard">Money Copilot AI</a> gives you the same budgeting and insights in your browser today.</p>
+
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="copyright">&copy; Money Copilot AI &middot; <a href="/">Home</a> &middot; <a href="/support">Support</a> &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
