@@ -3640,6 +3640,13 @@ img[src$="money-copilot-app-logo.png"] {
   .spending-panel .panel-footer-link,
   .transactions-panel .panel-link,
   .insights-panel > .panel-footer-link { font-size: 12px !important; }
+
+  /* Same split as the desktop layer: green means money, indigo means "this is
+     interactive". These were left green when that rule was scoped to >=721px. */
+  :root[data-theme="light"] .panel-footer-link,
+  :root[data-theme="light"] .panel-link { color: var(--ob-ai, #4f5bd5) !important; }
+  :root[data-theme="dark"] .panel-footer-link,
+  :root[data-theme="dark"] .panel-link { color: #8b93ff !important; }
   /* The insights footer link was hidden only because the 148px box had no room
      for it; at natural height it is the panel's way out to the advisor. */
   .insights-panel > .panel-footer-link { display: flex !important; }
