@@ -4120,3 +4120,32 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
 
 /* Header action button label. */
 .toolbar-actions .action-button { color: #2b3a52 !important; }
+
+/* ===========================================================================
+   Second pass, after re-measuring the deployed page in both themes.
+
+   The first sweep cleared 12 of 13 light-theme failures and every sub-10px
+   item, but re-running it in dark exposed three things, one of them mine.
+   =========================================================================== */
+
+/* Mine. Darkening the "New" pill to #056234 fixed light and broke dark, where
+   it landed on rgb(13,53,38) at 1.8:1 — I had set a single value for a token
+   that renders on two opposite surfaces. Both themes now get their own. */
+:root[data-theme="dark"] .sidebar .nav button .pill-new,
+:root[data-theme="dark"] em.pill-new {
+  color: #5fe3a0 !important;
+}
+
+/* Pre-existing, and only visible in dark: the percentage inside the assistant's
+   budget bar keeps its near-black #151b28 while the track turns dark, giving
+   1.25:1 — effectively invisible. */
+:root[data-theme="dark"] .copilot-progress strong { color: #e7f2ec !important; }
+
+/* The sidebar's "Signed dashboard" status was the one light-theme failure the
+   first pass missed: the previous rule lost on specificity to a theme-scoped
+   !important declaration, so it kept #019a56 at 3.65:1. Scoping it the same way
+   wins. Dark already reads 10.7:1 and is left alone. */
+:root[data-theme="light"] .sidebar .profile-card span,
+:root[data-theme="light"] .sidebar .profile-card div span {
+  color: #067a45 !important;
+}
