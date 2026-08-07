@@ -8125,8 +8125,6 @@ textarea:focus-visible {
 :root[data-theme="dark"] .profile-card span {
   color: #60a5fa !important;
 }
-  color: #6b7f9c;
-}
 
 /* Theme switch: blends into sidebar */
 :root[data-theme="dark"] .theme-switch {
