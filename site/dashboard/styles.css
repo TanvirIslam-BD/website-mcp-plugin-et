@@ -2405,7 +2405,7 @@ button {
 .ob {
   --ob-surface:#ffffff; --ob-surface-2:#f4f8f6; --ob-inset:#eef3f1;
   --ob-line:#e3eae7; --ob-line-2:#d7e1dd;
-  --ob-ink:#0b1613; --ob-ink-2:#26332e; --ob-muted:#61726c; --ob-faint:#8a9a94;
+  --ob-ink:#0b1613; --ob-ink-2:#26332e; --ob-muted:#61726c; --ob-faint:#677871;
   --ob-accent:#10b981; --ob-accent-deep:#0a8f66; --ob-accent-soft:#e6f7f0;
   --ob-ai:#4f5bd5; --ob-ai-soft:#ecedfb;
   --ob-shadow:0 1px 2px rgba(11,22,19,.05), 0 22px 44px -30px rgba(11,40,30,.28);
@@ -2416,7 +2416,7 @@ button {
 :root[data-theme="dark"] .ob {
   --ob-surface:#0f1815; --ob-surface-2:#0c1411; --ob-inset:#0c1411;
   --ob-line:#1c2924; --ob-line-2:#243430;
-  --ob-ink:#e9f1ed; --ob-ink-2:#c3d2cc; --ob-muted:#8aa19a; --ob-faint:#63756f;
+  --ob-ink:#e9f1ed; --ob-ink-2:#c3d2cc; --ob-muted:#8aa19a; --ob-faint:#7d8f89;
   --ob-accent:#18c98d; --ob-accent-deep:#37d79f; --ob-accent-soft:rgba(24,201,141,.12);
   --ob-ai:#8b93ff; --ob-ai-soft:rgba(111,120,255,.14);
   --ob-shadow:0 1px 0 rgba(255,255,255,.02) inset, 0 24px 50px -30px rgba(0,0,0,.8);
@@ -2454,7 +2454,7 @@ button {
 .ob-btn.primary:hover{transform:translateY(-2px); box-shadow:0 18px 34px -12px color-mix(in srgb,var(--ob-accent) 90%,transparent)}
 .ob-btn.ghost{background:var(--ob-surface); border-color:var(--ob-line-2); color:var(--ob-ink)}
 .ob-btn.ghost:hover{transform:translateY(-2px); background:var(--ob-surface-2); box-shadow:var(--ob-shadow)}
-.ob-reassure{display:inline-flex; align-items:center; gap:8px; margin:0; font-size:12.5px; color:var(--ob-faint)}
+.ob-hero .ob-reassure{display:inline-flex; align-items:center; gap:8px; margin:0; font-size:12.5px; line-height:1.4; color:var(--ob-faint)}
 .ob-reassure svg{width:14px;height:14px}
 .ob-hero-art{position:relative; align-self:stretch; min-height:260px; display:grid; place-items:center}
 .ob-halo{position:absolute; width:230px;height:230px;border-radius:50%; background:radial-gradient(circle,color-mix(in srgb,var(--ob-accent) 26%,transparent),transparent 66%); filter:blur(4px)}
@@ -2466,6 +2466,15 @@ button {
   background:
     radial-gradient(120% 150% at 100% -30%, color-mix(in srgb,var(--ob-ai) 14%, transparent), transparent 62%),
     linear-gradient(120deg, color-mix(in srgb,var(--ob-ai) 8%, var(--ob-surface)), var(--ob-surface));
+}
+/* Dark mode: lift the band off the near-black page so the headline feature
+   reads as a distinct panel (base tint was ~1.16:1 against the page). */
+:root[data-theme="dark"] .ob-connect{
+  border-color:color-mix(in srgb,var(--ob-ai) 42%, var(--ob-line));
+  background:
+    radial-gradient(120% 150% at 100% -30%, color-mix(in srgb,var(--ob-ai) 26%, transparent), transparent 60%),
+    linear-gradient(120deg, color-mix(in srgb,var(--ob-ai) 18%, var(--ob-surface)), color-mix(in srgb,var(--ob-ai) 6%, var(--ob-surface)));
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 0 0 1px color-mix(in srgb,var(--ob-ai) 14%, transparent), 0 24px 50px -30px rgba(0,0,0,.8);
 }
 .ob-connect-eyebrow{display:inline-flex; align-items:center; gap:7px; margin:0 0 8px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--ob-ai)}
 .ob-connect-eyebrow svg{width:14px;height:14px}
