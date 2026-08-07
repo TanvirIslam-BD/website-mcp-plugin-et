@@ -1733,6 +1733,90 @@
     body.motion-ready .hero-right{animation:none;opacity:1;translate:0 0;filter:none;}
     .stage{translate:0 0!important;}
   }
+
+  /* ---- Manny Copilot -------------------------------------------------------
+     Hardware announcement band. Deliberately uses the page's own tokens rather
+     than the poster's palette, so it reads as part of this site instead of an
+     advert pasted onto it. */
+  .manny{padding:0;}
+  .manny-shell{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:26px;background:
+    radial-gradient(120% 90% at 88% 8%,color-mix(in srgb,var(--blue) 16%,transparent),transparent 62%),
+    linear-gradient(160deg,var(--panel2),var(--panel));}
+  .manny-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:44px;align-items:center;padding:52px 48px 44px;}
+  .manny-kicker{display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border:1px solid color-mix(in srgb,var(--blue) 34%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--ink);font-size:12px;font-weight:750;letter-spacing:.2px;}
+  .manny-kicker i{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 22%,transparent);}
+  .manny-copy h2{margin:18px 0 0;font-size:clamp(38px,5.4vw,60px);line-height:1.02;letter-spacing:-1.6px;color:var(--ink);}
+  .manny-copy h2 .manny-name{color:var(--blue);}
+  .manny-tagline{margin:14px 0 0;font-size:clamp(17px,1.6vw,20px);font-weight:750;line-height:1.35;color:var(--ink);}
+  .manny-tagline span{color:var(--blue);}
+  .manny-lede{margin:14px 0 0;max-width:46ch;font-size:15px;line-height:1.65;color:var(--ink2);}
+  .manny-features{display:grid;gap:14px;margin:28px 0 0;padding:0;list-style:none;}
+  .manny-features li{display:flex;gap:14px;align-items:flex-start;}
+  .manny-ficon{display:grid;place-items:center;flex:0 0 auto;width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--tone) 16%,transparent);border:1px solid color-mix(in srgb,var(--tone) 34%,transparent);color:var(--tone);}
+  .manny-ficon svg{width:19px;height:19px;}
+  .manny-features b{display:block;font-size:14.5px;font-weight:750;color:var(--ink);}
+  .manny-features small{display:block;margin-top:2px;font-size:13px;line-height:1.5;color:var(--ink2);}
+  .manny-actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 0;}
+  .manny-cta{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:0 22px;border-radius:13px;border:1px solid transparent;background:var(--grad);color:#04121d;font-size:14.5px;font-weight:800;text-decoration:none;}
+  .manny-cta.ghost{background:transparent;border-color:var(--line2);color:var(--ink);}
+  .manny-note{margin:16px 0 0;font-size:12.5px;line-height:1.6;color:var(--muted);}
+  .manny-visual{margin:0;display:grid;place-items:center;}
+  .manny-visual img{display:block;width:100%;max-width:420px;height:auto;border-radius:20px;}
+  .manny-voice{padding:34px 48px 36px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--blue) 4%,transparent);}
+  .manny-voice h3{margin:0 0 22px;font-size:clamp(17px,2vw,21px);font-weight:800;letter-spacing:-.3px;color:var(--ink);}
+  .manny-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin:0;padding:0;list-style:none;counter-reset:none;}
+  .manny-steps li{position:relative;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);}
+  .manny-step-no{display:grid;place-items:center;width:26px;height:26px;margin-bottom:11px;border-radius:50%;background:var(--blue);color:#04121d;font-size:13px;font-weight:800;}
+  .manny-steps b{display:block;font-size:14.5px;font-weight:750;color:var(--ink);}
+  .manny-steps small{display:block;margin-top:3px;font-size:13px;line-height:1.5;color:var(--ink2);}
+  .manny-said{margin:12px 0 0;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.5;}
+  .manny-said.you{border:1px solid color-mix(in srgb,var(--blue) 32%,transparent);background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--ink);border-bottom-right-radius:4px;}
+  .manny-said.bot{border:1px solid var(--line2);background:var(--panel2);color:var(--ink2);border-bottom-left-radius:4px;}
+  .manny-specs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0;padding:0;border-top:1px solid var(--line);}
+  .manny-specs>div{padding:18px 22px;border-left:1px solid var(--line);border-top:1px solid var(--line);}
+  .manny-specs>div:nth-child(-n+4){border-top:0;}
+  .manny-specs>div:nth-child(4n+1){border-left:0;}
+  .manny-specs dt{font-size:11.5px;font-weight:750;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+  .manny-specs dd{margin:5px 0 0;font-size:13.5px;font-weight:650;color:var(--ink);}
+  .manny-benefits{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:0;padding:0;list-style:none;border-top:1px solid var(--line);}
+  .manny-benefits li{padding:26px 22px;text-align:center;border-left:1px solid var(--line);}
+  .manny-benefits li:first-child{border-left:0;}
+  .manny-bicon{display:grid;place-items:center;width:44px;height:44px;margin:0 auto 12px;border-radius:50%;background:color-mix(in srgb,var(--tone) 15%,transparent);border:1px solid color-mix(in srgb,var(--tone) 32%,transparent);color:var(--tone);}
+  .manny-bicon svg{width:21px;height:21px;}
+  .manny-benefits b{display:block;font-size:14px;font-weight:750;color:var(--ink);}
+  .manny-benefits small{display:block;margin-top:6px;font-size:12.5px;line-height:1.55;color:var(--ink2);}
+
+  @media(max-width:1000px){
+    .manny-hero{grid-template-columns:1fr;gap:32px;padding:40px 30px 34px;}
+    .manny-visual{order:-1;}
+    .manny-visual img{max-width:320px;}
+    .manny-benefits{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .manny-benefits li{border-top:1px solid var(--line);}
+    .manny-benefits li:nth-child(odd){border-left:0;}
+    .manny-benefits li:first-child,.manny-benefits li:nth-child(2){border-top:0;}
+    .manny-voice{padding:30px 30px 32px;}
+    .manny-steps{grid-template-columns:1fr;gap:14px;}
+    .manny-specs{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .manny-specs>div:nth-child(-n+4){border-top:1px solid var(--line);}
+    .manny-specs>div:nth-child(4n+1){border-left:1px solid var(--line);}
+    .manny-specs>div:nth-child(odd){border-left:0;}
+    .manny-specs>div:first-child,.manny-specs>div:nth-child(2){border-top:0;}
+  }
+  @media(max-width:560px){
+    .manny-shell{border-radius:20px;}
+    .manny-hero{padding:32px 20px 28px;}
+    .manny-copy h2{font-size:clamp(32px,9vw,44px);}
+    .manny-benefits{grid-template-columns:1fr;}
+    .manny-benefits li{border-left:0;border-top:1px solid var(--line);text-align:left;display:flex;gap:14px;align-items:flex-start;padding:18px 20px;}
+    .manny-benefits li:first-child{border-top:0;}
+    .manny-bicon{margin:0;flex:0 0 auto;width:38px;height:38px;}
+    .manny-cta{width:100%;justify-content:center;}
+    .manny-voice{padding:26px 20px 28px;}
+    .manny-specs{grid-template-columns:1fr;}
+    .manny-specs>div{border-left:0!important;border-top:1px solid var(--line)!important;padding:14px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:16px;}
+    .manny-specs>div:first-child{border-top:0!important;}
+    .manny-specs dd{margin:0;text-align:right;}
+  }
 </style>
 </head>
 <body>
@@ -1745,6 +1829,7 @@
       <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
     </a>
     <nav>
+      <a class="lnk" href="#manny">Manny</a>
       <a class="lnk" href="#about">Overview</a>
       <a class="lnk" href="#how">Connect</a>
       <a class="lnk" href="#features">Features</a>
@@ -1995,6 +2080,108 @@
           <span class="logo"><span class="li"><img src="assets/brands/mcp.svg" alt="MCP" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Any MCP Client</span>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANNY COPILOT — AI HOME & DESK ASSISTANT -->
+<section class="sec manny" id="manny" aria-labelledby="manny-title">
+  <div class="wrap">
+    <div class="manny-shell reveal">
+      <div class="manny-hero">
+        <div class="manny-copy">
+          <span class="manny-kicker"><i></i>New · AI home &amp; desk assistant</span>
+          <h2 id="manny-title"><span class="manny-name">Manny</span> Copilot</h2>
+          <p class="manny-tagline">Your AI Finance Companion.<br><span>Smarter Money, Every Day.</span></p>
+          <p class="manny-lede">Manny helps you budget, track spending, avoid overspending, and build better financial habits — all in a friendly conversation.</p>
+          <ul class="manny-features">
+            <li>
+              <span class="manny-ficon" style="--tone:var(--blue)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9v9z"/></svg></span>
+              <div><b>Budget Tracking</b><small>Know what's left, always</small></div>
+            </li>
+            <li>
+              <span class="manny-ficon" style="--tone:var(--green)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+              <div><b>Smart Alerts</b><small>Get notified before you overspend</small></div>
+            </li>
+            <li>
+              <span class="manny-ficon" style="--tone:var(--violet2)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+              <div><b>Recurring Reminders</b><small>Never miss a payment</small></div>
+            </li>
+            <li>
+              <span class="manny-ficon" style="--tone:var(--cyan)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V10M12 20V4M18 20v-6"/></svg></span>
+              <div><b>Spending Insights</b><small>Understand your habits</small></div>
+            </li>
+            <li>
+              <span class="manny-ficon" style="--tone:var(--blue)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span>
+              <div><b>Voice AI Copilot</b><small>Talk naturally, get instant answers</small></div>
+            </li>
+          </ul>
+          <div class="manny-actions">
+            <a class="manny-cta" href="mailto:support@contact.copilotai.live?subject=Manny%20Copilot%20launch%20updates&amp;body=Please%20let%20me%20know%20when%20Manny%20Copilot%20is%20available.">Get launch updates</a>
+            <a class="manny-cta ghost" href="/dashboard">Use Money Copilot AI today <span aria-hidden="true">→</span></a>
+          </div>
+          <p class="manny-note">Manny is in development. Pricing and availability haven't been announced — the button emails us so we can tell you when they are.</p>
+        </div>
+        <figure class="manny-visual">
+          <img src="assets/manny-device.jpg" width="578" height="798" loading="lazy" decoding="async" alt="Manny Copilot, a rounded desk assistant with a fabric base and a glowing light ring. Its screen shows a friendly animated face above four cards: budget left $420 of $1,800, a dining over-budget alert of $58, a Netflix renewal of $15.49 tomorrow, and monthly spend of $1,240, up 8% on last month.">
+        </figure>
+      </div>
+      <div class="manny-voice">
+        <h3>It accepts voice input and replies to you</h3>
+        <ol class="manny-steps">
+          <li>
+            <span class="manny-step-no">1</span>
+            <b>You speak</b>
+            <small>Ask anything about your money.</small>
+            <p class="manny-said you">“Hey Manny, how much budget is left this month?”</p>
+          </li>
+          <li>
+            <span class="manny-step-no">2</span>
+            <b>Manny thinks &amp; responds</b>
+            <small>It analyses your data and answers.</small>
+            <p class="manny-said bot">“You have $420 left in your monthly budget. You're doing great!”</p>
+          </li>
+          <li>
+            <span class="manny-step-no">3</span>
+            <b>The conversation keeps going</b>
+            <small>Ask follow-up questions any time.</small>
+            <p class="manny-said you">“What did I spend the most on this month?”</p>
+            <p class="manny-said bot">“Your top expense is Dining Out at $420.”</p>
+          </li>
+        </ol>
+      </div>
+      <ul class="manny-benefits">
+        <li>
+          <span class="manny-bicon" style="--tone:var(--blue)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-1L3 20l1.1-4.6a8.4 8.4 0 0 1-1-4A8.4 8.4 0 0 1 11.5 3h.5a8.4 8.4 0 0 1 9 8z"/></svg></span>
+          <div><b>Talk Naturally</b><small>Voice or text — Manny understands you.</small></div>
+        </li>
+        <li>
+          <span class="manny-bicon" style="--tone:var(--green)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span>
+          <div><b>Instant Replies</b><small>Get quick, accurate answers about your money.</small></div>
+        </li>
+        <li>
+          <span class="manny-bicon" style="--tone:var(--violet2)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <div><b>Personal &amp; Secure</b><small>Your data is private and always protected.</small></div>
+        </li>
+        <li>
+          <span class="manny-bicon" style="--tone:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
+          <div><b>Proactive Help</b><small>Manny reminds, alerts, and guides you ahead.</small></div>
+        </li>
+        <li>
+          <span class="manny-bicon" style="--tone:var(--cyan)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
+          <div><b>Smarter Every Day</b><small>AI that learns your habits to give better advice.</small></div>
+        </li>
+      </ul>
+      <dl class="manny-specs">
+        <div><dt>Size</dt><dd>150 × 120 × 105 mm</dd></div>
+        <div><dt>Weight</dt><dd>~750 g</dd></div>
+        <div><dt>Display</dt><dd>2.8″ OLED touch</dd></div>
+        <div><dt>Audio</dt><dd>3 W speaker + mic array</dd></div>
+        <div><dt>Connectivity</dt><dd>Wi-Fi · Bluetooth · Ethernet</dd></div>
+        <div><dt>Power</dt><dd>USB-C 5 V/3 A</dd></div>
+        <div><dt>AI model</dt><dd>Offline capable</dd></div>
+        <div><dt>Material</dt><dd>ABS + fabric</dd></div>
+      </dl>
     </div>
   </div>
 </section>
