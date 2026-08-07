@@ -3013,9 +3013,16 @@ button {
     flex-direction: column;
   }
 
+  /* These two containers turn column just above, which flips what `flex: 1`
+     means: flex-basis:0% stops being a width and becomes the height, so the
+     38px above never applies and the button collapses to ~17px -- well under
+     the 44px touch target. Width is already 100% here, so growing along the
+     main axis buys nothing; opt these out and state the height instead. */
   .category-manager-row .tx-modal-action,
   .category-manager-toolbar .tx-modal-action {
     width: 100%;
+    flex: 0 0 auto;
+    min-height: 44px;
   }
 }
 
@@ -5317,12 +5324,15 @@ body {
   background: #edf0f4;
 }
 
+/* Duplicate block: the later .copilot-progress i further down this file wins on
+   background. Kept in agreement with it rather than left stating a red the page
+   never paints. */
 .copilot-progress i {
   display: block;
   width: var(--value);
   height: 100%;
   border-radius: inherit;
-  background: #f11f25;
+  background: var(--status-good, #1baf7a);
 }
 
 .copilot-progress strong {
@@ -8918,8 +8928,22 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
+/* The fill takes the state the summary computed, on the same thresholds as the
+   ring and the health panel. It used to be unconditionally the over-budget red,
+   which made a 71%-used month with money left look like an emergency. Red is
+   still here -- it just has to be earned now. */
 .copilot-progress i {
   border-radius: 99px;
+  background: linear-gradient(90deg, #14c98a, var(--status-good, #1baf7a));
+  box-shadow: 0 1px 4px rgba(27, 175, 122, .2);
+}
+
+.copilot-progress.is-warn i {
+  background: linear-gradient(90deg, #ffb43d, var(--status-warning, #eda100));
+  box-shadow: 0 1px 4px rgba(237, 161, 0, .2);
+}
+
+.copilot-progress.is-over i {
   background: linear-gradient(90deg, #ff4548, #e83538);
   box-shadow: 0 1px 4px rgba(255, 69, 72, .2);
 }
@@ -9158,7 +9182,19 @@ textarea:focus-visible {
   background: #162236;
 }
 
+/* Dark carried its own hardcoded red, so fixing the light fill alone would have
+   left the same false alarm on half the users. States mirror the light rules. */
 :root[data-theme="dark"] .copilot-progress i {
+  background: linear-gradient(90deg, #19d693, #14b57e);
+  box-shadow: 0 1px 4px rgba(25, 214, 147, .15);
+}
+
+:root[data-theme="dark"] .copilot-progress.is-warn i {
+  background: linear-gradient(90deg, #ffc257, #f0a92b);
+  box-shadow: 0 1px 4px rgba(240, 169, 43, .15);
+}
+
+:root[data-theme="dark"] .copilot-progress.is-over i {
   background: linear-gradient(90deg, #e83538, #ff4548);
   box-shadow: 0 1px 4px rgba(255, 69, 72, .15);
 }

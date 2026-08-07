@@ -872,6 +872,16 @@ body.is-resizing-copilot * {
     overscroll-behavior: contain;
   }
 
+  /* Anchor the stack to the bottom, the way every chat does: the newest thing
+     said sits against the composer instead of 241px above it. A short
+     conversation was floating at the top of a 664px column with the remainder
+     blank, which is most of what the first screen showed. margin-top on the
+     first child rather than justify-content:flex-end, because the latter can
+     make overflowing content unreachable at the top once the log grows. */
+  .ai-modal .ai-chat-scroll > :first-child {
+    margin-top: auto !important;
+  }
+
   .ai-modal .ai-chat-scroll .ai-chat-messages {
     overflow: visible !important;
     max-height: none !important;
@@ -2014,23 +2024,24 @@ body.is-resizing-copilot * {
     transform: scale(1.2);
   }
 
-  .mobile-finance-composer textarea {
+  /* The bar is a trigger, not a field: tapping it opens the copilot modal and
+     the typing happens there. It keeps the geometry of the textarea it replaced
+     so the composer reads as an input, and takes the colour that used to be the
+     placeholder's, because its label is permanently placeholder text. */
+  .mobile-finance-composer .mobile-composer-trigger {
     width: 100%;
     height: 42px;
     min-height: 42px;
     padding: 11px 5px;
     border: 0;
     outline: 0;
-    color: var(--mobile-ink);
+    color: #69768f;
     background: transparent;
     font: inherit;
     font-size: 13px;
     line-height: 20px;
-    resize: none;
-  }
-
-  .mobile-finance-composer textarea::placeholder {
-    color: #7d8aa0;
+    text-align: left;
+    cursor: pointer;
   }
 
   .mobile-composer-action {
@@ -2526,10 +2537,16 @@ body.is-resizing-copilot * {
     border-color:#1b3036!important;
     background:#07141a!important;
   }
+  /* Indigo, not green: these are links, and green is reserved for money.
+     The light-theme twin of this rule was already corrected in place; this one
+     was left green and then "fixed" by a shorter selector further down the
+     file, which cannot win -- among !important declarations specificity still
+     decides, and .spending-panel/.transactions-panel each add an ancestor
+     class that the later rule lacks. Corrected at source, same as light. */
   :root[data-theme="dark"] .spending-panel .panel-footer-link,
   :root[data-theme="dark"] .mobile-budget-link,
   :root[data-theme="dark"] .transactions-panel .panel-link{
-    color:#25e486!important;
+    color:#8b93ff!important;
   }
   :root[data-theme="dark"] .insight-item{
     color:#e8f0ec!important;
@@ -2554,11 +2571,10 @@ body.is-resizing-copilot * {
     backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
   }
-  :root[data-theme="dark"] .mobile-finance-composer textarea{
-    color:#e9f1ed!important;
-  }
-  :root[data-theme="dark"] .mobile-finance-composer textarea::placeholder{
-    color:#91a29b!important;
+  /* One colour now, not two: the trigger's label is always the prompt text, so
+     the old typed-text/placeholder pair collapses to a single value. */
+  :root[data-theme="dark"] .mobile-finance-composer .mobile-composer-trigger{
+    color:#a9bcb4!important;
   }
   :root[data-theme="dark"] .mobile-composer-action{
     color:#25e486!important;
@@ -2609,7 +2625,7 @@ body.is-resizing-copilot * {
   }
   :root[data-theme="light"] .ai-modal .modal-top h2 { color:#102d21!important; }
   :root[data-theme="light"] .ai-modal .modal-top p,
-  :root[data-theme="light"] .ai-modal .assistant-rail-form > small { color:#668074!important; }
+  :root[data-theme="light"] .ai-modal .assistant-rail-form > small { color:#5e766b!important; }
   :root[data-theme="light"] .ai-modal .modal-close {
     color:#315b48!important;
     background:#edf7f1!important;
@@ -2636,7 +2652,7 @@ body.is-resizing-copilot * {
     background:#dff5e9!important;
   }
   :root[data-theme="light"] .ai-modal .assistant-alert > div > b { color:#17382a!important; }
-  :root[data-theme="light"] .ai-modal .assistant-alert > div > span { color:#60776c!important; }
+  :root[data-theme="light"] .ai-modal .assistant-alert > div > span { color:#5b7167!important; }
   :root[data-theme="light"] .ai-modal .assistant-alert-actions button {
     color:#087e49!important;
     border-color:#cfe5da!important;
@@ -2706,7 +2722,7 @@ body.is-resizing-copilot * {
   }
   :root[data-theme="light"] .ai-modal .assistant-integration-cta strong { color:#17382a!important; }
   :root[data-theme="light"] .ai-modal .assistant-integration-cta span,
-  :root[data-theme="light"] .ai-modal .assistant-integration-dismiss { color:#60796d!important; }
+  :root[data-theme="light"] .ai-modal .assistant-integration-dismiss { color:#5a7266!important; }
   :root[data-theme="light"] .ai-modal .assistant-integration-cta a {
     color:#244b39!important;
     border-color:#cfe5da!important;
@@ -3716,7 +3732,29 @@ img[src$="money-copilot-app-logo.png"] {
 
   .mobile-composer-bot,
   .mobile-composer-action { min-width: 44px !important; min-height: 44px !important; }
-  .mobile-finance-composer textarea { min-height: 44px !important; }
+  .mobile-finance-composer .mobile-composer-trigger { min-height: 44px !important; }
+
+  /* The copilot chat: this pass had only ever measured what was on the
+     dashboard, so nothing inside a modal was checked. Every control here was
+     under the floor -- the quick actions at 32px, the ChatGPT/Claude pair at
+     40px, and the promo's dismiss at 24px square, which is the smallest target
+     in the product and the one most likely to be hit by accident.
+     The two "Powered by CometAPI" links are deliberately left alone: they are
+     inline attribution inside a line of text, which 2.5.5 exempts, and giving
+     them 44px would add height to a modal that already opens with too much
+     before the conversation starts. */
+  .ai-modal .assistant-alert-actions button,
+  .ai-modal .assistant-integration-cta nav button { min-height: 44px !important; }
+  .ai-modal .assistant-integration-dismiss { min-width: 44px !important; min-height: 44px !important; }
+
+  /* The three contrast near-misses in this modal -- the subtitle at 4.19, the
+     alert's supporting line at 4.44 and the promo's at 4.34 -- are corrected at
+     their :root[data-theme="light"] source rules earlier in this file, not
+     here. A rule written here could not win: those carry a theme prefix this
+     block lacks, and among !important declarations specificity still decides.
+
+     8px, inside a modal the 10px floor was never measured against. */
+  .ai-modal .comet-badge span { font-size: 10px !important; }
 
   /* The slide-out sidebar's own controls sat at 30px. */
   .sidebar .nav button { min-height: 44px !important; }
@@ -4412,9 +4450,11 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
     align-items: center !important;
   }
 
-  /* Panel links: the green they used to take here is corrected at its source
-     rule higher in this file, where the winning declaration lives. Only the dark
-     theme needs stating separately. */
+  /* Panel links: both themes are corrected at their source rules higher in this
+     file, which is where the panel-scoped selectors win. This rule is not a
+     duplicate of those -- it catches the links that carry no panel ancestor
+     class ("View details", "Ask AI Advisor"), which would otherwise fall
+     through to the green dark-theme default in styles.css. */
   :root[data-theme="dark"] .panel-footer-link,
   :root[data-theme="dark"] .panel-link {
     color: #8b93ff !important;

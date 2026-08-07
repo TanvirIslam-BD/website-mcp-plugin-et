@@ -1162,8 +1162,8 @@ function renderMobileCopilotComposer() {
   return `
     <section class="mobile-finance-composer" aria-label="Money Copilot quick actions">
       <button class="mobile-composer-bot bot-mascot" type="button" data-open-ai-chat aria-label="Open Money Copilot"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></button>
-      <textarea rows="1" maxlength="2000" data-mobile-copilot-input placeholder="Ask or add expense..." aria-label="Ask or add an expense"></textarea>
-      <button class="mobile-composer-action" type="button" data-mobile-copilot-send aria-label="Send to Money Copilot">${icon("send")}</button>
+      <button class="mobile-composer-trigger" type="button" data-open-ai-chat>Ask or add expense...</button>
+      <button class="mobile-composer-action" type="button" data-open-ai-chat aria-label="Open Money Copilot">${icon("send")}</button>
     </section>
   `;
 }
@@ -1235,13 +1235,24 @@ function copilotSeedMessages(model) {
   const topShare = topCategory && model.spentMinor ? Math.round((Number(topCategory.amountMinor || 0) / Math.max(1, Number(model.spentMinor))) * 100) : 0;
   const overBudget = model.remainingMinor !== null && Number(model.remainingMinor || 0) < 0;
   const budgetDifference = Math.abs(Number(model.remainingMinor || 0));
+  // Same thresholds the health panel and the ring already use (>=100 over,
+  // >=80 warn, otherwise good). The bar carried no state at all before, so it
+  // was painted the over-budget red at every value -- including, as here, a
+  // month with money left, directly under a green card saying so.
+  const budgetState = !model.budgetMinor
+    ? "is-good"
+    : model.budgetUsed >= 100
+      ? "is-over"
+      : model.budgetUsed >= 80
+        ? "is-warn"
+        : "is-good";
   // No fabricated user turn. This used to open with "How is my spending this
   // month?" attributed to the user, and both messages were stamped 9:42 AM no
   // matter the actual time — a conversation that never happened, presented as
   // history. The summary is worth keeping; it just has to be the assistant
   // speaking unprompted, timestamped honestly.
   return `
-    <div class="ai-message assistant copilot-summary">${COPILOT_BOT_LABEL}<div class="ai-message-body"><p>Here’s where ${esc(monthLabel(model.month).split(" ")[0])} stands so far:</p><b>Budget usage</b><div class="copilot-progress"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>Just now</small></div>
+    <div class="ai-message assistant copilot-summary">${COPILOT_BOT_LABEL}<div class="ai-message-body"><p>Here’s where ${esc(monthLabel(model.month).split(" ")[0])} stands so far:</p><b>Budget usage</b><div class="copilot-progress ${budgetState}"><i style="--value:${Math.min(100, model.budgetUsed || 0)}%"></i><strong>${model.budgetMinor ? `${model.budgetUsed}%` : "--"}</strong></div><div class="copilot-budget-row"><span>${formatMoney(model.spentMinor, model.currency, { compact: true })} of ${model.budgetMinor ? formatMoney(model.budgetMinor, model.currency, { compact: true }) : "no budget"}</span><b>${model.remainingMinor === null ? "" : overBudget ? `${formatMoney(budgetDifference, model.currency, { compact: true })} over` : `${formatMoney(model.remainingMinor, model.currency, { compact: true })} left`}</b></div><ul><li>You spent ${formatMoney(model.spentMinor, model.currency, { compact: true })} this month.</li>${topCategory ? `<li>${esc(topCategory.name)} is your top category at ${topShare}% of spending.</li>` : ""}</ul></div><small>Just now</small></div>
   `;
 }
 
@@ -2208,18 +2219,17 @@ function openAiChat(prefill = "") {
       </form>
     </div>
   `, { wide: true, className: "ai-modal ai-desktop-modal" });
-}
-
-function openMobileCopilotAndSend(message) {
-  const text = String(message || "").trim();
-  if (!text) {
-    openAiChat();
-    return;
-  }
-  openAiChat(text);
+  // Focus belongs inside the dialog the moment it opens: it was staying on
+  // <body>, which left keyboard and screen-reader users outside the thing that
+  // had just appeared. It also makes the mobile composer's one job work -- that
+  // bar is a trigger now, so the tap that opens this modal has to be the same
+  // tap that raises the keyboard, or typing costs two taps instead of one.
   requestAnimationFrame(() => {
-    const form = document.querySelector(".ai-modal [data-ai-chat-form]");
-    if (form) submitAiQuestion(form);
+    const field = document.querySelector(".ai-modal [data-ai-chat-form] textarea[name=message]");
+    if (!field) return;
+    field.focus();
+    // Prefilled questions land ready to send rather than ready to overwrite.
+    field.setSelectionRange(field.value.length, field.value.length);
   });
 }
 
@@ -2828,7 +2838,10 @@ function openPanel(kind) {
     const categoryNames = Array.from(new Set([...(model.categories || []).map(category => category.name), ...(model.categoryCatalog || []).map(category => category?.name).filter(Boolean)])).sort();
     const categoriesHtml = categoryNames.length ? `<div class="category-manager-list">${categoryNames.map((name, index) => {
       const amountMinor = categoryTotals.get(name) || 0;
-      const pct = amountMinor ? Math.round((amountMinor / Math.max(model.spentMinor, 1)) * 100) : 0;
+      // Rounding a real amount to "0%" reads as "nothing was spent here", which is
+      // the one thing it does not mean. Anything under half a percent says so.
+      const share = amountMinor ? (amountMinor / Math.max(model.spentMinor, 1)) * 100 : 0;
+      const pct = share > 0 && share < 0.5 ? "<1" : Math.round(share);
       const [tone] = toneFor(name, index);
       const subcategories = subcategoriesForCategory(model, name);
       return `<article class="category-manager-row"><div><b><i class="dot" style="--tone:${tone}"></i>${esc(name)}</b><small>${amountMinor ? `${pct}% of monthly expenses · ${formatMoney(amountMinor, model.currency)}` : "Ready to use for future expenses"}</small>${subcategories.length ? `<div class="category-manager-subcategories">${subcategories.map(subcategory => `<span>${esc(subcategory)}</span>`).join("")}</div>` : ""}</div><button type="button" class="tx-modal-action" data-manage-category="${esc(name)}">Manage</button></article>`;
@@ -3675,11 +3688,6 @@ function bindEvents() {
       openAiChat(aiChat.dataset.aiPrefill || "");
       return;
     }
-    const mobileCopilotSend = event.target.closest("[data-mobile-copilot-send]");
-    if (mobileCopilotSend) {
-      openMobileCopilotAndSend(document.querySelector("[data-mobile-copilot-input]")?.value);
-      return;
-    }
     const dismissIntegration = event.target.closest("[data-dismiss-integration]");
     if (dismissIntegration) {
       dismissIntegration.closest(".assistant-integration-cta")?.classList.add("is-dismissed");
@@ -4054,16 +4062,11 @@ function bindEvents() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.target.matches("[data-mobile-copilot-input]") && event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      openMobileCopilotAndSend(event.target.value.trim());
-      return;
-    }
-    // Enter sends, Shift+Enter newlines — the same contract the mobile composer
-    // above already had. Every desktop surface (rail, onboarding, modal) uses a
-    // textarea inside [data-ai-chat-form], where Enter previously just inserted
-    // a line break, so the send button was the only way to submit a message.
-    // The mobile composer is a standalone section, so these never both fire.
+    // Enter sends, Shift+Enter newlines. Every surface that accepts a question
+    // (rail, onboarding, modal) uses a textarea inside [data-ai-chat-form],
+    // where Enter previously just inserted a line break, so the send button was
+    // the only way to submit a message. The mobile composer is not in this set:
+    // it is a trigger that opens the modal, and the typing happens there.
     if (event.key === "Enter" && !event.shiftKey && event.target.matches("[data-ai-chat-form] textarea[name=message]")) {
       event.preventDefault();
       const form = event.target.closest("[data-ai-chat-form]");
