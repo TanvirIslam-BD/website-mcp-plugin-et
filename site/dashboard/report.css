@@ -4059,3 +4059,64 @@ img[src$="money-copilot-app-logo.png"] {
   opacity: 1 !important;
   background: rgba(234, 88, 12, .08) !important;
 }
+
+/* ===========================================================================
+   Live contrast and size sweep.
+
+   Measured on the deployed site, element by element, not in the harness. Every
+   value below failed either AA at its size or the 10px legibility floor, and
+   each target colour was chosen to clear 4.5:1 against the background actually
+   resolved behind it.
+   =========================================================================== */
+
+/* Alarm red on a healthy balance. The rail headline wraps the figure in
+   <strong> for both states — "৳14,639 remains in your budget" and "You're
+   ৳14,639 over budget" — and the stylesheet painted both #f11f25, so the colour
+   carried no information and contradicted the sentence around it. Red is now
+   reserved for actually being over. (Markup tags the two states.) */
+.assistant-alert strong,
+.assistant-alert strong.is-remaining {
+  color: #0a7a45 !important;
+}
+
+.assistant-alert strong.is-over { color: #c81e22 !important; }
+
+:root[data-theme="dark"] .assistant-alert strong,
+:root[data-theme="dark"] .assistant-alert strong.is-remaining { color: #3ddc8f !important; }
+
+:root[data-theme="dark"] .assistant-alert strong.is-over { color: #ff8b8e !important; }
+
+/* My own regression: the category parent span shipped at 3.47:1 in the previous
+   commit. Muted has to stay above the floor. */
+.category-line .category-parent { color: #5c6b83; }
+
+:root[data-theme="dark"] .category-line .category-parent { color: #9aa9c1; }
+
+/* Sub-10px text. None of these are decoration — they label money or navigation. */
+.sidebar-search kbd { font-size: 10px !important; }
+.sidebar .nav-label { font-size: 10px !important; color: #4c5a51 !important; }
+.spending-donut span { font-size: 10px !important; }
+.category-line .category-amount { font-size: 10px !important; }
+
+/* Greens that sat just under the line on light surfaces. */
+.sidebar .nav button .pill-new,
+em.pill-new { font-size: 10px !important; color: #056234 !important; }
+
+.sidebar .profile-card span { color: #067a45 !important; }
+
+.transactions td button.tag,
+.transactions td .tag { font-size: 10px !important; }
+
+/* Category chips take their colour from a per-category --tone, so they cannot be
+   given one fixed value. Mixing the tone toward ink darkens every hue by the
+   same amount and keeps each category identifiable. color-mix is already used
+   elsewhere in this codebase. */
+.transactions td button.tag { color: color-mix(in srgb, var(--tone) 72%, #0a1120) !important; }
+
+/* "/ 100" beside the health score, and the remaining-budget line under the ring. */
+.score-ring .inner span { color: #55637c !important; }
+.budget-over.positive { color: #0a7a45 !important; }
+.budget-over.negative { color: #c81e22 !important; }
+
+/* Header action button label. */
+.toolbar-actions .action-button { color: #2b3a52 !important; }

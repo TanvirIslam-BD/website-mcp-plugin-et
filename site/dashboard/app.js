@@ -1235,8 +1235,8 @@ function renderAiAssistantRail(model) {
   const budgetDifference = Math.abs(Number(model.remainingMinor || 0));
   const budgetHeadline = model.budgetMinor
     ? overBudget
-      ? `You’re <strong>${formatMoney(budgetDifference, model.currency, { compact: true })}</strong> over budget`
-      : `<strong>${formatMoney(model.remainingMinor, model.currency, { compact: true })}</strong> remains in your budget`
+      ? `You’re <strong class="is-over">${formatMoney(budgetDifference, model.currency, { compact: true })}</strong> over budget`
+      : `<strong class="is-remaining">${formatMoney(model.remainingMinor, model.currency, { compact: true })}</strong> remains in your budget`
     : "Set a budget to unlock alerts";
   const budgetContext = topCategory
     ? `${esc(topCategory.name)} drove most of this month’s spending.`
@@ -2155,8 +2155,8 @@ function openAiChat(prefill = "") {
   const budgetDifference = Math.abs(Number(model?.remainingMinor || 0));
   const budgetHeadline = model?.budgetMinor
     ? overBudget
-      ? `You’re <strong>${formatMoney(budgetDifference, model.currency, { compact: true })}</strong> over budget`
-      : `<strong>${formatMoney(model.remainingMinor, model.currency, { compact: true })}</strong> remains in your budget`
+      ? `You’re <strong class="is-over">${formatMoney(budgetDifference, model.currency, { compact: true })}</strong> over budget`
+      : `<strong class="is-remaining">${formatMoney(model.remainingMinor, model.currency, { compact: true })}</strong> remains in your budget`
     : "Set a budget to unlock alerts";
   const budgetContext = topCategory
     ? `${esc(topCategory.name)} drove most of this month’s spending.`
