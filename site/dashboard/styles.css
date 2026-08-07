@@ -2433,24 +2433,70 @@ button {
 }
 .onb-hero-checks li { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--text); }
 .onb-hero-checks svg { width: 15px; height: 15px; padding: 3px; border-radius: 50%; background: #10b981; color: #fff; stroke-width: 3; }
-.onb-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.onb-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .onb-hero-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 18px;
+  gap: 11px;
+  padding: 11px 20px 11px 12px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--panel);
   color: var(--ink);
   font-size: 13.5px;
-  font-weight: 700;
+  font-weight: 750;
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  box-shadow: 0 2px 6px -3px rgba(16, 42, 76, .18);
+  transition: transform .18s cubic-bezier(.2, .8, .3, 1.1), box-shadow .18s ease, border-color .18s ease;
 }
-.onb-hero-btn svg { width: 17px; height: 17px; }
-.onb-hero-btn:hover { transform: translateY(-1px); border-color: #6ee7b7; box-shadow: 0 10px 22px -14px rgba(16,185,129,.6); }
-.onb-hero-btn.primary { border-color: transparent; background: linear-gradient(135deg, #10b981, #0ea371); color: #fff; box-shadow: 0 12px 26px -12px rgba(16,185,129,.75); }
+.onb-hero-btn:hover { transform: translateY(-3px); border-color: transparent; box-shadow: 0 16px 30px -14px rgba(16, 42, 76, .38); }
+.onb-hero-btn:active { transform: translateY(-1px); }
+.onb-hero-btn:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+
+/* Accent icon chip inside each button */
+.onb-btn-ic {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--soft);
+  color: var(--ink);
+  transition: transform .18s ease;
+}
+.onb-btn-ic svg { width: 17px; height: 17px; }
+.onb-hero-btn:hover .onb-btn-ic { transform: scale(1.08) rotate(-3deg); }
+.onb-btn-ic.amber { background: #fff2d9; color: #d98500; }
+.onb-btn-ic.blue { background: #e5efff; color: #2563eb; }
+.onb-btn-ic.teal { background: #d8f6ee; color: #0f9d68; }
+
+/* Primary — gradient with a soft moving sheen */
+.onb-hero-btn.primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #10b981, #0ea371);
+  color: #fff;
+  box-shadow: 0 12px 26px -12px rgba(16, 185, 129, .75);
+}
+.onb-hero-btn.primary:hover { box-shadow: 0 20px 36px -12px rgba(16, 185, 129, .9); }
+.onb-hero-btn.primary .onb-btn-ic { background: rgba(255, 255, 255, .22); color: #fff; }
+.onb-hero-btn.primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .7s ease;
+  pointer-events: none;
+}
+.onb-hero-btn.primary:hover::after { transform: translateX(120%); }
+
+/* Per-button hover border accents on the secondary buttons */
+.onb-hero-btn:has(.onb-btn-ic.amber):hover { box-shadow: 0 16px 30px -14px rgba(217, 133, 0, .45); }
+.onb-hero-btn:has(.onb-btn-ic.blue):hover { box-shadow: 0 16px 30px -14px rgba(37, 99, 235, .45); }
+.onb-hero-btn:has(.onb-btn-ic.teal):hover { box-shadow: 0 16px 30px -14px rgba(15, 157, 104, .45); }
+
 .onb-hero-btn .onb-soon {
   margin-left: 2px;
   padding: 2px 7px;
@@ -2462,6 +2508,9 @@ button {
   letter-spacing: .04em;
   text-transform: uppercase;
 }
+:root[data-theme="dark"] .onb-btn-ic.amber { background: rgba(217, 133, 0, .2); color: #f7b955; }
+:root[data-theme="dark"] .onb-btn-ic.blue { background: rgba(37, 99, 235, .22); color: #7fa8ff; }
+:root[data-theme="dark"] .onb-btn-ic.teal { background: rgba(15, 157, 104, .22); color: #4dd6a8; }
 .onb-hero-note { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 12px; color: var(--muted); }
 .onb-hero-note svg { width: 14px; height: 14px; }
 .onb-hero-art { flex: 0 0 auto; width: 190px; text-align: center; }

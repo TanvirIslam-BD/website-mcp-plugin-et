@@ -1408,10 +1408,10 @@ function renderOnboarding(model) {
           <li>${icon("check")}Save more money</li>
         </ul>
         <div class="onb-hero-actions">
-          <button class="onb-hero-btn primary" type="button" data-entry="expense">${icon("plus")}Add First Expense</button>
-          <button class="onb-hero-btn" type="button" data-panel="budget-editor">${icon("budget")}Set a Monthly Budget</button>
-          <button class="onb-hero-btn" type="button" data-panel="connections">${icon("advisor")}Connect ChatGPT or Claude</button>
-          <button class="onb-hero-btn" type="button" data-preview-sample>${icon("eye")}Explore Demo</button>
+          <button class="onb-hero-btn primary" type="button" data-entry="expense"><span class="onb-btn-ic">${icon("plus")}</span>Add First Expense</button>
+          <button class="onb-hero-btn" type="button" data-panel="budget-editor"><span class="onb-btn-ic amber">${icon("budget")}</span>Set a Monthly Budget</button>
+          <button class="onb-hero-btn" type="button" data-panel="connections"><span class="onb-btn-ic blue">${icon("advisor")}</span>Connect ChatGPT or Claude</button>
+          <button class="onb-hero-btn" type="button" data-preview-sample><span class="onb-btn-ic teal">${icon("eye")}</span>Explore Demo</button>
         </div>
         <p class="onb-hero-note">${icon("lock")}No bank connection required. Your data stays private and secure.</p>
       </div>
