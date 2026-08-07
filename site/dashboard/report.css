@@ -3927,3 +3927,85 @@ img[src$="money-copilot-app-logo.png"] {
   .insights-panel { order: 5 !important; }
   .large-chart { order: 6 !important; }
 }
+
+/* ===========================================================================
+   Assistant rail: type scale, privacy footer, composer.
+
+   The rail had drifted to a size no one would choose deliberately: the
+   "Powered by" badge computed to 7.5px, the three alert actions and the privacy
+   line to 9px, timestamps to 10px, and the panel title to 13px even though its
+   inline style asks for 15px. The overrides live in a styles.css
+   @media (min-width:1181px) block that sets each with !important, which is why
+   the inline style lost. report.css loads after styles.css, so matching the
+   media query and the !important is what it takes to win here.
+
+   Worth stating plainly: contrast was never the problem. Measured in the light
+   theme these ran 6.9:1 to 19.7:1, every one passing AA. 7.5px text is
+   illegible at any contrast ratio, so the fix is size, not colour.
+   =========================================================================== */
+@media (min-width: 1181px) {
+  .assistant-title { font-size: 15px !important; }
+  .assistant-alert-actions button { font-size: 12px !important; min-height: 38px !important; }
+  .assistant-rail .ai-message { font-size: 13px !important; }
+  .assistant-rail .ai-message small { font-size: 11px !important; }
+  .assistant-integration-cta strong { font-size: 12px !important; }
+}
+
+/* The privacy line now carries a real lock icon and the relocated attribution,
+   so it is a row rather than a single string — and it needs to shed the 220px
+   max-width it inherits from .assistant-rail-form small, or the badge wraps. */
+.assistant-privacy {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  max-width: none !important;
+  font-size: 11px !important;
+  line-height: 1.35;
+}
+
+.assistant-privacy > svg {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+}
+
+.assistant-privacy > span { min-width: 0; }
+
+/* Pushed to the far end so the sentence reads first and attribution trails it. */
+.assistant-privacy .comet-badge {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+/* Auto-grown by autosizeComposer(); the cap here has to match COMPOSER_MAX_H. */
+.assistant-rail-form textarea,
+.ai-chat-form textarea[name="message"] {
+  max-height: 120px !important;
+  font-size: 13px !important;
+}
+
+/* Only present within 20% of the limit, so it must not reserve space when absent. */
+.compose-count {
+  display: block;
+  margin-top: -2px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+}
+
+.compose-count.is-limit {
+  color: #ea580c;
+  font-weight: 700;
+}
+
+/* Two sizes the rules above missed, because both live on descendants rather
+   than the elements I targeted: .ai-message set 13px but the body carries its
+   own 12px, and the badge's inner span shrank to 8px inside a 10px parent.
+   Attribution is allowed to be quiet, but not 8px — 10px is the floor for it. */
+@media (min-width: 1181px) {
+  .assistant-rail .ai-message-body { font-size: 13px !important; }
+}
+
+.assistant-privacy .comet-badge span { font-size: 10px !important; }
