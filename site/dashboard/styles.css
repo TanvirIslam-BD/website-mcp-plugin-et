@@ -2595,11 +2595,13 @@ button {
   .ob-topline{flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:16px}
   .ob-hero{margin-bottom:14px}
   .ob-hero-body{padding:22px 18px}
-  .ob-hero h2{font-size:clamp(24px,7vw,30px)}
+  /* Compact hero: tuck the mascot into the top-right beside the title instead
+     of a tall block below the CTAs. Reserve title space so text never underlaps it. */
+  .ob-hero-art{position:absolute; top:12px; right:12px; width:76px; min-height:0; padding:0; margin:0; display:block; z-index:1}
+  .ob-hero-art img{width:76px; margin:0}
+  .ob-halo{display:none}
+  .ob-hero h2{font-size:clamp(23px,6.2vw,28px); padding-right:88px; min-height:76px}
   .ob-hero p{font-size:14px; margin-bottom:20px}
-  .ob-hero-art{min-height:0;padding:0 0 20px}
-  .ob-hero-art img{width:118px}
-  .ob-halo{width:150px;height:150px}
   .ob-cta-row{gap:8px}
   .ob-cta-row .ob-btn{flex:1 1 100%; justify-content:center; min-height:46px}
   .ob-connect{padding:18px}
