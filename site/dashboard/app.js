@@ -1386,6 +1386,17 @@ function renderOnboarding(model) {
 
   return `
     ${renderMobileDashboardHeader(model)}
+    <header class="topbar onb-topbar">
+      <div class="toolbar">
+        ${renderMonthPicker(model.month)}
+        <label class="input-shell">${icon("search")}<input type="search" placeholder="Search transactions" data-search></label>
+        <button class="notice-button" data-panel="notifications" aria-label="Notifications">${icon("bell")}<b>${buildNotifications(model).length}</b></button>
+        <div class="toolbar-actions">
+          <button class="action-button" data-entry="income">${icon("plus")}Add Income</button>
+          <button class="action-button primary" data-entry="expense">${icon("plus")}Add Expense</button>
+        </div>
+      </div>
+    </header>
     <section class="onb-hero">
       <div class="onb-hero-copy">
         <h1>Welcome to Money Copilot AI <span aria-hidden="true">👋</span></h1>
@@ -1398,8 +1409,8 @@ function renderOnboarding(model) {
         </ul>
         <div class="onb-hero-actions">
           <button class="onb-hero-btn primary" type="button" data-entry="expense">${icon("plus")}Add First Expense</button>
-          <button class="onb-hero-btn" type="button" data-coming-soon="Receipt upload">${icon("camera")}Upload Receipt<span class="onb-soon">Soon</span></button>
-          <button class="onb-hero-btn" type="button" data-coming-soon="Voice expense logging">${icon("microphone")}Voice Expense<span class="onb-soon">Soon</span></button>
+          <button class="onb-hero-btn" type="button" data-panel="budget-editor">${icon("budget")}Set a Monthly Budget</button>
+          <button class="onb-hero-btn" type="button" data-panel="connections">${icon("advisor")}Connect ChatGPT or Claude</button>
           <button class="onb-hero-btn" type="button" data-preview-sample>${icon("eye")}Explore Demo</button>
         </div>
         <p class="onb-hero-note">${icon("lock")}No bank connection required. Your data stays private and secure.</p>
@@ -1419,7 +1430,7 @@ function renderOnboarding(model) {
           <div class="onb-chips">
             <button type="button" data-ai-send="I spent money">💸 I spent money</button>
             <button type="button" data-ai-send="I received income">💰 I received income</button>
-            <button type="button" data-coming-soon="Receipt scanning">📷 Scan a receipt</button>
+            <button type="button" data-panel="connections">🔗 Connect ChatGPT or Claude</button>
             <button type="button" data-ai-send="Help me create a budget">🎯 Create my budget</button>
             <button type="button" data-preview-sample>📊 Show sample dashboard</button>
           </div>

@@ -2398,6 +2398,8 @@ button {
    New-user onboarding experience
    ============================================================ */
 .onboarding-main { display: block; }
+.onb-topbar { justify-content: flex-end; margin-bottom: 16px; }
+.onb-topbar .toolbar { margin-left: 0; }
 
 /* Hero */
 .onb-hero {
