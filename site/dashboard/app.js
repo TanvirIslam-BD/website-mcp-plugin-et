@@ -1370,127 +1370,89 @@ function celebrateFirstData() {
 // the normal dashboard the moment any real data exists.
 function renderOnboarding(model) {
   const displayName = esc((model.user?.displayName || "there").split(/\s+/)[0]);
-  const loveItems = [
-    "AI categorizes expenses", "Voice expense logging", "Receipt scanner",
-    "Monthly reports", "Budget alerts", "Spending insights", "Privacy first",
-  ];
   const setupSteps = [
     { label: "Account created", done: true },
-    { label: "Add first expense", done: false },
-    { label: "Add income", done: false },
-    { label: "Create budget", done: false },
-    { label: "Get first AI insight", done: false },
+    { label: "Add your first expense", hint: "Takes about 10 seconds", hook: `data-entry="expense"` },
+    { label: "Set a monthly budget", hint: "See what's left as you spend", hook: `data-panel="budget-editor"` },
+    { label: "Connect ChatGPT or Claude", hint: "Log expenses from your AI chat", hook: `data-panel="connections"` },
   ];
+  const total = setupSteps.length;
   const doneCount = setupSteps.filter((step) => step.done).length;
-  const setupPercent = Math.round((doneCount / setupSteps.length) * 100);
+  const setupPercent = Math.round((doneCount / total) * 100);
+  const nextIndex = setupSteps.findIndex((step) => !step.done);
+  const stepsMarkup = setupSteps.map((step, index) => {
+    const state = step.done ? "done" : index === nextIndex ? "next" : "";
+    const attrs = step.done ? "" : `${step.hook} role="button" tabindex="0"`;
+    return `
+          <li class="${state}" ${attrs}>
+            <span class="mark">${step.done ? icon("check") : ""}</span>
+            <span class="txt"><b>${esc(step.label)}</b>${step.hint ? `<small>${esc(step.hint)}</small>` : ""}</span>
+            ${step.done ? "" : `<span class="go">${icon("chevron")}</span>`}
+          </li>`;
+  }).join("");
 
   return `
     ${renderMobileDashboardHeader(model)}
-    <section class="onb-hero">
-      <div class="onb-hero-copy">
-        <h1>Welcome to Money Copilot AI <span aria-hidden="true">👋</span></h1>
-        <p class="onb-hero-sub">Let's build your financial picture in under 60 seconds.</p>
-        <ul class="onb-hero-checks">
-          <li>${icon("check")}Track expenses</li>
-          <li>${icon("check")}Create budgets</li>
-          <li>${icon("check")}Get AI insights</li>
-          <li>${icon("check")}Save more money</li>
-        </ul>
-        <div class="onb-hero-actions">
-          <button class="onb-hero-btn primary" type="button" data-entry="expense"><span class="onb-btn-ic">${icon("plus")}</span>Add First Expense</button>
-          <button class="onb-hero-btn" type="button" data-panel="budget-editor"><span class="onb-btn-ic amber">${icon("budget")}</span>Set a Monthly Budget</button>
-          <button class="onb-hero-btn" type="button" data-panel="connections"><span class="onb-btn-ic blue">${icon("advisor")}</span>Connect ChatGPT or Claude</button>
-          <button class="onb-hero-btn" type="button" data-preview-sample><span class="onb-btn-ic teal">${icon("eye")}</span>Explore Demo</button>
+    <div class="ob">
+      <header class="ob-topline rise d1">
+        <div>
+          <p class="ob-eyebrow">Getting started</p>
+          <h1 class="ob-greet">Welcome, ${displayName}</h1>
         </div>
-        <p class="onb-hero-note">${icon("lock")}No bank connection required. Your data stays private and secure.</p>
-      </div>
-      <div class="onb-hero-art" aria-hidden="true">
-        <img src="/assets/logo/money-copilot-bot-mascot-cutout.png" alt="">
-      </div>
-    </section>
+        <span class="ob-setup-pill"><span class="ob-ring" style="--v:${setupPercent}"></span>Setup <b>${doneCount}</b>&nbsp;/&nbsp;${total} complete</span>
+      </header>
 
-    <div class="onb-body">
-      <div class="onb-main-col">
-        <section class="onb-copilot" data-ai-chat>
-          <div class="onb-copilot-head">
-            <span class="onb-copilot-id"><img class="bot-mascot" data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""><b>Money Copilot AI</b><span class="onb-beta">Beta</span></span>
+      <section class="ob-hero ob-card rise d1">
+        <div class="ob-hero-body">
+          <h2>Your money, <span class="ob-accentword">on autopilot.</span></h2>
+          <p>Tell Money Copilot what you spent in plain language &mdash; it categorizes, tracks your budget, and surfaces savings. No spreadsheets, no bank connection.</p>
+          <div class="ob-cta-row">
+            <button class="ob-btn primary" type="button" data-entry="expense">${icon("plus")}Add your first expense</button>
+            <button class="ob-btn ghost" type="button" data-preview-sample>${icon("eye")}Explore with demo data</button>
           </div>
-          <p class="onb-copilot-intro">Hi! I'm your personal AI money assistant. What would you like to do?</p>
-          <div class="onb-chips">
-            <button type="button" data-ai-send="I spent money">💸 I spent money</button>
-            <button type="button" data-ai-send="I received income">💰 I received income</button>
-            <button type="button" data-panel="connections">🔗 Connect ChatGPT or Claude</button>
-            <button type="button" data-ai-send="Help me create a budget">🎯 Create my budget</button>
-            <button type="button" data-preview-sample>📊 Show sample dashboard</button>
+          <p class="ob-reassure">${icon("lock")}No bank connection required &middot; your data stays private</p>
+        </div>
+        <div class="ob-hero-art" aria-hidden="true"><span class="ob-halo"></span><img src="/assets/logo/money-copilot-bot-mascot-cutout.png" alt=""></div>
+      </section>
+
+      <div class="ob-split">
+        <section class="ob-copilot ob-card rise d2" data-ai-chat>
+          <div class="ob-cop-head">
+            <span class="ob-cop-ava"><img data-bot-mascot src="/assets/logo/money-copilot-bot-mascot.png" alt=""></span>
+            <div>
+              <b>Money Copilot <span class="ob-beta">Beta</span></b>
+              <small><span class="ob-dot"></span>Online &middot; private to you</small>
+            </div>
           </div>
-          <div class="ai-chat-messages onb-chat-messages" data-ai-messages></div>
-          <form class="onb-copilot-form" data-ai-chat-form>
-            <span class="compose-clip" aria-hidden="true">${icon("attachment")}</span>
-            <textarea name="message" maxlength="2000" placeholder="Ask or add expense… e.g., &quot;I spent 350 on groceries&quot;" aria-label="Ask Money Copilot" required></textarea>
-            <button class="assistant-send" type="submit" aria-label="Send">${icon("send")}</button>
+          <p class="ob-cop-lead">Hi ${displayName} &mdash; I'm your finance assistant. <b>Just tell me what you spent</b> and I'll handle the rest. Try one of these:</p>
+          <div class="ob-chips">
+            <button type="button" class="ob-chip" data-ai-send="I spent 350 on groceries">${icon("wallet")}I spent 350 on groceries</button>
+            <button type="button" class="ob-chip" data-ai-send="I received my salary">${icon("up")}I received my salary</button>
+            <button type="button" class="ob-chip" data-panel="budget-editor">${icon("budget")}Set up a monthly budget</button>
+            <button type="button" class="ob-chip" data-ai-send="Where can I save money?">${icon("advisor")}Where can I save?</button>
+          </div>
+          <div class="ai-chat-messages ob-chat-messages" data-ai-messages></div>
+          <form class="ob-composer" data-ai-chat-form>
+            <textarea name="message" maxlength="2000" rows="1" placeholder="Ask, or just say what you spent…" aria-label="Ask Money Copilot" required></textarea>
+            <button class="ob-send" type="submit" aria-label="Send">${icon("send")}</button>
           </form>
         </section>
 
-        <div class="onb-quick-row">
-          <section class="onb-quickstart panel">
-            <div class="onb-section-head"><h3>Quick Start</h3><span>Complete a few simple steps to get personalized insights</span></div>
-            <div class="onb-quick-grid">
-              <button class="onb-quick-card" type="button" data-entry="expense">
-                <span class="onb-quick-icon green">${icon("wallet")}</span>
-                <b>Add Expense</b><small>Log spending in seconds</small>${icon("chevron")}
-              </button>
-              <button class="onb-quick-card" type="button" data-entry="income">
-                <span class="onb-quick-icon violet">${icon("up")}</span>
-                <b>Add Income</b><small>Track salary or business income</small>${icon("chevron")}
-              </button>
-              <button class="onb-quick-card" type="button" data-panel="budget-editor">
-                <span class="onb-quick-icon amber">${icon("goals")}</span>
-                <b>Create Budget</b><small>Set monthly spending limits</small>${icon("chevron")}
-              </button>
-              <button class="onb-quick-card" type="button" data-preview-sample>
-                <span class="onb-quick-icon blue">${icon("database")}</span>
-                <b>Import Sample Data</b><small>See the full experience instantly</small>${icon("chevron")}
-              </button>
-            </div>
-          </section>
-
-          <section class="onb-setup panel">
-            <div class="onb-setup-head"><b>Your Financial Setup</b><span class="onb-setup-pct">${setupPercent}%</span></div>
-            <div class="onb-setup-track"><i style="width:${setupPercent}%"></i></div>
-            <ul class="onb-setup-list">
-              ${setupSteps.map((step) => `<li class="${step.done ? "done" : ""}"><span class="onb-setup-dot">${step.done ? icon("check") : ""}</span>${esc(step.label)}</li>`).join("")}
-            </ul>
-            <p class="onb-setup-foot">Complete setup to unlock personalized recommendations.</p>
-          </section>
-        </div>
-
-        <div class="onb-panels">
-          ${renderIncomeExpense(model)}
-          ${renderBudget(model)}
-          ${renderTransactions(model)}
-        </div>
+        <aside class="ob-setup ob-card rise d3">
+          <div class="ob-setup-h"><h3>Finish setting up</h3><span>${setupPercent}%</span></div>
+          <div class="ob-bar"><i style="width:${setupPercent}%"></i></div>
+          <ul class="ob-steps">${stepsMarkup}
+          </ul>
+          <p class="ob-foot">Finish these to unlock personalized insights, forecasts, and savings tips.</p>
+        </aside>
       </div>
 
-      <aside class="onb-rail">
-        <section class="panel onb-love">
-          <h3>Why users love<br>Money Copilot AI <span aria-hidden="true">❤️</span></h3>
-          <ul>${loveItems.map((item) => `<li>${icon("check")}${esc(item)}</li>`).join("")}</ul>
-        </section>
-        <section class="panel onb-tip">
-          <div class="onb-tip-head"><span class="onb-tip-bulb" aria-hidden="true">💡</span><b>Tip #1</b></div>
-          <p>The fastest way to save money is knowing where it goes. Start by adding today's expenses.</p>
-          <button class="onb-tip-btn" type="button" data-entry="expense">${icon("plus")}Add Expense</button>
-        </section>
-        <section class="panel onb-insight">
-          <div class="onb-insight-head">${icon("advisor")}<b>AI Insight</b></div>
-          <p class="onb-insight-empty">No data yet. After only 5 expenses I'll start finding:</p>
-          <ul>
-            <li>${icon("check")}Spending leaks</li>
-            <li>${icon("check")}Saving opportunities</li>
-            <li>${icon("check")}Budget suggestions</li>
-          </ul>
-        </section>
-      </aside>
+      <section class="ob-caps rise d4">
+        <span class="ob-cap">${icon("advisor")}AI auto-categorization</span>
+        <span class="ob-cap">${icon("camera")}Receipt scanning</span>
+        <span class="ob-cap">${icon("budget")}Budget alerts</span>
+        <span class="ob-cap">${icon("lock")}Private by design</span>
+      </section>
     </div>
   `;
 }
