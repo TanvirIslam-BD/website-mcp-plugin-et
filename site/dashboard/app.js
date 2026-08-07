@@ -2224,13 +2224,19 @@ function openAiChat(prefill = "") {
   // had just appeared. It also makes the mobile composer's one job work -- that
   // bar is a trigger now, so the tap that opens this modal has to be the same
   // tap that raises the keyboard, or typing costs two taps instead of one.
-  requestAnimationFrame(() => {
-    const field = document.querySelector(".ai-modal [data-ai-chat-form] textarea[name=message]");
-    if (!field) return;
+  // Synchronously, inside the click that opened this. openModal has already
+  // inserted the field by the time it returns, so there is nothing to wait for
+  // -- and waiting actively breaks the feature: iOS Safari only raises the
+  // keyboard when focus() runs within the user gesture, so deferring to a frame
+  // would open the modal and leave the keyboard down, which is the one thing
+  // making the composer a trigger was supposed to fix. requestAnimationFrame
+  // also never fires while the tab is hidden.
+  const field = document.querySelector(".ai-modal [data-ai-chat-form] textarea[name=message]");
+  if (field) {
     field.focus();
     // Prefilled questions land ready to send rather than ready to overwrite.
     field.setSelectionRange(field.value.length, field.value.length);
-  });
+  }
 }
 
 function localDashboardAnswer(message) {
