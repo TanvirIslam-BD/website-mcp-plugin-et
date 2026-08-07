@@ -1759,6 +1759,8 @@
   .manny-actions{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 0;}
   .manny-cta{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:0 22px;border-radius:13px;border:1px solid transparent;background:var(--grad);color:#04121d;font-size:14.5px;font-weight:800;text-decoration:none;}
   .manny-cta.ghost{background:transparent;border-color:var(--line2);color:var(--ink);}
+  .manny-cta{font-family:inherit;cursor:pointer;}
+  .manny-play{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(4,18,29,.16);font-size:8px;line-height:1;}
   .manny-note{margin:16px 0 0;font-size:12.5px;line-height:1.6;color:var(--muted);}
   .manny-visual{margin:0;display:grid;place-items:center;}
   .manny-visual img{display:block;width:100%;max-width:420px;height:auto;border-radius:20px;}
@@ -1772,7 +1774,24 @@
   .manny-said{margin:12px 0 0;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.5;}
   .manny-said.you{border:1px solid color-mix(in srgb,var(--blue) 32%,transparent);background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--ink);border-bottom-right-radius:4px;}
   .manny-said.bot{border:1px solid var(--line2);background:var(--panel2);color:var(--ink2);border-bottom-left-radius:4px;}
-  .manny-specs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0;padding:0;border-top:1px solid var(--line);}
+  .manny-updates{padding:34px 48px 38px;border-top:1px solid var(--line);}
+  .manny-updates h3{margin:0 0 6px;font-size:clamp(17px,2vw,21px);font-weight:800;letter-spacing:-.3px;color:var(--ink);}
+  .manny-updates>p{margin:0 0 22px;font-size:13.5px;color:var(--ink2);}
+  .manny-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none;}
+  .manny-screen{display:block;padding:16px 16px 18px;border-radius:18px;border:1px solid #1e2a3c;background:linear-gradient(160deg,#0d1626,#070d18);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);}
+  .manny-card-label{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--tone);}
+  .manny-card-label svg{width:13px;height:13px;}
+  .manny-screen b{display:block;margin-top:9px;font-size:26px;font-weight:800;letter-spacing:-.8px;color:#f2f7fa;}
+  .manny-screen small{display:block;margin-top:2px;font-size:12px;color:#8fa2b6;}
+  .manny-card-bar{display:block;height:5px;margin-top:12px;border-radius:99px;background:#1c2941;overflow:hidden;}
+  .manny-card-bar i{display:block;height:100%;width:var(--fill,50%);border-radius:99px;background:var(--tone);}
+  .manny-spark{display:block;width:100%;height:32px;margin-top:10px;}
+  .manny-spoken{display:flex;gap:8px;margin:12px 2px 0;font-size:12.5px;line-height:1.5;color:var(--ink2);}
+  .manny-spoken svg{flex:0 0 auto;width:14px;height:14px;margin-top:2px;color:var(--muted);}
+  .manny-hardware{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);align-items:center;gap:0;border-top:1px solid var(--line);}
+  .manny-dims{margin:0;padding:22px;display:grid;place-items:center;border-right:1px solid var(--line);}
+  .manny-dims svg{width:100%;max-width:190px;height:auto;color:var(--ink2);}
+  .manny-specs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0;padding:0;}
   .manny-specs>div{padding:18px 22px;border-left:1px solid var(--line);border-top:1px solid var(--line);}
   .manny-specs>div:nth-child(-n+4){border-top:0;}
   .manny-specs>div:nth-child(4n+1){border-left:0;}
@@ -1796,6 +1815,10 @@
     .manny-benefits li:first-child,.manny-benefits li:nth-child(2){border-top:0;}
     .manny-voice{padding:30px 30px 32px;}
     .manny-steps{grid-template-columns:1fr;gap:14px;}
+    .manny-updates{padding:30px 30px 32px;}
+    .manny-cards{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .manny-hardware{grid-template-columns:1fr;}
+    .manny-dims{border-right:0;border-bottom:1px solid var(--line);}
     .manny-specs{grid-template-columns:repeat(2,minmax(0,1fr));}
     .manny-specs>div:nth-child(-n+4){border-top:1px solid var(--line);}
     .manny-specs>div:nth-child(4n+1){border-left:1px solid var(--line);}
@@ -1812,6 +1835,14 @@
     .manny-bicon{margin:0;flex:0 0 auto;width:38px;height:38px;}
     .manny-cta{width:100%;justify-content:center;}
     .manny-voice{padding:26px 20px 28px;}
+    .manny-updates{padding:26px 0 28px 20px;}
+    .manny-updates h3,.manny-updates>p{padding-right:20px;}
+    /* Four stacked cards added roughly a screen and a half of scrolling to a
+       section that is already long on a phone. A snap rail keeps all four
+       visible-by-swipe without spending that height. */
+    .manny-cards{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:0 20px 4px 0;scrollbar-width:none;}
+    .manny-cards::-webkit-scrollbar{display:none;}
+    .manny-cards>li{flex:0 0 78%;scroll-snap-align:start;}
     .manny-specs{grid-template-columns:1fr;}
     .manny-specs>div{border-left:0!important;border-top:1px solid var(--line)!important;padding:14px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:16px;}
     .manny-specs>div:first-child{border-top:0!important;}
@@ -2117,7 +2148,13 @@
             </li>
           </ul>
           <div class="manny-actions">
-            <a class="manny-cta" href="mailto:support@contact.copilotai.live?subject=Manny%20Copilot%20launch%20updates&amp;body=Please%20let%20me%20know%20when%20Manny%20Copilot%20is%20available.">Get launch updates</a>
+            <button class="manny-cta" type="button" data-demo-trigger aria-haspopup="dialog" aria-controls="demoModal"
+              data-demo-src="assets/manny-demo.mp4"
+              data-demo-poster="assets/manny-demo-poster.jpg"
+              data-demo-title="Meet Manny Copilot"
+              data-demo-sub="A first look at the desk assistant."
+              data-demo-foot="10-second first look"><span class="manny-play" aria-hidden="true">▶</span>Watch Manny demo</button>
+            <a class="manny-cta ghost" href="mailto:support@contact.copilotai.live?subject=Manny%20Copilot%20launch%20updates&amp;body=Please%20let%20me%20know%20when%20Manny%20Copilot%20is%20available.">Get launch updates</a>
             <a class="manny-cta ghost" href="/dashboard">Use Money Copilot AI today <span aria-hidden="true">→</span></a>
           </div>
           <p class="manny-note">Manny is in development. Pricing and availability haven't been announced — the button emails us so we can tell you when they are.</p>
@@ -2150,6 +2187,48 @@
           </li>
         </ol>
       </div>
+      <div class="manny-updates">
+        <h3>Real-time finance updates on Manny</h3>
+        <p>What the screen shows — and what Manny says out loud.</p>
+        <ul class="manny-cards">
+          <li>
+            <div class="manny-screen" style="--tone:#22d3ee">
+              <span class="manny-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M17 12h.01"/></svg>Budget Left</span>
+              <b>$420</b>
+              <small>of $1,800</small>
+              <span class="manny-card-bar"><i style="--fill:77%"></i></span>
+            </div>
+            <p class="manny-spoken"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>“You have $420 left in your monthly budget.”</p>
+          </li>
+          <li>
+            <div class="manny-screen" style="--tone:#f87171">
+              <span class="manny-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Over-Budget Alert</span>
+              <b>Dining</b>
+              <small><strong style="color:#f87171">+$58</strong> over budget</small>
+              <span class="manny-card-bar"><i style="--fill:100%"></i></span>
+            </div>
+            <p class="manny-spoken"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>“You're $58 over budget in Dining.”</p>
+          </li>
+          <li>
+            <div class="manny-screen" style="--tone:#34d399">
+              <span class="manny-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Upcoming Payment</span>
+              <b>Netflix</b>
+              <small>Tomorrow · $15.49</small>
+              <span class="manny-card-bar"><i style="--fill:92%"></i></span>
+            </div>
+            <p class="manny-spoken"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>“Netflix payment of $15.49 is due tomorrow.”</p>
+          </li>
+          <li>
+            <div class="manny-screen" style="--tone:#8b93ff">
+              <span class="manny-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Monthly Spend</span>
+              <b>$1,240</b>
+              <small>+8% vs last month</small>
+              <svg class="manny-spark" viewBox="0 0 120 32" fill="none" preserveAspectRatio="none" aria-hidden="true"><path d="M2 27 18 24 34 25 50 19 66 20 82 13 98 9 118 3" stroke="#8b93ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="manny-spoken"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>“Your spending is up 8% compared to last month.”</p>
+          </li>
+        </ul>
+      </div>
       <ul class="manny-benefits">
         <li>
           <span class="manny-bicon" style="--tone:var(--blue)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-1L3 20l1.1-4.6a8.4 8.4 0 0 1-1-4A8.4 8.4 0 0 1 11.5 3h.5a8.4 8.4 0 0 1 9 8z"/></svg></span>
@@ -2172,16 +2251,33 @@
           <div><b>Smarter Every Day</b><small>AI that learns your habits to give better advice.</small></div>
         </li>
       </ul>
+      <div class="manny-hardware">
+      <figure class="manny-dims">
+        <svg viewBox="0 0 200 156" fill="none" stroke="currentColor" role="img" aria-label="Manny measures 150 mm tall by 120 mm wide.">
+          <!-- device silhouette: rounded head over a wider fabric base -->
+          <path d="M58 118V52a34 34 0 0 1 68 0v66" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M46 118a46 46 0 0 0 92 0" stroke-width="2.4" stroke-linecap="round"/>
+          <rect x="70" y="60" width="44" height="40" rx="8" stroke-width="1.6" opacity=".55"/>
+          <ellipse cx="92" cy="30" rx="17" ry="5" stroke-width="1.6" opacity=".55"/>
+          <!-- height dimension -->
+          <path d="M22 22v96M17 22h10M17 118h10" stroke-width="1.3" opacity=".75" stroke-linecap="round"/>
+          <text x="12" y="74" fill="currentColor" stroke="none" font-size="10" font-weight="700" transform="rotate(-90 12 74)" text-anchor="middle">150 mm</text>
+          <!-- width dimension -->
+          <path d="M46 134h92M46 129v10M138 129v10" stroke-width="1.3" opacity=".75" stroke-linecap="round"/>
+          <text x="92" y="149" fill="currentColor" stroke="none" font-size="10" font-weight="700" text-anchor="middle">120 mm</text>
+        </svg>
+      </figure>
       <dl class="manny-specs">
-        <div><dt>Size</dt><dd>150 × 120 × 105 mm</dd></div>
+        <div><dt>Depth</dt><dd>105 mm</dd></div>
         <div><dt>Weight</dt><dd>~750 g</dd></div>
         <div><dt>Display</dt><dd>2.8″ OLED touch</dd></div>
         <div><dt>Audio</dt><dd>3 W speaker + mic array</dd></div>
         <div><dt>Connectivity</dt><dd>Wi-Fi · Bluetooth · Ethernet</dd></div>
         <div><dt>Power</dt><dd>USB-C 5 V/3 A</dd></div>
         <div><dt>AI model</dt><dd>Offline capable</dd></div>
-        <div><dt>Material</dt><dd>ABS + fabric</dd></div>
+        <div><dt>In the box</dt><dd>USB-C cable · adapter · guide</dd></div>
       </dl>
+      </div>
     </div>
   </div>
 </section>
@@ -2725,7 +2821,7 @@
         Your browser does not support HTML video.
       </video>
     </div>
-    <footer class="demo-dialog-foot"><span><i aria-hidden="true"></i>10-second product walkthrough</span><span>Press Esc to close</span></footer>
+    <footer class="demo-dialog-foot"><span><i aria-hidden="true"></i><span data-demo-foot-text>10-second product walkthrough</span></span><span>Press Esc to close</span></footer>
   </section>
 </div>
 
@@ -2882,11 +2978,52 @@
     document.body.classList.remove('demo-modal-open');
     demoOpener?.focus();
   };
+  // One dialog, more than one film. A trigger may carry data-demo-src (plus
+  // poster/title/sub/foot) to play something else — Manny's first look uses
+  // this. Triggers without those attributes keep the original demo verbatim,
+  // so nothing that already worked has to change.
+  const demoTrack=demoVideo?.querySelector('track');
+  const demoTitleEl=document.getElementById('demoModalTitle');
+  const demoSubEl=demoTitleEl?.nextElementSibling;
+  const demoFootEl=demoModal?.querySelector('[data-demo-foot-text]');
+  const DEMO_DEFAULT={
+    src:'assets/money-copilot-demo.mp4',
+    poster:'assets/money-copilot-demo.webp',
+    captions:'assets/money-copilot-demo.en.vtt',
+    title:'Money Copilot AI demo',
+    sub:'See how effortless AI-powered money management can be.',
+    foot:'10-second product walkthrough'
+  };
+  const applyDemo=trigger=>{
+    if(!demoVideo) return;
+    const d=trigger.dataset;
+    const custom=!!d.demoSrc;
+    const src=d.demoSrc||DEMO_DEFAULT.src;
+    const poster=d.demoPoster||(custom?'':DEMO_DEFAULT.poster);
+    // Only the default clip ships a caption file; pointing the track at a
+    // missing .vtt would just log a fetch error for every other clip.
+    const captions=custom?(d.demoCaptions||''):DEMO_DEFAULT.captions;
+    if(demoVideo.getAttribute('src')!==src){
+      demoVideo.setAttribute('src',src);
+      if(poster) demoVideo.setAttribute('poster',poster); else demoVideo.removeAttribute('poster');
+      if(demoTrack){
+        if(captions){demoTrack.setAttribute('src',captions);demoTrack.setAttribute('default','');}
+        else{demoTrack.removeAttribute('src');demoTrack.removeAttribute('default');}
+      }
+      demoVideo.load();
+    }
+    const title=d.demoTitle||DEMO_DEFAULT.title;
+    if(demoTitleEl) demoTitleEl.textContent=title;
+    if(demoSubEl) demoSubEl.textContent=d.demoSub||DEMO_DEFAULT.sub;
+    if(demoFootEl) demoFootEl.textContent=d.demoFoot||DEMO_DEFAULT.foot;
+    demoVideo.setAttribute('aria-label',title);
+  };
   document.querySelectorAll('[data-demo-trigger]').forEach(trigger=>trigger.addEventListener('click',()=>{
     if(!demoModal) return;
     mm?.classList.remove('open');
     mb?.classList.remove('open');
     mb?.setAttribute('aria-expanded','false');
+    applyDemo(trigger);
     demoOpener=trigger;
     demoModal.hidden=false;
     document.body.classList.add('demo-modal-open');
