@@ -1369,12 +1369,18 @@ function celebrateFirstData() {
 // quick-start actions, a setup tracker and supporting cards — then hands back to
 // the normal dashboard the moment any real data exists.
 function renderOnboarding(model) {
-  const displayName = esc((model.user?.displayName || "there").split(/\s+/)[0]);
+  // Only greet by name when the account actually has a real one — generic
+  // placeholders like "User"/"there" should greet without a name instead of
+  // reading as an impersonal "Welcome, User".
+  const rawFirst = String(model.user?.displayName || "").trim().split(/\s+/)[0] || "";
+  const GENERIC_NAMES = new Set(["user", "there", "guest", "friend", "account", "customer"]);
+  const hasName = Boolean(rawFirst) && !GENERIC_NAMES.has(rawFirst.toLowerCase());
+  const displayName = hasName ? esc(rawFirst) : "";
   const setupSteps = [
     { label: "Account created", done: true },
     { label: "Add your first expense", hint: "Takes about 10 seconds", hook: `data-entry="expense"` },
     { label: "Set a monthly budget", hint: "See what's left as you spend", hook: `data-panel="budget-editor"` },
-    { label: "Connect ChatGPT or Claude", hint: "Log expenses from your AI chat", hook: `data-panel="connections"` },
+    { label: "Connect your AI assistant", hint: "ChatGPT, Claude, or any MCP client", hook: `data-panel="connections"` },
   ];
   const total = setupSteps.length;
   const doneCount = setupSteps.filter((step) => step.done).length;
@@ -1397,7 +1403,7 @@ function renderOnboarding(model) {
       <header class="ob-topline rise d1">
         <div>
           <p class="ob-eyebrow">Getting started</p>
-          <h1 class="ob-greet">Welcome, ${displayName}</h1>
+          <h1 class="ob-greet">Welcome${hasName ? `, ${displayName}` : ""} <span aria-hidden="true">👋</span></h1>
         </div>
         <span class="ob-setup-pill"><span class="ob-ring" style="--v:${setupPercent}"></span>Setup <b>${doneCount}</b>&nbsp;/&nbsp;${total} complete</span>
       </header>
@@ -1441,7 +1447,7 @@ function renderOnboarding(model) {
               <small><span class="ob-dot"></span>Online &middot; private to you</small>
             </div>
           </div>
-          <p class="ob-cop-lead">Hi ${displayName} &mdash; I'm your finance assistant. <b>Just tell me what you spent</b> and I'll handle the rest. Try one of these:</p>
+          <p class="ob-cop-lead">Hi ${hasName ? displayName : "there"} &mdash; I'm your finance assistant. <b>Just tell me what you spent</b> and I'll handle the rest. Try one of these:</p>
           <div class="ob-chips">
             <button type="button" class="ob-chip ob-chip-ai" data-panel="connections">${icon("advisor")}Connect ChatGPT or Claude</button>
             <button type="button" class="ob-chip" data-ai-send="I spent 350 on groceries">${icon("wallet")}I spent 350 on groceries</button>

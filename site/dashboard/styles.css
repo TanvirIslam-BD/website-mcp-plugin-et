@@ -2435,8 +2435,10 @@ button {
 .ob-greet{margin:0; font-size:clamp(23px,2.6vw,30px); font-weight:800; letter-spacing:-.03em; line-height:1.05; color:var(--ob-ink)}
 .ob-setup-pill{display:inline-flex; align-items:center; gap:9px; padding:8px 14px; border-radius:999px; background:var(--ob-surface); border:1px solid var(--ob-line); box-shadow:var(--ob-shadow); font-size:12.5px; font-weight:650; color:var(--ob-muted); white-space:nowrap}
 .ob-setup-pill b{color:var(--ob-ink); font-variant-numeric:tabular-nums}
-.ob-ring{width:22px;height:22px;border-radius:50%; background:conic-gradient(var(--ob-accent) calc(var(--v,25)*1%), var(--ob-line-2) 0); display:grid; place-items:center}
-.ob-ring::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--ob-surface)}
+.ob-ring{width:26px;height:26px;border-radius:50%; display:grid; place-items:center;
+  background:conic-gradient(var(--ob-accent) calc(var(--v,25)*1%), color-mix(in srgb, var(--ob-muted) 30%, transparent) 0);}
+.ob-ring::after{content:""; grid-area:1/1; width:16px;height:16px;border-radius:50%;background:var(--ob-surface)}
+.ob-ring::before{content:""; grid-area:1/1; width:26px;height:26px;border-radius:50%; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ob-muted) 16%, transparent);}
 
 .ob-card{background:var(--ob-surface); border:1px solid var(--ob-line); border-radius:var(--ob-r); box-shadow:var(--ob-shadow)}
 
@@ -2604,7 +2606,9 @@ button {
   .ob-split{gap:14px; margin-bottom:14px}
   .ob-copilot{padding:18px}
   .ob-setup{padding:18px}
-  .ob-chip{min-height:38px}
+  .ob-chip{min-height:44px}
+  .ob-send{width:44px;height:44px}
+  .ob-composer{padding:6px 6px 6px 14px}
 }
 
 @media (max-width: 720px) {
