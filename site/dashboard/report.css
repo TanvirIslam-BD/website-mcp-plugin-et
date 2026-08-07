@@ -4169,26 +4169,50 @@ em.pill-new { font-size: 10px !important; color: #056234 !important; }
    the AMOUNT header stranded left of figures that align right.
    =========================================================================== */
 @media (min-width: 721px) {
-  /* Shrink-to-content, so slack goes to Merchant, which can use it, rather than
-     collecting in a column holding one short tag. */
-  .transactions th.tx-category,
-  .transactions td.tx-category {
-    width: 1%;
-    white-space: nowrap;
-  }
+  /*
+   * The panel is ~1190px wide and the row content needs roughly 700px, so about
+   * 490px of slack has to live somewhere. The first attempt shrank Category to
+   * its content on the reasoning that the slack would go to Merchant, "which can
+   * use it" — it cannot. Merchant names here are "Fish", "Rickshaw", "Snack
+   * Stall", so Merchant grew to 500px and the hole simply moved one column left.
+   * That was measured as a win (category dead space 316px to 20px) and looked
+   * worse, because the measurement asked the wrong question: not "is any column
+   * oversized" but "is there a chasm anywhere in the row".
+   *
+   * Slack cannot be removed, only distributed. Proportional widths spread it so
+   * no single gap dominates, and Category is centred in its column so the space
+   * falls on both sides of the tag instead of pooling on one. Two moderate gaps
+   * read as column rhythm; one wide gap reads as a rendering fault.
+   */
+  /* Percentages resolve against the table box, so state it explicitly rather than
+     leaning on an inherited width. Measured both ways at 1440 with the rail open
+     and at ~1900: identical either way — the table already filled its panel (689
+     of 731 inside the padding, 1169 of 1211). Kept as a guarantee, not a fix; I
+     had guessed the panel was ~890px there and it is not. */
+  .transactions { width: 100%; }
 
   .transactions th.tx-date,
-  .transactions td.tx-date { width: 116px; }
+  .transactions td.tx-date { width: 13%; }
 
-  /* The header sits over its own figures instead of at the far side of a gap. */
+  .transactions th.tx-merchant,
+  .transactions td.tx-merchant { width: 31%; }
+
+  .transactions th.tx-category,
+  .transactions td.tx-category {
+    width: 28%;
+    text-align: center;
+  }
+
+  /* Header sits over its own figures rather than at the far side of a gap; there
+     was no right-align rule for amounts anywhere before this. */
   .transactions th.tx-amount,
   .transactions td.tx-amount {
-    width: 132px;
+    width: 20%;
     text-align: right !important;
   }
 
   .transactions th.tx-method,
-  .transactions td.tx-method { width: 1%; white-space: nowrap; }
+  .transactions td.tx-method { width: 8%; white-space: nowrap; }
 }
 
 /* Mobile: rebuild the card from classes. Left column stacks merchant over
