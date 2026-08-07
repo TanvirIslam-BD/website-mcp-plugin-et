@@ -15,6 +15,14 @@
   --report-violet: #6338f2;
   --report-green: #0cba70;
   --report-red: #f3263c;
+  /* Text-only variants. The tokens above are tuned for fills, rings and
+     swatches, where they read well; as small bold label text on white they
+     measure 2.5:1 (green) and 4.1:1 (red), so both fail WCAG AA. These
+     darker pairs clear 4.5:1 and are used wherever the colour carries
+     meaning in type rather than in a shape. */
+  --report-green-text: #07814c;
+  --report-red-text: #d31c30;
+  --report-warn-text: #9c5b00;
   --report-orange: #ff6811;
 }
 
@@ -3363,4 +3371,87 @@ img[src$="money-copilot-app-logo.png"] {
 :root[data-theme="light"] .floating-ai.bot-mascot img,
 :root[data-theme="dark"] .floating-ai.bot-mascot img {
   filter: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Semantic direction colour for the KPI row.
+
+   renderMetricCards() already computes a `favorable` flag per metric and emits
+   .positive/.negative on both .metric-trend and .metric-direction (income down
+   and spend up are correctly "negative"). The intended colours are declared
+   above at .metric-trend.positive/.negative — but the per-theme blocks in
+   styles.css repaint every trend, arrow and sparkline green with !important,
+   so a 9% income *drop* rendered identically to a 142% savings *gain*. On a
+   finance dashboard that is actively misleading, so the semantic rules win
+   here: green only when the movement is good for the user, red when it is not.
+   --------------------------------------------------------------------------- */
+:root[data-theme="light"] .metric-trend.positive { color: var(--report-green-text) !important; }
+:root[data-theme="dark"] .metric-trend.positive { color: #4ce8a2 !important; }
+:root[data-theme="light"] .metric-trend.negative { color: var(--report-red-text) !important; }
+:root[data-theme="dark"] .metric-trend.negative { color: #ff8b95 !important; }
+
+:root[data-theme="light"] .metric-direction.negative {
+  color: var(--report-red-text) !important;
+  border: 0 !important;
+  background: #ffeaed !important;
+}
+
+:root[data-theme="dark"] .metric-direction.negative {
+  color: #ff8b95 !important;
+  border: 1px solid #4d1f26 !important;
+  background: #2b1116 !important;
+}
+
+/* The sparkline is tinted inline by spark()'s `tone` argument (per-series for
+   income/expense/savings, status-coloured for the runway card). styles.css
+   overrode that with a single green stroke, which cost the row its only
+   at-a-glance link to the cash-flow chart below. Restore the authored tone. */
+:root[data-theme="light"] .metric-card .sparkline polyline,
+:root[data-theme="dark"] .metric-card .sparkline polyline {
+  stroke: currentColor !important;
+}
+
+:root[data-theme="light"] .metric-card.is-negative .sparkline,
+:root[data-theme="dark"] .metric-card.is-negative .sparkline {
+  color: var(--report-red) !important;
+}
+
+/* Financial-health value tones. The per-theme blocks in styles.css set a flat
+   ink colour on every `.health-stat b`, which also swallowed the good/negative
+   states, and no warn state existed at all. Declare the full ladder here so the
+   Budget and Emergency-fund rows can actually signal their status. */
+:root[data-theme="light"] .health-stat b.good { color: var(--report-green-text) !important; }
+:root[data-theme="light"] .health-stat b.warn { color: var(--report-warn-text) !important; }
+:root[data-theme="light"] .health-stat b.negative { color: var(--report-red-text) !important; }
+:root[data-theme="dark"] .health-stat b.good { color: #4ce8a2 !important; }
+:root[data-theme="dark"] .health-stat b.warn { color: #ffbe5c !important; }
+:root[data-theme="dark"] .health-stat b.negative { color: #ff8b95 !important; }
+
+/* Vendor attribution in the assistant rail sat as a bordered, boxed badge with
+   an 84px logo directly under the assistant's name — giving the API vendor
+   near-equal billing with the product itself in a consumer finance panel. The
+   link (and its UTM attribution) is preserved, just demoted to a footnote:
+   no chrome, smaller mark, muted until hovered. */
+.assistant-status-row .comet-badge {
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  opacity: .55;
+  transition: opacity .15s ease;
+}
+
+.assistant-status-row .comet-badge:hover,
+.assistant-status-row .comet-badge:focus-visible {
+  opacity: 1;
+}
+
+.assistant-status-row .comet-badge > span {
+  font-size: 7.5px;
+  font-weight: 600;
+}
+
+.assistant-status-row .comet-badge img {
+  width: 52px;
+  height: 11px;
 }

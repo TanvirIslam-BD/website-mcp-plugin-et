@@ -480,6 +480,7 @@ function renderMetricCards(model) {
         caption: overBudget
           ? `${model.budgetUsed}% of ${formatMoney(model.budgetMinor, model.currency, { compact: true })} budget used`
           : `${formatMoney(perDayMinor, model.currency, { compact: true })}/day for ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`,
+        hint: `Your ${formatMoney(model.budgetMinor, model.currency, { compact: true })} budget minus what you have spent.`,
       }
       : {
         className: `balance ${model.savedMinor < 0 ? "is-negative" : ""}`,
@@ -501,6 +502,7 @@ function renderMetricCards(model) {
       iconName: "analytics",
       spark: incomeSpark,
       sparkTone: "var(--series-income)",
+      hint: "Total money received this month.",
     },
     {
       className: "expense",
@@ -512,6 +514,7 @@ function renderMetricCards(model) {
       iconName: "card",
       spark: expenseSpark,
       sparkTone: "var(--series-expense)",
+      hint: "Total money spent this month.",
     },
     {
       className: `saving ${model.savedMinor < 0 ? "is-negative" : ""}`,
@@ -523,12 +526,13 @@ function renderMetricCards(model) {
       iconName: "piggy",
       spark: model.savingsCum.length ? model.savingsCum : balanceSpark,
       sparkTone: model.savedMinor < 0 ? "var(--status-critical)" : "var(--series-savings)",
+      hint: "Income minus spending this month.",
     },
   ];
   return `
     <section class="summary-grid" aria-label="Monthly summary">
       ${metrics.map((metric) => `
-        <article class="metric-card ${metric.className}">
+        <article class="metric-card ${metric.className}"${metric.hint ? ` title="${esc(metric.label)}: ${esc(metric.hint)}"` : ""}>
           <div class="metric-card-main">
             <span class="metric-icon">${icon(metric.iconName)}</span>
             <div class="metric-copy">
@@ -542,7 +546,7 @@ function renderMetricCards(model) {
                 <small>vs last month</small>
               </span>`}
             </div>
-            ${metric.caption ? "" : `<span class="metric-direction ${metric.favorable ? "positive" : "negative"}">${icon(metric.favorable ? "up" : "down")}</span>`}
+            ${metric.caption ? "" : `<span class="metric-direction ${metric.favorable ? "positive" : "negative"}">${icon(metric.trendDirection >= 0 ? "up" : "down")}</span>`}
           </div>
           ${spark(metric.spark, metric.sparkTone)}
         </article>
@@ -553,6 +557,22 @@ function renderMetricCards(model) {
 
 function renderHealth(model) {
   const recurringMonths = Math.max(0, Math.round((Math.max(0, model.savedMinor) / Math.max(1, model.spentMinor || 1)) * 10) / 10);
+  /*
+   * These two rows used to be painted from fixed literals: Budget was always
+   * red and Emergency fund always neutral ink, whatever the numbers said. So a
+   * healthy 20%-used budget still looked like an alarm, and an emergency fund
+   * of 0.4 months — well under the 3-month rule of thumb — looked fine. Both
+   * now follow the value, using the same good/warn/bad ladder as the KPI row.
+   */
+  const [budgetTone, budgetClass] = !model.budgetMinor
+    ? [["#06133a", "#f1f4f8"], ""]
+    : model.budgetUsed >= 100 ? [["#ff4548", "#fff0f0"], "negative"]
+    : model.budgetUsed >= 80 ? [["#ff9f1c", "#fff7e6"], "warn"]
+    : [["#18b96f", "#e8faef"], "good"];
+  const [fundTone, fundClass] = recurringMonths >= 3
+    ? [["#18b96f", "#e8faef"], "good"]
+    : recurringMonths >= 1 ? [["#ff9f1c", "#fff7e6"], "warn"]
+    : [["#ff4548", "#fff0f0"], "negative"];
   return `
     <article class="panel financial-health" id="analytics">
       <div class="panel-head">
@@ -563,9 +583,9 @@ function renderHealth(model) {
           <div class="inner"><b>${model.health}</b><span>/ 100</span></div>
         </div>
         <div class="health-stats">
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#ff4548;--tone-bg:#fff0f0">${icon("budget")}</i>Budget</span><b class="negative">${model.budgetMinor ? `${model.budgetUsed}%` : "Not set"}</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:${budgetTone[0]};--tone-bg:${budgetTone[1]}">${icon("budget")}</i>Budget</span><b class="${budgetClass}">${model.budgetMinor ? `${model.budgetUsed}%` : "Not set"}</b></div>
           <div class="health-stat"><span><i class="status-dot" style="--tone:#18b96f;--tone-bg:#e8faef">${icon("card")}</i>Debt</span><b class="good">Low</b></div>
-          <div class="health-stat"><span><i class="status-dot" style="--tone:#06133a;--tone-bg:#f1f4f8">${icon("wallet")}</i>Emergency fund</span><b>${recurringMonths} months</b></div>
+          <div class="health-stat"><span><i class="status-dot" style="--tone:${fundTone[0]};--tone-bg:${fundTone[1]}">${icon("wallet")}</i>Emergency fund</span><b class="${fundClass}" title="Months of spending your current savings would cover.">${recurringMonths} months</b></div>
         </div>
       </div>
       ${model.hasFinancialData ? "" : `<div class="panel-empty-hint">${icon("advisor")}<span>This score is a starting estimate. It sharpens as you add income, expenses, and a budget.</span></div>`}
@@ -579,11 +599,15 @@ function renderIncomeExpense(model) {
   const height = 178;
   const padX = 34;
   const padY = 24;
-  const max = Math.max(...model.incomeCum, ...model.expenseCum, ...model.savingsCum, 1);
-  const incomePoints = linePoints(model.incomeCum, width, height, padX, padY, max);
-  const expensePoints = linePoints(model.expenseCum, width, height, padX, padY, max);
-  const savingPoints = linePoints(model.savingsCum, width, height, padX, padY, max);
-  const midIndex = Math.floor(model.incomeCum.length / 2);
+  // Same month-to-date window the interactive updater uses (see chartDataset),
+  // so the first paint matches what bindIncomeExpenseChart() draws immediately
+  // after — otherwise the flat-tailed full-month shape flashes in first.
+  const series = chartDataset(model, "month");
+  const max = Math.max(...series.income, ...series.expense, ...series.saving, 1);
+  const incomePoints = linePoints(series.income, width, height, padX, padY, max);
+  const expensePoints = linePoints(series.expense, width, height, padX, padY, max);
+  const savingPoints = linePoints(series.saving, width, height, padX, padY, max);
+  const midIndex = Math.floor(series.income.length / 2);
   const midDay = `${String(midIndex + 1).padStart(2, "0")} ${monthLabel(model.month).split(" ")[0]} ${model.month.slice(0, 4)}`;
   return `
     <article class="panel large-chart" data-income-expense-chart>
@@ -631,14 +655,14 @@ function renderIncomeExpense(model) {
         </div>
         <div class="chart-x-axis" aria-hidden="true">
           <span data-x-label="start">1 ${monthLabel(model.month).split(" ")[0]}</span>
-          <span data-x-label="mid">15 ${monthLabel(model.month).split(" ")[0]}</span>
-          <span data-x-label="end">${daysInMonth(model.month)} ${monthLabel(model.month).split(" ")[0]}</span>
+          <span data-x-label="mid">${Math.max(1, Math.ceil(series.income.length / 2))} ${monthLabel(model.month).split(" ")[0]}</span>
+          <span data-x-label="end">${series.income.length} ${monthLabel(model.month).split(" ")[0]}</span>
         </div>
         <div class="chart-tooltip" data-chart-tooltip>
           <b data-tip-date>${esc(midDay)}</b>
-          <span><i class="tip-swatch" style="background:var(--series-income)"></i><label>Income</label><strong data-tip-income>${formatMoney(model.incomeCum[midIndex] || 0, model.currency)}</strong></span>
-          <span><i class="tip-swatch" style="background:var(--series-expense)"></i><label>Expenses</label><strong data-tip-expense>${formatMoney(model.expenseCum[midIndex] || 0, model.currency)}</strong></span>
-          <span><i class="tip-swatch" style="background:var(--series-savings)"></i><label>Savings</label><strong data-tip-saving>${formatMoney(model.savingsCum[midIndex] || 0, model.currency)}</strong></span>
+          <span><i class="tip-swatch" style="background:var(--series-income)"></i><label>Income</label><strong data-tip-income>${formatMoney(series.income[midIndex] || 0, model.currency)}</strong></span>
+          <span><i class="tip-swatch" style="background:var(--series-expense)"></i><label>Expenses</label><strong data-tip-expense>${formatMoney(series.expense[midIndex] || 0, model.currency)}</strong></span>
+          <span><i class="tip-swatch" style="background:var(--series-savings)"></i><label>Savings</label><strong data-tip-saving>${formatMoney(series.saving[midIndex] || 0, model.currency)}</strong></span>
         </div>
         ${model.hasFinancialData ? "" : `<div class="chart-empty-overlay">Your income, spending, and savings trends will appear here once you add your first transactions.</div>`}
       </div>
@@ -3090,14 +3114,22 @@ function chartDataset(model, mode = "month") {
   const monthName = monthLabel(model.month).split(" ")[0];
   const year = model.month.slice(0, 4);
   let start = 0;
-  let income = model.incomeCum;
-  let expense = model.expenseCum;
-  let saving = model.savingsCum;
+  // The cumulative series always span the whole month, so for the current month
+  // every day after today repeats the last real total — drawing a long flat
+  // tail across two-thirds of the canvas that reads as a broken chart rather
+  // than "the month is still in progress". Plot month-to-date instead; for past
+  // months todayDay() is the last day, so those still draw in full.
+  const elapsed = Math.max(2, Math.min(todayDay(model.month), model.incomeCum.length));
+  let income = model.incomeCum.slice(0, elapsed);
+  let expense = model.expenseCum.slice(0, elapsed);
+  let saving = model.savingsCum.slice(0, elapsed);
   let labels = income.map((_, index) => `${index + 1} ${monthName} ${year}`);
   if (mode === "daily") {
-    income = model.incomeDaily;
-    expense = model.expenseDaily;
-    saving = model.incomeDaily.map((value, index) => Math.max(0, value - (model.expenseDaily[index] || 0)));
+    // Same month-to-date window as above: days that have not happened yet are
+    // zero, not "a day with no spending", so plotting them flat-lines the tail.
+    income = model.incomeDaily.slice(0, elapsed);
+    expense = model.expenseDaily.slice(0, elapsed);
+    saving = income.map((value, index) => Math.max(0, value - (expense[index] || 0)));
   }
   if (mode === "week") {
     const end = Math.min(todayDay(model.month), model.incomeDaily.length);
