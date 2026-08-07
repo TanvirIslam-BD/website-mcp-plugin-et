@@ -2796,6 +2796,29 @@ button {
 :root[data-theme="dark"] .onb-quick-icon,
 :root[data-theme="dark"] .onb-btn-ic { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); }
 
+/* ---- Mobile polish for the premium onboarding ---- */
+@media (max-width: 640px) {
+  /* Scale the ambient hero glows down so they accent rather than wash out the
+     compact hero, and keep them from crowding the heading. */
+  .onb-hero::before { width: 168px; height: 168px; right: -46px; top: -66px; }
+  .onb-hero::after { width: 150px; height: 150px; left: -56px; bottom: -82px; }
+  /* Mascot reads as a deliberate centered hero illustration on phones. */
+  .onb-hero-art { width: 92px; align-self: center; margin-bottom: 2px; }
+  .onb-hero-art img { filter: drop-shadow(0 10px 14px rgba(16, 42, 76, .18)); }
+  .onb-hero-copy h1 { line-height: 1.16; }
+  /* Comfortable touch targets. */
+  .onb-chips button { min-height: 38px; }
+  .onb-quick-card { min-height: 92px; }
+  .onb-hero-btn { min-height: 46px; }
+  /* Tighten the copilot top accent so it hugs the smaller radius cleanly. */
+  .onb-copilot::before { height: 2.5px; }
+}
+/* Calmer float amplitude on small screens (motion-safe). */
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  .onb-hero-art img { animation: onbFloatSm 6s ease-in-out infinite; }
+}
+@keyframes onbFloatSm { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
 @media (max-width: 720px) {
   .welcome-steps { grid-template-columns: 1fr; }
   .welcome-banner { padding: 15px 15px; }
