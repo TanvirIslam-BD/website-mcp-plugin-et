@@ -1459,7 +1459,7 @@ function renderOnboarding(model) {
             <button type="button" class="ob-chip" data-ai-send="I spent 350 on groceries">${icon("wallet")}I spent 350 on groceries</button>
             <button type="button" class="ob-chip" data-ai-send="I received my salary">${icon("up")}I received my salary</button>
             <button type="button" class="ob-chip" data-panel="budget-editor">${icon("budget")}Set up a monthly budget</button>
-            <button type="button" class="ob-chip" data-ai-send="Where can I save money?">${icon("advisor")}Where can I save?</button>
+            <button type="button" class="ob-chip ob-chip-extra" data-ai-send="Where can I save money?">${icon("advisor")}Where can I save?</button>
           </div>
           <div class="ai-chat-messages ob-chat-messages" data-ai-messages></div>
           <form class="ob-composer" data-ai-chat-form>

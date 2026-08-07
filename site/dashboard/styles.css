@@ -2591,8 +2591,10 @@ button {
   .ob-connect-note{justify-content:center}
 }
 @media (max-width:640px){
-  .ob{padding:18px 15px 44px}
-  .ob-topline{flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:16px}
+  .ob{padding:16px 15px 40px}
+  /* The mobile header already greets ("Good afternoon 👋"); drop the onboarding
+     topline so we don't stack two greetings. Progress lives in the checklist. */
+  .ob-topline{display:none}
   .ob-hero{margin-bottom:14px}
   .ob-hero-body{padding:22px 18px}
   /* Compact hero: tuck the mascot into the top-right beside the title instead
@@ -2604,13 +2606,20 @@ button {
   .ob-hero p{font-size:14px; margin-bottom:20px}
   .ob-cta-row{gap:8px}
   .ob-cta-row .ob-btn{flex:1 1 100%; justify-content:center; min-height:46px}
-  .ob-connect{padding:18px}
+  .ob-connect{padding:18px; margin-bottom:14px}
   .ob-split{gap:14px; margin-bottom:14px}
   .ob-copilot{padding:18px}
   .ob-setup{padding:18px}
   .ob-chip{min-height:44px}
+  /* De-dup CTAs on mobile: the band already owns "Connect", and "Where can I
+     save?" is low-value with no data yet — hide both so the chips stay focused
+     on the three core money actions (spent / income / budget). */
+  .ob-chip-ai, .ob-chip-extra{display:none}
   .ob-send{width:44px;height:44px}
   .ob-composer{padding:6px 6px 6px 14px}
+  /* Tighter, tidier capability grid */
+  .ob-caps{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+  .ob-cap{justify-content:flex-start}
 }
 
 @media (max-width: 720px) {
