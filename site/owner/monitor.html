@@ -55,13 +55,16 @@
           <span>Activity Telemetry</span>
         </div>
       </a>
-      <a class="nav-link" href="#metrics-section">
+      <!-- Both point at the storage panel: it is the one that breaks expense and budget
+           records down. There is no #metrics-section on this page and there never was,
+           so until now these two were the only nav links that did nothing at all. -->
+      <a class="nav-link" href="#storage-section">
         <div class="nav-link-content">
           <span>💳</span>
           <span>Expense Metrics</span>
         </div>
       </a>
-      <a class="nav-link" href="#metrics-section">
+      <a class="nav-link" href="#storage-section">
         <div class="nav-link-content">
           <span>🎯</span>
           <span>Budgets Control</span>
@@ -298,30 +301,33 @@
             <div class="panel-card-title">Owner Quick Actions</div>
           </div>
 
+          <!-- type="button" so they do not submit anything, and real buttons rather than
+               click-only divs: these four were reachable by mouse alone, and announced as
+               nothing in particular to a screen reader. -->
           <div class="quick-action-grid">
-            <div class="quick-action-card" id="btn-quick-pwd">
-              <div class="quick-action-icon" style="background:#f5f3ff;color:#8b5cf6;">🔑</div>
-              <div class="quick-action-title">Change Password</div>
-              <div class="quick-action-desc">Update owner key</div>
-            </div>
+            <button type="button" class="quick-action-card" id="btn-quick-pwd">
+              <span class="quick-action-icon" style="background:#f5f3ff;color:#8b5cf6;">🔑</span>
+              <span class="quick-action-title">Change Password</span>
+              <span class="quick-action-desc">Update owner key</span>
+            </button>
 
-            <div class="quick-action-card" id="btn-quick-export">
-              <div class="quick-action-icon" style="background:#eff6ff;color:#3b82f6;">📥</div>
-              <div class="quick-action-title">Export Users CSV</div>
-              <div class="quick-action-desc">Download accounts</div>
-            </div>
+            <button type="button" class="quick-action-card" id="btn-quick-export">
+              <span class="quick-action-icon" style="background:#eff6ff;color:#3b82f6;">📥</span>
+              <span class="quick-action-title">Export Users CSV</span>
+              <span class="quick-action-desc">Download accounts</span>
+            </button>
 
-            <div class="quick-action-card" id="btn-export-audit">
-              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🛡️</div>
-              <div class="quick-action-title">Export Audit Log</div>
-              <div class="quick-action-desc">Security records</div>
-            </div>
+            <button type="button" class="quick-action-card" id="btn-export-audit">
+              <span class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🛡️</span>
+              <span class="quick-action-title">Export Audit Log</span>
+              <span class="quick-action-desc">Security records</span>
+            </button>
 
-            <div class="quick-action-card" id="btn-quick-refresh">
-              <div class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🔄</div>
-              <div class="quick-action-title">Refresh Telemetry</div>
-              <div class="quick-action-desc">Live metrics sync</div>
-            </div>
+            <button type="button" class="quick-action-card" id="btn-quick-refresh">
+              <span class="quick-action-icon" style="background:#ecfdf5;color:#10b981;">🔄</span>
+              <span class="quick-action-title">Refresh Telemetry</span>
+              <span class="quick-action-desc">Live metrics sync</span>
+            </button>
           </div>
         </article>
 

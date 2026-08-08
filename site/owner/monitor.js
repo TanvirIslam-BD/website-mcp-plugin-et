@@ -283,7 +283,7 @@ function render() {
   $('#users').innerHTML = filteredUsers.length ? filteredUsers.map(user => `
     <tr data-user-id="${escapeHtml(user.userId)}">
       <td>
-        <div class="user-cell" onclick="window.openUserModal('${escapeHtml(user.userId)}')">
+        <div class="user-cell" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(user.displayName || user.userId)}" onclick="window.openUserModal('${escapeHtml(user.userId)}')">
           ${user.profilePhotoUrl ? 
             `<img class="avatar" src="${escapeHtml(user.profilePhotoUrl)}" alt="">` : 
             `<span class="avatar avatar-fallback">${escapeHtml((user.displayName || 'U')[0].toUpperCase())}</span>`
@@ -729,6 +729,30 @@ if (searchInput) {
     render();
   });
 }
+
+// The magnifier in the topbar had no handler at all, so it was the one control on this
+// page that did nothing when clicked. The search field itself lives down in the users
+// panel, which is off screen from the top of the page -- so bring it into view and put
+// the caret in it, which is the only thing a search icon up there can usefully mean.
+const topSearchBtn = $('#top-search-btn');
+if (topSearchBtn && searchInput) {
+  topSearchBtn.addEventListener('click', () => {
+    $('#users-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    searchInput.focus({ preventScroll: true });
+  });
+}
+
+// The user cells in the table carry an onclick and nothing else, so they could be opened
+// with a mouse but not with a keyboard. They are rendered from a template string, so the
+// role and tabindex go on there; this supplies the other half a real button would give
+// for free -- Enter and Space activating it.
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const cell = event.target.closest?.('.user-cell[role="button"]');
+  if (!cell) return;
+  event.preventDefault();
+  cell.click();
+});
 
 const refreshBtn = $('#refresh');
 if (refreshBtn) refreshBtn.addEventListener('click', load);
