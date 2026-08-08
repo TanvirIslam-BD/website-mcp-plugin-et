@@ -370,6 +370,15 @@
   .hero .cta .hero-connect-actions .btn{min-width:0;width:100%;justify-content:center;gap:7px;padding:12px 9px;font-size:13.5px;}
   .hero-connect-actions .client-ico{width:18px;height:18px;flex-basis:18px;}
   @media(max-width:620px){
+    /* The 319px cap is a desktop constraint -- it stops the buttons stretching
+       across a wide column. On a phone the hero column is centred and everything
+       else in it (h1, lead, the Manny strip, the feature chips) spans the full
+       394px, so the cap left the whole CTA group -- both buttons, the divider and
+       the ChatGPT/Claude pair -- flush left with 75px of dead space on its right,
+       reading as off-centre against its own neighbours. Full width rather than
+       margin:auto, so its edges line up with the strip directly beneath it
+       instead of stepping in by 37px on each side. */
+    .hero .cta{max-width:none;width:100%;}
     .hero .cta .btn.btn-primary{
       width:100%;
       max-width:none;
@@ -426,6 +435,60 @@
   .pill b{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600;}
 
   /* hero feature row + social proof */
+  /* ---- Manny teaser in the hero ----
+     Carries the Manny band's own blue rather than the hero's green, so it reads as
+     a pointer to something else on the page instead of another feature of the
+     product above it. #0b5fdc on light / #6da4ff on dark are the section's own
+     values, both measured over these backgrounds. */
+  /* margin-top carries the mascot's overhang as well as the gap: the head rises
+     ~26px above the card, and without the extra room it would touch the
+     ChatGPT/Claude row above. overflow stays visible for the same reason. */
+  .hero-manny{display:flex;align-items:center;gap:13px;width:100%;max-width:466px;margin-top:56px;padding:11px 13px;overflow:visible;
+    border:1px solid color-mix(in srgb,#2f7bff 32%,var(--line2));border-radius:15px;
+    background:linear-gradient(100deg,color-mix(in srgb,#2f7bff 9%,transparent),transparent 72%),var(--panel);
+    color:inherit;text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s;}
+  .hero-manny:hover{transform:translateY(-1px);border-color:#2f7bff;box-shadow:0 12px 26px -18px rgba(47,123,255,.75);}
+  .hero-manny:focus-visible{outline:2px solid #2f7bff;outline-offset:3px;}
+  /* Manny stands in the card rather than sitting inside a tile: no plate, no
+     border, no crop -- the source is a cut-out with a real alpha channel, so the
+     silhouette reads as an object on the page in either theme. Earlier versions
+     put it on a white plate because the only asset available was a JPEG on white,
+     which would have shown as a lit rectangle in dark theme.
+     Absolutely positioned so it can rise above the card's top edge without
+     driving the row's height -- the strip stays as tall as its text, and the
+     mascot overhangs. The thumb only reserves the width. */
+  .hero-manny-thumb{position:relative;flex:0 0 64px;width:64px;align-self:stretch;}
+  .hero-manny-thumb img{position:absolute;left:50%;bottom:-11px;width:auto;height:104px;transform:translateX(-50%);
+    filter:drop-shadow(0 8px 12px rgba(9,22,48,.22));}
+  .hero-manny-copy{display:grid;gap:1px;min-width:0;}
+  .hero-manny-kicker{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#0b5fdc;}
+  .hero-manny-title{font-size:14px;font-weight:650;line-height:1.35;color:var(--ink);}
+  .hero-manny-title b{font-weight:800;color:#0b5fdc;}
+  .hero-manny-sub{font-size:12.5px;line-height:1.4;color:var(--muted);}
+  /* Lighter wash, deeper ink: 6.34:1 in light and 7.49:1 in dark, comfortably
+     clear for a glyph rather than merely clear for a decorative shape.
+     Worth recording how this was nearly got wrong: a contrast probe that reads
+     getComputedStyle().backgroundColor and stops at the first non-transparent
+     value treats a color-mix(...,transparent) wash as if it were opaque, and
+     reports nonsense -- 3.67:1, then 2.7:1 after a change that in fact improved
+     things. Translucent layers have to be composited down to the first opaque
+     ancestor before the ratio means anything. */
+  .hero-manny-go{margin-left:auto;flex:0 0 auto;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+    background:color-mix(in srgb,#2f7bff 9%,transparent);color:#0a4cb4;font-size:14px;line-height:1;transition:transform .2s;}
+  .hero-manny:hover .hero-manny-go{transform:translateX(2px);}
+  html[data-theme="dark"] .hero-manny-kicker,
+  html[data-theme="dark"] .hero-manny-title b,
+  html[data-theme="dark"] .hero-manny-go{color:#6da4ff;}
+  @media(prefers-reduced-motion:reduce){.hero-manny,.hero-manny-go{transition:none;}.hero-manny:hover{transform:none;}}
+  @media(max-width:620px){
+    /* Two lines of title inside a 44px-tall row would crush it, and the arrow
+       stops earning its width once the whole strip is the target. */
+    .hero-manny{max-width:none;margin-top:50px;padding:12px;gap:11px;}
+    .hero-manny-go{display:none;}
+    .hero-manny-title{font-size:13.5px;}
+    .hero-manny-sub{font-size:12px;}
+  }
+
   .hfeats{display:flex;gap:28px;margin-top:34px;flex-wrap:wrap;}
   .hfeat{display:inline-flex;align-items:center;gap:9px;font-size:15px;color:var(--ink2);font-weight:500;}
   .hfeat svg{width:19px;height:19px;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
@@ -1216,7 +1279,60 @@
   .demo-dialog-foot span{display:inline-flex;align-items:center;gap:7px;}
   .demo-dialog-foot i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(52,211,153,.11);}
   @keyframes demoIn{from{opacity:0;transform:translateY(12px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
-  @media(max-width:600px){.demo-modal{padding:12px}.demo-dialog{border-radius:18px;max-height:94vh}.demo-dialog-head{padding:13px 14px}.demo-video-wrap{padding:8px}.demo-video{border-radius:11px}.demo-dialog-foot{padding:12px 14px;font-size:12px}.demo-dialog-foot span:last-child{display:none;}}
+
+  /* ---- Manual & specs viewer (reuses the demo dialog's shell) ---- */
+  /* Full height: a 1197x1315 sheet is the tallest thing this site shows, and the
+     inherited 760px cap wasted most of the screen on it. The dialog becomes a
+     flex column -- head and footer keep their size, the sheet takes the rest --
+     and only the sheet scrolls, so the title and the zoom control stay put while
+     panning. place-items on the backdrop has to stretch, or the grid would keep
+     centring the dialog at its content height and height:100% would do nothing. */
+  .spec-modal{place-items:stretch;}
+  .spec-dialog{width:min(100%,1120px);height:100%;max-height:none;margin:0 auto;
+    display:flex;flex-direction:column;overflow:hidden;}
+  .spec-modal .demo-dialog-head,.spec-modal .demo-dialog-foot{flex:0 0 auto;}
+  /* min-height:0 so the flex child may shrink below its content and scroll,
+     instead of forcing the dialog past the viewport. */
+  .spec-sheet-wrap{flex:1 1 auto;min-height:0;overflow:auto;padding:12px;background:#fff;overscroll-behavior:contain;}
+  .spec-sheet{display:block;width:100%;height:auto;border-radius:12px;}
+  /* `display:block` above is an author rule and beats the UA's `[hidden]{display:none}`,
+     so setting the hidden attribute on a failed sheet did nothing -- the broken-image
+     icon and its whole alt string stayed on screen above the fallback message. Any
+     element in this dialog that gets hidden needs the attribute to actually win. */
+  .spec-modal [hidden]{display:none;}
+  /* Actual size: the image stops being fitted so the wrap can scroll it in both
+     axes, which is the only way the spec table and the block diagram are legible. */
+  .spec-sheet-wrap.is-actual .spec-sheet{width:auto;max-width:none;}
+  .spec-sheet-missing{margin:0;padding:34px 18px;text-align:center;color:#3c4658;font-size:14px;line-height:1.6;}
+  .spec-sheet-missing a{color:#0b5fdc;font-weight:700;}
+  .spec-zoom{border:1px solid var(--line2);border-radius:9px;padding:6px 12px;background:var(--panel2);color:var(--ink2);font:700 12.5px/1 inherit;cursor:pointer;transition:.18s;}
+  .spec-zoom:hover{border-color:var(--violet2);color:var(--ink);}
+  .demo-dialog-foot a{color:inherit;font-weight:700;text-decoration:underline;}
+
+  @media(max-width:600px){.demo-modal{padding:12px}.demo-dialog{border-radius:18px;max-height:94vh}.demo-dialog-head{padding:13px 14px}.demo-video-wrap{padding:8px}.demo-video{border-radius:11px}.demo-dialog-foot{padding:12px 14px;font-size:12px}.demo-dialog-foot>span:last-child{display:none;}
+    /* The demo dialog hides its whole trailing span on phones. This one must not:
+       that span holds the link to the manual page, which is the text equivalent
+       of the image. Only the Esc hint goes, since there is no Esc key here. */
+    .spec-modal .demo-dialog-foot>span:last-child{display:inline-flex;}
+    /* Two classes, not one: `.demo-dialog-foot span` above already sets
+       display:inline-flex on every span in this footer, and a bare `.spec-esc`
+       loses to it on specificity. */
+    .spec-modal .spec-esc{display:none;}
+    /* Both footer controls are standalone actions on a touch surface, not words
+       inside a sentence, so the 2.5.5 inline exemption does not cover them: the
+       manual link measured 96x19 and the zoom button ~30 tall. */
+    .spec-modal .demo-dialog-foot a,.spec-modal .spec-zoom{min-height:46px;display:inline-flex;align-items:center;}
+    .spec-modal .spec-zoom{padding:0 14px;}
+    /* Shared with the demo dialog, and 37px in both: the control that dismisses a
+       full-screen sheet is the last one that should need a careful tap. */
+    .demo-close{width:46px;height:46px;flex:0 0 46px;}
+    /* `.demo-dialog{max-height:94vh}` sits later in this same block and ties with
+       .spec-dialog on specificity, so document order gave it the win and the sheet
+       stopped 56px short of full height. Two classes to settle it. */
+    .spec-modal .spec-dialog{height:100%;max-height:none;}
+    /* The desktop rule already flexes to fill; a vh cap here would re-introduce
+       the gap this change removed. */
+    .spec-sheet-wrap{padding:8px;}}
   @media(prefers-reduced-motion:reduce){.demo-dialog{animation:none;}}
 
   /* ---------- pricing ---------- */
@@ -1735,106 +1851,237 @@
   }
 
   /* ---- Manny Copilot -------------------------------------------------------
-     Built to match the product poster rather than the surrounding page: the
-     band carries its own light desk palette and its own dark footer strip, and
-     holds that appearance in either site theme. Colours below are sampled from
-     the poster itself (#016ff8 title blue, #000f2c navy, #eeeeee->#bdbbbc desk
-     gradient, #0a1624->#19283d footer) so this reads as the same artwork, not
-     an approximation of it. */
+     This band takes its composition from the product poster -- three columns,
+     the one-line wordmark, the device as the largest object, the five-up strip --
+     but its colour from the site's own tokens rather than from the poster.
+     It used to do both from the poster: a hardcoded #eeeeee->#c2bfbe desk
+     gradient, #000f2c ink, #016ff8 blue and a #0a1624 strip, none of which are
+     brand values (the brand blue is --blue, #168cff light / #3b82f6 dark). More
+     to the point it referenced no tokens at all, so it rendered identically in
+     both themes -- the page would go dark around a band that stayed light grey.
+     Every colour below now resolves through a token, so it re-themes with
+     everything else. Two deliberate exceptions, both content rather than chrome:
+     the device photograph, and the navy speech bubbles that echo its screen. */
   .manny{padding:0;}
-  .manny-shell{position:relative;overflow:hidden;border-radius:26px;color:#0b1533;
+  /* No border on the shell: the section reads as part of the page, and an outline
+     around it made it look like a card dropped onto the page instead. The tinted
+     washes are what separate it from the white above and below. */
+  .manny-shell{position:relative;overflow:hidden;border-radius:26px;color:var(--ink);
     background:
-      radial-gradient(120% 80% at 8% 4%, #f4f3f2 0%, transparent 55%),
-      radial-gradient(90% 70% at 96% 2%, #c9c4c1 0%, transparent 60%),
-      linear-gradient(158deg,#eeeeee 0%,#e6e3e2 38%,#d3cfce 68%,#c2bfbe 100%);}
-  .manny-poster{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.78fr) minmax(0,1.1fr);
-    gap:26px;align-items:center;padding:44px 46px 40px;}
+      radial-gradient(120% 80% at 6% 0%, color-mix(in srgb,var(--violet) 10%,transparent) 0%, transparent 58%),
+      radial-gradient(90% 70% at 98% 3%, color-mix(in srgb,var(--blue) 11%,transparent) 0%, transparent 62%),
+      var(--bg2);}
+  /* Column shares, and the padding and gap that feed them, are set by two things
+     the poster does at once: "Manny Copilot" sits on ONE line, and the device is
+     the biggest object in the frame. Both want width, so the middle column is
+     held at roughly the poster's own share of it (~20%) and the slack goes to the
+     outer two. See the nowrap rule on h2, which depends on this width. */
+  /* Two rows in the first column, head above copy, with the chat and the device
+     spanning both. row-gap is 0 so the title-to-tagline distance stays the 14px
+     the tagline's own margin provides, rather than gaining the 22px column gap. */
+  .manny-poster{display:grid;grid-template-columns:minmax(0,1.14fr) minmax(0,.66fr) minmax(0,1.26fr);
+    grid-template-areas:"head chat visual" "copy chat visual";
+    gap:0 22px;align-items:center;padding:44px 34px 40px;}
+  .manny-head{grid-area:head;align-self:end;}
+  .manny-copy{grid-area:copy;align-self:start;}
+  .manny-chat{grid-area:chat;}
+  .manny-visual{grid-area:visual;}
 
-  .manny-lockup{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
-  .manny-lockup img{width:34px;height:34px;}
-  .manny-lockup b{font-size:14.5px;font-weight:800;letter-spacing:.6px;color:#0b1533;text-transform:uppercase;}
-  .manny-kind{display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;
-    border:1px solid rgba(1,111,248,.28);background:rgba(1,111,248,.09);
-    font-size:12.5px;font-weight:800;letter-spacing:.2px;color:#0b4fbf;}
-  .manny-kind i{width:7px;height:7px;border-radius:50%;background:#016ff8;box-shadow:0 0 0 4px rgba(1,111,248,.18);}
+  /* .manny-lockup is gone with the markup it styled -- the header already shows that
+     mark and wordmark on every page. The eyebrow now carries the margin the lockup
+     used to provide. */
+  /* Same construction as the hero's .pill, so the two eyebrows read as one system. */
+  .manny-kind{margin-bottom:14px;display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;
+    border:1px solid color-mix(in srgb,var(--violet2) 32%,transparent);background:color-mix(in srgb,var(--violet) 8%,transparent);
+    font-size:12.5px;font-weight:800;letter-spacing:.2px;color:var(--violet-ink);}
+  .manny-kind i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 18%,transparent);}
   .manny-physical{display:flex;gap:11px;margin:16px 0 0;max-width:44ch;padding:13px 15px;border-radius:14px;
-    border:1px solid rgba(11,21,51,.12);background:rgba(255,255,255,.62);
-    font-size:13.5px;line-height:1.6;color:#3c4658;}
-  .manny-physical svg{flex:0 0 auto;width:22px;height:22px;margin-top:1px;color:#0b4fbf;}
-  .manny-physical b{color:#0b1533;font-weight:800;}
-  .manny-copy h2{margin:0;font-size:clamp(44px,6.4vw,74px);line-height:.98;letter-spacing:-2.6px;font-weight:800;color:#000f2c;}
-  .manny-copy h2 .manny-name{color:#016ff8;}
-  .manny-tagline{margin:14px 0 0;font-size:clamp(18px,1.75vw,22px);font-weight:800;line-height:1.28;color:#0b1533;letter-spacing:-.3px;}
-  .manny-tagline span{color:#0b5fdc;}
-  .manny-lede{margin:15px 0 0;max-width:34ch;font-size:15px;line-height:1.7;color:#3c4658;}
+    border:1px solid var(--line);background:var(--panel);
+    font-size:13.5px;line-height:1.6;color:var(--ink2);}
+  .manny-physical svg{flex:0 0 auto;width:22px;height:22px;margin-top:1px;color:var(--violet-ink);}
+  .manny-physical b{color:var(--ink);font-weight:800;}
+  /* 4.6vw, not 4.9: paired with the nowrap rule below, 4.9 left only 2-3px of
+     slack at 1081px, which the first font fallback would have eaten. */
+  .manny-head h2{margin:0;font-size:clamp(44px,4.6vw,62px);line-height:.98;letter-spacing:-2.6px;font-weight:800;color:var(--ink);}
+  /* The poster sets "Manny" in a flat blue. The page's own device for an accented
+     word in a heading is the brand gradient (.hero h1 .g, #how h2 .g), so it uses
+     that -- same treatment as "Finance Assistant" in the hero. */
+  .manny-head h2 .manny-name{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .manny-tagline{margin:14px 0 0;font-size:clamp(18px,1.75vw,22px);font-weight:800;line-height:1.28;color:var(--ink);letter-spacing:-.3px;}
+  .manny-tagline span{color:var(--violet-ink);}
+  .manny-lede{margin:15px 0 0;max-width:34ch;font-size:15px;line-height:1.7;color:var(--ink2);}
   .manny-features{display:grid;gap:15px;margin:26px 0 0;padding:0;list-style:none;}
   .manny-features li{display:flex;gap:14px;align-items:flex-start;}
   .manny-ficon{display:grid;place-items:center;flex:0 0 auto;width:42px;height:42px;border-radius:50%;
     background:radial-gradient(circle at 32% 28%, color-mix(in srgb,var(--tone) 70%,#fff) 0%, var(--tone) 62%, color-mix(in srgb,var(--tone) 72%,#000) 100%);
     color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--tone) 14%,transparent),0 6px 14px -6px color-mix(in srgb,var(--tone) 70%,transparent);}
   .manny-ficon svg{width:20px;height:20px;}
-  .manny-features b{display:block;font-size:15.5px;font-weight:800;color:#0b1533;letter-spacing:-.2px;}
-  .manny-features small{display:block;margin-top:2px;font-size:13.5px;line-height:1.5;color:#4b5568;}
+  .manny-features b{display:block;font-size:15.5px;font-weight:800;color:var(--ink);letter-spacing:-.2px;}
+  .manny-features small{display:block;margin-top:2px;font-size:13.5px;line-height:1.5;color:var(--ink2);}
 
   /* Middle column: the spoken exchange, drawn as the poster draws it -- Manny
      in deep navy with a waveform, the person in pale grey. */
   .manny-chat{display:grid;gap:15px;align-content:center;}
   .manny-bubble{position:relative;padding:14px 16px;border-radius:16px;font-size:13.5px;line-height:1.45;}
-  .manny-bubble.bot{background:linear-gradient(150deg,#0b2f5e,#06203f);color:#eaf2fb;border-bottom-left-radius:5px;box-shadow:0 12px 26px -16px rgba(4,20,42,.85);}
-  .manny-bubble.you{background:#eef2f6;color:#26324a;border:1px solid #dfe6ee;border-bottom-right-radius:5px;margin-left:24px;}
+  /* Frosted glass at every width, not just where the bubbles float on the photo.
+     Both fills are fixed rather than tokenised, and both carry their own text
+     colour: the tints have to survive a light shell, a dark shell and a photograph,
+     so they cannot follow --panel2/--ink2 -- in dark theme that pairing would have
+     put light --ink2 text on a light glass bubble. Manny stays navy because that is
+     his screen colour; the person stays pale, as a messaging app would draw it.
+     Alphas are high on purpose: verified against the photo's own pixels on mobile,
+     and they keep the text legible even where backdrop-filter is unsupported, since
+     the blur is an enhancement rather than the thing carrying contrast. */
+  .manny-bubble.bot{background:rgba(7,28,55,.78);color:#eaf2fb;border:1px solid rgba(150,196,255,.22);
+    border-bottom-left-radius:5px;box-shadow:0 12px 26px -16px rgba(4,20,42,.85);
+    -webkit-backdrop-filter:blur(13px) saturate(1.3);backdrop-filter:blur(13px) saturate(1.3);}
+  .manny-bubble.you{background:rgba(250,252,255,.74);color:#0c1830;border:1px solid rgba(255,255,255,.6);
+    border-bottom-right-radius:5px;margin-left:24px;
+    -webkit-backdrop-filter:blur(13px) saturate(1.15);backdrop-filter:blur(13px) saturate(1.15);}
   .manny-wave{display:block;width:100%;height:16px;margin-top:9px;}
+  /* The poster closes the exchange with a loose waveform under the last bubble --
+     Manny still listening, outside any bubble. It is decoration, so it is hidden
+     from assistive tech rather than described. */
+  .manny-wave.trailing{width:86%;margin:3px auto 0;height:18px;opacity:.85;}
   .manny-badge{position:absolute;right:-12px;bottom:-10px;width:32px;height:32px;border-radius:50%;background:#06203f;border:2px solid #1d4c86;display:grid;place-items:center;overflow:hidden;}
   .manny-badge img{width:22px;height:22px;}
-  .manny-mic{flex:0 0 auto;width:16px;height:16px;color:#5b6478;}
 
   .manny-visual{margin:0;display:grid;place-items:center;}
-  .manny-visual img{display:block;width:100%;max-width:430px;height:auto;border-radius:18px;}
+  /* The cap was 430px, which held the device below a third of the band while the
+     poster gives it well over a third. Raised to let the widened column actually
+     be used; still a cap, so it cannot outgrow its column on very wide screens. */
+  .manny-visual img{display:block;width:100%;max-width:490px;height:auto;border-radius:18px;}
 
   .manny-actions{display:flex;flex-wrap:wrap;gap:11px;margin:26px 0 0;}
   .manny-cta{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:0 20px;border-radius:13px;border:1px solid transparent;
-    background:linear-gradient(100deg,#016ff8,#0b5fdc);color:#fff;font-size:14.5px;font-weight:800;text-decoration:none;font-family:inherit;cursor:pointer;}
-  .manny-cta.ghost{background:#fff;border-color:#cfd6df;color:#12203c;}
+    background:var(--grad);color:#fff;font-size:14.5px;font-weight:800;text-decoration:none;font-family:inherit;cursor:pointer;}
+  .manny-cta.ghost{background:var(--panel);border-color:var(--line2);color:var(--ink);}
   .manny-play{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.22);font-size:8px;line-height:1;}
-  .manny-book{display:grid;place-items:center;width:18px;height:18px;color:#0b5fdc;}
+  .manny-book{display:grid;place-items:center;width:18px;height:18px;color:var(--violet-ink);}
   .manny-book svg{width:16px;height:16px;}
-  .manny-note{margin:14px 0 0;font-size:12.5px;line-height:1.6;color:#5a6478;}
+  .manny-note{margin:14px 0 0;font-size:12.5px;line-height:1.6;color:var(--muted);}
+  /* Was an inline style="color:#0b5fdc", the last hardcoded colour in the section
+     and the only one the re-skin left failing (3.41:1 on the dark surface).
+     Two values because one cannot work: on these two shells, every candidate dark
+     enough to clear 4.5 in light theme falls under 3.6 in dark, and vice versa --
+     measured across nine of them. --violet-ink carries dark at 5.8:1; light takes
+     teal-700 at 5.37:1, the same family a shade deeper. */
+  .manny-note-link{color:var(--violet-ink);font-weight:700;}
+  html[data-theme="light"] .manny-note-link{color:#0f766e;}
 
   /* ---- dark footer band (poster's bottom strip) ---- */
+  /* One line for "Manny Copilot", as the poster sets it. Only above 1080px, where
+     the column measured wide enough for it at this size -- below that the poster
+     layout has already collapsed and wrapping is correct. */
+  @media(min-width:1081px){
+    .manny-head h2{white-space:nowrap;}
+  }
+
+  /* ---- five-up strip (poster's bottom band) ----
+     The poster's is near-black with neon rings, which on a white page was the most
+     foreign element here. It uses the page's own recessed-panel surface instead, so
+     it is dark in dark theme and light in light theme, and the divider hairlines
+     follow --line rather than a fixed white alpha that only worked on near-black. */
   .manny-benefits{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:22px 26px 26px;padding:0;list-style:none;
-    border-radius:18px;background:linear-gradient(120deg,#0a1624,#16233a 52%,#101c2e);overflow:hidden;}
-  .manny-benefits li{padding:26px 20px 28px;text-align:center;border-left:1px solid rgba(255,255,255,.08);}
+    border-radius:18px;background:var(--panel2);overflow:hidden;}
+  .manny-benefits li{padding:26px 20px 28px;text-align:center;border-left:1px solid var(--line);}
   .manny-benefits li:first-child{border-left:0;}
   .manny-bicon{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 14px;border-radius:50%;
     border:2px solid var(--tone);color:var(--tone);background:color-mix(in srgb,var(--tone) 12%,transparent);
-    box-shadow:0 0 18px -2px color-mix(in srgb,var(--tone) 55%,transparent),inset 0 0 12px -4px color-mix(in srgb,var(--tone) 60%,transparent);}
+    box-shadow:0 0 18px -6px color-mix(in srgb,var(--tone) 42%,transparent),inset 0 0 12px -6px color-mix(in srgb,var(--tone) 34%,transparent);}
   .manny-bicon svg{width:23px;height:23px;}
-  .manny-benefits b{display:block;font-size:15px;font-weight:750;color:var(--label,#fff);letter-spacing:-.2px;}
-  .manny-benefits small{display:block;margin-top:8px;font-size:13px;line-height:1.55;color:#c3cede;}
+  /* One inline --tone has to serve two surfaces. The five values are set bright so
+     they hold up on the dark strip; light theme derives a deeper variant from the
+     same value rather than needing a second set in the markup. The tones run
+     green -> teal -> cyan -> sky -> blue across the strip, which is --grad's own
+     ramp, so the row reads as the brand gradient rather than five random hues
+     (it previously included amber and violet). */
+  html[data-theme="light"] .manny-bicon{
+    border-color:color-mix(in srgb,var(--tone) 74%,#062032);
+    color:color-mix(in srgb,var(--tone) 74%,#062032);}
+  /* --label per item is gone from the markup: it existed to choose white-or-accent
+     against a near-black strip, and on a surface that re-themes the token is the
+     only answer that works in both. */
+  .manny-benefits b{display:block;font-size:15px;font-weight:750;color:var(--ink);letter-spacing:-.2px;}
+  .manny-benefits small{display:block;margin-top:8px;font-size:13px;line-height:1.55;color:var(--ink2);}
 
   @media(max-width:1080px){
-    .manny-poster{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;}
-    .manny-chat{grid-column:1 / -1;grid-template-columns:repeat(2,minmax(0,1fr));display:grid;gap:12px;}
+    /* Two columns: title and copy stacked beside the device, conversation across
+       the full width beneath them in two lanes. */
+    .manny-poster{grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      grid-template-areas:"head visual" "copy visual" "chat chat";gap:0 24px;}
+    .manny-chat{grid-template-columns:repeat(2,minmax(0,1fr));display:grid;gap:12px;margin-top:24px;}
     .manny-visual img{max-width:360px;}
   }
   @media(max-width:820px){
-    .manny-poster{grid-template-columns:1fr;gap:26px;padding:34px 26px 30px;}
-    .manny-visual{order:-1;}
+    /* One column, and the device and the conversation share a single grid area
+       rather than stacking: the bubbles float in front of the lower half of the
+       photo, which is how the poster composes them. Stacked, the two ran ~757px
+       before the features or the buttons appeared; overlaid, the stage is only as
+       tall as the photo. The face and the on-screen cards stay above the bubbles,
+       and every bubble has an opaque background of its own, so nothing has to be
+       read against the photograph. */
+    .manny-poster{grid-template-columns:1fr;
+      grid-template-areas:"head" "stage" "copy";gap:26px 0;padding:34px 26px 30px;}
+    .manny-visual{grid-area:stage;align-self:start;}
     .manny-visual img{max-width:330px;}
-    .manny-chat{grid-template-columns:1fr;}
+    /* Inset and lifted off the bottom on purpose: the fabric base and the desk show
+       below the last bubble, and the face and cards above the first, so the object
+       still reads as an object at both ends instead of a head behind a chat log.
+       The lift costs nothing in height -- the photo is taller than the stack, so the
+       stage is the photo's height either way. */
+    .manny-chat{grid-area:stage;align-self:end;position:relative;z-index:1;
+      grid-template-columns:1fr;width:min(288px,100%);margin:0 auto 26px;align-content:end;gap:3px;}
+    .manny-bubble{box-shadow:0 10px 24px -14px rgba(6,20,42,.55);}
     .manny-benefits{grid-template-columns:repeat(2,minmax(0,1fr));margin:18px 18px 20px;}
-    .manny-benefits li{border-top:1px solid rgba(255,255,255,.08);}
+    .manny-benefits li{border-top:1px solid var(--line);}
     .manny-benefits li:nth-child(odd){border-left:0;}
     .manny-benefits li:first-child,.manny-benefits li:nth-child(2){border-top:0;}
   }
   @media(max-width:560px){
     .manny-shell{border-radius:20px;}
     .manny-poster{padding:28px 20px 26px;}
-    .manny-copy h2{font-size:clamp(38px,11vw,52px);letter-spacing:-1.8px;}
+    .manny-head h2{font-size:clamp(38px,11vw,52px);letter-spacing:-1.8px;}
     .manny-cta{width:100%;justify-content:center;}
     .manny-benefits{grid-template-columns:1fr;margin:16px 14px 18px;}
-    .manny-benefits li{border-left:0;border-top:1px solid rgba(255,255,255,.08);text-align:left;display:flex;gap:14px;align-items:flex-start;padding:18px 20px;}
+    .manny-benefits li{border-left:0;border-top:1px solid var(--line);text-align:left;display:flex;gap:14px;align-items:flex-start;padding:18px 20px;}
     .manny-benefits li:first-child{border-top:0;}
     .manny-bicon{margin:0;flex:0 0 auto;width:42px;height:42px;}
+
+    /* The exchange is an illustration of how Manny talks, not something to read
+       word by word, and at desktop metrics it ran 387px -- 40% of a phone screen
+       before the features or the buttons appear. Tightened rather than trimmed, so
+       all five turns survive: the point is the back-and-forth, and cutting turns
+       would remove the follow-up question that makes it a conversation.
+       Text stays at 13px, above the 10px floor this project holds to. */
+    .manny-chat{gap:7px;}
+    /* Smallest the bubbles go. 10px is the floor this project enforces everywhere --
+       it is the threshold I fixed sub-10px text against in the dashboard and the
+       copilot modal, so going under it here to reveal a little more of the photo
+       would break the rule the rest of the site now keeps. Everything else that
+       could give has: padding, leading, radius and the gap. */
+    .manny-bubble{padding:5px 9px;border-radius:9px;font-size:10px;line-height:1.28;}
+    .manny-bubble.you{margin-left:10px;}
+    /* display:none rather than visibility or height:0 -- these are removed from the
+       phone layout, so they should be out of the accessibility tree too rather than
+       read aloud as invisible text. */
+    .manny-bubble.is-extra{display:none;}
+
+    /* The glass itself is now defined once, above, for every width. Only the alphas
+       differ here: on a phone these sit on a photograph whose luminance swings from
+       the near-black screen to the near-white shell, so they are a shade lighter
+       than the base to let more of Manny read through, which the pixel-sampled
+       contrast check showed there was room for. */
+    .manny-bubble.bot{background:rgba(7,28,55,.72);}
+    .manny-bubble.you{background:rgba(250,252,255,.72);}
+    .manny-wave{height:9px;margin-top:4px;}
+    /* Both waveforms go now. The in-bubble one was kept earlier because it is what
+       says "spoken" -- but the photo it now floats on has a waveform on Manny's own
+       screen, directly above these bubbles, so it was saying it twice and charging
+       ~14px for the repeat. */
+    .manny-wave{display:none;}
+    .manny-badge{right:-7px;bottom:-6px;width:21px;height:21px;}
+    .manny-badge img{width:14px;height:14px;}
   }
 </style>
 </head>
@@ -1934,6 +2181,26 @@
             </div>
           </div>
         </div>
+        <!-- Manny's introduction in the hero. Deliberately a teaser and not a
+             second primary CTA: this hero converts on the free product, and Manny
+             has no price or ship date, so giving it button weight next to "Get
+             Started Free" would make a promise the product cannot keep -- hence
+             "In development" said up front rather than buried in the section.
+             It sits directly after the "Connect with your AI" block because that
+             is the same question -- where can you use this -- and Manny is the
+             answer the reader cannot guess: a thing on the desk, not another chat
+             surface. One anchor rather than nested controls, so the whole strip is
+             the target and it carries a single accessible name. -->
+        <a class="hero-manny" href="#manny">
+          <span class="hero-manny-thumb" aria-hidden="true"><img src="assets/manny-mascot.png" alt="" width="147" height="224" loading="lazy" decoding="async"></span>
+          <span class="hero-manny-copy">
+            <span class="hero-manny-kicker">New &middot; In development</span>
+            <span class="hero-manny-title">Meet <b>Manny</b>, the AI home &amp; desk assistant</span>
+            <span class="hero-manny-sub">A real device you talk to &mdash; not another app.</span>
+          </span>
+          <span class="hero-manny-go" aria-hidden="true">&rarr;</span>
+        </a>
+
         <div class="hfeats">
           <span class="hfeat"><svg viewBox="0 0 24 24" stroke="#34d399"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Scan Receipts</span>
           <span class="hfeat"><svg viewBox="0 0 24 24" stroke="#2dd4bf"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg>Voice Logging</span>
@@ -2108,13 +2375,23 @@
   <div class="wrap">
     <div class="manny-shell reveal">
       <div class="manny-poster">
-        <div class="manny-copy">
-          <div class="manny-lockup">
-            <img src="assets/logo/money-copilot-app-logo-108.webp" width="34" height="34" alt="" loading="lazy" decoding="async">
-            <b>Money Copilot AI</b>
-            <span class="manny-kind"><i></i>AI Home &amp; Desk Assistant</span>
-          </div>
+        <!-- The lockup and the title are their own grid child rather than the first
+             two elements of .manny-copy. On one column the reader should meet the
+             name before the object, but the device and the conversation should still
+             come before the features and the buttons -- which is impossible while
+             the title is welded to the rest of the copy. Placement is by grid area,
+             so each breakpoint states its own reading order. -->
+        <div class="manny-head">
+          <!-- No logo-and-wordmark lockup here. The site header carries the same mark
+               and the same "Money Copilot AI" wordmark on every page, directly above
+               this band, so repeating it said nothing and cost 78px above the title
+               on a phone. The eyebrow stays -- it is the only part that carried
+               information the reader did not already have. -->
+          <span class="manny-kind"><i></i>AI Home &amp; Desk Assistant</span>
           <h2 id="manny-title"><span class="manny-name">Manny</span> Copilot</h2>
+        </div>
+
+        <div class="manny-copy">
           <p class="manny-tagline">Your AI Finance Copilot.<br><span>Smarter Money, Every Day.</span></p>
           <p class="manny-lede">Manny helps you budget, track spending, avoid overspending, and build better financial habits — all in a friendly conversation.</p>
           <!-- Stated plainly and early: readers arriving from an app-shaped site
@@ -2126,23 +2403,23 @@
           </p>
           <ul class="manny-features">
             <li>
-              <span class="manny-ficon" style="--tone:#1150e4" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9v9z"/></svg></span>
+              <span class="manny-ficon" style="--tone:#168cff" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9v9z"/></svg></span>
               <div><b>Budget Tracking</b><small>Know what's left, always</small></div>
             </li>
             <li>
-              <span class="manny-ficon" style="--tone:#0e9f6e" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+              <span class="manny-ficon" style="--tone:#10b981" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
               <div><b>Smart Alerts</b><small>Get notified before you overspend</small></div>
             </li>
             <li>
-              <span class="manny-ficon" style="--tone:#12b981" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+              <span class="manny-ficon" style="--tone:#0dbfbc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
               <div><b>Recurring Reminders</b><small>Never miss a payment</small></div>
             </li>
             <li>
-              <span class="manny-ficon" style="--tone:#f08a1d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V10M12 20V4M18 20v-6"/></svg></span>
+              <span class="manny-ficon" style="--tone:#06b6d4" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V10M12 20V4M18 20v-6"/></svg></span>
               <div><b>Spending Insights</b><small>Understand your habits</small></div>
             </li>
             <li>
-              <span class="manny-ficon" style="--tone:#7c3aed" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span>
+              <span class="manny-ficon" style="--tone:#2f7bd8" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span>
               <div><b>Voice AI Copilot</b><small>Talk naturally, get instant answers</small></div>
             </li>
           </ul>
@@ -2153,10 +2430,13 @@
               data-demo-title="Meet Manny Copilot"
               data-demo-sub="A first look at the desk assistant."
               data-demo-foot="10-second first look"><span class="manny-play" aria-hidden="true">▶</span>Watch Manny demo</button>
-            <a class="manny-cta ghost" href="/manny-guide"><span class="manny-book" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>Manual &amp; specs</a>
+            <!-- Still an anchor to the manual page, so it works with JS off and
+                 keeps its middle-click/open-in-new-tab behaviour. The popup is
+                 the enhancement, and it links the page too. -->
+            <a class="manny-cta ghost" href="/manny-guide" data-spec-trigger aria-haspopup="dialog" aria-controls="specModal"><span class="manny-book" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>Manual &amp; specs</a>
             <a class="manny-cta ghost" href="mailto:support@contact.copilotai.live?subject=Manny%20Copilot%20launch%20updates&amp;body=Please%20let%20me%20know%20when%20Manny%20Copilot%20is%20available.">Get launch updates</a>
           </div>
-          <p class="manny-note">Manny is in development. Pricing and availability haven't been announced — the button emails us so we can tell you when they are. <a href="/dashboard" style="color:#0b5fdc;font-weight:700">Use Money Copilot AI today →</a></p>
+          <p class="manny-note">Manny is in development. Pricing and availability haven't been announced — the button emails us so we can tell you when they are. <a href="/dashboard" class="manny-note-link">Use Money Copilot AI today →</a></p>
         </div>
 
         <div class="manny-chat" aria-label="Example conversation with Manny">
@@ -2169,11 +2449,18 @@
             You spent $458 on dining this month. That's 18% of your total spending.
             <span class="manny-badge" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo-108.webp" width="22" height="22" alt="" loading="lazy" decoding="async"></span>
           </div>
-          <div class="manny-bubble you">Remind me about my Netflix payment.</div>
-          <div class="manny-bubble bot">
+          <!-- The reminder exchange is marked as the part that goes on a phone. Five
+               turns at the 10px type floor cost ~150px whatever the padding, so
+               halving the stack could only come from showing fewer turns, not from
+               tightening further. The three that stay are a greeting, a question and
+               a substantive answer, which is still a conversation; this pair is the
+               second demonstration of the same idea. Desktop keeps all five. -->
+          <div class="manny-bubble you is-extra">Remind me about my Netflix payment.</div>
+          <div class="manny-bubble bot is-extra">
             Sure! Your Netflix payment of $15.49 is due tomorrow. I'll remind you.
             <span class="manny-badge" aria-hidden="true"><img src="assets/logo/money-copilot-app-logo-108.webp" width="22" height="22" alt="" loading="lazy" decoding="async"></span>
           </div>
+          <svg class="manny-wave trailing" viewBox="0 0 200 18" fill="none" aria-hidden="true"><g stroke="#7cc6f5" stroke-width="2.4" stroke-linecap="round"><path d="M6 9v0"/><path d="M15 7v4"/><path d="M24 5v8"/><path d="M33 8v2"/><path d="M42 4v10"/><path d="M51 7v4"/><path d="M60 2v14"/><path d="M69 6v6"/><path d="M78 4v10"/><path d="M87 8v2"/><path d="M96 3v12"/><path d="M105 7v4"/><path d="M114 5v8"/><path d="M123 8v2"/><path d="M132 6v6"/><path d="M141 8v2"/><path d="M150 7v4"/><path d="M159 8v2"/><path d="M168 8v2"/><path d="M177 9v0"/><path d="M186 9v0"/></g></svg>
         </div>
 
         <figure class="manny-visual">
@@ -2182,23 +2469,23 @@
       </div>
 
       <ul class="manny-benefits">
-        <li style="--tone:#3b82f6;--label:#ffffff">
+        <li style="--tone:#10b981">
           <span class="manny-bicon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-1L3 20l1.1-4.6a8.4 8.4 0 0 1-1-4A8.4 8.4 0 0 1 11.5 3h.5a8.4 8.4 0 0 1 9 8z"/></svg></span>
           <div><b>Talk Naturally</b><small>Voice or text — Manny understands you.</small></div>
         </li>
-        <li style="--tone:#2ee6a8;--label:#2ee6a8">
+        <li style="--tone:#0dbfbc">
           <span class="manny-bicon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-1L3 20l1.1-4.6a8.4 8.4 0 0 1-1-4A8.4 8.4 0 0 1 11.5 3h.5a8.4 8.4 0 0 1 9 8z"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></svg></span>
           <div><b>Instant Replies</b><small>Get quick, accurate answers about your money.</small></div>
         </li>
-        <li style="--tone:#a855f7;--label:#c084fc">
+        <li style="--tone:#06b6d4">
           <span class="manny-bicon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
           <div><b>Personal &amp; Secure</b><small>Your data is private and always protected.</small></div>
         </li>
-        <li style="--tone:#f59e0b;--label:#ffffff">
+        <li style="--tone:#38a3f7">
           <span class="manny-bicon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
           <div><b>Proactive Help</b><small>Manny reminds, alerts, and guides you ahead.</small></div>
         </li>
-        <li style="--tone:#3b82f6;--label:#93c5fd">
+        <li style="--tone:#168cff">
           <span class="manny-bicon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
           <div><b>Smarter Every Day</b><small>AI that learns your habits to give better advice.</small></div>
         </li>
@@ -2750,6 +3037,34 @@
   </section>
 </div>
 
+<!-- MANUAL & SPECS -->
+<!-- The sheet is one dense image, so this dialog is a viewer rather than a page:
+     fitted to the dialog on open, switchable to actual size and pannable, since
+     fitting a 1200px spec sheet into a modal makes its smallest type unreadable.
+     No alt string can carry a diagram, a spec table and a block schematic, so the
+     manual page is linked as the text equivalent instead of paraphrased here. -->
+<div class="demo-modal spec-modal" id="specModal" hidden>
+  <section class="demo-dialog spec-dialog" role="dialog" aria-modal="true" aria-labelledby="specModalTitle" tabindex="-1">
+    <header class="demo-dialog-head">
+      <div class="demo-dialog-title">
+        <i aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></i>
+        <div><b id="specModalTitle">Manual &amp; specs</b><span>Manny Copilot at a glance — dimensions, specifications, and what's in the box.</span></div>
+      </div>
+      <button class="demo-close" type="button" data-spec-close aria-label="Close manual and specs">&times;</button>
+    </header>
+    <div class="spec-sheet-wrap" data-spec-scroll>
+      <!-- Short alt on purpose: a long one is what renders as a wall of text if the
+           file is ever missing, and the manual page below carries the real detail. -->
+      <img class="spec-sheet" data-spec-image src="assets/manny-manual-spec-sheet.webp" width="1197" height="1315" alt="Manny Copilot specification sheet" loading="lazy" decoding="async">
+      <p class="spec-sheet-missing" data-spec-missing hidden>The specification sheet image isn't available yet. <a href="/manny-guide">Open the full manual page</a> instead.</p>
+    </div>
+    <footer class="demo-dialog-foot">
+      <span><button class="spec-zoom" type="button" data-spec-zoom aria-pressed="false">Actual size</button></span>
+      <span><a href="/manny-guide">Full manual page</a><span class="spec-esc"> · Press Esc to close</span></span>
+    </footer>
+  </section>
+</div>
+
 <!-- STICKY MOBILE CTA -->
 <div class="mcta">
   <div class="inner">
@@ -2778,7 +3093,9 @@
       </div>
     </div>
     <div class="cols">
-      <div class="col"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#how">How it works</a></div>
+      <!-- Manny is a page, not an anchor, so it goes last in this column rather than
+           among the three in-page jumps above it. -->
+      <div class="col"><h4>Product</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#how">How it works</a><a href="/manny">Manny</a></div>
       <div class="col"><h4>Resources</h4><a href="/docs">Documentation</a><a href="#faq">FAQ</a></div>
       <div class="col"><h4>Company</h4><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/support">Support</a></div>
     </div>
@@ -2958,6 +3275,67 @@
   demoModal?.querySelectorAll('[data-demo-close]').forEach(button=>button.addEventListener('click',closeDemo));
   demoModal?.addEventListener('click',event=>{if(event.target===demoModal) closeDemo();});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!demoModal?.hidden) closeDemo();});
+
+  // Manual & specs viewer. Same shell as the demo dialog, but the payload is a
+  // still image, so there is nothing to play or reset -- only a zoom state.
+  const specModal=document.getElementById('specModal');
+  const specDialog=specModal?.querySelector('.spec-dialog');
+  const specScroll=specModal?.querySelector('[data-spec-scroll]');
+  const specImage=specModal?.querySelector('[data-spec-image]');
+  const specMissing=specModal?.querySelector('[data-spec-missing]');
+  const specZoom=specModal?.querySelector('[data-spec-zoom]');
+  let specOpener=null;
+  const setSpecZoom=on=>{
+    specScroll?.classList.toggle('is-actual',on);
+    if(specZoom){specZoom.setAttribute('aria-pressed',on?'true':'false');specZoom.textContent=on?'Fit to window':'Actual size';}
+    if(!on&&specScroll){specScroll.scrollTop=0;specScroll.scrollLeft=0;}
+  };
+  const closeSpec=()=>{
+    if(!specModal||specModal.hidden) return;
+    specModal.hidden=true;
+    document.body.classList.remove('demo-modal-open');
+    setSpecZoom(false);
+    specOpener?.focus();
+  };
+  // A sheet that fails to load should hand over to the manual page rather than
+  // leave a broken frame inside a dialog the reader opened deliberately.
+  const flagSpecMissing=()=>{
+    specImage?.setAttribute('hidden','');
+    specMissing?.removeAttribute('hidden');
+    specZoom?.setAttribute('hidden','');
+  };
+  // The sheet arrives from someone's Save-As dialog, which decides the extension.
+  // Try the usual ones before giving up, rather than making the popup depend on
+  // whether the file happened to be saved as .png. A <picture> cannot do this:
+  // it commits to the first source whose type is supported and does not fall back
+  // when that URL 404s.
+  const SPEC_FALLBACKS=['assets/manny-manual-spec-sheet.png','assets/manny-manual-spec-sheet.jpg','assets/manny-manual-spec-sheet.jpeg'];
+  let specTried=0;
+  if(specImage){
+    specImage.addEventListener('error',()=>{
+      if(specTried<SPEC_FALLBACKS.length){specImage.src=SPEC_FALLBACKS[specTried++];return;}
+      flagSpecMissing();
+    });
+    if(specImage.complete&&specImage.naturalWidth===0) specImage.src=SPEC_FALLBACKS[specTried++];
+  }
+  document.querySelectorAll('[data-spec-trigger]').forEach(trigger=>trigger.addEventListener('click',event=>{
+    if(!specModal) return;
+    // Let modified clicks through: this is a real link to the manual page, and
+    // hijacking cmd/ctrl/middle-click would break opening it in a new tab.
+    if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.button!==0) return;
+    event.preventDefault();
+    mm?.classList.remove('open');
+    mb?.classList.remove('open');
+    mb?.setAttribute('aria-expanded','false');
+    specOpener=trigger;
+    specModal.hidden=false;
+    document.body.classList.add('demo-modal-open');
+    specDialog?.focus();
+  }));
+  specModal?.querySelectorAll('[data-spec-close]').forEach(button=>button.addEventListener('click',closeSpec));
+  specModal?.addEventListener('click',event=>{if(event.target===specModal) closeSpec();});
+  specZoom?.addEventListener('click',()=>setSpecZoom(!specScroll?.classList.contains('is-actual')));
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!specModal?.hidden) closeSpec();});
 
   // sticky-nav shadow + scroll-spy active link
   const header=document.querySelector('header.nav');
