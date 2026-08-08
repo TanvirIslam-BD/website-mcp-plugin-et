@@ -440,31 +440,54 @@
      a pointer to something else on the page instead of another feature of the
      product above it. #0b5fdc on light / #6da4ff on dark are the section's own
      values, both measured over these backgrounds. */
-  /* margin-top carries the mascot's overhang as well as the gap: the head rises
-     ~26px above the card, and without the extra room it would touch the
-     ChatGPT/Claude row above. overflow stays visible for the same reason. */
-  .hero-manny{display:flex;align-items:center;gap:13px;width:100%;max-width:466px;margin-top:56px;padding:11px 13px;overflow:visible;
-    border:1px solid color-mix(in srgb,#2f7bff 32%,var(--line2));border-radius:15px;
-    background:linear-gradient(100deg,color-mix(in srgb,#2f7bff 9%,transparent),transparent 72%),var(--panel);
-    color:inherit;text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s;}
-  .hero-manny:hover{transform:translateY(-1px);border-color:#2f7bff;box-shadow:0 12px 26px -18px rgba(47,123,255,.75);}
+  /* margin-top is now just the gap from the ChatGPT/Claude row above. It used to
+     carry a mascot overhang too, which is gone: overflow is hidden so the arcs are
+     cropped to the card's radius, and an overhang would have been sliced off. */
+  .hero-manny{position:relative;display:flex;align-items:center;gap:15px;width:100%;max-width:520px;
+    margin-top:56px;padding:14px 18px;overflow:hidden;
+    border:1px solid color-mix(in srgb,#2f7bff 26%,var(--line2));border-radius:18px;
+    background:linear-gradient(103deg,color-mix(in srgb,#2f7bff 11%,transparent),color-mix(in srgb,#2f7bff 4%,transparent) 62%,transparent),var(--panel);
+    color:inherit;text-decoration:none;transition:border-color .2s,transform .2s,box-shadow .2s;
+    /* The hero column centres its text on phones. This card is a left-aligned
+       composition -- badge, title, strapline stacked against the mascot -- so it opts
+       out rather than inheriting centring that leaves the strapline's last word alone
+       on its own line. */
+    text-align:left;}
+  /* The faint concentric arcs behind the action, as the design draws them. Rings from
+     a repeating gradient rather than stacked elements, and overflow is hidden on the
+     card so they are cropped by its own radius. */
+  .hero-manny::after{content:"";position:absolute;right:-58px;top:50%;width:210px;height:210px;
+    transform:translateY(-50%);border-radius:50%;pointer-events:none;
+    background:repeating-radial-gradient(circle at center,
+      transparent 0 25px, color-mix(in srgb,#2f7bff 13%,transparent) 25px 26px);
+    -webkit-mask-image:radial-gradient(circle at center,#000 60%,transparent 100%);
+    mask-image:radial-gradient(circle at center,#000 60%,transparent 100%);}
+  .hero-manny:hover{transform:translateY(-1px);border-color:#2f7bff;box-shadow:0 14px 30px -18px rgba(47,123,255,.7);}
   .hero-manny:focus-visible{outline:2px solid #2f7bff;outline-offset:3px;}
   /* Manny stands in the card rather than sitting inside a tile: no plate, no
      border, no crop -- the source is a cut-out with a real alpha channel, so the
      silhouette reads as an object on the page in either theme. Earlier versions
      put it on a white plate because the only asset available was a JPEG on white,
-     which would have shown as a lit rectangle in dark theme.
-     Absolutely positioned so it can rise above the card's top edge without
-     driving the row's height -- the strip stays as tall as its text, and the
-     mascot overhangs. The thumb only reserves the width. */
-  .hero-manny-thumb{position:relative;flex:0 0 64px;width:64px;align-self:stretch;}
-  .hero-manny-thumb img{position:absolute;left:50%;bottom:-11px;width:auto;height:104px;transform:translateX(-50%);
-    filter:drop-shadow(0 8px 12px rgba(9,22,48,.22));}
-  .hero-manny-copy{display:grid;gap:1px;min-width:0;}
-  .hero-manny-kicker{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#0b5fdc;}
-  .hero-manny-title{font-size:14px;font-weight:650;line-height:1.35;color:var(--ink);}
-  .hero-manny-title b{font-weight:800;color:#0b5fdc;}
-  .hero-manny-sub{font-size:12.5px;line-height:1.4;color:var(--muted);}
+     which would have shown as a lit rectangle in dark theme. The product renders
+     arrive on a white studio background, so re-exporting one straight into this slot
+     brings that bug back: the background has to come off first, and it has to come
+     off by flood-filling in from the edges rather than by a brightness threshold,
+     because Manny's own shell is white and a threshold punches holes through it.
+     Manny sits inside the card rather than overhanging its top edge, which is what
+     the design shows and what lets the card own its own bounds -- needed anyway, since
+     overflow is hidden for the arcs and an overhang would be sliced off. The thumb
+     therefore has a height as well as a width, and the image is bottom-aligned in it. */
+  .hero-manny-thumb{position:relative;flex:0 0 74px;width:74px;height:96px;}
+  .hero-manny-thumb img{position:absolute;left:50%;bottom:0;width:auto;height:96px;transform:translateX(-50%);
+    filter:drop-shadow(0 10px 14px rgba(9,22,48,.2));}
+  .hero-manny-copy{display:grid;gap:5px;min-width:0;}
+  /* A badge, not a line of small caps: bordered pill, white plate, so it reads as a
+     status chip the way the design has it. */
+  .hero-manny-kicker{justify-self:start;display:inline-flex;align-items:center;gap:6px;
+    padding:3px 10px;border:1px solid color-mix(in srgb,#2f7bff 30%,transparent);border-radius:999px;
+    background:var(--panel);font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#0b5fdc;}
+  .hero-manny-title{font-size:16px;font-weight:800;line-height:1.3;letter-spacing:-.01em;color:var(--ink);}
+  .hero-manny-sub{font-size:13px;line-height:1.45;color:var(--muted);}
   /* Lighter wash, deeper ink: 6.34:1 in light and 7.49:1 in dark, comfortably
      clear for a glyph rather than merely clear for a decorative shape.
      Worth recording how this was nearly got wrong: a contrast probe that reads
@@ -473,20 +496,32 @@
      reports nonsense -- 3.67:1, then 2.7:1 after a change that in fact improved
      things. Translucent layers have to be composited down to the first opaque
      ancestor before the ratio means anything. */
-  .hero-manny-go{margin-left:auto;flex:0 0 auto;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
-    background:color-mix(in srgb,#2f7bff 9%,transparent);color:#0a4cb4;font-size:14px;line-height:1;transition:transform .2s;}
+  /* The action: a filled circle with its own label beneath, sitting above the arcs.
+     Both are decorative -- the whole card is the link and its accessible name already
+     contains the title and the strapline, so a third reading of "Explore Manny" would
+     just lengthen it. */
+  .hero-manny-action{position:relative;z-index:1;margin-left:auto;flex:0 0 auto;
+    display:grid;justify-items:center;gap:7px;}
+  .hero-manny-go{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(140deg,#2f8bff,#0b5fdc);color:#fff;font-size:20px;line-height:1;
+    box-shadow:0 10px 22px -10px rgba(11,95,220,.65);transition:transform .2s;}
+  .hero-manny-label{font-size:11.5px;font-weight:800;color:#0b5fdc;white-space:nowrap;}
   .hero-manny:hover .hero-manny-go{transform:translateX(2px);}
   html[data-theme="dark"] .hero-manny-kicker,
-  html[data-theme="dark"] .hero-manny-title b,
-  html[data-theme="dark"] .hero-manny-go{color:#6da4ff;}
+  html[data-theme="dark"] .hero-manny-label{color:#6da4ff;}
   @media(prefers-reduced-motion:reduce){.hero-manny,.hero-manny-go{transition:none;}.hero-manny:hover{transform:none;}}
   @media(max-width:620px){
-    /* Two lines of title inside a 44px-tall row would crush it, and the arrow
-       stops earning its width once the whole strip is the target. */
+    /* The circle keeps its place on a phone now that it is the design's focal control
+       rather than a 26px hint, but the label under it goes: at 360px the three columns
+       leave the title about four words a line. */
     .hero-manny{max-width:none;margin-top:50px;padding:12px;gap:11px;}
-    .hero-manny-go{display:none;}
-    .hero-manny-title{font-size:13.5px;}
+    .hero-manny-label{display:none;}
+    .hero-manny-go{width:44px;height:44px;font-size:17px;}
+    .hero-manny-thumb{flex:0 0 60px;width:60px;height:80px;}
+    .hero-manny-thumb img{height:80px;}
+    .hero-manny-title{font-size:14.5px;}
     .hero-manny-sub{font-size:12px;}
+    .hero-manny::after{right:-96px;}
   }
 
   .hfeats{display:flex;gap:28px;margin-top:34px;flex-wrap:wrap;}
@@ -2192,13 +2227,16 @@
              surface. One anchor rather than nested controls, so the whole strip is
              the target and it carries a single accessible name. -->
         <a class="hero-manny" href="#manny">
-          <span class="hero-manny-thumb" aria-hidden="true"><img src="assets/manny-mascot.png" alt="" width="147" height="224" loading="lazy" decoding="async"></span>
+          <span class="hero-manny-thumb" aria-hidden="true"><img src="assets/manny-mascot.png" alt="" width="210" height="288" loading="lazy" decoding="async"></span>
           <span class="hero-manny-copy">
             <span class="hero-manny-kicker">New &middot; In development</span>
-            <span class="hero-manny-title">Meet <b>Manny</b>, the AI home &amp; desk assistant</span>
+            <span class="hero-manny-title">Meet Manny, the AI Home &amp; Desk Assistant</span>
             <span class="hero-manny-sub">A real device you talk to &mdash; not another app.</span>
           </span>
-          <span class="hero-manny-go" aria-hidden="true">&rarr;</span>
+          <span class="hero-manny-action" aria-hidden="true">
+            <span class="hero-manny-go">&rarr;</span>
+            <span class="hero-manny-label">Explore Manny</span>
+          </span>
         </a>
 
         <div class="hfeats">
