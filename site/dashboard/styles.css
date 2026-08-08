@@ -9025,11 +9025,15 @@ textarea:focus-visible {
 }
 
 /* Copilot progress bar: polished */
+/* No overflow clipping here. The block further up parks the percentage label outside
+   the bar -- left: calc(100% + 8px), with margin-right: 38px reserving the room for it
+   -- so hiding overflow on the track cut the label off entirely and left that 38px as
+   dead space. The fill carries its own border-radius, so the track never needed to
+   clip it. */
 .copilot-progress {
   height: 8px;
   border-radius: 99px;
   background: #edf0f7;
-  overflow: hidden;
 }
 
 /* The fill takes the state the summary computed, on the same thresholds as the
@@ -10199,6 +10203,22 @@ body { background:radial-gradient(circle at 48% -20%,#effbf6 0,transparent 38rem
   .assistant-rail{display:block;min-width:0;border-left:1px solid #ebf1ed;background:rgba(255,255,255,.84)}.assistant-rail-header{min-height:101px;padding:16px 15px;border-bottom-color:#edf2ef}.assistant-title{color:#102131;font-size:13px}.copilot-logo{width:38px;height:38px}.assistant-rail-chat{height:calc(100vh - 102px);gap:12px;padding:16px 10px 14px}.assistant-alert{padding:13px;border-color:#e0eee6;border-radius:12px;background:linear-gradient(135deg,#f5fcf8,#eff9f4)}.assistant-alert-icon{color:#079a55;background:#e1f8eb}.assistant-alert b{color:#174432}.assistant-alert-actions button{color:#078f50;border-color:#d8ede2;background:#fff;font-size:9px}.assistant-rail .ai-message.user{border-color:#d4eddf;background:#e3f6eb;color:#1f4e39}.assistant-rail .ai-message.assistant{border-color:#e2ece7;background:#fff}.assistant-integration-cta{border-color:#ddede4;background:linear-gradient(140deg,#f5fcf8,#edf9f3)}.assistant-integration-cta a{border-color:#e1ebe6}.assistant-rail-form .copilot-compose{border-color:#dceae2;background:#fff}.assistant-send{background:linear-gradient(135deg,#079a55,#05b66a)}
 }
 @media (max-width:1180px) and (min-width:721px){.dashboard-shell,.dashboard-shell:has(.assistant-rail){grid-template-columns:218px minmax(0,1fr)}.assistant-rail{display:none}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Pin the rail wherever it is shown. The rules above give it a column from 1181px up,
+   but the block that pins it (position:sticky, height:100vh, overflow:hidden) was left
+   gated at min-width:1440px -- so between 1181px and 1439px the rail was displayed and
+   never pinned. It stretched to the full page height instead, and since only the
+   sidebar is sticky, scrolling the page carried the whole rail off the top: at
+   1366x768, the commonest laptop, the bottom of the page left a 440px column empty and
+   took the composer with it. .assistant-rail-chat already sizes itself to
+   calc(100vh - 75px) unconditionally, so 100vh is the height this was always built for
+   -- only the container was missing it. The floating button comes with the same
+   correction: it is the rail's stand-in for when the rail is hidden, and below 1440px
+   it was being drawn on top of a rail that was right there. */
+@media (min-width:1181px){
+  .assistant-rail{position:sticky;top:0;height:100vh;overflow:hidden;}
+  .floating-ai{display:none;}
+}
 @media (max-width:720px){body{background:var(--page-mint)}.mobile-dashboard-header{background:linear-gradient(155deg,#f8fdf9,#eefaf3)}.mobile-greeting h1,.mobile-brand-title{color:#102131}.mobile-bottom-nav{border-top-color:#e0ebe5;background:rgba(255,255,255,.96)}.mobile-bottom-nav button.active{color:#079a55}.mobile-add-button{background:linear-gradient(135deg,#079a55,#08b468)!important}.metric-card,.metric-card.balance,.panel{border-color:#e3ece7;border-radius:14px;background:#fff;box-shadow:0 6px 18px rgba(30,83,57,.035)}.metric-card.balance{color:#102131}.metric-card.balance h2,.metric-card h2{color:#102131}.metric-card.balance label,.metric-card label{color:#102131}.metric-icon,.metric-card.balance .metric-icon{background:linear-gradient(145deg,#51d69d,#009350);color:#fff}.mobile-finance-composer{border-color:#dbeae2}.mobile-composer-action{background:#079a55}}
 :root[data-theme="dark"] body,:root[data-theme="dark"] .dashboard-shell{background:#091711}:root[data-theme="dark"] .metric-card,:root[data-theme="dark"] .metric-card.balance,:root[data-theme="dark"] .panel{border-color:#234334;background:#102119}:root[data-theme="dark"] .metric-card h2,:root[data-theme="dark"] .metric-card.balance h2,:root[data-theme="dark"] .metric-card label,:root[data-theme="dark"] .metric-card.balance label,:root[data-theme="dark"] .panel h3{color:#ecf8f1}:root[data-theme="dark"] .sidebar,:root[data-theme="dark"] .assistant-rail{background:#0b1812;border-color:#1c382a}:root[data-theme="dark"] .sidebar .nav button.active,:root[data-theme="dark"] .action-button.primary{background:linear-gradient(110deg,#078f50,#08ad63)}:root[data-theme="dark"] .mobile-dashboard-header{background:linear-gradient(155deg,#091711,#0b2218);border-bottom:1px solid #1c382a}:root[data-theme="dark"] .mobile-greeting h1,:root[data-theme="dark"] .mobile-brand-title{color:#ecf8f1}:root[data-theme="dark"] .mobile-bottom-nav{border-top-color:#1c382a;background:rgba(11,24,18,.96)}:root[data-theme="dark"] .mobile-bottom-nav button{color:#9eabc0}:root[data-theme="dark"] .mobile-bottom-nav button.active{color:#078f50}
 
