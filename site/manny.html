@@ -281,10 +281,17 @@
     /* One column: the photo stops being a bleeding backdrop and becomes a normal
        block above the cards, because text over a full-width photo behind it is not
        readable and a feathered edge would just look like a rendering fault. */
+    /* Frame height and crop chosen together, from the source's own geometry rather
+       than by taste. At 430px wide the image scales by 0.653, so a 340px frame saw
+       only 521px of the 930px source -- not enough to hold both the speech bubble at
+       the top of the screen and the icon row at the bottom, so every offset traded
+       one clipped edge for the other: 24% cut through the icons, 44% cut the bubble.
+       The screen spans roughly y=140-700, which is 560px, so the frame is 366px
+       (560 x 0.653) and the offset 38% puts the window at exactly 140-700. */
     .mn-hero-bg{position:relative;top:auto;right:auto;bottom:auto;width:100%;
-      height:340px;margin:0 0 16px;border-radius:20px;
+      height:366px;margin:0 0 16px;border-radius:20px;
       -webkit-mask-image:none;mask-image:none;}
-    .mn-hero-bg img{object-position:center 24%;}
+    .mn-hero-bg img{object-position:center 38%;}
     .mn-hero-in{display:flex;flex-direction:column;}
     .mn-stage{max-width:none;min-height:0;}
     .mn-strip{grid-template-columns:1fr;}
@@ -328,13 +335,16 @@
       <a href="/#pricing">Pricing</a>
       <a href="/#faq">FAQ</a>
     </nav>
-    <a class="mn-login" href="/dashboard">Login</a>
     <!-- Was a hamburger icon linking to "/". A hamburger promises a menu; this only
-         ever went home, so it now says so, with a house rather than three lines. -->
+         ever went home, so it now says so, with a house rather than three lines.
+         It sits before Login, in the markup and so in the tab order: on a phone the
+         nav links are hidden and this is the only navigation, which read as
+         "Login | Home" with the way out placed after the account action. -->
     <a class="mn-burger" href="/">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-7 9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       Home
     </a>
+    <a class="mn-login" href="/dashboard">Login</a>
   </div>
 </header>
 
