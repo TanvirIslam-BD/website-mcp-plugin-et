@@ -283,7 +283,7 @@ function render() {
   $('#users').innerHTML = filteredUsers.length ? filteredUsers.map(user => `
     <tr data-user-id="${escapeHtml(user.userId)}">
       <td>
-        <div class="user-cell" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(user.displayName || user.userId)}" onclick="window.openUserModal('${escapeHtml(user.userId)}')">
+        <div class="user-cell" role="button" tabindex="0" aria-label="Open details for ${escapeHtml(user.displayName || user.userId)}" data-open-user="${escapeHtml(user.userId)}">
           ${user.profilePhotoUrl ? 
             `<img class="avatar" src="${escapeHtml(user.profilePhotoUrl)}" alt="">` : 
             `<span class="avatar avatar-fallback">${escapeHtml((user.displayName || 'U')[0].toUpperCase())}</span>`
@@ -302,7 +302,7 @@ function render() {
       </td>
       <td><strong>${user.expenseCount.toLocaleString()}</strong></td>
       <td>
-        <button class="action-btn-sm" style="font-size:11px;padding:3px 8px;" onclick="window.filterActivityByUser('${escapeHtml(user.userId)}')">
+        <button class="action-btn-sm" style="font-size:11px;padding:3px 8px;" data-filter-user="${escapeHtml(user.userId)}">
           ⚡ ${user.activityCount.toLocaleString()}
         </button>
       </td>
@@ -312,7 +312,7 @@ function render() {
           <button class="action-btn-sm ${user.status === 'suspended' ? 'restore' : 'suspend'}" data-user="${escapeHtml(user.userId)}" data-action="${user.status === 'suspended' ? 'restore' : 'suspend'}">
             ${user.status === 'suspended' ? 'Restore' : 'Suspend'}
           </button>
-          <button class="action-btn-sm" onclick="window.openUserModal('${escapeHtml(user.userId)}')">Details</button>
+          <button class="action-btn-sm" data-open-user="${escapeHtml(user.userId)}">Details</button>
         </div>
       </td>
     </tr>
@@ -340,7 +340,7 @@ function renderActivityFeed(selector, items) {
 
     return `
       <div style="display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-        <div style="cursor: pointer; flex-shrink: 0;" onclick="window.openUserModal('${escapeHtml(item.userId)}')">
+        <div style="cursor: pointer; flex-shrink: 0;" data-open-user="${escapeHtml(item.userId)}">
           ${item.profilePhotoUrl ? 
             `<img style="width:26px;height:26px;border-radius:7px;object-fit:cover;" src="${escapeHtml(item.profilePhotoUrl)}" alt="">` :
             `<div style="width:26px;height:26px;border-radius:7px;background:#dbeafe;color:#2563eb;font-weight:800;font-size:11px;display:grid;place-items:center;">${escapeHtml(initial)}</div>`
@@ -349,7 +349,7 @@ function renderActivityFeed(selector, items) {
         <div style="flex: 1; min-width: 0;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
             <div style="font-size: 11.5px; font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              <span style="cursor: pointer; color: #0f172a;" onclick="window.openUserModal('${escapeHtml(item.userId)}')">
+              <span style="cursor: pointer; color: #0f172a;" data-open-user="${escapeHtml(item.userId)}">
                 ${escapeHtml(displayName)}
               </span>
               <span style="font-size: 10px; color: #3b82f6; margin-left: 4px; font-weight: 600;">${escapeHtml(eventName)}</span>
@@ -487,7 +487,7 @@ window.openUserModal = function (userId) {
   `;
 
   foot.innerHTML = `
-    <button class="action-btn-sm ${user.status === 'suspended' ? 'restore' : 'suspend'}" style="padding:8px 16px;font-size:13px;" onclick="window.handleSuspendAction('${escapeHtml(user.userId)}', '${user.status}')">
+    <button class="action-btn-sm ${user.status === 'suspended' ? 'restore' : 'suspend'}" style="padding:8px 16px;font-size:13px;" data-suspend-user="${escapeHtml(user.userId)}" data-suspend-status="${escapeHtml(user.status)}">
       ${user.status === 'suspended' ? 'Restore User Access' : 'Suspend Account'}
     </button>
   `;
@@ -742,10 +742,33 @@ if (topSearchBtn && searchInput) {
   });
 }
 
-// The user cells in the table carry an onclick and nothing else, so they could be opened
-// with a mouse but not with a keyboard. They are rendered from a template string, so the
-// role and tabindex go on there; this supplies the other half a real button would give
-// for free -- Enter and Space activating it.
+/*
+ * Every control rendered into a template string is wired here rather than through an
+ * onclick attribute in the markup.
+ *
+ * This is not a style preference. The owner console is served with
+ * `script-src 'self'` and no 'unsafe-inline' -- boot.js exists precisely so that header
+ * can stay strict -- and that blocks inline handlers outright. Six controls carried one
+ * and so did nothing at all on the deployed site: the Details button, the user cell, the
+ * activity-count button, both author links in the activity feed, and the modal's own
+ * suspend/restore. They worked locally only because a dev server sends no CSP, which is
+ * the trap: this code has to be exercised under the real header to mean anything.
+ *
+ * Delegated from the document so it covers content re-rendered by render() as well.
+ */
+document.addEventListener('click', (event) => {
+  const opener = event.target.closest?.('[data-open-user]');
+  if (opener) return window.openUserModal(opener.dataset.openUser);
+
+  const filter = event.target.closest?.('[data-filter-user]');
+  if (filter) return window.filterActivityByUser(filter.dataset.filterUser);
+
+  const suspend = event.target.closest?.('[data-suspend-user]');
+  if (suspend) return window.handleSuspendAction(suspend.dataset.suspendUser, suspend.dataset.suspendStatus);
+});
+
+// The user cell is a div, so Enter and Space do not activate it the way they would a
+// button. Supplies that half; the click delegation above supplies the rest.
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Enter' && event.key !== ' ') return;
   const cell = event.target.closest?.('.user-cell[role="button"]');
