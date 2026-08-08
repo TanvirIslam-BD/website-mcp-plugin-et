@@ -17,6 +17,10 @@
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/_vercel/speed-insights/script.js"></script>
+<!-- page-base.css first, legal-pages.css second: the latter is an override layer and
+     cannot lay out a page on its own. This page shipped with only the override, which
+     is why it rendered as unstyled serif text with the pill's SVG at full size. -->
+<link rel="stylesheet" href="assets/page-base.css">
 <link rel="stylesheet" href="assets/legal-pages.css">
 <style>
   /* The one-page sheet this replaces is a 1200px image of dense 9px type. Set
