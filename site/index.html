@@ -876,7 +876,19 @@
   @media(max-width:900px){
     .trust .logo{border-right:none;padding:8px 16px;font-size:16px;}
   }
-  .hero-platforms{margin:-78px 0 0 calc(500px + 18px);padding:0;position:relative;z-index:2;}
+  /* The strip tucks up under the hero art, and the pull has to be this large because
+     of what it is actually measured against. The hero grid centres its two columns,
+     and the copy column is far taller than the art -- so the art floats with
+     (copyHeight - artHeight) / 2 of dead space beneath it, and the strip, sitting
+     after the grid, starts below all of that rather than below the art. The visible
+     gap is therefore that slack plus this margin, not this margin alone.
+     The slack is ~173px from 1770px up (the hero stops growing at its container's
+     max-width), and ~188px at 1366px, so -149px leaves a 24-39px gap across that
+     range. It stays looser just above the 1120px breakpoint, where the art shrinks
+     with the column but the copy does not: ~92px at 1121px.
+     Anything that changes the height of the copy column -- the Manny card especially --
+     moves this gap, which is how it drifted to 95px in the first place. */
+  .hero-platforms{margin:-149px 0 0 calc(500px + 18px);padding:0;position:relative;z-index:2;}
   .hero-platforms .panel{max-width:none;padding:15px 17px;border-radius:16px;box-shadow:0 18px 36px -30px rgba(4,24,38,.55);}
   .hero-platforms .cap{margin-bottom:10px;font-size:11.5px;}
   .hero-platforms .logo{gap:8px;padding:0 14px;font-size:14px;}
