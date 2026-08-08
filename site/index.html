@@ -876,13 +876,27 @@
   @media(max-width:900px){
     .trust .logo{border-right:none;padding:8px 16px;font-size:16px;}
   }
-  .hero-platforms{margin:-78px 0 0 calc(500px + 18px);padding:0;position:relative;z-index:2;}
+  /* Art and strip are one grid column, aligned to the top of the copy rather than
+     centred against it, and lifted by a single value. Everything about where the pair
+     sits is this one number -- previously the strip was pulled up by a large negative
+     margin measured from the bottom of the whole grid, so its gap was really
+     (copyHeight - artHeight) / 2 plus that margin, and any change to the copy column
+     silently moved it. Nothing below depends on the copy column's height now. */
+  /* The lift gives way on short screens. At 100px the strip's bottom lands at ~867px
+     on the widths where the art is tallest, so anything shorter than that cuts it off --
+     1366x768, one of the commonest laptops, lost it entirely. The clamp holds 100px
+     wherever there is room for it (>=870px tall) and trades it away smoothly below
+     that, down to 24px, rather than stepping at a breakpoint mid-resize. */
+  .hero-col-right{align-self:start;margin-top:clamp(24px,calc(100vh - 770px),100px);}
+  .hero-platforms{margin:34px 0 0;padding:0;position:relative;z-index:2;}
   .hero-platforms .panel{max-width:none;padding:15px 17px;border-radius:16px;box-shadow:0 18px 36px -30px rgba(4,24,38,.55);}
   .hero-platforms .cap{margin-bottom:10px;font-size:11.5px;}
   .hero-platforms .logo{gap:8px;padding:0 14px;font-size:14px;}
   .hero-platforms .logo .li{width:24px;height:24px;flex-basis:24px;border-radius:7px;}
   .hero-platforms .logo .li img{width:14px !important;height:14px !important;}
-  @media(max-width:1120px){.hero-platforms{margin:20px auto 0;max-width:920px;}.hero-platforms .panel{padding:18px;}}
+  /* Stacked: the columns are full width and in source order, so the lift has nothing
+     left to do and would just open a gap under the copy. */
+  @media(max-width:1120px){.hero-col-right{margin-top:0;}.hero-platforms{margin:20px auto 0;max-width:920px;}.hero-platforms .panel{padding:18px;}}
   @media(max-width:640px){.hero-platforms{margin-top:28px;}.hero-platforms .panel{padding:14px 10px;}.hero-platforms .logo{padding:7px 9px;font-size:13px;}}
 
   /* ---------- how it works ---------- */
@@ -1573,6 +1587,13 @@
     .hero-grid{grid-template-columns:1fr;gap:0;}
     .hero .lead{margin-left:auto;margin-right:auto;max-width:520px;}
     .hero .cta,.hfeats,.proof{justify-content:center;}
+    /* Centre the two blocks that are narrower than the column. Everything else here
+       centres either because it is full width or because it already has auto margins;
+       these two are capped by max-width with none, so they stayed pinned to the left
+       edge of a centred column and left a band of dead space beside them -- 663px next
+       to the buttons at 1045px wide, 462px next to the Manny card. justify-content
+       cannot fix it: the boxes themselves are only as wide as their max-width. */
+    .hero .cta,.hero-manny{margin-inline:auto;}
     /* re-anchor the stage to the centre instead of the left edge */
     .hero-right{min-height:588px;margin-top:44px;}
     .stage{left:50%;transform:translate(-50%,-50%) scale(var(--s));transform-origin:center center;}
@@ -2252,6 +2273,13 @@
         </div>
       </div>
 
+      <!-- The art and the platforms strip are one column. They used to sit either side
+           of the grid's closing tag, so the strip's position was measured from the whole
+           grid -- and therefore from the height of the copy column, which is why its gap
+           drifted every time that column changed. Grouped, the strip hangs off the art,
+           the pair lifts together, and the gap is a plain margin that nothing else moves.
+           (The inner block is left at its original indentation so the diff stays readable.) -->
+      <div class="hero-col-right">
       <div class="hero-right">
         <div class="stage">
           <svg class="links" viewBox="0 0 1180 700" aria-hidden="true">
@@ -2391,8 +2419,7 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="trust hero-platforms" aria-label="Supported AI platforms">
+      <div class="trust hero-platforms" aria-label="Supported AI platforms">
       <div class="panel">
         <div class="cap">Works with your favorite AI platforms</div>
         <div class="row">
@@ -2403,6 +2430,8 @@
           <span class="logo"><span class="li"><img src="assets/brands/cursor.svg" alt="Cursor" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Cursor</span>
           <span class="logo"><span class="li"><img src="assets/brands/mcp.svg" alt="MCP" style="width:18px;height:18px;filter:brightness(0) invert(1)"></span>Any MCP Client</span>
         </div>
+      </div>
+      </div>
       </div>
     </div>
   </div>
