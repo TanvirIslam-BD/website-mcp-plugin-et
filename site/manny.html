@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meet Manny &mdash; your AI home &amp; desk assistant | Money Copilot AI</title>
+<meta name="description" content="Manny is your smart home and desk assistant: track budgets, expenses, recurring payments, alerts and financial insights through natural conversation. In development — join the waitlist." />
+<meta name="robots" content="index,follow" />
+<link rel="canonical" href="https://www.copilotai.live/manny" />
+<meta property="og:title" content="Meet Manny — your AI home & desk assistant" />
+<meta property="og:description" content="Voice-first, always learning, private and secure, works offline. In development." />
+<meta property="og:image" content="https://www.copilotai.live/assets/manny-device.jpg" />
+<meta property="og:type" content="product" />
+<link rel="icon" type="image/png" sizes="256x256" href="assets/logo/money-copilot-app-logo.png?v=20260804" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/logo/money-copilot-app-logo.png?v=20260804" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+<!-- Base first for tokens, reset, nav and footer; legal-pages.css layers the light
+     palette on top. Everything below is this page's own layout. -->
+<link rel="stylesheet" href="assets/page-base.css">
+<link rel="stylesheet" href="assets/legal-pages.css">
+<style>
+  /* ------------------------------------------------------------------------
+     Manny landing page. Built to the supplied design, with colour taken from the
+     site's tokens so it re-themes and cannot drift from the brand: --grad-text for
+     the accented headline, --grad for the primary button, --line/--panel for every
+     card. The page is a landing page rather than a document, so none of the .doc
+     styling from the shared sheet is used.
+     ------------------------------------------------------------------------ */
+  body{background:var(--bg);}
+  .mn-wrap{width:100%;max-width:1320px;margin:0 auto;padding:0 28px;}
+
+  /* A keyboard focus ring. Audited the page and found zero focus rules across both
+     shared stylesheets and this one -- index.html defines this and the standalone
+     pages never did, so every page built on page-base.css has been relying on
+     whatever the UA happens to draw over author backgrounds. Copied from the
+     homepage so the ring is the same object everywhere. */
+  :where(a,button,[tabindex]):focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 72%,white);outline-offset:3px;border-radius:6px;}
+
+  /* ---------- nav: the site's own, so this page does not read as an offshoot ---- */
+  .mn-nav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.9);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+  .mn-nav-in{display:flex;align-items:center;justify-content:space-between;gap:22px;height:72px;}
+  .mn-brand{display:flex;align-items:center;gap:11px;color:var(--ink);}
+  .mn-brand img{width:42px;height:42px;}
+  .mn-brand b{display:block;font-size:16px;font-weight:800;line-height:1.15;letter-spacing:-.02em;}
+  .mn-brand b span{display:block;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .mn-links{display:flex;align-items:center;gap:22px;}
+  /* Padded to a 44px hit area rather than the 25px the text alone gave. The gap comes
+     down to compensate so the row keeps its measured width. */
+  .mn-links a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;
+    color:var(--ink2);font-size:14.5px;font-weight:600;}
+  .mn-links a:hover,.mn-links a[aria-current="page"]{color:var(--ink);text-decoration:none;}
+  .mn-login{display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border:1px solid var(--line2);
+    border-radius:11px;background:var(--panel);color:var(--ink);font-size:14.5px;font-weight:700;}
+  .mn-login:hover{text-decoration:none;border-color:var(--violet2);}
+  .mn-burger{display:none;align-items:center;gap:8px;min-height:44px;padding:0 15px;border:1px solid var(--line2);
+    border-radius:11px;background:var(--panel);color:var(--ink);font-size:14.5px;font-weight:700;}
+  .mn-burger:hover{text-decoration:none;border-color:var(--violet2);}
+  .mn-burger svg{width:17px;height:17px;stroke:var(--violet-ink);}
+
+  /* ---------- hero ----------
+     The design runs the photograph off the right edge of the page and blends its
+     left edge into the background, rather than sitting it in a card with page
+     colour all round it. overflow:hidden on the section is what lets the photo be
+     wider than its column and get clipped at the viewport instead of causing a
+     sideways scroll. */
+  .mn-hero{position:relative;overflow:hidden;padding:26px 0 8px;}
+  /* One rule, not two: this was declared here for the grid and again 40 lines below
+     for position/z-index, which is how a later edit ends up silently fighting an
+     earlier one. */
+  .mn-hero-in{position:relative;z-index:1;
+    display:grid;grid-template-columns:minmax(0,.84fr) minmax(0,1.3fr);gap:24px;align-items:center;}
+  .mn-pill{display:inline-flex;align-items:center;gap:9px;padding:9px 17px;border-radius:999px;
+    border:1px solid color-mix(in srgb,var(--violet2) 34%,transparent);background:color-mix(in srgb,var(--violet) 8%,transparent);
+    color:var(--ink);font-size:13.5px;font-weight:700;}
+  .mn-pill svg{width:15px;height:15px;fill:none;stroke:var(--violet-ink);stroke-width:1.9;}
+  .mn-h1{margin:20px 0 0;font-size:clamp(34px,4.1vw,54px);line-height:1.08;letter-spacing:-.03em;font-weight:800;color:var(--ink);}
+  .mn-h1 .g{display:block;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .mn-lede{margin:20px 0 0;max-width:46ch;font-size:16.5px;line-height:1.65;color:var(--ink2);}
+  .mn-cta-row{display:flex;flex-wrap:wrap;gap:13px;margin:28px 0 0;}
+  .mn-btn{display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 26px;border-radius:14px;
+    border:1px solid transparent;background:var(--grad);color:#fff;font-size:15.5px;font-weight:700;
+    font-family:inherit;cursor:pointer;text-decoration:none;}
+  .mn-btn:hover{text-decoration:none;}
+  .mn-btn.ghost{background:var(--panel);border-color:var(--line2);color:var(--ink);}
+  .mn-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+  .mn-btn.ghost svg{stroke:var(--violet-ink);}
+  .mn-traits{display:flex;flex-wrap:wrap;gap:26px;margin:26px 0 0;padding:0;list-style:none;}
+  .mn-traits li{display:inline-flex;align-items:center;gap:8px;color:var(--ink2);font-size:14px;font-weight:600;}
+  .mn-traits svg{width:16px;height:16px;fill:none;stroke:var(--violet-ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* The photograph is a layer on the section, not an item in the grid. As a grid item
+     it was capped by its column -- 492px wide, stopping 253px short of the page edge --
+     and no extra width could escape a track the card gutters had already narrowed;
+     bleeding backgrounds have to be positioned against the section. Square on the
+     right because it leaves the page there, feathered on the left so the room
+     dissolves into the page instead of ending on a line.
+     The width is sized toward the source's own aspect on purpose: the asset is a
+     658x930 portrait, and in a 940x520 box `cover` fills the width and crops away 61%
+     of the height, leaving only Manny's head. The design's photograph is a landscape
+     room shot with the device centre-right; with that file this can go back to a wide
+     bleed and the cards can flank the device on both sides again. */
+  .mn-hero-bg{position:absolute;top:0;right:0;bottom:0;z-index:0;
+    width:min(44vw,640px);border-radius:26px 0 0 26px;overflow:hidden;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 17%,#000 100%);
+    mask-image:linear-gradient(to right,transparent 0,#000 17%,#000 100%);}
+  .mn-hero-bg img{display:block;width:100%;height:100%;object-fit:cover;object-position:52% 32%;}
+  /* The cards sit clear of the device, in the space to its left, in two columns of
+     three. The design flanks the device on both sides -- which works because its
+     photograph is a wide room shot with empty desk beside Manny. This asset is a
+     portrait close-up where the device fills the frame, so a right-hand column had
+     nowhere to go but on top of his screen, and the two groups met in the middle and
+     overlapped each other. Capped width keeps them off him; with the design's own
+     photograph this goes back to a column each side.
+     min-height here sets how tall the bleeding layer is, since that layer stretches
+     to the section. */
+  .mn-stage{display:grid;grid-template-columns:1fr;gap:10px;align-content:center;
+    width:100%;max-width:200px;min-height:clamp(500px,46vw,680px);}
+  /* No forced landscape crop. The asset here is a portrait desk shot, and cropping it
+     to the design's wider frame cut Manny off at the chin. It keeps its own aspect
+     until the design's own photograph is available -- see the note in the page's
+     README trail: that image is a different render and cannot be rebuilt in CSS. */
+  /* Column layout, not a row: at 165px a horizontal icon-plus-text card left about
+     nine characters per line, which is what made these look broken. The icon sits
+     above its text instead. */
+  .mn-float{display:grid;gap:7px;align-content:start;z-index:2;
+    padding:12px 13px;border:1px solid var(--line);border-radius:14px;
+    background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    box-shadow:0 16px 34px -22px rgba(16,42,80,.5);}
+  .mn-float b{display:block;font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35;}
+  .mn-float span{display:block;font-size:11.5px;line-height:1.4;color:var(--ink2);}
+  .mn-float strong{display:block;font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.2;}
+  .mn-fi{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:8px;
+    background:color-mix(in srgb,var(--tone,#168cff) 12%,transparent);color:var(--tone,#168cff);}
+  .mn-fi svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .mn-wave{display:block;width:74px;height:14px;}
+
+  /* ---------- feature grid ---------- */
+  /* auto-fit rather than a fixed four columns: the grid has grown from 8 cards to 10
+     and will grow again, and a fixed count leaves a hole in the last row every time
+     the total is not a multiple of it. This reflows at any count and any width, which
+     also makes the per-breakpoint column overrides unnecessary. */
+  .mn-feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:15px;margin:56px 0 0;padding:0;list-style:none;}
+  .mn-feats li{padding:19px 20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);}
+  .mn-feats .mn-fi{width:34px;height:34px;margin-bottom:12px;border-radius:10px;}
+  .mn-feats b{display:block;margin-bottom:7px;font-size:14.5px;font-weight:700;color:var(--ink);}
+  .mn-feats p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink2);}
+
+  /* ---------- "not only money" strip ----------
+     Its own group rather than three more cards in the grid above. Two reasons: the
+     grid is four across, so 8 became 11 and left a hole in the last row; and these
+     are ambient things the screen shows, not finance features -- filing them with
+     budget tracking would overstate them. */
+  .mn-extra{margin:15px 0 0;}
+  .mn-extra-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:0;padding:0;list-style:none;}
+  .mn-extra-list li{display:flex;align-items:flex-start;gap:12px;}
+  .mn-extra-list .mn-fi{width:34px;height:34px;border-radius:10px;}
+  .mn-extra-list b{display:block;margin-bottom:4px;font-size:14.5px;font-weight:700;color:var(--ink);}
+  .mn-extra-list span{display:block;font-size:13.5px;line-height:1.55;color:var(--ink2);}
+
+  /* ---------- three panels ---------- */
+  .mn-panels{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.28fr) minmax(0,.86fr);gap:18px;margin:20px 0 0;}
+  .mn-panel{padding:22px 24px;border:1px solid var(--line);border-radius:18px;background:var(--panel);}
+  .mn-panel > h2{margin:0 0 18px;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.01em;}
+
+  .mn-steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:start;gap:8px;margin:0;padding:0;list-style:none;}
+  .mn-steps li{text-align:center;}
+  .mn-step-ico{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 12px;border-radius:50%;
+    background:color-mix(in srgb,var(--tone) 11%,transparent);color:var(--tone);}
+  .mn-step-ico svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .mn-steps b{display:block;font-size:13.5px;font-weight:700;color:var(--ink);}
+  .mn-steps span{display:block;margin-top:5px;font-size:12.5px;line-height:1.5;color:var(--ink2);}
+  .mn-arrow{align-self:center;color:var(--ink2);font-size:17px;line-height:1;padding-top:14px;}
+
+  /* The glance panel is a static illustration of the dashboard, so the figures are
+     marked up as a real table and list rather than drawn, and the donut carries a
+     text summary -- a picture of a chart is not readable otherwise. */
+  .mn-glance{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1fr) minmax(0,1fr);gap:12px;}
+  .mn-tile{padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);}
+  .mn-tile small{display:block;font-size:11.5px;font-weight:650;color:var(--ink2);}
+  .mn-tile strong{display:block;margin-top:4px;font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.02em;}
+  /* #0f766e, not --violet-ink: that token is #098d7d in the light sheet and measured
+     3.84:1 on this tile. Same family, one shade deeper, 5.4:1. */
+  .mn-tile .up{display:block;margin-top:3px;font-size:11.5px;font-weight:700;color:#0f766e;}
+  .mn-tile-pair{display:grid;gap:12px;}
+  .mn-tile-pair .mn-tile strong{font-size:16px;}
+  .mn-cardbox{padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);}
+  .mn-cardbox h3{margin:0 0 10px;font-size:12px;font-weight:700;color:var(--ink2);letter-spacing:.02em;}
+  .mn-donut-row{display:flex;align-items:center;gap:12px;}
+  .mn-donut{flex:0 0 auto;position:relative;width:88px;height:88px;}
+  .mn-donut svg{width:88px;height:88px;transform:rotate(-90deg);}
+  .mn-donut-mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center;}
+  .mn-donut-mid b{display:block;font-size:13px;font-weight:800;color:var(--ink);}
+  .mn-donut-mid span{display:block;font-size:10px;color:var(--ink2);}
+  .mn-legend{flex:1 1 auto;min-width:0;margin:0;padding:0;list-style:none;font-size:11px;}
+  .mn-legend li{display:grid;grid-template-columns:9px 1fr auto auto;align-items:center;gap:7px;padding:2px 0;color:var(--ink2);}
+  .mn-legend i{width:8px;height:8px;border-radius:50%;background:var(--tone);}
+  .mn-legend .lg-amt{color:var(--ink);font-weight:700;}
+  .mn-legend .lg-name,.mn-legend .lg-pct{color:var(--ink2);}
+  /* Tabular figures so the amount and percentage columns line up down the list. */
+  .mn-legend .lg-amt,.mn-legend .lg-pct{font-variant-numeric:tabular-nums;}
+  .mn-tx{margin:0;padding:0;list-style:none;font-size:11.5px;}
+  .mn-tx li{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;padding:5px 0;color:var(--ink2);}
+  /* Was #fff on the raw tone: 2.15:1 on amber, 2.54 on green, 3.91 on red. A wash of
+     the tone with the letter mixed toward ink clears AA for every brand colour
+     without needing a per-tone exception. */
+  .mn-tx .tx-ini{display:grid;place-items:center;width:22px;height:22px;border-radius:6px;
+    background:color-mix(in srgb,var(--tone) 17%,transparent);
+    color:color-mix(in srgb,var(--tone) 68%,#05192b);font-size:10px;font-weight:800;}
+  .mn-tx b{color:var(--ink);font-weight:700;}
+  .mn-tx-more{display:block;margin-top:8px;font-size:11.5px;font-weight:700;color:#0f766e;}
+
+  .mn-dev{border-color:color-mix(in srgb,var(--violet2) 30%,var(--line));
+    background:linear-gradient(160deg,color-mix(in srgb,var(--violet) 9%,transparent),color-mix(in srgb,var(--blue) 6%,transparent));}
+  .mn-dev > h2{color:#0f766e;}
+  .mn-dev p{margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--ink2);}
+  .mn-checks{margin:0 0 18px;padding:0;list-style:none;}
+  .mn-checks li{display:flex;align-items:flex-start;gap:9px;padding:4px 0;font-size:13px;color:var(--ink2);}
+  .mn-checks svg{flex:0 0 auto;width:15px;height:15px;margin-top:3px;fill:none;stroke:var(--violet-ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;}
+  .mn-dev .mn-btn{width:100%;justify-content:center;min-height:50px;}
+  .mn-dev-foot{margin:12px 0 0;font-size:12px;color:var(--muted);text-align:center;}
+
+  /* ---------- closing strip ---------- */
+  .mn-strip{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:center;
+    margin:20px 0 0;padding:22px 26px;border:1px solid var(--line);border-radius:18px;background:var(--panel);}
+  .mn-strip-line{display:flex;align-items:center;flex-wrap:wrap;gap:9px;font-size:15px;color:var(--ink2);}
+  .mn-strip-line img{width:34px;height:34px;}
+  .mn-strip-line b{font-size:16px;font-weight:800;color:var(--ink);}
+  .mn-strip-line b span{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .mn-strip-name{font-weight:800;color:#0f766e;}
+  .mn-strip-pts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none;}
+  .mn-strip-pts li{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;line-height:1.45;color:var(--ink2);}
+  .mn-strip-pts svg{flex:0 0 auto;width:20px;height:20px;fill:none;stroke:var(--violet-ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .mn-strip-pts b{display:block;color:var(--ink);font-weight:700;}
+
+  .mn-tail{padding:34px 0 60px;}
+  .mn-tail p{margin:0;font-size:13px;color:var(--muted);}
+  .mn-tail a{color:#0f766e;font-weight:700;}
+
+  /* ---------- demo dialog ---------- */
+  .mn-demo{width:min(92vw,880px);padding:0;border:1px solid var(--line);border-radius:18px;
+    background:var(--panel);box-shadow:0 40px 90px -50px rgba(16,42,80,.7);overflow:visible;}
+  .mn-demo::backdrop{background:rgba(6,18,38,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+    .mn-demo video{display:block;width:100%;height:auto;border-radius:17px;background:#000;color:#f2f7fa;}
+  /* The fallback inside <video> shows only where the element is unsupported, and it
+     inherited black on the black backdrop -- 1:1. */
+  .mn-demo video a{color:#8ecbff;font-weight:700;}
+  .mn-demo-close{position:absolute;top:-14px;right:-14px;display:grid;place-items:center;
+    width:46px;height:46px;border:1px solid var(--line2);border-radius:50%;background:var(--panel);
+    color:var(--ink);font-size:24px;line-height:1;cursor:pointer;box-shadow:0 10px 24px -14px rgba(16,42,80,.6);}
+  .mn-demo-close:hover{border-color:var(--violet2);}
+  @media(max-width:620px){.mn-demo-close{top:-10px;right:-10px;width:44px;height:44px;}}
+
+  /* page-base.css styles `footer .col h4`; these are h3 now, so the look has to be
+     restated or this footer stops matching every other page's. */
+  /* Size and case only. Colour is left to legal-pages.css, which now sets --ink2 for
+     these headings across every page -- restating --muted here would have reintroduced
+     the 3.72:1 failure on this one page. */
+  footer .col h3{font-size:13px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;margin-bottom:14px;}
+
+  .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:1180px){
+    .mn-panels{grid-template-columns:1fr 1fr;}
+    .mn-panels > .mn-dev{grid-column:1 / -1;}
+  }
+  @media(max-width:980px){
+    .mn-links{display:none;}
+    .mn-burger{display:inline-flex;}
+    .mn-hero-in{grid-template-columns:1fr;gap:30px;}
+    /* Cards stop floating: on one column they would sit on top of the device. The
+       two absolute columns become one plain grid beneath the photo. */
+    /* One column: the photo stops being a bleeding backdrop and becomes a normal
+       block above the cards, because text over a full-width photo behind it is not
+       readable and a feathered edge would just look like a rendering fault. */
+    .mn-hero-bg{position:relative;top:auto;right:auto;bottom:auto;width:100%;
+      height:340px;margin:0 0 16px;border-radius:20px;
+      -webkit-mask-image:none;mask-image:none;}
+    .mn-hero-bg img{object-position:center 24%;}
+    .mn-hero-in{display:flex;flex-direction:column;}
+    .mn-stage{max-width:none;min-height:0;}
+    .mn-strip{grid-template-columns:1fr;}
+  }
+  @media(max-width:860px){
+    .mn-panels{grid-template-columns:1fr;}
+    .mn-glance{grid-template-columns:1fr;}
+    .mn-tile-pair{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:860px){
+    .mn-extra-list{grid-template-columns:1fr;gap:14px;}
+  }
+  @media(max-width:620px){
+    .mn-wrap{padding:0 16px;}
+    .mn-hero{padding:30px 0 0;}
+    .mn-feats{gap:11px;}
+    .mn-stage{grid-template-columns:1fr;}
+    .mn-btn{width:100%;justify-content:center;}
+    .mn-traits{gap:12px 20px;}
+    /* Three steps side by side at 320px would be three columns of wrapped words. */
+    .mn-steps{grid-template-columns:1fr;gap:16px;}
+    .mn-arrow{display:none;}
+    .mn-strip-pts{grid-template-columns:1fr;}
+    .mn-tile-pair{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="mn-nav">
+  <div class="mn-wrap mn-nav-in">
+    <a class="mn-brand" href="/">
+      <img src="assets/logo/money-copilot-app-logo.png" alt="" width="42" height="42">
+      <b>Money<span>Copilot AI</span></b>
+    </a>
+    <nav class="mn-links" aria-label="Primary">
+      <a href="/manny" aria-current="page">Manny</a>
+      <a href="/#about">Overview</a>
+      <a href="/#features">Features</a>
+      <a href="/#how">Demo</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/#faq">FAQ</a>
+    </nav>
+    <a class="mn-login" href="/dashboard">Login</a>
+    <!-- Was a hamburger icon linking to "/". A hamburger promises a menu; this only
+         ever went home, so it now says so, with a house rather than three lines. -->
+    <a class="mn-burger" href="/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-7 9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      Home
+    </a>
+  </div>
+</header>
+
+<main>
+  <!-- ---------------- hero ---------------- -->
+  <section class="mn-hero">
+    <figure class="mn-hero-bg">
+      <!-- eager + high priority: this is the hero and almost certainly the LCP element.
+           It was lazy, which asks the browser to defer the one image the page is
+           waiting on. -->
+      <img src="assets/manny-device.jpg" width="658" height="930" alt="Manny Copilot on a desk: a rounded assistant with a fabric base, showing a friendly face above cards for budget left, an over-budget dining alert, an upcoming Netflix payment and monthly spend." loading="eager" fetchpriority="high" decoding="async">
+    </figure>
+    <div class="mn-wrap mn-hero-in">
+      <div>
+        <span class="mn-pill">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.1z"/></svg>
+          Introducing Manny
+        </span>
+        <h1 class="mn-h1">Meet Manny, your<span class="g">AI home &amp; desk assistant</span></h1>
+        <p class="mn-lede">Manny is your smart home and desk assistant that helps you track budgets, expenses, recurring payments, alerts, and financial insights &mdash; through natural conversation.</p>
+        <div class="mn-cta-row">
+          <a class="mn-btn" href="mailto:support@contact.copilotai.live?subject=Book%20a%20Manny&amp;body=I%27d%20like%20to%20reserve%20a%20Manny%20Copilot.%20Please%20let%20me%20know%20when%20it%20is%20available.">
+            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-1L3 20l1.1-4.6a8.4 8.4 0 0 1-1-4A8.4 8.4 0 0 1 11.5 3h.5a8.4 8.4 0 0 1 9 8z"/></svg>
+            Book your Manny
+          </a>
+          <!-- A button, not a link to /#manny. It was pointing at the homepage section,
+               where the demo lives behind a JS modal that a hash cannot open -- so the
+               one thing it promised was the one thing it did not do. It plays the clip
+               here instead. -->
+          <button class="mn-btn ghost" type="button" data-demo-open aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 6 3.5-6 3.5z"/></svg>
+            Watch demo
+          </button>
+        </div>
+        <ul class="mn-traits">
+          <li><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg>Voice-first</li>
+          <li><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.1z"/></svg>Always learning</li>
+          <li><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Private &amp; secure</li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5.5 5.5 0 0 1 7 0"/><path d="M12 19.5h.01"/></svg>Works offline</li>
+        </ul>
+      </div>
+
+      <!-- Six cards flat in the grid. They were wrapped in two column divs when they
+           flanked the device; that arrangement is gone, and the wrappers with it. -->
+      <div class="mn-stage">
+        <div class="mn-float">
+          <svg class="mn-wave" viewBox="0 0 74 14" fill="none" aria-hidden="true"><g stroke="#3aa0f5" stroke-width="2" stroke-linecap="round"><path d="M3 7v0"/><path d="M9 4v6"/><path d="M15 2v10"/><path d="M21 5v4"/><path d="M27 3v8"/><path d="M33 6v2"/><path d="M39 4v6"/><path d="M45 6v2"/><path d="M51 5v4"/><path d="M57 6v2"/><path d="M63 7v0"/><path d="M69 7v0"/></g></svg>
+          <b>Hi John, would you like this week&rsquo;s spending summary?</b>
+        </div>
+        <div class="mn-float">
+          <span class="mn-fi" style="--tone:#10b981" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9v9z"/></svg></span>
+          <div><span>You have</span><strong>$420</strong><span>left this month</span></div>
+        </div>
+        <div class="mn-float">
+          <span class="mn-fi" style="--tone:#e5484d" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+          <div><b>Dining is over budget by $58</b></div>
+        </div>
+        <div class="mn-float">
+          <span class="mn-fi" style="--tone:#e5484d" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7v10M15 7v10"/></svg></span>
+          <div><b>Netflix renews tomorrow</b><strong>$15.49</strong></div>
+        </div>
+        <div class="mn-float">
+          <span class="mn-fi" style="--tone:#168cff" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-6"/></svg></span>
+          <div><span>Monthly spend</span><strong>$1,240</strong><span>+8% vs last month</span></div>
+        </div>
+        <div class="mn-float">
+          <b>Listening&hellip;</b>
+          <svg class="mn-wave" viewBox="0 0 74 14" fill="none" aria-hidden="true"><g stroke="#3aa0f5" stroke-width="2" stroke-linecap="round"><path d="M3 6v2"/><path d="M9 3v8"/><path d="M15 1v12"/><path d="M21 4v6"/><path d="M27 2v10"/><path d="M33 5v4"/><path d="M39 3v8"/><path d="M45 5v4"/><path d="M51 2v10"/><path d="M57 4v6"/><path d="M63 6v2"/><path d="M69 6v2"/></g></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------- features ---------------- -->
+  <section class="mn-wrap">
+    <h2 class="sr-only">What Manny does</h2>
+    <ul class="mn-feats">
+      <li><span class="mn-fi" style="--tone:#168cff" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></span><b>Voice AI Copilot</b><p>Talk naturally with Manny. It listens, understands, and helps in real time.</p></li>
+      <li><span class="mn-fi" style="--tone:#0dbfbc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9v9z"/></svg></span><b>Budget Tracking</b><p>See what&rsquo;s left, what&rsquo;s spent, and stay on track with smart budgeting.</p></li>
+      <li><span class="mn-fi" style="--tone:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><b>Smart Alerts</b><p>Get notified about over-budget spending, bills, and unusual activity.</p></li>
+      <li><span class="mn-fi" style="--tone:#a855f7" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><b>Recurring Reminders</b><p>Never miss a payment. Manny reminds you before it&rsquo;s due.</p></li>
+      <li><span class="mn-fi" style="--tone:#06b6d4" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 20V10M12 20V4M18 20v-6"/></svg></span><b>Spending Insights</b><p>Clear insights and trends so you can make better money decisions.</p></li>
+      <li><span class="mn-fi" style="--tone:#10b981" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><b>Privacy First</b><p>Your data stays private and secure &mdash; always under your control.</p></li>
+      <li><span class="mn-fi" style="--tone:#38a3f7" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><b>Desk Presence Detection</b><p>Manny wakes up when you&rsquo;re there and rests when you&rsquo;re not.</p></li>
+      <li><span class="mn-fi" style="--tone:#14b8a6" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span><b>Spoken Replies</b><p>Manny replies in a warm, natural voice you can hear and trust.</p></li>
+      <li><span class="mn-fi" style="--tone:#6366f1" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18.5h2"/></svg></span><b>Pairs With Your Phone</b><p>Pair over Bluetooth so Manny keeps working while your phone stays in your pocket.</p></li>
+      <li><span class="mn-fi" style="--tone:#0dbfbc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 7.5 16 17l-4 4V3l4 4L8 16.5"/></svg></span><b>Bluetooth Devices</b><p>Connect your own speaker, headphones or other Bluetooth accessories.</p></li>
+    </ul>
+  </section>
+
+  <!-- ---------------- not only money ---------------- -->
+  <section class="mn-wrap">
+    <div class="mn-panel mn-extra">
+      <h2>Not only money</h2>
+      <ul class="mn-extra-list">
+        <li>
+          <span class="mn-fi" style="--tone:#38a3f7" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg></span>
+          <div><b>Weather</b><span>Today&rsquo;s forecast on the display, and spoken when you ask for it.</span></div>
+        </li>
+        <li>
+          <span class="mn-fi" style="--tone:#0dbfbc" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
+          <div><b>Time &amp; date</b><span>A glanceable clock, so Manny is useful even when you are not asking about money.</span></div>
+        </li>
+        <li>
+          <span class="mn-fi" style="--tone:#168cff" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H4z"/><path d="M17 9h3v8a2 2 0 0 1-2 2"/><path d="M7 9h7M7 13h7M7 16h4"/></svg></span>
+          <div><b>Google News</b><span>Headlines on screen, read aloud on request.</span></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ---------------- three panels ---------------- -->
+  <section class="mn-wrap">
+    <div class="mn-panels">
+
+      <div class="mn-panel">
+        <h2>How Manny works</h2>
+        <ol class="mn-steps">
+          <li>
+            <span class="mn-step-ico" style="--tone:#168cff" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0z"/><path d="M6 11a6 6 0 0 0 12 0"/></svg></span>
+            <b>You talk</b><span>Ask Manny anything about your money.</span>
+          </li>
+          <li class="mn-arrow" aria-hidden="true">&rarr;</li>
+          <li>
+            <span class="mn-step-ico" style="--tone:#0dbfbc" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12v-2M8 15V7M12 18V4M16 15V7M20 12v-2"/></svg></span>
+            <b>Manny listens</b><span>Understands your question instantly.</span>
+          </li>
+          <li class="mn-arrow" aria-hidden="true">&rarr;</li>
+          <li>
+            <span class="mn-step-ico" style="--tone:#10b981" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="13" rx="3"/><path d="M8.5 11h.01M15.5 11h.01M9.5 14.5a3.6 3.6 0 0 0 5 0"/></svg></span>
+            <b>Manny helps</b><span>Gives you insights, alerts, and answers.</span>
+          </li>
+        </ol>
+      </div>
+
+      <div class="mn-panel">
+        <h2>Your money, at a glance</h2>
+        <div class="mn-glance">
+          <div class="mn-tile-pair">
+            <div class="mn-tile"><small>Total balance</small><strong>$7,560.45</strong><span class="up">&uarr; 6.2% vs last month</span></div>
+            <div class="mn-tile"><small>Income</small><strong>$4,850</strong></div>
+            <div class="mn-tile"><small>Expenses</small><strong>$3,120</strong></div>
+          </div>
+
+          <div class="mn-cardbox">
+            <h3>Expenses by category</h3>
+            <div class="mn-donut-row">
+              <div class="mn-donut">
+                <!-- One ring, six arcs, drawn with dash offsets on a 100-unit
+                     circumference so each percentage is literally the dash length. -->
+                <svg viewBox="0 0 42 42" role="img" aria-label="Food and dining 26%, shopping 20%, transport 18%, bills and utilities 16%, entertainment 12%, others 11%.">
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#eef3f8" stroke-width="7"/>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#10b981" stroke-width="7" stroke-dasharray="26 74" stroke-dashoffset="0"/>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#0dbfbc" stroke-width="7" stroke-dasharray="20 80" stroke-dashoffset="-26"/>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#168cff" stroke-width="7" stroke-dasharray="18 82" stroke-dashoffset="-46"/>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#a855f7" stroke-width="7" stroke-dasharray="16 84" stroke-dashoffset="-64"/>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#f59e0b" stroke-width="7" stroke-dasharray="12 88" stroke-dashoffset="-80"/>
+                  <circle cx="21" cy="21" r="15.9" fill="none" stroke="#94a3b8" stroke-width="7" stroke-dasharray="11 89" stroke-dashoffset="-92"/>
+                </svg>
+                <div class="mn-donut-mid"><div><b>$3,120</b><span>total</span></div></div>
+              </div>
+              <!-- Plain spans. This was <u> for the labels and <em> for the amounts,
+                   used purely as styling hooks: <u> means an unarticulated annotation
+                   and <em> means stress emphasis, and neither is true here. A screen
+                   reader would have stressed twelve of these for no reason. -->
+              <ul class="mn-legend">
+                <li style="--tone:#10b981"><i aria-hidden="true"></i><span class="lg-name">Food &amp; dining</span><span class="lg-amt">$710</span><span class="lg-pct">26%</span></li>
+                <li style="--tone:#0dbfbc"><i aria-hidden="true"></i><span class="lg-name">Shopping</span><span class="lg-amt">$620</span><span class="lg-pct">20%</span></li>
+                <li style="--tone:#168cff"><i aria-hidden="true"></i><span class="lg-name">Transport</span><span class="lg-amt">$550</span><span class="lg-pct">18%</span></li>
+                <li style="--tone:#a855f7"><i aria-hidden="true"></i><span class="lg-name">Bills &amp; utilities</span><span class="lg-amt">$500</span><span class="lg-pct">16%</span></li>
+                <li style="--tone:#f59e0b"><i aria-hidden="true"></i><span class="lg-name">Entertainment</span><span class="lg-amt">$360</span><span class="lg-pct">12%</span></li>
+                <li style="--tone:#94a3b8"><i aria-hidden="true"></i><span class="lg-name">Others</span><span class="lg-amt">$340</span><span class="lg-pct">11%</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mn-cardbox">
+            <h3>Top transactions</h3>
+            <ul class="mn-tx">
+              <li style="--tone:#f59e0b"><span class="tx-ini" aria-hidden="true">A</span><span><b>Amazon</b></span><span>Jul 16</span></li>
+              <li style="--tone:#10b981"><span class="tx-ini" aria-hidden="true">W</span><span><b>Whole Foods</b></span><span>Jul 15</span></li>
+              <li style="--tone:#0c1830"><span class="tx-ini" aria-hidden="true">U</span><span><b>Uber</b></span><span>Jul 14</span></li>
+              <li style="--tone:#e5484d"><span class="tx-ini" aria-hidden="true">N</span><span><b>Netflix</b></span><span>Jul 13</span></li>
+            </ul>
+            <span class="mn-tx-more">+ 23 more transactions</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mn-panel mn-dev">
+        <h2>Manny is in development</h2>
+        <p>We&rsquo;re hard at work building the future of personal finance assistance at home and on your desk.</p>
+        <ul class="mn-checks">
+          <li><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>Pricing not announced yet</li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>Release date not announced</li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>Shipping details coming soon</li>
+        </ul>
+        <a class="mn-btn" href="mailto:support@contact.copilotai.live?subject=Manny%20Copilot%20waitlist&amp;body=Please%20add%20me%20to%20the%20Manny%20Copilot%20waitlist.">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>
+          Join waitlist
+        </a>
+        <p class="mn-dev-foot">Be the first to know when Manny is ready.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ---------------- closing strip ---------------- -->
+  <section class="mn-wrap">
+    <div class="mn-strip">
+      <p class="mn-strip-line">
+        <img src="assets/logo/money-copilot-app-logo.png" alt="" width="34" height="34">
+        <b>Money <span>Copilot AI</span></b> gives you the intelligence. <span class="mn-strip-name">Manny</span> brings it into the room.
+      </p>
+      <ul class="mn-strip-pts">
+        <li><svg viewBox="0 0 24 24"><path d="m3 11 9-7 9 7v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span><b>Designed for your home</b>and desk</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.1z"/></svg><span><b>Always improving</b>with your feedback</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span><b>Built with care.</b>Backed by trust.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="mn-wrap mn-tail">
+    <p>Manny Copilot is in development; pricing, release date and shipping regions have not been announced. The buttons above email us so we can tell you when they are. Full specifications and quick start are on the <a href="/manny-guide">manual page</a>, and <a href="/dashboard">Money Copilot AI</a> gives you the same budgeting and insights in your browser today.</p>
+  </div>
+  <!-- A native <dialog>: showModal() gives Esc, focus trapping and an inert page for
+       free, which a div-based modal has to reimplement and usually gets wrong. -->
+  <dialog class="mn-demo" id="mannyDemo" aria-label="Manny Copilot demo video">
+    <button class="mn-demo-close" type="button" data-demo-close aria-label="Close the demo">&times;</button>
+    <video data-demo-video controls playsinline preload="none" poster="assets/manny-demo-poster.jpg">
+      <source src="assets/manny-demo.mp4" type="video/mp4">
+      Your browser cannot play this video. <a href="assets/manny-demo.mp4">Download it instead.</a>
+    </video>
+  </dialog>
+</main>
+
+<footer>
+  <div class="wrap wide">
+    <div>
+      <div class="brand">
+        <span class="mark"><img src="assets/logo/money-copilot-app-logo.png" alt="" width="54" height="54"></span>
+        <span class="wordmark"><span>Money</span><span class="w2">Copilot AI</span></span>
+      </div>
+      <div class="sub">Track expenses by typing &mdash; inside the AI assistant you already use.</div>
+    </div>
+    <div class="cols">
+      <div class="col"><h3>Product</h3><a href="/#features">Features</a><a href="/#pricing">Pricing</a><a href="/#how">Connect</a><a href="/manny">Manny</a></div>
+      <div class="col"><h3>Resources</h3><a href="/docs">Documentation</a><a href="/manny-guide">Manny manual</a><a href="/#faq">FAQ</a><a href="/support">Support</a></div>
+      <div class="col"><h3>Company</h3><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/support">Support</a></div>
+    </div>
+  </div>
+  <div class="copyright">&copy; 2026 Money Copilot AI. Built on the Model Context Protocol</div>
+</footer>
+
+<script>
+  (function () {
+    var dlg = document.getElementById('mannyDemo');
+    if (!dlg || typeof dlg.showModal !== 'function') return;   // no <dialog> support: leave the button inert rather than half-working
+    var video = dlg.querySelector('[data-demo-video]');
+    var open = document.querySelector('[data-demo-open]');
+    var stop = function () { if (video) { video.pause(); video.currentTime = 0; } };
+    var hide = function () { if (dlg.open) dlg.close(); stop(); };
+    if (open) open.addEventListener('click', function () {
+      dlg.showModal();
+      if (video) video.play().catch(function () {});   // autoplay may be refused; the controls still work
+    });
+    dlg.querySelectorAll('[data-demo-close]').forEach(function (b) { b.addEventListener('click', hide); });
+    // Clicking the backdrop closes it. The dialog's own box is the only child, so a
+    // click landing on the dialog element itself came from outside that box.
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) hide(); });
+    // Every close path stops the video itself rather than all of them funnelling
+    // through the 'close' event. Per spec close() fires that event, but it was
+    // measured never firing here -- dialog.open went true then false with no event,
+    // for a listener attached fresh in the same tick -- and the failure mode is a
+    // dismissed dialog whose audio keeps playing. The listener stays as well, for
+    // the browsers where it does fire and for the native Esc path.
+    dlg.addEventListener('keydown', function (e) { if (e.key === 'Escape') stop(); });
+    dlg.addEventListener('close', stop);
+    dlg.addEventListener('cancel', stop);
+  })();
+</script>
+
+</body>
+</html>

@@ -49,8 +49,16 @@ main{padding-bottom:96px;}
 .card .ci{width:42px;height:42px;margin-bottom:15px;border-radius:12px;background:rgba(20,184,166,.11);border-color:rgba(20,184,166,.21);}
 .card p{line-height:1.6;}
 footer{padding:52px 0 38px;border-color:var(--line);background:#fff;}
-footer .sub,footer .col h4,.copyright{color:var(--muted);}
-footer .col a{color:var(--ink2);}
+/* --ink2, not --muted. --muted is #75869b here and measures 3.72:1 on the white
+   footer -- under AA for body text, on every page that loads this sheet (privacy,
+   terms, support, docs, manny, manny-guide). --ink2 is the same family and clears it
+   at ~6:1. The column headings move too: they are 13px uppercase labels, which needs
+   4.5:1 the same as any other small text, and "they read as a second tier" is a
+   reason to keep them visually quieter, not a reason to leave them unreadable. */
+footer .sub,.copyright,footer .col h4,footer .col h3{color:var(--ink2);}
+/* 44px hit areas. These measured 25px tall on every page using this sheet -- fine to
+   click, awkward to tap, and they are the only navigation in the footer. */
+footer .col a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink2);}
 footer .col a:hover{color:var(--violet-ink);}
 footer .brand{color:var(--ink);}
 .copyright{border-color:var(--line);}
